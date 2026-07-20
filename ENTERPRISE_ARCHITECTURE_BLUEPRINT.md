@@ -30,7 +30,7 @@ Enterprise OS (Bella EOS)
 
 ---
 
-## 🏛️ Sơ Đồ Kiến Trúc Doanh Nghiệp 10 Lớp (10-Layer Enterprise OS Architecture)
+## 🏛️ Sơ Đồ Kiến Trúc Doanh Nghiệp 10 Lớp (10-Layer Enterprise OS System Architecture)
 
 ```
                        BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
@@ -39,41 +39,43 @@ Enterprise OS (Bella EOS)
 │ 1. OBJECTIVE CENTER OS (Vision ➔ Strategy ➔ Objectives ➔ OKRs ➔ Projects)              │
 │ • Company Vision       • 2026 Strategy           • Objectives        • Cascaded OKRs    │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 2. PROJECT OPERATING SYSTEM (Linh Hồn Doanh Nghiệp - Project-First Core)                │
-│ • Project Hub          • Owner & Budget          • Timeline & Risks  • Lessons Learned  │
+┌─────────────────────────────────────────────────────────────────────────────────────────┘
+│ 2. PORTFOLIO & PROJECT OS (Linh Hồn Doanh Nghiệp - Project-First Core & State Machine)   │
+│ • Project Hub          • State Machine           • Timeline & Risks  • Lessons Learned  │
+│ • State Pipeline: Draft ➔ Planning ➔ Approved ➔ Executing ➔ Review ➔ Completed         │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │ 3. ORGANIZATION OS (Công ty, Phòng ban, Đội nhóm, Cơ cấu Tổ chức & SOP Tree)            │
 │ • Company Hierarchy    • Department SOPs         • Team Policies     • Job Matrix       │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 4. ENTERPRISE POLICY ENGINE (Lớp Quản Trị Phanh An Toàn, Ngân Sách & Quyền Hạn Độc Lập)   │
-│ • Financial Limits     • CEO Threshold Sign-off  • Legal Boundaries  • Security Barrier │
+│ 4. POLICY & GOVERNANCE OS (Lớp Phanh An Toàn, Hạn Mạch Tài Chính & Phê Duyệt Độc Lập)   │
+│ • Financial Limits     • CEO Threshold Sign-off  • Legal Boundaries  • Safety Barrier   │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 5. DECISION ENGINE OS (Sổ Cái Quyết Định & Nhật Ký Audit Trail Doanh Nghiệp)             │
-│ • Decision Audit Log   • Budget Approvals        • Escaped Decisions • Re-allocation Log  │
+│ 5. RESOURCE & WORKFORCE OS (Quản Lý Nguồn Lực, Capacity Engine & Auto Scheduler)        │
+│ • Digital HR Profiles  • Workload Capacity Engine• Priority Queue    • Dynamic Scheduler│
+│ • Resource Auto-Failover: Auto Redirection when Worker Workload > 90%                   │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 6. WORKFORCE OS (Con người & AI Employees - Hồ sơ Nhân sự 12 Hạng mục)                  │
-│ • Digital HR Profiles  • Job Descriptions (JDs)  • Capacity Engine   • Direct Reports   │
+│ 6. WORKFLOW & EVENT BUS OS (Trục Xương Sống Sự Kiện Event-Driven & Workflow Stream)     │
+│ • Event Bus (Pub/Sub)  • Task Contracts (DoD)    • Inter-Agent Stream • Realtime Webhooks │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 6. WORKFLOW OS (Chuỗi Công Việc, Bàn Giao & Phê Duyệt)                                  │
-│ • Task Contracts       • Definition of Done (DoD)• Inter-Agent Stream • Quality Gates   │
+│ 7. EXECUTION RUNTIME & COST ENGINE OS (Tối Ưu Chi Phí Multi-LLM & Runtime Routing)     │
+│ • Multi-LLM Smart Router (Gemini/Claude/GPT)     • Cost/ROI Ledger   • Execution Sandbox│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 7. BUSINESS APPLICATIONS OS (First-party Apps vs Third-party Connectors)                │
-│ • Bella EIP Suite      • Bella CRM / POS / HR    • SAP / Oracle / MISA / Salesforce     │
+│ 8. BUSINESS APPLICATIONS OS (First-party Apps & Connector SDK Open Plugin)             │
+│ • Bella EIP Suite      • Bella CRM / POS / HR    • Connector SDK (SAP/Oracle/MISA)      │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 8. BUSINESS MEMORY & KNOWLEDGE OS (Trí Nhớ Doanh Nghiệp & Tiến Hóa Tri Thức)            │
-│ • Project Memory       • Decision History        • Campaign History  • Knowledge Evolution│
+│ 9. KNOWLEDGE & ENTERPRISE MEMORY GRAPH OS (Trí Nhớ Doanh Nghiệp & Knowledge Graph)       │
+│ • Knowledge Graph      • Project Memory          • Decision History  • Campaign Memory  │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 9. ORGANIZATION ANALYTICS OS (Bảng Điều Hành CEO - Sức Khỏe Doanh Nghiệp Đa Tầng)        │
-│ • Company Health Index • Active Project Portfolio• Dept Health      • Workforce ROI     │
+│ 10. ANALYTICS & SIMULATION OS (Digital Twin Simulator & Dashboard Điều Hành CEO)        │
+│ • Monte Carlo Simulation• ROI Forecasting       • Company Health Index• Workforce Analytics│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
