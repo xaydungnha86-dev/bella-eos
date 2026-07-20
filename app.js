@@ -30,6 +30,22 @@ console.error = function(...args) {
 };
 
 // =========================================================================
+// SUPABASE CLIENT INTEGRATION (SUPABASE DỰ ÁN MỚI)
+// =========================================================================
+const SUPABASE_URL = "https://qwpyfhojxctrvqkjctcl.supabase.co";
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || ""; 
+let supabaseClient = null;
+
+if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+    try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY || 'dummy_key_for_init');
+        console.log("⚡ Supabase Client initialized successfully with URL:", SUPABASE_URL);
+    } catch(err) {
+        console.warn("Supabase Client warning:", err);
+    }
+}
+
+// =========================================================================
 // MILESTONE 1: ENTERPRISE ORGANIZATION MANAGER & WORKFORCE REGISTRY
 // =========================================================================
 
