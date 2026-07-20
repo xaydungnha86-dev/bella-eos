@@ -2229,11 +2229,29 @@ function appendLog(agentName, text, colorClass = 'text-slate-700') {
     container.scrollTop = container.scrollHeight;
 }
 
+function showCampaignExecutiveReport() {
+    const modal = document.getElementById('campaign-report-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+safeAddListener('btn-close-report-modal', 'click', () => {
+    const modal = document.getElementById('campaign-report-modal');
+    if (modal) modal.classList.add('hidden');
+});
+
+safeAddListener('btn-modal-close-report', 'click', () => {
+    const modal = document.getElementById('campaign-report-modal');
+    if (modal) modal.classList.add('hidden');
+});
+
 // Execute Next Step in Workflow Simulation
 function stepForward() {
     if (currentStepIndex >= WORKFLOW_STEPS.length - 1) {
         pauseSimulation();
-        appendLog('SYSTEM', '🎉 Workflow hoàn tất 100%! Đã bàn giao sản phẩm Bella EIP.', 'text-emerald-600 font-bold');
+        appendLog('SYSTEM', '🎉 Workflow hoàn tất 100%! Đã lập Báo cáo Kế hoạch Content & Bàn giao sản phẩm Bella EIP.', 'text-emerald-400 font-bold');
+        showCampaignExecutiveReport();
         return;
     }
 
