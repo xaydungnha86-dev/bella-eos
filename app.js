@@ -496,6 +496,77 @@ window.EnterpriseIntelligenceOS = EnterpriseIntelligenceOS;
 window.DigitalTwinSimulator = DigitalTwinSimulator;
 
 // =========================================================================
+// PHASE 6: PLATFORM ECOSYSTEM & EXTENSION MARKETPLACE (LAYER 13 PLATFORM OS)
+// =========================================================================
+const PlatformEcosystemOS = {
+    version: '1.0-ECOSYSTEM',
+    installedPlugins: new Map(),
+    marketplaceCatalog: [
+        { id: 'plugin_misa_connector', name: 'MISA ERP Connector Plugin', vendor: 'Bella Partners', category: 'Integration', version: '2.1.0', icon: 'fa-file-invoice-dollar', installed: true },
+        { id: 'plugin_hubspot_sync', name: 'HubSpot CRM 2-Way Sync', vendor: 'HubSpot Official', category: 'CRM', version: '1.4.0', icon: 'fa-hubspot', installed: false },
+        { id: 'plugin_zalo_oa_bot', name: 'Zalo Official Account Bot', vendor: 'Bella Growth Lab', category: 'Messaging', version: '3.0.1', icon: 'fa-comment-dots', installed: true },
+        { id: 'plugin_sap_s4hana', name: 'SAP S/4HANA Enterprise Bridge', vendor: 'SAP Enterprise', category: 'ERP', version: '4.0.0', icon: 'fa-building-columns', installed: false }
+    ],
+
+    // 1. Plugin Architecture & Extension SDK
+    registerPlugin(pluginId, pluginDefinition) {
+        if (this.installedPlugins.has(pluginId)) {
+            console.warn(`[Platform OS] Plugin ${pluginId} đã được cài đặt.`);
+            return false;
+        }
+
+        const pluginRecord = {
+            id: pluginId,
+            ...pluginDefinition,
+            installedAt: new Date().toISOString(),
+            status: 'ACTIVE'
+        };
+
+        this.installedPlugins.set(pluginId, pluginRecord);
+
+        // Audit Kernel Event
+        if (typeof BellaKernel !== 'undefined' && BellaKernel.executeTransaction) {
+            BellaKernel.executeTransaction('platform_os', 'PLUGIN_INSTALLED', { pluginId, name: pluginDefinition.name });
+        }
+
+        console.log(`📦 [PLATFORM ECOSYSTEM] 1-Click Cài đặt Plugin thành công: [${pluginDefinition.name}] v${pluginDefinition.version || '1.0'}`);
+        return pluginRecord;
+    },
+
+    // 2. 1-Click Install Plugin from Marketplace
+    installFromMarketplace(pluginId) {
+        const item = this.marketplaceCatalog.find(p => p.id === pluginId);
+        if (!item) {
+            console.error(`[Marketplace Error] Không tìm thấy Plugin ID: ${pluginId}`);
+            return false;
+        }
+
+        item.installed = true;
+        this.registerPlugin(pluginId, {
+            name: item.name,
+            vendor: item.vendor,
+            category: item.category,
+            version: item.version
+        });
+        return true;
+    },
+
+    getInstalledPlugins() {
+        return Array.from(this.installedPlugins.values());
+    },
+
+    getMarketplaceCatalog() {
+        return this.marketplaceCatalog;
+    }
+};
+
+// Seed initial default plugins
+PlatformEcosystemOS.installFromMarketplace('plugin_misa_connector');
+PlatformEcosystemOS.installFromMarketplace('plugin_zalo_oa_bot');
+
+window.PlatformEcosystemOS = PlatformEcosystemOS;
+
+// =========================================================================
 // MILESTONE 1: ENTERPRISE ORGANIZATION MANAGER & WORKFORCE REGISTRY
 // =========================================================================
 
