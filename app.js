@@ -46,6 +46,46 @@ if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
 }
 
 // =========================================================================
+// ENTERPRISE GOVERNANCE & POLICY ENGINE (LAYER 4 POLICY & AI GOVERNANCE)
+// =========================================================================
+const EnterprisePolicyEngine = {
+    policies: {
+        financialLimit: 100000000, // 100 triệu VND threshold for CEO sign-off
+        aiGovernance: {
+            allowPayrollAccess: false,
+            allowProductionCodeDeploy: ['devops', 'ceo'],
+            allowDirectDatabaseDrop: []
+        }
+    },
+
+    evaluatePolicy(sourceIdentity, actionType, payload = {}) {
+        // 1. Financial Threshold Check
+        if (actionType === 'BUDGET_APPROVAL' || actionType === 'WORKFLOW_EXECUTE' || actionType === 'BUDGET_SPEND') {
+            const budget = payload.budgetAmount || payload.amount || 0;
+            if (budget > this.policies.financialLimit && sourceIdentity !== 'ceo') {
+                return {
+                    allowed: false,
+                    reason: `Ngân sách ${budget.toLocaleString()} VND vượt hạn mức tự động 100M VND. Yêu cầu phê duyệt từ CEO Gate!`
+                };
+            }
+        }
+
+        // 2. AI Governance Check
+        if (actionType === 'PAYROLL_ACCESS' && !this.policies.aiGovernance.allowPayrollAccess) {
+            return { allowed: false, reason: 'AI Governance Shield: Nghiêm cấm mọi AI Worker truy cập bảng lương Payroll!' };
+        }
+
+        if (actionType === 'PRODUCTION_DEPLOY' && !this.policies.aiGovernance.allowProductionCodeDeploy.includes(sourceIdentity)) {
+            return { allowed: false, reason: `AI Governance Shield: Nhân sự ${sourceIdentity.toUpperCase()} không có quyền deploy Production!` };
+        }
+
+        return { allowed: true };
+    }
+};
+
+window.EnterprisePolicyEngine = EnterprisePolicyEngine;
+
+// =========================================================================
 // PHASE 1: BELLA KERNEL CORE ENGINE (BELLA KERNEL OS LAYER 1)
 // =========================================================================
 const BellaKernel = {
@@ -695,44 +735,6 @@ const CapabilityMatrix = {
         return false;
     }
 };
-
-// ENTERPRISE GOVERNANCE & POLICY ENGINE (LAYER 4 POLICY & AI GOVERNANCE)
-const EnterprisePolicyEngine = {
-    policies: {
-        financialLimit: 100000000, // 100 triệu VND threshold for CEO sign-off
-        aiGovernance: {
-            allowPayrollAccess: false,
-            allowProductionCodeDeploy: ['devops', 'ceo'],
-            allowDirectDatabaseDrop: []
-        }
-    },
-
-    evaluatePolicy(sourceIdentity, actionType, payload = {}) {
-        // 1. Financial Threshold Check
-        if (actionType === 'BUDGET_APPROVAL' || actionType === 'WORKFLOW_EXECUTE') {
-            const budget = payload.budgetAmount || 0;
-            if (budget > this.policies.financialLimit && sourceIdentity !== 'ceo') {
-                return {
-                    allowed: false,
-                    reason: `Ngân sách ${budget.toLocaleString()} VND vượt hạn mức tự động 100M VND. Yêu cầu phê duyệt từ CEO Gate!`
-                };
-            }
-        }
-
-        // 2. AI Governance Check
-        if (actionType === 'PAYROLL_ACCESS' && !this.policies.aiGovernance.allowPayrollAccess) {
-            return { allowed: false, reason: 'AI Governance Shield: Nghiêm cấm mọi AI Worker truy cập bảng lương Payroll!' };
-        }
-
-        if (actionType === 'PRODUCTION_DEPLOY' && !this.policies.aiGovernance.allowProductionCodeDeploy.includes(sourceIdentity)) {
-            return { allowed: false, reason: `AI Governance Shield: Nhân sự ${sourceIdentity.toUpperCase()} không có quyền deploy Production!` };
-        }
-
-        return { allowed: true };
-    }
-};
-
-window.EnterprisePolicyEngine = EnterprisePolicyEngine;
 
 // Legacy compatibility mapping
 const AI_AGENTS = WorkforceRegistry.members;
