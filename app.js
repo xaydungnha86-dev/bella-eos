@@ -2885,82 +2885,93 @@ function openStepDetailModal(step) {
         let outputText = '';
         switch(step.id) {
             case 1:
-                outputText = `🎯 [CEO STRATEGIC OBJECTIVE CONTRACT]
-- Mục tiêu chính: Bứt phá ký kết Spa Booking Module Q3-2026.
-- Ngân sách trích xuất: 150,000,000 VND (Cần duyệt qua CEO Approval Gate).
-- Trạng thái: ĐÃ BAN HÀNH QUYẾT ĐỊNH CHIẾN LƯỢC.
-- Ký duyệt bởi: CEO / Founder (Human-in-the-Loop)`;
+                outputText = `🎯 [CEO STRATEGIC DECISION - EXECUTED]
+- Người ban hành: CEO / Founder (Human-in-the-Loop)
+- Quyết định chiến lược: Đã chính thức duyệt triển khai module "Spa Appointment Booking v1.2" để tăng 20% lượng Spa mới ký kết hợp đồng Bella EIP trong Q3-2026.
+- Ngân sách chiến dịch: Đã phân bổ 150,000,000 VND (Trong đó 50M VND cho Marketing và 100M VND cho R&D / AWS GPU Infra).
+- Trạng thái: ĐÃ KHỞI TẠO PROJECT & EVENT STREAM.`;
                 break;
             case 2:
-                outputText = `📝 [PRODUCT REQUIREMENT DOCUMENT (PRD v1.2)]
-- Module: Spa Appointment & Calendar Booking
-- Người viết: AI Product Manager (PM)
-- Yêu cầu chức năng:
-  + Quản lý khung giờ trống (Time OS Calendar).
-  + Cho phép Spa tạo dịch vụ, thiết lập giá trị.
-  + Trạng thái State: PLANNING ➔ APPROVED.
-- Output File: https://notion.bellaspa.vn/prd/spa-booking-v1.2`;
+                outputText = `📝 [PRODUCT REQUIREMENT DOCUMENT (PRD) - COMPLETION IN 1.8h]
+- Người thực hiện: AI Product Manager (PM)
+- Đầu ra thực tế: Đã biên soạn PRD v1.2 chi tiết tại Notion link:
+  + Chức năng 1: Khách hàng tự chọn dịch vụ, Kỹ thuật viên (KTV) và giờ trống 24/7.
+  + Chức năng 2: Thuật toán tự động sắp xếp giờ trống (Time OS) giảm xung đột trùng ca.
+  + Chức năng 3: Zalo OA Notification API nhắc lịch tự động trước 2 tiếng.
+- Trạng thái: ĐÃ KIỂM DUYỆT & THÔNG QUA BỞI BAN LÃNH ĐẠO (100% Tiêu chí PRD Gate Đạt).`;
                 break;
             case 3:
-                outputText = `🏛️ [SYSTEM ARCHITECTURE & DB SCHEMA SPEC]
-- Kiến trúc sư: AI CTO & Tech Lead
-- Database Schema:
-  CREATE TABLE spa_bookings (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      customer_id UUID REFERENCES customers(id),
-      scheduled_time TIMESTAMP WITH TIME ZONE,
-      status VARCHAR(50) DEFAULT 'DRAFT'
-  );
-- Security Protocol: Zero Trust Access Shield (Level 3 Permission Bus checked).`;
+                outputText = `🏛️ [SYSTEM ARCHITECTURE & DATABASE SPECIFICATION - APPROVED]
+- Người thực hiện: AI CTO & Tech Lead
+- Đầu ra thực tế:
+  + Sơ đồ thiết kế Microservices của Booking Engine liên kết với Core ERP.
+  + Database Schema đã khởi tạo:
+    CREATE TABLE spa_bookings (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        customer_id UUID NOT NULL REFERENCES customers(id),
+        service_id UUID NOT NULL,
+        scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
+        status VARCHAR(30) DEFAULT 'PENDING_APPROVAL',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+  + Đánh giá bảo mật (Security Audit): Đã kích hoạt Layer 3 Zero Trust Permission Bus cho bảng Bookings.`;
                 break;
             case 4:
-                outputText = `🎨 [UI/UX GRAPHICAL TOKENS & WIREFRAME]
-- Thiết kế: AI Designer (UX/UI)
-- Hạng mục bàn giao:
-  + 4 Screen Wireframes (Mobile & Desktop POS layout).
-  + Design Tokens export:
+                outputText = `🎨 [UI/UX FIGMA EXPORT & DESIGN SYSTEM TOKENS - COMPLETED]
+- Người thực hiện: AI Designer (UX/UI)
+- Đầu ra thực tế: 
+  + Đã hoàn thiện thiết kế 4 màn hình (Đặt lịch di động, Quản lý ca của Kỹ thuật viên, Dashboard thống kê, Cấu hình Dịch vụ).
+  + Design Tokens được xuất tự động:
     {
-      "colors": { "primary": "#06b6d4", "background": "#020617" },
-      "font": "Inter"
+      "theme": "glassmorphism-dark",
+      "colors": { "primary": "#06b6d4", "accent": "#f59e0b", "background": "#020617" },
+      "fonts": "Inter, sans-serif"
     }
-- Figma Design Link: figma.com/file/bella-spa-booking-module`;
+  + Figma Link: figma.com/file/bella-spa-booking-v1.2 (Đã khóa file để Dev code)`;
                 break;
             case 5:
-                outputText = `💻 [PRODUCTION SOURCE CODE SPECIFICATION]
-- Lập trình viên: AI Developer
-- Tech Stack: React SPA, Tailwind CSS v4, Supabase JS Client v2.
-- Hàm Core:
-  export const createNewBooking = async (bookingData) => {
-      const canonical = EnterpriseDataFabric.standardizeData('Customer', bookingData);
+                outputText = `💻 [CORE SOURCE CODE IMPLEMENTATION - COMPLETED]
+- Người thực hiện: AI Developer
+- Đầu ra thực tế: Đã viết xong mã nguồn cho Booking Controller & frontend đặt lịch:
+  export const createNewBooking = async (rawPayload) => {
+      // Chuẩn hóa dữ liệu thô sang Canonical Model thông qua Layer 5 Data Fabric
+      const canonical = EnterpriseDataFabric.standardizeData('Customer', rawPayload);
+      
+      // Kiểm tra quy định tài chính/quyền hạn qua Layer 4 Policy Engine
+      const policyPass = EnterprisePolicyEngine.evaluatePolicy(canonical.name, 'BOOKING_CREATE', canonical);
+      if (!policyPass.allowed) throw new Error(policyPass.reason);
+      
+      // Ghi nhận sự kiện vào database Supabase
       return await supabaseClient.from('bookings').insert(canonical);
   };
-- Git Commit: hash: 7511f0e [feat: implement Spa Booking layout]`;
+- Git Commit: [feat: implement Spa Booking layout and Supabase sync logic] (hash: 7511f0e).`;
                 break;
             case 6:
-                outputText = `🧪 [AUTOMATED QA INTEGRATION E2E REPORT]
-- Chuyên viên QA: AI QA Engineer
-- Kịch bản chạy: Playwright Automated Suite (42 Test cases).
-- Chi tiết:
-  + Test case 1: Create booking successfully ➔ PASS
-  + Test case 2: Time Slot double booking check ➔ PASS
-  + Test case 3: Policy Guardrail budget threshold ➔ PASS
-- Trạng thái: 100% SUCCESS (0 critical bugs).`;
+                outputText = `🧪 [AUTOMATED QA INTEGRATION E2E TEST REPORT - 100% PASS]
+- Người thực hiện: AI QA Engineer
+- Đầu ra thực tế: Đã thực thi kịch bản kiểm thử E2E tự động qua Playwright (42 Test cases).
+- Nhật ký thực thi:
+  ✓ Case 01: Đăng ký ca trống thành công ➔ PASS (120ms)
+  ✓ Case 02: Trùng ca trùng nhân sự báo lỗi ➔ PASS (98ms)
+  ✓ Case 03: Policy Engine ngăn chặn truy cập sai quyền ➔ PASS (45ms)
+- Kết quả: 0 Lỗi nghiêm trọng. Sẵn sàng đóng gói Build phát hành.`;
                 break;
             case 7:
-                outputText = `🛡️ [HUMAN CEO GATEWAY - DECISION REGISTERED]
-- Trạng thái: ĐÃ PHÊ DUYỆT (APPROVED).
-- Người phê duyệt: Human CEO (Ban Lãnh Đạo)
-- Hành động: Quyết định cho phép đóng gói Bundle v2.1-SPA và bắt đầu triển khai tự động lên hạ tầng Production Cloud.`;
+                outputText = `🛡️ [HUMAN CEO GATEWAY - SYSTEM RELEASE APPROVED]
+- Người thực hiện: CEO / Founder (Human-in-the-Loop)
+- Đầu ra thực tế: Đã kiểm tra báo cáo E2E Test của QA và PRD của PM.
+- Quyết định: KÝ DUYỆT PHÁT HÀNH (APPROVED RELEASE) cho mã nguồn Booking Module v2.1.
+- Event Log: Đã phát sự kiện \`BUILD_RELEASE_APPROVED\` tới Integration Mesh.`;
                 break;
             case 8:
-                outputText = `🚀 [AUTO STAGING & PRODUCTION DEPLOY LOGS]
-- Triển khai: AI DevOps
-- Môi trường: Vercel Serverless Edge & Docker Hub.
+                outputText = `🚀 [CI/CD PIPELINE STAGING & PRODUCTION DEPLOYED]
+- Người thực hiện: AI DevOps
+- Đầu ra thực tế: Triển khai thành công ứng dụng lên Vercel Production.
 - Deploy Logs:
   ▲ Aliased: https://bella-eos.vercel.app
-  ▲ Status: ACTIVE (Production)
-  ▲ SSL Certificate: Active & Secure (Let's Encrypt).
-- Trạng thái: DEPLOY COMPLETED IN 1.8s.`;
+  ▲ Serverless Edge Routing: Washington, D.C., USA (iad1)
+  ▲ SSL & CDN Caching: Active & Optimized.
+- Trạng thái: Dịch vụ Go-Live 100% ổn định trong 1.8 giây.`;
                 break;
             case 9:
                 outputText = `📢 [CAMPAIGN CONTENT SPEC & MARKETING LAUNCH]
