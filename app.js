@@ -3108,23 +3108,6 @@ const EnterpriseResourceManager = {
     }
 };
 
-const EnterprisePolicyEngine = {
-    policies: [
-        { id: 'POL-01', category: 'FINANCIAL', name: 'Max Marketing Budget Limit', rule: 'AI Marketing chỉ được tự quyết ngân sách <= 50M VND/tháng.', status: 'ENFORCED' },
-        { id: 'POL-02', category: 'FINANCIAL', name: 'CEO Approval Threshold', rule: 'Mọi đề xuất chi > 100M VND bắt buộc phải có Human CEO Sign-off.', status: 'ENFORCED' },
-        { id: 'POL-03', category: 'SECURITY', name: 'Data Destruction Barrier', rule: 'AI tuyệt đối không được xóa/ghi đè dữ liệu DB nếu chưa có Backup.', status: 'ENFORCED' },
-        { id: 'POL-04', category: 'LEGAL', name: 'Contract Signature Boundaries', rule: 'Đối với hợp đồng pháp lý, AI chỉ được phép Draft. Human Legal phải ký.', status: 'ENFORCED' }
-    ],
-    evaluatePolicy(actionType, amount = 0) {
-        if (actionType === 'BUDGET_SPEND' && amount > 100000000) {
-            appendLog('POLICY ENGINE', `🛡️ POLICY BLOCK [POL-02]: Đề xuất ${amount.toLocaleString()} VND vượt ngưỡng 100M ➔ Bắt buộc chuyển Gate CEO Phê duyệt!`, 'text-rose-400 font-bold');
-            return { allowed: false, requireHumanApproval: true };
-        }
-        appendLog('POLICY ENGINE', `✅ POLICY PASSED [POL-01]: Ngân sách cho phép tự chủ trong khung quy định.`, 'text-emerald-400 font-medium');
-        return { allowed: true, requireHumanApproval: false };
-    }
-};
-
 const DecisionEngineOS = {
     decisionLog: [],
     recordDecision(decision) {
