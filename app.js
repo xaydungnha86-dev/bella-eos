@@ -2187,8 +2187,38 @@ function renderAgentCards() {
 
 window.openAgentConfigModal = openAgentConfigModal;
 
+function renderSopTabSteps() {
+    const container = document.getElementById('sop-steps-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    WORKFLOW_STEPS.forEach((step, idx) => {
+        const isCurrent = idx === currentStepIndex;
+        const isPassed = idx < currentStepIndex;
+        const agent = AI_AGENTS.find(a => a.id === step.agent);
+
+        const node = document.createElement('div');
+        node.className = 'relative cursor-pointer group';
+        node.onclick = () => jumpToStep(idx);
+
+        const dotColor = isCurrent ? 'bg-cyan-400 ring-4 ring-cyan-500/20' : isPassed ? 'bg-emerald-500' : 'bg-slate-700';
+
+        node.innerHTML = `
+            <div class="absolute -left-[21px] top-0.5 w-3 h-3 rounded-full ${dotColor} transition"></div>
+            <div class="flex items-center justify-between">
+                <p class="font-semibold text-xs ${isCurrent ? 'text-cyan-400 font-bold' : isPassed ? 'text-emerald-400' : 'text-slate-200'} group-hover:text-cyan-300 transition">${step.name}</p>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">${agent ? agent.name : ''}</span>
+            </div>
+            <p class="text-slate-400 text-[11px] mt-0.5 leading-relaxed">${step.text}</p>
+        `;
+        container.appendChild(node);
+    });
+}
+
 function renderWorkflowPipeline() {
+    renderSopTabSteps();
     const container = document.getElementById('workflow-pipeline');
+    if (!container) return;
     container.innerHTML = '';
 
     WORKFLOW_STEPS.forEach((step, idx) => {
