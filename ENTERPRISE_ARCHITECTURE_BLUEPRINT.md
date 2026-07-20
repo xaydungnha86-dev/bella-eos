@@ -5,7 +5,7 @@
 
 ---
 
-## 🌐 Sơ Đồ Kiến Trúc 11 Tầng Enterprise OS (Bella EOS Architecture)
+## 🌐 Sơ Đồ Kiến Trúc 13 Tầng Enterprise OS (Bella EOS Architecture)
 
 ```
 Enterprise OS (Bella EOS)
@@ -13,13 +13,15 @@ Enterprise OS (Bella EOS)
 ├── 📂 2. Portfolio & Project OS (Project-First Core & State Machine Engine)
 ├── 🏛️ 3. Organization OS (Company ➔ Dept ➔ Team ➔ Role ➔ SOP Tree)
 ├── 🆔 4. Identity & Security OS (Universal Identity: Human, AI, App, Webhook, IoT)
-├── ⚖️ 5. Policy & Governance OS (Guardrails, Financial Boundaries & CEO Sign-off)
-├── ⚙️ 6. Resource & Workforce OS (Digital Employee HR, Workload Capacity & Scheduler)
-├── 🔄 7. Workflow & Event OS (Event Bus, Event Store, Saga, Temporal-like State)
-├── ⚡ 8. Execution Runtime OS (Model Router, Retry, Cost Optimizer, Tool Invoker)
-├── 🔌 9. Enterprise Service Mesh (Bella EIP, Connector SDK, SAP, Oracle, MISA)
-├── 🧠 10. Knowledge Graph OS (Enterprise Knowledge Graph: Campaign ➔ Customer ➔ Decision)
-└── 🔮 11. Analytics & Simulation OS (Digital Twin Simulator, Forecasting & Optimization)
+├── ⚖️ 5. Policy & Governance OS (Guardrails, Financial, Legal, Security, Compliance)
+├── 📊 6. Data Fabric OS (Canonical Data Model, Standardized Business Data Pipeline)
+├── 🔄 7. Workflow & Event OS (Event Bus, Event Store, Saga Pattern, Versioning v1/v2)
+├── ⚡ 8. AI Runtime OS (Planner, Router, Tool Invoker, Cost Optimizer, Execution History)
+├── 🔌 9. Integration OS (API Gateway, Connector SDK, MCP, Webhook, Queue, OAuth)
+├── 🏢 10. Business Applications OS (Bella EIP Suite & Business Applications)
+├── 🧠 11. Enterprise Memory OS (Knowledge Graph: Company ➔ Campaign ➔ Customer ➔ Decision)
+├── 🔮 12. Analytics & Simulation OS (Digital Twin Simulator, Forecasting & Recommendations)
+└── 📦 13. Platform OS (Plugin Architecture, Marketplace, SDK, CLI & Extensions)
 ```
 
 ---
@@ -32,7 +34,7 @@ Enterprise OS (Bella EOS)
 
 ---
 
-## 🏛️ Sơ Đồ Kiến Trúc Doanh Nghiệp 11 Lớp (11-Layer Enterprise OS System Architecture)
+## 🏛️ Sơ Đồ Kiến Trúc Doanh Nghiệp 13 Lớp (13-Layer Enterprise OS System Architecture)
 
 ```
                        BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
@@ -56,33 +58,40 @@ Enterprise OS (Bella EOS)
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │ 5. POLICY & GOVERNANCE OS (Lớp Phanh An Toàn, Hạn Mạch Tài Chính & Guardrails)          │
-│ • Financial Guardrails • CEO Threshold Sign-off  • Legal Boundaries  • Compliance Shield│
+│ • Financial Guardrails • CEO Threshold Sign-off  • Security & Privacy • Compliance Shield│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 6. RESOURCE & WORKFORCE OS (Quản Lý Nguồn Lực, Capacity Engine & Scheduler)             │
-│ • Digital HR Profiles  • Capacity Engine         • Resource Scheduler• Auto Redirection │
-│ • Auto Failover: Tự động chuyển giao Task sang Worker B khi Worker A Workload > 90%     │
+│ 6. DATA FABRIC OS (Chuẩn Hóa & Quản Trị Dữ Liệu Doanh Nghiệp - Canonical Data Model)    │
+│ • Raw Data Pipeline    • Standardized Data       • Canonical Model   • Unified Business │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 7. WORKFLOW & EVENT OS (Event Bus, Event Store & Temporal Saga Engine)                  │
-│ • Event Bus (Pub/Sub)  • Event Store (Replay)    • Saga Pattern      • Task Compensation│
+│ 7. WORKFLOW & EVENT OS (Event Bus, Event Store, Temporal Saga Engine & Versioning)      │
+│ • Event Bus (Pub/Sub)  • Event Store (Replay)    • Saga Pattern      • Workflow v1/v2/v3│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 8. EXECUTION RUNTIME OS (Bộ Máy Thực Thi AI Multi-LLM, Router & Cost Optimizer)         │
+│ 8. AI RUNTIME OS (Bộ Máy Thực Thi AI Multi-LLM, Router, Cost Optimizer & History Log)   │
 │ • Execution Planner    • Model Router            • Retry & Fallback  • Cost Optimizer   │
-│ • Tool Invoker         • Memory Context          • Response Validator• Execution Sandbox│
+│ • Tool Invoker         • Execution History       • Response Validator• Sandbox Context  │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 9. ENTERPRISE SERVICE MESH (Lớp Kết Nối Dịch Vụ - Bella EIP, SAP, Oracle, MISA)          │
-│ • Bella EIP Suite      • Connector SDK           • Third-party Services (SAP/Salesforce)│
+│ 9. INTEGRATION OS (Cổng Kết Nối Dịch Vụ - API Gateway, Connector SDK, MCP, Webhook)     │
+│ • API Gateway          • Connector SDK (SAP/MISA)• MCP Protocol      • Webhook Queue    │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 10. KNOWLEDGE GRAPH OS (Enterprise Knowledge Graph - Bộ Não Tri Thức Liên Kết)           │
-│ • Knowledge Graph Node • Campaign ➔ Customer     • Decision ➔ Lessons• Enterprise Brain │
+│ 10. BUSINESS APPLICATIONS OS (Bella EIP Suite & Bộ Ứng Dụng Nghiệp Vụ)                  │
+│ • Bella EIP Suite      • Bella CRM / POS / HR    • Bella Financial   • First-party Apps │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 11. ANALYTICS & SIMULATION OS (Digital Twin Simulator & Enterprise Intelligence)       │
+│ 11. ENTERPRISE MEMORY OS (Enterprise Knowledge Graph - Bộ Não Tri Thức Liên Kết)        │
+│ • Knowledge Graph Node • Campaign ➔ Customer     • Invoice ➔ Decision• Meeting ➔ Lessons│
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 12. ANALYTICS & SIMULATION OS (Digital Twin Simulator & Enterprise Intelligence)       │
 │ • Digital Twin Clone   • Monte Carlo Simulation  • Forecast & Risk   • Recommendations  │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 13. PLATFORM OS (Hệ Sinh Thái Mở - Plugin Architecture, Marketplace, SDK & CLI)         │
+│ • Plugin Architecture  • Marketplace             • Extension SDK     • Enterprise CLI   │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```• Workload Capacity Engine• Priority Queue    • Dynamic Scheduler│
 │ • Resource Auto-Failover: Auto Redirection when Worker Workload > 90%                   │
