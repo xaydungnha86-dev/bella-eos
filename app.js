@@ -107,6 +107,124 @@ const BellaKernel = {
 window.BellaKernel = BellaKernel;
 
 // =========================================================================
+// PHASE 2: ENTERPRISE DATA FABRIC & STATE MACHINE ENGINE (LAYER 5 & LAYER 2)
+// =========================================================================
+
+// 1. Enterprise Data Fabric (Canonical Data Model)
+const EnterpriseDataFabric = {
+    canonicalModels: {
+        Customer: ['id', 'name', 'email', 'phone', 'segment', 'lifecycleState'],
+        Project: ['id', 'name', 'objective', 'budget', 'state', 'ownerId'],
+        Invoice: ['id', 'projectId', 'amount', 'currency', 'status', 'approvedBy'],
+        EmployeeCandidate: ['id', 'name', 'roleTitle', 'skills', 'status']
+    },
+
+    // Standardize Raw Ingested Data from Facebook/ERP/CRM into Canonical Model
+    standardizeData(entityType, rawPayload) {
+        const schema = this.canonicalModels[entityType];
+        if (!schema) {
+            console.warn(`[Data Fabric] Không tìm thấy Canonical Model cho: ${entityType}`);
+            return rawPayload;
+        }
+
+        const canonicalEntity = {};
+        schema.forEach(field => {
+            canonicalEntity[field] = rawPayload[field] !== undefined ? rawPayload[field] : null;
+        });
+        canonicalEntity['_standardizedAt'] = new Date().toISOString();
+        canonicalEntity['_version'] = '1.0-CANONICAL';
+
+        console.log(`📊 [ENTERPRISE DATA FABRIC] Đã chuẩn hóa dữ liệu thô sang Canonical [${entityType}]:`, canonicalEntity);
+        return canonicalEntity;
+    }
+};
+
+// 2. Enterprise State Machine Engine (State-Driven Operating Architecture)
+const EnterpriseStateMachine = {
+    states: {
+        Project: {
+            DRAFT: ['PLANNING', 'CANCELLED'],
+            PLANNING: ['APPROVED', 'CANCELLED'],
+            APPROVED: ['EXECUTING', 'PAUSED'],
+            EXECUTING: ['REVIEW', 'PAUSED'],
+            REVIEW: ['COMPLETED', 'EXECUTING'],
+            COMPLETED: ['ARCHIVED'],
+            PAUSED: ['EXECUTING', 'CANCELLED'],
+            CANCELLED: []
+        },
+        Lead: {
+            NEW: ['QUALIFIED', 'LOST'],
+            QUALIFIED: ['PROPOSAL', 'LOST'],
+            PROPOSAL: ['NEGOTIATION', 'LOST'],
+            NEGOTIATION: ['WON', 'LOST'],
+            WON: ['ONBOARDING'],
+            ONBOARDING: ['ACTIVE'],
+            ACTIVE: ['RENEW', 'CHURNED'],
+            RENEW: ['ACTIVE'],
+            LOST: [],
+            CHURNED: []
+        },
+        Invoice: {
+            DRAFT: ['PENDING_APPROVAL', 'CANCELLED'],
+            PENDING_APPROVAL: ['APPROVED', 'REJECTED'],
+            APPROVED: ['PAID'],
+            PAID: ['CLOSED', 'REFUNDED'],
+            REFUNDED: ['CLOSED'],
+            REJECTED: ['DRAFT'],
+            CANCELLED: [],
+            CLOSED: []
+        }
+    },
+
+    transitionState(entityType, currentEntity, nextState, actorIdentity = 'system') {
+        const entityStates = this.states[entityType];
+        if (!entityStates) {
+            console.error(`[State Machine Error] Loại thực thể không hợp lệ: ${entityType}`);
+            return false;
+        }
+
+        const currentState = currentEntity.state || currentEntity.status || 'DRAFT';
+        const allowedNextStates = entityStates[currentState] || [];
+
+        if (!allowedNextStates.includes(nextState)) {
+            const err = `[STATE MACHINE BLOCKED] Không thể chuyển đổi trạng thái ${entityType} từ "${currentState}" ➔ "${nextState}". Các trạng thái hợp lệ: [${allowedNextStates.join(', ')}]`;
+            console.warn(err);
+            if (typeof appendLog === 'function') {
+                appendLog('STATE MACHINE', err, 'text-amber-500 font-bold');
+            }
+            return false;
+        }
+
+        // Execute State Transition via Bella Kernel
+        const oldState = currentState;
+        if (currentEntity.state) currentEntity.state = nextState;
+        if (currentEntity.status) currentEntity.status = nextState;
+
+        BellaKernel.executeTransaction(actorIdentity, 'STATE_TRANSITION', {
+            entityType,
+            entityId: currentEntity.id,
+            oldState,
+            newState: nextState
+        });
+
+        // Trigger Event Bus
+        EventBus.emit(`${entityType.toUpperCase()}_STATE_CHANGED`, {
+            entityType,
+            entityId: currentEntity.id,
+            oldState,
+            newState: nextState,
+            actorIdentity
+        });
+
+        console.log(`🔄 [STATE MACHINE] ${entityType} [${currentEntity.id}] chuyển trạng thái: ${oldState} ➔ ${nextState}`);
+        return true;
+    }
+};
+
+window.EnterpriseDataFabric = EnterpriseDataFabric;
+window.EnterpriseStateMachine = EnterpriseStateMachine;
+
+// =========================================================================
 // MILESTONE 1: ENTERPRISE ORGANIZATION MANAGER & WORKFORCE REGISTRY
 // =========================================================================
 
