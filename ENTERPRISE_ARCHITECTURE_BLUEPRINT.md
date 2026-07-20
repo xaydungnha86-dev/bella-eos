@@ -209,13 +209,68 @@ Hệ thống cung cấp sẵn bộ các file đóng gói Production tiêu chuẩ
 
 ---
 
-## 🗺️ Lộ Trình 5 Phase Thực Thi Chiến Lược (10-Year Strategic Roadmap)
+## 🗺️ KẾ HOẠCH TRIỂN KHAI CHIẾN LƯỢC 6 GIAI ĐOẠN (IMPLEMENTATION ROADMAP)
 
-| Phase | Module / System | Mục Tiêu Kỹ Thuật & Nghiệp Vụ Vận Hành |
-| :--- | :--- | :--- |
-| **Phase 1** | **Organization OS** | Xây dựng Cơ cấu Tổ chức (`Company` $\rightarrow$ `Department` $\rightarrow$ `Team`), Unified Workforce Registry (`Human` + `AI`), Role Matrix, Skill Matrix & Capability Permissions. |
-| **Phase 2** | **Project & Workflow OS** | Quản trị Gốc Dự án (Project-First Hub), Strategic Objectives, Task Contracts, Standard DoD, Workflow DAG Graph & Quality Gates. |
-| **Phase 3** | **Knowledge & Decision OS** | Enterprise Business Memory, SOPs Tree, Decision Log Audit Trail, Lessons Learned Engine & **Enterprise Policy Engine** (Guardrails & Sign-off). |
-| **Phase 4** | **Business Applications OS** | Tích hợp **Bella EIP Suite** (EIP, CRM, POS, HR, Finance) làm First-party Business App & Cổng kết nối Third-party (SAP, Oracle, Salesforce, MISA). |
-| **Phase 5** | **Autonomous Enterprise OS** | Vận hành Tự trị Toàn diện: `Objective` $\rightarrow$ `AI COO` $\rightarrow$ `Dynamic Projects` $\rightarrow$ `OKRs` $\rightarrow$ `Whole-Enterprise Continuous Learning` $\rightarrow$ `Self Optimization`. |
+Để đưa toàn bộ **Sơ đồ Kiến trúc 13 Lớp Bella EOS** vào vận hành thực tế mà không làm gián đoạn hệ thống hiện tại, kế hoạch triển khai được chia thành **6 Giai đoạn Chiến lược (Phased Engineering Approach)** với tinh thần: **Xây Lõi Kernel vững chắc trước $\rightarrow$ Chuẩn hóa Dữ liệu & Nghiệp vụ $\rightarrow$ Mở rộng Hệ sinh thái về sau**.
+
+```mermaid
+graph LR
+    P1["Phase 1: Bella Kernel Core"] --> P2["Phase 2: Data Fabric & State"]
+    P2 --> P3["Phase 3: Event Engine & AI Runtime"]
+    P3 --> P4["Phase 4: Domain Engine & Integration Mesh"]
+    P4 --> P5["Phase 5: Knowledge Graph & Digital Twin"]
+    P5 --> P6["Phase 6: Platform Ecosystem & Marketplace"]
+```
+
+---
+
+### 📌 CHI TIẾT 6 GIAI ĐOẠN TRIỂN KHAI KỸ THUẬT:
+
+#### 🟢 GIAI ĐOẠN 1: BELLA KERNEL CORE & UNIVERSAL IDENTITY (Lõi OS & Định Danh)
+- **Mục tiêu**: Xây dựng **Bella Kernel Core** làm nền tảng điều phối hạt nhân.
+- **Hạng mục thực thi**:
+  1. Xây dựng **Identity Engine (Layer 3)**: Khai báo Universal Identity cho `Human`, `AI Employee`, `Applications`, `Webhooks` và `IoT Assets`.
+  2. Xây dựng **Enterprise Governance & Policy Engine (Layer 4)**: Cấu hình hạn mạch tài chính, phanh an toàn và cổng phê duyệt CEO Gate (`Financial`, `Legal`, `Security`, `AI Policy`).
+  3. Đóng gói **Audit Ledger & Event Sourcing Core**: Lưu vết 100% mọi truy vấn và quyết định trong Kernel.
+
+#### 🔵 GIAI ĐOẠN 2: ENTERPRISE DATA FABRIC & STATE MACHINE (Dữ Liệu & Trạng Thái Nghiệp Vụ)
+- **Mục tiêu**: Chuyển đổi từ mô hình chạy Task đơn thuần sang **State-Driven Enterprise Model**.
+- **Hạng mục thực thi**:
+  1. Xây dựng **Enterprise Data Fabric (Layer 5)**: Chuẩn hóa Raw Data thành **Canonical Data Model** duy nhất cho toàn doanh nghiệp.
+  2. Thiết lập **Enterprise State Machine (Layer 2)**: Quản trị luồng trạng thái chuẩn cho các thực thể (`Project`, `Lead`, `Invoice`, `Employee Candidate`).
+
+#### 🟣 GIAI ĐOẠN 3: WORKFLOW & EVENT OS + AI RUNTIME DRIVER (Sự Kiện & Thực Thi AI)
+- **Mục tiêu**: Độc lập hoàn toàn tầng thực thi AI với quy trình vận hành.
+- **Hạng mục thực thi**:
+  1. Xây dựng **Event Bus & Event Store (Layer 7)**: Mô hình Pub/Sub Event-Driven hỗ trợ Replay sự kiện quá khứ (Kafka/Temporal pattern).
+  2. Triển khai **AI Runtime OS (Layer 8)**: Bộ máy Multi-LLM Model Router (Gemini/Claude/GPT), Cost Optimizer và Retry/Fallback Sandbox.
+
+#### 🟡 GIAI ĐOẠN 4: BUSINESS DOMAIN ENGINE & INTEGRATION MESH (Nghiệp Vụ & Kết Nối)
+- **Mục tiêu**: Tách biệt rõ nghiệp vụ các phòng ban và mở rộng khả năng kết nối bên ngoài.
+- **Hạng mục thực thi**:
+  1. Xây dựng **Business Domain Engine & Time OS (Layer 6)**: Động cơ nghiệp vụ Sales, HR, Finance, Inventory và Time Engine (Business Calendar, SLA Escalation).
+  2. Phát triển **Integration Mesh OS & Connector SDK (Layer 9)**: Cổng API Gateway, MCP Protocol và SDK kết nối ERP (MISA, SAP, Salesforce, HubSpot).
+
+#### 🟠 GIAI ĐOẠN 5: ENTERPRISE INTELLIGENCE & DIGITAL TWIN SIMULATOR (Bộ Não & Mô Phỏng)
+- **Mục tiêu**: Biến Bella EOS thành Trí nhớ và Bộ não tự học của Doanh nghiệp.
+- **Hạng mục thực thi**:
+  1. Xây dựng **Enterprise Knowledge Graph (Layer 11)**: Nối liền tất cả các Nút tri thức (`Campaign` $\rightarrow$ `Customer` $\rightarrow$ `Decision` $\rightarrow$ `Lessons Learned`).
+  2. Triển khai **Analytics & Digital Twin Simulator (Layer 12)**: Bộ máy chạy thử kịch bản giả định Monte Carlo (Optimization Engine) trước khi chi tiền thật.
+
+#### 🔴 GIAI ĐOẠN 6: PLATFORM ECOSYSTEM & ENTERPRISE MARKETPLACE (Hệ Sinh Thái Mở)
+- **Mục tiêu**: Mở rộng Bella EOS thành một Nền tảng OS có hệ sinh thái đối tác.
+- **Hạng mục thực thi**:
+  1. Xây dựng **Plugin Architecture & Extension SDK (Layer 13)**: Cho phép lập trình viên bên ngoài phát triển Plugin mà không sửa code Core.
+  2. Khởi chạy **Bella Enterprise Marketplace & CLI**: Nơi các doanh nghiệp cài đặt 1-Click các bộ SOP, Connectors và AI Employees Mới.
+
+---
+
+| Giai Đoạn | Tên Module System | Thời Gian Dự Kiến | Đầu Ra Bắt Buộc (Key Deliverables) |
+| :---: | :--- | :---: | :--- |
+| **Phase 1** | **Bella Kernel & Identity** | Quý 3 / 2026 | Kernel Transaction Core, Universal Identity, Policy Guardrails, Audit Ledger. |
+| **Phase 2** | **Data Fabric & State Machine** | Quý 4 / 2026 | Canonical Data Model, Project & Business State Machine Engines. |
+| **Phase 3** | **Event OS & AI Runtime** | Quý 1 / 2027 | Event Bus (Pub/Sub), Event Store Replay, Multi-LLM Cost Router & Sandbox. |
+| **Phase 4** | **Domain Engine & Integration** | Quý 2 / 2027 | Sales/HR/Finance Domains, Time Engine (SLA), Connector SDK & MCP API Gateway. |
+| **Phase 5** | **Knowledge Graph & Digital Twin** | Quý 3 / 2027 | Enterprise Knowledge Graph, Digital Twin Simulator (Monte Carlo What-If). |
+| **Phase 6** | **Platform OS & Marketplace** | Quý 4 / 2027 | Plugin Architecture, Extension SDK, Enterprise CLI & Marketplace Hub. |
 
