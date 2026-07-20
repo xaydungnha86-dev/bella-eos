@@ -2914,6 +2914,9 @@ function stepForward() {
         pauseSimulation();
         openApprovalModal(nextStep);
     }
+
+    // Update global metrics UI on step change
+    updateGlobalMetricsUI();
 }
 
 // Simulation Controls
@@ -2946,6 +2949,7 @@ function jumpToStep(idx) {
     renderAgentCards();
     renderWorkflowPipeline();
     appendLog('SYSTEM', `CEO chuyển trực tiếp tới bước: ${step.name}`, 'text-amber-600 font-medium');
+    updateGlobalMetricsUI();
 }
 
 // =========================================================================
@@ -3627,6 +3631,45 @@ function populateModelSelectOptions(providerKey, currentModelId) {
     });
 }
 
+function updateGlobalMetricsUI() {
+    // 1. Calculate dynamically from local data arrays
+    // Total simulated hours saved (Each task contract has SLA hours)
+    let totalSlaHours = 0;
+    let completedCount = 0;
+    if (typeof taskContractsStore !== 'undefined' && Array.isArray(taskContractsStore)) {
+        taskContractsStore.forEach(t => {
+            totalSlaHours += parseFloat(t.sla_hours || 4);
+            if (t.status === 'COMPLETED') completedCount++;
+        });
+    }
+
+    // Baseline fallback values + dynamic additions
+    const baseHoursSaved = 1420 + totalSlaHours;
+    const baseTasks = 8950 + completedCount;
+    
+    // Auto % and ROI % variance simulation slightly dynamically based on AI active tasks count
+    let activeAiTaskCount = 0;
+    AI_AGENTS.forEach(a => {
+        if (a.status === 'PROCESSING' || a.status === 'WAITING_APPROVAL') activeAiTaskCount++;
+    });
+    
+    const autoPercent = Math.min(98, 88 + (activeAiTaskCount * 0.5));
+    const roiPercent = 420 + (completedCount * 10) - (activeAiTaskCount * 2);
+
+    // Write to DOM
+    const hoursEl = document.getElementById('biz-metric-hours');
+    if (hoursEl) hoursEl.textContent = `${baseHoursSaved.toLocaleString()} hrs`;
+
+    const tasksEl = document.getElementById('biz-metric-tasks');
+    if (tasksEl) tasksEl.textContent = baseTasks.toLocaleString();
+
+    const autoEl = document.getElementById('biz-metric-auto');
+    if (autoEl) autoEl.textContent = `${autoPercent.toFixed(0)}%`;
+
+    const roiEl = document.getElementById('biz-metric-roi');
+    if (roiEl) roiEl.textContent = `+${roiPercent.toFixed(0)}%`;
+}
+
 function updateEnterpriseMetrics() {
     const providerKey = document.getElementById('config-provider-select').value;
     const modelId = document.getElementById('config-model-select').value;
@@ -3660,6 +3703,9 @@ function updateEnterpriseMetrics() {
     document.getElementById('cost-today').textContent = `$${HISTORICAL_COST_LEDGER.today.toFixed(4)}`;
     document.getElementById('cost-week').textContent = `$${HISTORICAL_COST_LEDGER.week.toFixed(2)}`;
     document.getElementById('cost-month').textContent = `$${HISTORICAL_COST_LEDGER.month.toFixed(2)}`;
+    
+    // Call UI dynamic metric updates
+    updateGlobalMetricsUI();
 }
 
 function syncInputsToPreview() {
@@ -4080,6 +4126,7 @@ function initApp() {
     renderWorkflowPipeline();
     renderKanbanBoard();
     initSupabaseRealtimeSync();
+    updateGlobalMetricsUI();
 }
 
 if (document.readyState === 'loading') {
