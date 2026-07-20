@@ -888,7 +888,7 @@
                 </button>
             </div>
 
-            <div class="p-5 space-y-4 text-xs">
+            <div class="p-5 space-y-4 text-xs max-h-[60vh] overflow-y-auto custom-scrollbar">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">GOOGLE GEMINI API KEY</label>
                     <div class="relative">
@@ -897,13 +897,35 @@
                             <i class="fa-solid fa-eye text-[11px]"></i>
                         </button>
                     </div>
-                    <p class="text-[9px] text-slate-500 mt-1">Cung cấp khóa API để kích hoạt tác vụ phản hồi AI trực tuyến thời gian thực qua Gemini 1.5 Pro / Flash.</p>
+                    <p class="text-[9px] text-slate-500 mt-1">Dành cho: Gemini 1.5 Pro, Gemini 1.5 Flash.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">OPENAI API KEY</label>
+                    <div class="relative">
+                        <input id="settings-openai-key" type="password" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono pr-10" placeholder="sk-proj-..." />
+                        <button type="button" onclick="const input = document.getElementById('settings-openai-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2 text-slate-450 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-eye text-[11px]"></i>
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-slate-500 mt-1">Dành cho: GPT-4o, GPT-4o Mini.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ANTHROPIC API KEY</label>
+                    <div class="relative">
+                        <input id="settings-anthropic-key" type="password" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono pr-10" placeholder="sk-ant-..." />
+                        <button type="button" onclick="const input = document.getElementById('settings-anthropic-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2 text-slate-450 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-eye text-[11px]"></i>
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-slate-500 mt-1">Dành cho: Claude 3.5 Sonnet, Claude 3 Haiku.</p>
                 </div>
 
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">SUPABASE ANON KEY (DATABASE CLOUD)</label>
                     <textarea id="settings-supabase-key" rows="2" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono resize-none" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
-                    <p class="text-[9px] text-slate-500 mt-1">Khóa Supabase Anon dùng để đồng bộ bảng Task Kanban lên Cloud DB của bạn.</p>
+                    <p class="text-[9px] text-slate-500 mt-1">Đồng bộ bảng Task Kanban lên Cloud DB.</p>
                 </div>
             </div>
 
