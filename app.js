@@ -265,6 +265,43 @@ ProviderRegistry.register(new StandardProviderAdapter('meta', 'Meta OpenSource',
     'llama-3-1-70b': { name: 'Llama 3.1 70B', costPer1kInput: 0.0007, costPer1kOutput: 0.0009, contextLimit: 128000 }
 }));
 
+// Real Gemini / LLM Execution Service
+const LLMExecutionService = {
+    async generateContent(prompt, apiKey = '', modelId = 'gemini-1.5-flash') {
+        const key = apiKey || window.GEMINI_API_KEY || localStorage.getItem('bella_gemini_api_key') || '';
+        if (!key) {
+            console.warn('[LLM Service] Không tìm thấy Gemini API Key. Đang sử dụng chế độ AI Simulation.');
+            return null;
+        }
+
+        try {
+            const cleanModel = modelId.includes('pro') ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${key}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                console.error('[Gemini API Error]', errData);
+                return null;
+            }
+
+            const data = await response.json();
+            const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            return resultText;
+        } catch (err) {
+            console.error('[Gemini API Fetch Exception]', err);
+            return null;
+        }
+    }
+};
+
 const PROVIDERS_CATALOG = {
     anthropic: {
         name: 'Anthropic AI',
@@ -2617,13 +2654,26 @@ document.getElementById('ceo-command-input').addEventListener('keypress', (e) =>
     if (e.key === 'Enter') sendCeoCommand();
 });
 
-function sendCeoCommand() {
+async function sendCeoCommand() {
     const input = document.getElementById('ceo-command-input');
     const val = input.value.trim();
     if (!val) return;
 
     appendLog('CEO (OBJECTIVE)', `🎯 MỤC TIÊU CHIẾN LƯỢC MỚI TỪ CEO: "${val}"`, 'text-amber-400 font-bold');
     input.value = '';
+
+    appendLog('AI COO', '🤖 AI COO đang phân tích và tự lập trình Quy trình SOP qua LLM Engine...', 'text-cyan-400 font-semibold animate-pulse');
+
+    // Attempt Real LLM Gemini Call
+    const llmPrompt = `Bạn là AI COO của hệ thống Bella EIP OS. CEO vừa giao Mục tiêu Chiến lược: "${val}".
+Hãy phân rã mục tiêu này thành 10 bước SOP ngắn gọn cho 11 AI Employees (PM, CTO, TL, Dev, Designer, QA, DevOps, Marketing, Sales, Finance).
+Trả về kết quả ngắn gọn 10 dòng tiếng Việt.`;
+
+    const realResponse = await LLMExecutionService.generateContent(llmPrompt);
+
+    if (realResponse) {
+        appendLog('AI COO (GEMINI API)', `✨ [GEMINI REAL RESPONSE]\n${realResponse.substring(0, 300)}...`, 'text-emerald-400 font-mono text-[11px]');
+    }
 
     // Trigger AI COO Dynamic Workflow Generation
     setTimeout(() => {
