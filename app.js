@@ -2239,11 +2239,17 @@ function renderWorkflowPipeline() {
                 <p class="text-[9px] ${isCurrent ? 'text-blue-500 font-mono' : 'text-slate-400'}">${agent ? agent.name : ''}</p>
             </div>
         `;
+        if (isCurrent) {
+            setTimeout(() => {
+                node.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 50);
+        }
+
         container.appendChild(node);
 
         if (idx < WORKFLOW_STEPS.length - 1) {
             const line = document.createElement('div');
-            line.className = `w-4 h-0.5 ${isPassed ? 'bg-emerald-500' : 'bg-slate-200'}`;
+            line.className = `w-4 h-0.5 shrink-0 ${isPassed ? 'bg-emerald-500' : 'bg-slate-200'}`;
             container.appendChild(line);
         }
     });
