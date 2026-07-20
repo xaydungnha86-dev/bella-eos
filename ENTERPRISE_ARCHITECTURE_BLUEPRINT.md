@@ -146,24 +146,24 @@ Một **AI Employee** trên Bella AI Platform không chỉ là một chuỗi Pro
 
 ---
 
-## 📋 Hợp Đồng Công Việc & Tiêu Chuẩn Hoàn Thành (Task Contract & DoD)
+## 🛡️ Hệ Thống Kiểm Soát Chất Lượng Doanh Nghiệp (Enterprise Quality & Control System - EQCS)
 
-Mọi nhiệm vụ giao cho **Member (Human hoặc AI)** đều phải đi kèm một **Hợp Đồng Công Việc (Task Contract)** chặt chẽ:
+Chu trình đầy đủ của mọi hoạt động trong Bella EOS được quản lý nghiêm ngặt qua trục EQCS nằm ngang với Workflow Engine:
 
-- **Input Specifications**: Brief, Brand Guidelines, Campaign Target, Deadlines.
-- **Mandatory Outputs**: Title, Hook, Body text, Call-to-action, Image Suggestions.
-- **Definition of Done (DoD)**: Check chính tả, Brand Voice Compliance, Đúng độ dài (500-700 từ), Kiểm tra pháp lý/bản quyền.
-- **Quality Gate Pipeline**: `GrammarCheck` $\rightarrow$ `BrandCheck` $\rightarrow$ `SEOCheck` $\rightarrow$ `LegalCheck` $\rightarrow$ `ManagerReview`.
-- **SLA & Escalation**: SLA 2 giờ; nếu sau 2 lần sửa không đạt sẽ tự động chuyển sang Trưởng bộ phận phụ trách.
+$$\text{Objective} \longrightarrow \text{Project} \longrightarrow \text{Workflow Engine} \longrightarrow \text{AI Runtime} \longrightarrow \text{EQCS Gateway (Passport)} \longrightarrow \text{Decision Engine} \longrightarrow \text{Memory & Continuous Learning}$$
 
----
-
-## 🛡️ Cổng Kiểm Soát Chất Lượng & Đánh Giá Score (Quality Gate & Evaluation)
-
-$$\text{Task Execution} \longrightarrow \text{AI Self-Review} \longrightarrow \text{AI Checker Pipeline} \longrightarrow \text{Human Review} \longrightarrow \text{Scorecard Ledger}$$
-
-* Mỗi tác vụ sau khi hoàn thành sẽ nhận bộ điểm số chi tiết (*Grammar Score, Brand Score, SEO Score, Legal Score, Overall Score*).
-* Đảm bảo công việc chỉ được bàn giao khi đạt tiêu chuẩn chất lượng đã cam kết.
+### 🎫 Hộ Chiếu Thực Thi (Execution Passport)
+Mỗi tác vụ (Task) phát sinh trong hệ thống đều đi kèm một Hộ chiếu điện tử để ghi nhận toàn bộ vòng đời chất lượng công việc:
+* **Passport ID**: Ví dụ `#EQCS-MKT-2048`.
+* **Vòng đời trạng thái (Life-cycle)**: `RUNNING` ➔ `REVIEW` ➔ `APPROVED / REJECTED` ➔ `LEARN`.
+* **Báo cáo chấm điểm (EQCS Scores)**:
+  * **Grammar Score**: Độ chính xác và chuẩn hóa ngôn ngữ.
+  * **SEO Score**: Tỷ lệ tối ưu hóa từ khóa và nội dung.
+  * **Brand Score**: Mức độ đồng bộ với tiếng nói thương hiệu (Brand Voice).
+  * **Policy Score**: Kiểm duyệt tính hợp lệ của quy chế tài chính/pháp lý.
+  * **Overall Score**: Điểm chất lượng trung bình (Yêu cầu phải đạt $\ge 90$ để đi tiếp).
+* **DoD Rules Engine**: Định nghĩa Definition of Done chặt chẽ dưới dạng các bộ rules kiểm tra tự động.
+* **Retry & Escalation Logs**: Ghi nhận số lần sửa đổi và tự động leo thang (Escalate) lên CEO nếu vượt quá giới hạn 2 lần rollback.
 
 ---
 

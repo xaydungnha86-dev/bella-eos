@@ -2856,8 +2856,11 @@ function appendLog(agentName, text, colorClass = 'text-slate-700') {
 }
 
 function openStepDetailModal(step) {
+    openStepDetailModalEQE(step);
+}
+
+function openStepDetailModal_original_unused(step) {
     const modal = document.getElementById('step-detail-modal');
-    if (!modal) return;
 
     const agent = AI_AGENTS.find(a => a.id === step.agent);
     
@@ -3058,56 +3061,493 @@ safeAddListener('btn-modal-close-report', 'click', () => {
     if (modal) modal.classList.add('hidden');
 });
 
+function getStepOutputText(stepId) {
+    switch(stepId) {
+        case 1:
+            return `🎯 [CEO STRATEGIC DECISION - EXECUTED]
+- Người ban hành: CEO / Founder (Human-in-the-Loop)
+- Quyết định chiến lược: Đã chính thức duyệt triển khai module "Spa Appointment Booking v1.2" để tăng 20% lượng Spa mới ký kết hợp đồng Bella EIP trong Q3-2026.
+- Ngân sách chiến dịch: Đã phân bổ 150,000,000 VND (Trong đó 50M VND cho Marketing và 100M VND cho R&D / AWS GPU Infra).
+- Trạng thái: ĐÃ KHỞI TẠO PROJECT & EVENT STREAM.`;
+        case 2:
+            return `📝 [PRODUCT REQUIREMENT DOCUMENT (PRD) - COMPLETION IN 1.8h]
+- Người thực hiện: AI Product Manager (PM)
+- Đầu ra thực tế: Đã biên soạn PRD v1.2 chi tiết tại Notion link:
+  + Chức năng 1: Khách hàng tự chọn dịch vụ, Kỹ thuật viên (KTV) và giờ trống 24/7.
+  + Chức năng 2: Thuật toán tự động sắp xếp giờ trống (Time OS) giảm xung đột trùng ca.
+  + Chức năng 3: Zalo OA Notification API nhắc lịch tự động trước 2 tiếng.
+- Trạng thái: ĐÃ KIỂM DUYỆT & THÔNG QUA BỞI BAN LÃNH ĐẠO (100% Tiêu chí PRD Gate Đạt).`;
+        case 3:
+            return `🏛️ [SYSTEM ARCHITECTURE & DATABASE SPECIFICATION - APPROVED]
+- Người thực hiện: AI CTO & Tech Lead
+- Đầu ra thực tế:
+  + Sơ đồ thiết kế Microservices của Booking Engine liên kết với Core ERP.
+  + Database Schema đã khởi tạo:
+    CREATE TABLE spa_bookings (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        customer_id UUID NOT NULL REFERENCES customers(id),
+        service_id UUID NOT NULL,
+        scheduled_time TIMESTAMP WITH TIME ZONE NOT NULL,
+        status VARCHAR(30) DEFAULT 'PENDING_APPROVAL',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    );
+  + Đánh giá bảo mật (Security Audit): Đã kích hoạt Layer 3 Zero Trust Permission Bus cho bảng Bookings.`;
+        case 4:
+            return `🎨 [UI/UX FIGMA EXPORT & DESIGN SYSTEM TOKENS - COMPLETED]
+- Người thực hiện: AI Designer (UX/UI)
+- Đầu ra thực tế: 
+  + Đã hoàn thiện thiết kế 4 màn hình (Đặt lịch di động, Quản lý ca của Kỹ thuật viên, Dashboard thống kê, Cấu hình Dịch vụ).
+  + Design Tokens được xuất tự động:
+    {
+      "theme": "glassmorphism-dark",
+      "colors": { "primary": "#06b6d4", "accent": "#f59e0b", "background": "#020617" },
+      "fonts": "Inter, sans-serif"
+    }
+  + Figma Link: figma.com/file/bella-spa-booking-v1.2 (Đã khóa file để Dev code)`;
+        case 5:
+            return `💻 [CORE SOURCE CODE IMPLEMENTATION - COMPLETED]
+- Người thực hiện: AI Developer
+- Đầu ra thực tế: Đã viết xong mã nguồn cho Booking Controller & frontend đặt lịch:
+  export const createNewBooking = async (rawPayload) => {
+      // Chuẩn hóa dữ liệu thô sang Canonical Model thông qua Layer 5 Data Fabric
+      const canonical = EnterpriseDataFabric.standardizeData('Customer', rawPayload);
+      
+      // Kiểm tra quy định tài chính/quyền hạn qua Layer 4 Policy Engine
+      const policyPass = EnterprisePolicyEngine.evaluatePolicy(canonical.name, 'BOOKING_CREATE', canonical);
+      if (!policyPass.allowed) throw new Error(policyPass.reason);
+      
+      // Ghi nhận sự kiện vào database Supabase
+      return await supabaseClient.from('bookings').insert(canonical);
+  };
+- Git Commit: [feat: implement Spa Booking layout and Supabase sync logic] (hash: 7511f0e).`;
+        case 6:
+            return `🧪 [AUTOMATED QA INTEGRATION E2E TEST REPORT - 100% PASS]
+- Người thực hiện: AI QA Engineer
+- Đầu ra thực tế: Đã thực thi kịch bản kiểm thử E2E tự động qua Playwright (42 Test cases).
+- Nhật ký thực thi:
+  ✓ Case 01: Đăng ký ca trống thành công ➔ PASS (120ms)
+  ✓ Case 02: Trùng ca trùng nhân sự báo lỗi ➔ PASS (98ms)
+  ✓ Case 03: Policy Engine ngăn chặn truy cập sai quyền ➔ PASS (45ms)
+- Kết quả: 0 Lỗi nghiêm trọng. Sẵn sàng đóng gói Build phát hành.`;
+        case 7:
+            return `🛡️ [HUMAN CEO GATEWAY - SYSTEM RELEASE APPROVED]
+- Người thực hiện: CEO / Founder (Human-in-the-Loop)
+- Đầu ra thực tế: Đã kiểm tra báo cáo E2E Test của QA và PRD của PM.
+- Quyết định: KÝ DUYỆT PHÁT HÀNH (APPROVED RELEASE) cho mã nguồn Booking Module v2.1.
+- Event Log: Đã phát sự kiện \`BUILD_RELEASE_APPROVED\` tới Integration Mesh.`;
+        case 8:
+            return `🚀 [CI/CD PIPELINE STAGING & PRODUCTION DEPLOYED]
+- Người thực hiện: AI DevOps
+- Đầu ra thực tế: Triển khai thành công ứng dụng lên Vercel Production.
+- Deploy Logs:
+  ▲ Aliased: https://bella-eos.vercel.app
+  ▲ Serverless Edge Routing: Washington, D.C., USA (iad1)
+  ▲ SSL & CDN Caching: Active & Optimized.
+- Trạng thái: Dịch vụ Go-Live 100% ổn định trong 1.8 giây.`;
+        case 9:
+            return `📢 [CAMPAIGN CONTENT SPEC & MARKETING LAUNCH]
+- Biên soạn: AI Marketing
+- Kế hoạch Content: Tăng 20% Spa demo trong 30 ngày.
+
+--------------------------------------------------
+🎬 TUYẾN 1: KỊCH BẢN SHORT VIDEO REELS (12 CLIPS)
+--------------------------------------------------
+[Kịch bản Clip #1: Nỗi đau quản lý đặt lịch thủ công]
+• Thời lượng: 45 giây.
+• Visual: Cảnh chủ Spa bận rộn nghe 3 điện thoại cùng lúc, sổ sách ghi chép lung tung, khách hàng đến Spa phải ngồi chờ đợi lâu.
+• Voiceover (AI Marketing): "Bạn có mệt mỏi khi mỗi ngày phải trả lời hàng chục cuộc gọi đặt lịch, rồi ghi chép thủ công nhầm lẫn lung tung? Khách VIP đến Spa lại phải chờ đợi vì trùng lịch? Hãy chấm dứt ngay nỗi đau này!"
+• Action/CTA: Giới thiệu giao diện đặt lịch tự động 24/7 của Bella EIP trên điện thoại. Click link bio nhận dùng thử 30 ngày miễn phí!
+
+[Kịch bản Clip #2: Giải cứu giờ cao điểm cuối tuần]
+• Thời lượng: 60 giây.
+• Voiceover: "Làm thế nào để Spa tăng gấp đôi công suất phục vụ ngày cuối tuần mà nhân viên không bị kiệt sức? Bí quyết là tối ưu khung giờ trống (Time OS) tự động điều phối nhân sự rảnh tay của Bella EIP..."
+
+--------------------------------------------------
+📊 TUYẾN 2: BÀI VIẾT CAROUSEL INFOGRAPHICS (10 BÀI)
+--------------------------------------------------
+[Bài viết #1: 5 Lý do Spa của bạn cần App Đặt Lịch Tự Động]
+• Nội dung Slide 1: Tiêu đề "Spa thất thoát bao nhiêu khách hàng vì chậm trả lời tin nhắn?"
+• Nội dung Slide 2: 78% khách hàng sẽ chuyển sang Spa khác nếu không đặt được lịch trong vòng 5 phút.
+• Nội dung Slide 3: Hệ thống Bella EIP tự động giữ chỗ 24/7 không cần trực page.
+• Nội dung Slide 4: Giảm 95% tỷ lệ khách quên lịch (No-Show) nhờ tin nhắn nhắc nhở tự động qua Zalo.
+• Nội dung Slide 5: Nút kêu gọi hành động "Nhận ưu đãi giảm 50% trọn đời hôm nay".
+
+[Bài viết #2: Cách tối ưu 100% công suất kỹ thuật viên]
+• Nội dung: Hướng dẫn phân bổ phòng dịch vụ và quản trị ca kíp thông minh của phần mềm Bella EIP.
+
+--------------------------------------------------
+📖 TUYẾN 3: BÀI VIẾT CASE STUDY THỰC TẾ (5 BÀI)
+--------------------------------------------------
+[Case Study #1: An Nhiên Spa tăng 45% doanh thu sau 2 tháng]
+• Khách hàng: An Nhiên Spa (Hà Nội) - Quy mô 12 giường dịch vụ.
+• Thách thức trước khi dùng Bella EIP: Tỷ lệ khách hàng đặt lịch nhưng không đến (No-show) lên đến 28%. Quản lý không kiểm soát được ca làm việc của kỹ thuật viên dẫn đến trùng lịch dịch vụ.
+• Giải pháp áp dụng: Triển khai Bella EIP Booking & Zalo OA Auto-Notification.
+• Kết quả thực tế: Tỷ lệ No-show giảm xuống dưới 3%. Doanh thu tổng tăng vọt 45% nhờ tối ưu lịch trống cuối tuần. Chủ spa tự do đi du lịch không cần trực máy.`;
+        case 10:
+            return `📊 [FINANCIAL COST ACCOUNTING & ROI REPORT]
+- Kế toán trưởng: AI Finance
+- Hạch toán Chi phí API Token:
+  + Gemini Flash: $0.00342
+  + Claude Sonnet: $0.01250
+  ➔ Tổng chi phí vận hành AI: $0.01592 USD.
+- ROI Dự báo: +420% hiệu suất, tiết kiệm 1,420 giờ làm việc thay con người.`;
+        default:
+            return `📝 Không có kết quả bàn giao cụ thể cho bước này.`;
+    }
+}
+
+function openStepDetailModalEQE(step) {
+    const modal = document.getElementById('step-detail-modal');
+    if (!modal) return;
+
+    const agent = AI_AGENTS.find(a => a.id === step.agent);
+    
+    // Set titles
+    document.getElementById('step-modal-title').textContent = step.name;
+    document.getElementById('step-modal-executor').textContent = `Thực thi bởi: ${agent ? agent.name : 'Hệ thống'} (${agent ? agent.role : 'Hạt nhân'})`;
+    
+    // Change Icon & Color dynamically
+    const iconEl = document.getElementById('step-modal-icon');
+    const iconBgEl = document.getElementById('step-modal-icon-bg');
+    if (agent && iconEl && iconBgEl) {
+        iconEl.className = `fa-solid ${agent.icon}`;
+        const hexColor = '#' + agent.color.toString(16).padStart(6, '0');
+        iconBgEl.style.color = hexColor;
+        iconBgEl.style.borderColor = `${hexColor}4d`;
+        iconBgEl.style.backgroundColor = `${hexColor}1a`;
+    }
+
+    // Set Description
+    document.getElementById('step-modal-desc').textContent = step.text;
+
+    // Get or Create Deliverable to display
+    const taskId = `task-step-${step.id}`;
+    let dlv = DeliverableManager.getDeliverable(taskId);
+    if (!dlv) {
+        // Fallback create
+        dlv = DeliverableManager.createDeliverable(taskId, step.name, step.agent, getStepOutputText(step.id));
+        EnterpriseQualityEngine.evaluate(dlv);
+    }
+
+    // Render Deliverable Details
+    const deliverableContainer = document.getElementById('step-modal-deliverable-container');
+    if (deliverableContainer) {
+        deliverableContainer.innerHTML = `
+<div class="space-y-2 text-slate-200">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 font-sans">
+        <span class="text-cyan-400 font-bold">${dlv.id} (v${dlv.version})</span>
+        <span class="font-bold text-[10px] px-2 py-0.5 rounded font-mono ${dlv.status.startsWith('APPROVED') ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/30' : 'bg-amber-950 text-amber-400 border border-amber-900/30'}">${dlv.status}</span>
+    </div>
+    <div class="font-mono whitespace-pre-wrap">${dlv.evidence}</div>
+    <div class="border-t border-slate-850 pt-2 font-sans flex items-center justify-between text-[10px] text-slate-400">
+        <span>EQE Score: <strong class="text-emerald-400 text-xs">${dlv.score}%</strong></span>
+        <span>Confidence: <strong class="text-slate-200">${dlv.confidence}%</strong> | Risk: <strong class="text-slate-200">${dlv.risk}</strong></span>
+    </div>
+</div>
+        `;
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function switchSidebarTab(tabName) {
+    const tabs = ['agents', 'sops', 'kanban', 'deliverables'];
+    tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if (!btn || !content) return;
+
+        if (t === tabName) {
+            btn.classList.add('border-cyan-500', 'text-cyan-400', 'font-semibold');
+            btn.classList.remove('border-transparent', 'text-slate-400');
+            content.classList.remove('hidden');
+        } else {
+            btn.classList.add('border-transparent', 'text-slate-400');
+            btn.classList.remove('border-cyan-500', 'text-cyan-400', 'font-semibold');
+            content.classList.add('hidden');
+        }
+    });
+
+    if (tabName === 'deliverables') {
+        renderDeliverablesTab();
+    }
+}
+
+function renderDeliverablesTab() {
+    const container = document.getElementById('deliverable-list-container');
+    const label = document.getElementById('deliverables-count-label');
+    if (!container) return;
+
+    const list = DeliverableManager.getAllDeliverables();
+    if (label) {
+        label.textContent = `${list.length} bản bàn giao`;
+    }
+
+    if (list.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-6 text-slate-500 font-sans text-[11px]">
+                <i class="fa-solid fa-folder-open text-2xl block mb-2 opacity-30"></i>
+                Chưa có tài sản nào được bàn giao. Chạy mô phỏng để nạp dữ liệu.
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = '';
+    list.forEach(dlv => {
+        const item = document.createElement('div');
+        item.className = 'p-2.5 rounded-xl border bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 text-slate-350 cursor-pointer shadow-sm transition-all relative overflow-hidden space-y-1.5';
+        
+        let statusBadge = '';
+        if (dlv.status === 'APPROVED') {
+            statusBadge = '<span class="text-[8px] bg-emerald-950/80 text-emerald-400 border border-emerald-900/30 px-1 py-0.5 rounded font-mono font-bold">APPROVED</span>';
+        } else if (dlv.status === 'APPROVED_WITH_COMMENT') {
+            statusBadge = '<span class="text-[8px] bg-cyan-950/80 text-cyan-400 border border-cyan-900/30 px-1 py-0.5 rounded font-mono font-bold">APPROVED*</span>';
+        } else if (dlv.status === 'REVISE') {
+            statusBadge = '<span class="text-[8px] bg-amber-950/80 text-amber-400 border border-amber-900/30 px-1 py-0.5 rounded font-mono font-bold animate-pulse">REVISE</span>';
+        } else if (dlv.status === 'ESCALATE') {
+            statusBadge = '<span class="text-[8px] bg-rose-950/80 text-rose-455 border border-rose-900/30 px-1 py-0.5 rounded font-mono font-bold animate-pulse">ESCALATE</span>';
+        } else {
+            statusBadge = `<span class="text-[8px] bg-slate-950 text-slate-400 border border-slate-800 px-1 py-0.5 rounded font-mono">${dlv.status}</span>`;
+        }
+
+        item.onclick = () => {
+            openDeliverableDetailModal(dlv.taskId);
+        };
+
+        item.innerHTML = `
+            <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-100 truncate flex items-center gap-1.5">
+                    <i class="fa-solid fa-passport text-cyan-400"></i>
+                    <span>${dlv.stepName}</span>
+                </h4>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="text-[8px] text-slate-500 font-mono">v${dlv.version}</span>
+                    ${statusBadge}
+                </div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400">
+                <span>Bởi: <strong class="text-slate-350">${dlv.owner}</strong></span>
+                <span class="font-bold text-emerald-400 font-mono">${dlv.score}% EQE</span>
+            </div>
+            <p class="text-[9px] text-slate-500 truncate font-mono">${dlv.id}</p>
+        `;
+        container.appendChild(item);
+    });
+}
+
+function openDeliverableDetailModal(taskId) {
+    const dlv = DeliverableManager.getDeliverable(taskId);
+    if (!dlv) return;
+
+    const modal = document.getElementById('deliverable-detail-modal');
+    if (!modal) return;
+
+    document.getElementById('dlv-modal-title').textContent = dlv.stepName;
+    document.getElementById('dlv-modal-id').textContent = dlv.id;
+    document.getElementById('dlv-modal-version').textContent = `v${dlv.version}`;
+    document.getElementById('dlv-modal-owner').textContent = dlv.owner;
+    document.getElementById('dlv-modal-score').textContent = `${dlv.score}%`;
+
+    // Status Badge inside modal
+    const badgeEl = document.getElementById('dlv-modal-status-badge');
+    if (badgeEl) {
+        let badgeColor = '';
+        if (dlv.status.startsWith('APPROVED')) {
+            badgeColor = 'bg-emerald-950/80 text-emerald-400 border border-emerald-900/30';
+        } else if (dlv.status === 'REVISE') {
+            badgeColor = 'bg-amber-950/80 text-amber-400 border border-amber-900/30 animate-pulse';
+        } else if (dlv.status === 'ESCALATE') {
+            badgeColor = 'bg-rose-950/80 text-rose-455 border border-rose-900/30 animate-pulse';
+        } else {
+            badgeColor = 'bg-slate-950 text-slate-400 border border-slate-800';
+        }
+        badgeEl.className = `inline-block text-[10px] font-bold font-mono px-2 py-0.5 rounded ${badgeColor}`;
+        badgeEl.textContent = dlv.status;
+    }
+
+    // Populate scorecard values
+    document.getElementById('dlv-score-grammar').textContent = `${dlv.scores.grammar}%`;
+    document.getElementById('dlv-score-brand').textContent = `${dlv.scores.brand}%`;
+    document.getElementById('dlv-score-policy').textContent = `${dlv.scores.policy}%`;
+    document.getElementById('dlv-score-security').textContent = `${dlv.scores.security}%`;
+    document.getElementById('dlv-score-evidence').textContent = `${dlv.scores.evidence}%`;
+    document.getElementById('dlv-score-risk').textContent = `${dlv.scores.risk}%`;
+    document.getElementById('dlv-score-compliance').textContent = `${dlv.scores.compliance}%`;
+    document.getElementById('dlv-score-overall').textContent = `${dlv.scores.overall}%`;
+
+    // Populate DoD List
+    const dodList = document.getElementById('dlv-dod-list');
+    if (dodList) {
+        dodList.innerHTML = '';
+        dlv.dodChecks.forEach(check => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center justify-between py-0.5 border-b border-slate-900/50';
+            li.innerHTML = `
+                <span class="text-slate-350">
+                    <span class="text-[8px] bg-slate-900 text-slate-400 border border-slate-850 px-1 py-0.5 rounded font-mono mr-1.5 uppercase">${check.type}</span>
+                    ${check.rule}
+                </span>
+                <span class="font-bold text-[10px] font-mono px-1.5 py-0.5 rounded ${check.status === 'PASS' ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-900/30' : 'bg-rose-950/80 text-rose-455 border border-rose-900/30'}">${check.status}</span>
+            `;
+            dodList.appendChild(li);
+        });
+    }
+
+    // Set Evidence Preview
+    document.getElementById('dlv-modal-evidence').textContent = dlv.evidence;
+
+    // Populate timeline history
+    const historyContainer = document.getElementById('dlv-modal-history');
+    if (historyContainer) {
+        historyContainer.innerHTML = '';
+        dlv.approvalHistory.forEach(hist => {
+            const time = new Date(hist.timestamp).toLocaleTimeString('vi-VN');
+            const item = document.createElement('div');
+            item.className = 'flex items-start gap-2 border-l border-slate-850 pb-3 pl-3.5 relative';
+            item.innerHTML = `
+                <div class="absolute -left-[5.5px] top-1 w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700"></div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between text-[9px]">
+                        <span class="font-bold text-slate-350">Phiên bản v${hist.version} • Trạng thái: <strong class="text-cyan-400">${hist.status}</strong></span>
+                        <span class="text-slate-500">${time}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-450 mt-0.5 font-sans">${hist.comments}</p>
+                </div>
+            `;
+            historyContainer.appendChild(item);
+        });
+    }
+
+    modal.classList.remove('hidden');
+}
+
+safeAddListener('btn-close-dlv-modal', 'click', () => {
+    document.getElementById('deliverable-detail-modal').classList.add('hidden');
+});
+
+safeAddListener('btn-close-dlv-modal-confirm', 'click', () => {
+    document.getElementById('deliverable-detail-modal').classList.add('hidden');
+});
+
 // Execute Next Step in Workflow Simulation
 function stepForward() {
-    if (currentStepIndex >= WORKFLOW_STEPS.length - 1) {
+    if (currentStepIndex >= WORKFLOW_STEPS.length) {
         pauseSimulation();
         appendLog('SYSTEM', '🎉 Workflow hoàn tất 100%! Đã lập Báo cáo Kế hoạch Content & Bàn giao sản phẩm Bella EIP.', 'text-emerald-400 font-bold');
         showCampaignExecutiveReport();
         return;
     }
 
-    const prevStep = WORKFLOW_STEPS[currentStepIndex];
-    currentStepIndex++;
-    const nextStep = WORKFLOW_STEPS[currentStepIndex];
+    const currentStep = WORKFLOW_STEPS[currentStepIndex];
+    const taskId = `task-step-${currentStep.id}`;
+    
+    appendLog('EQE GATEWAY', `🛡️ ĐANG QUÉT CHẤT LƯỢNG (LIVE SCANNING): "${currentStep.name}"...`, 'text-cyan-400 font-medium');
 
-    // Update agent states
-    AI_AGENTS.forEach(a => a.status = 'IDLE');
-    const activeAgent = AI_AGENTS.find(a => a.id === nextStep.agent);
-    if (activeAgent) activeAgent.status = 'PROCESSING';
-
-    // Particle Trail effect between agents
-    spawnWorkflowDataOrb(prevStep.agent, nextStep.agent);
-
-    // Inter-Agent Message Handover Packet
-    InterAgentBus.sendHandoverMessage({
-        senderId: prevStep.agent,
-        receiverId: nextStep.agent,
-        taskId: `TASK-STEP-${nextStep.id}`,
-        payload: { stepName: nextStep.name, text: nextStep.text },
-        handoverType: 'SEQUENTIAL'
-    });
-
-    // Update Camera & UI
-    highlightAgent(nextStep.agent);
-    renderAgentCards();
-    renderWorkflowPipeline();
-
-    // Log update
-    appendLog(activeAgent ? activeAgent.name : 'AI AGENT', nextStep.text, 'text-blue-600 font-medium');
-
-    // Trigger Auto-Learning Engine on Step 9
-    if (nextStep.id === 9 && typeof ContinuousLearningEngine !== 'undefined') {
-        ContinuousLearningEngine.analyzeAndShiftBudget();
+    // Create or retrieve deliverable
+    let dlv = DeliverableManager.getDeliverable(taskId);
+    if (!dlv) {
+        dlv = DeliverableManager.createDeliverable(taskId, currentStep.name, currentStep.agent, getStepOutputText(currentStep.id));
+    } else if (dlv.status === 'REVISE') {
+        DeliverableManager.registerVersion(taskId, getStepOutputText(currentStep.id));
     }
 
-    // Trigger CEO Approval Modal if it's an Approval Gate Step
-    if (nextStep.isApprovalGate) {
+    // Run EQE assessment
+    EnterpriseQualityEngine.evaluate(dlv);
+
+    // Update deliverables sidebar tab
+    if (typeof renderDeliverablesTab === 'function') {
+        renderDeliverablesTab();
+    }
+
+    // Run Decision Engine
+    const decision = DecisionEngine.evaluateAndRoute(dlv);
+
+    if (decision.action.startsWith('APPROVED')) {
+        // Step Passed!
+        appendLog('DECISION ENGINE', `✅ ĐẠT YÊU CẦU: [${dlv.id}] v${dlv.version} được duyệt với điểm ${dlv.score}%.`, 'text-emerald-400 font-bold');
+        
+        // Log agent text
+        const activeAgent = AI_AGENTS.find(a => a.id === currentStep.agent);
+        appendLog(activeAgent ? activeAgent.name : 'AI AGENT', currentStep.text, 'text-blue-500');
+
+        // Go to next step
+        if (currentStepIndex < WORKFLOW_STEPS.length - 1) {
+            const nextStep = WORKFLOW_STEPS[currentStepIndex + 1];
+            
+            // Spawn data orb effect
+            spawnWorkflowDataOrb(currentStep.agent, nextStep.agent);
+
+            // Inter-Agent Message Handover
+            InterAgentBus.sendHandoverMessage({
+                senderId: currentStep.agent,
+                receiverId: nextStep.agent,
+                taskId: `TASK-STEP-${nextStep.id}`,
+                payload: { stepName: nextStep.name, text: nextStep.text },
+                handoverType: 'SEQUENTIAL'
+            });
+
+            currentStepIndex++;
+
+            // Set states
+            AI_AGENTS.forEach(a => a.status = 'IDLE');
+            const nextAgent = AI_AGENTS.find(a => a.id === nextStep.agent);
+            if (nextAgent) nextAgent.status = 'PROCESSING';
+
+            highlightAgent(nextStep.agent);
+            renderAgentCards();
+            renderWorkflowPipeline();
+
+            // Trigger CEO Gateway modal if next step is human gate
+            if (nextStep.isApprovalGate) {
+                pauseSimulation();
+                openApprovalModal(nextStep);
+            }
+        } else {
+            // End of workflow
+            currentStepIndex++;
+            pauseSimulation();
+            appendLog('SYSTEM', '🎉 Workflow hoàn tất 100%! Đã lập Báo cáo Kế hoạch Content & Bàn giao sản phẩm Bella EIP.', 'text-emerald-400 font-bold');
+            showCampaignExecutiveReport();
+        }
+
+        // Auto-learning on step 9
+        if (currentStep.id === 9 && typeof ContinuousLearningEngine !== 'undefined') {
+            ContinuousLearningEngine.analyzeAndShiftBudget();
+        }
+    } else if (decision.action === 'REVISE') {
+        // Revision required - Pause sim and trigger automatic rollback + rerun
         pauseSimulation();
-        openApprovalModal(nextStep);
+        appendLog('EQE GATEWAY', `❌ KHÔNG ĐẠT: [${dlv.id}] v${dlv.version} chỉ đạt ${dlv.score}%. Tự động rollback để sửa đổi.`, 'text-rose-450 font-bold');
+
+        const prevStep = WORKFLOW_STEPS[decision.targetStep];
+        
+        // Orb flies BACK!
+        spawnWorkflowDataOrb(currentStep.agent, prevStep.agent);
+
+        // Update current step index back to revision target
+        currentStepIndex = decision.targetStep;
+
+        AI_AGENTS.forEach(a => a.status = 'IDLE');
+        const prevAgent = AI_AGENTS.find(a => a.id === prevStep.agent);
+        if (prevAgent) prevAgent.status = 'PROCESSING';
+
+        highlightAgent(prevStep.agent);
+        renderAgentCards();
+        renderWorkflowPipeline();
+
+        // Log revision action
+        appendLog('SYSTEM', `🔄 Khởi chạy lại bước "${prevStep.name}" với phản hồi sửa đổi chất lượng.`, 'text-amber-400');
+
+        // Auto resume after brief pause
+        setTimeout(() => {
+            startSimulation();
+        }, 2200 / simSpeed);
+    } else if (decision.action === 'ESCALATE') {
+        pauseSimulation();
+        openApprovalModal(currentStep);
     }
 
-    // Update global metrics UI on step change
     updateGlobalMetricsUI();
 }
 
