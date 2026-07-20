@@ -1,97 +1,98 @@
 # 🏛️ BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
 ## Master Enterprise Blueprint - Architectural Standard 2026-2046
 
-> **Định Vị Cốt Lõi**: Bella AI Platform không phải là "AI Platform", "AI Agent Tool" hay "Automation Platform", mà là một **Enterprise Operating System (Bella EOS)** hoàn chỉnh dành cho Doanh nghiệp Số. AI chỉ đóng vai trò **Execution Layer** (tương tự CPU/ARM trong Windows/Android). Doanh nghiệp mua Mô hình Vận hành Doanh nghiệp Tự trị (Operating Model), chứ không mua công cụ AI đơn lẻ.
+> **Định Vị Cốt Lõi**: Bella AI Platform không phải là "AI Platform", "AI Agent Tool" hay "Automation Platform", mà là một **Enterprise Operating System (Bella EOS)** hoàn chỉnh dành cho Doanh nghiệp Số. Hệ thống được thiết kế theo tư duy **Operating System-Centric** với **Bella Kernel** làm lõi hạt nhân điều phối. AI chỉ đóng vai trò **AI Runtime Driver** (tương tự CPU/ARM Driver trong Windows/Android). Doanh nghiệp mua Mô hình Vận hành Doanh nghiệp Tự trị (Operating Model), chứ không mua công cụ AI đơn lẻ.
 
 ---
 
-## 🌐 Sơ Đồ Kiến Trúc 13 Tầng Enterprise OS (Bella EOS Architecture)
+## 🌐 Sơ Đồ Kiến Trúc Lõi Bella Kernel & 13 Tầng Enterprise OS (Bella EOS Architecture)
 
 ```
-Enterprise OS (Bella EOS)
-├── 🎯 1. Objective OS (Vision ➔ Strategy ➔ Objectives ➔ OKRs ➔ Projects)
-├── 📂 2. Portfolio & Project OS (Project-First Core & State Machine Engine)
-├── 🏛️ 3. Organization OS (Company ➔ Dept ➔ Team ➔ Role ➔ SOP Tree)
-├── 🆔 4. Identity & Security OS (Universal Identity: Human, AI, App, Webhook, IoT)
-├── ⚖️ 5. Policy & Governance OS (Guardrails, Financial, Legal, Security, Compliance)
-├── 📊 6. Data Fabric OS (Canonical Data Model, Standardized Business Data Pipeline)
-├── 🔄 7. Workflow & Event OS (Event Bus, Event Store, Saga Pattern, Versioning v1/v2)
-├── ⚡ 8. AI Runtime OS (Planner, Router, Tool Invoker, Cost Optimizer, Execution History)
-├── 🔌 9. Integration OS (API Gateway, Connector SDK, MCP, Webhook, Queue, OAuth)
-├── 🏢 10. Business Applications OS (Bella EIP Suite & Business Applications)
-├── 🧠 11. Enterprise Memory OS (Knowledge Graph: Company ➔ Campaign ➔ Customer ➔ Decision)
-├── 🔮 12. Analytics & Simulation OS (Digital Twin Simulator, Forecasting & Recommendations)
-└── 📦 13. Platform OS (Plugin Architecture, Marketplace, SDK, CLI & Extensions)
+                       BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
+
+ 📦 13. Platform Ecosystem OS     │ Marketplace, Plugin Architecture, Extension SDK, Enterprise CLI
+ 🔮 12. Analytics & Optimization  │ Digital Twin Simulator, Monte Carlo Engine, Optimization & Forecasting
+ 🧠 11. Enterprise Intelligence   │ Knowledge Graph, Enterprise Memory, Reasoning Cache, Decision History
+ 🏢 10. Business Applications OS │ Bella EIP Suite, ERP/CRM/POS/HR Services, First-party Apps
+ 🔌 9.  Integration Mesh OS       │ API Gateway, Connector SDK, MCP Protocol, Webhook Queue, OAuth
+ ⚡ 8.  AI Runtime OS (Driver)    │ Execution Planner, Model Router (GPT/Claude/Gemini), Cost Optimizer
+ 🔄 7.  Workflow & Process Engine │ Enterprise State Machine, Temporal-like Process, Saga, Event Bus/Store
+ 🏛️ 6.  Business Domain Engine    │ Sales, HR, Finance, Inventory, POS, Booking & Time Engine (Calendar/SLA)
+ 📊 5.  Enterprise Data Fabric OS │ Raw Data Pipeline, Standardized Data, Canonical Data Model
+ ⚖️ 4.  Policy & Governance OS    │ Financial Guardrails, CEO Sign-off, Legal, Security & AI Governance
+ 🆔 3.  Identity & Security OS    │ Universal Identity (Human, AI, App, Webhook, IoT Assets), Zero Trust
+ 🎯 2.  Organization & Objective  │ Vision, Strategy 2026-2046, Cascaded OKRs, Project State Hub
+ ⚙️ 1.  BELLA KERNEL (LÕI OS)     │ Transaction, Event Sourcing, Audit Ledger, Context & Permission Bus
 ```
 
 ---
 
 ## 👁️ Tuyên Bố Triết Lý Cốt Lõi (Core Enterprise OS Philosophy)
 
-> **"Giá trị lớn nhất của Bella OS nằm ở việc SỐ HÓA MÔ HÌNH VẬN HÀNH DOANH NGHIỆP TỰ TRỊ (Vision ➔ Objectives ➔ Projects ➔ Decisions ➔ Learning). AI chỉ là một tầng thực thi phía dưới."**
+> **"Giá trị lớn nhất của Bella OS nằm ở việc SỐ HÓA MÔ HÌNH VẬN HÀNH DOANH NGHIỆP TỰ TRỊ (Vision ➔ Objectives ➔ States ➔ Domains ➔ Learning). AI chỉ là một Driver thực thi phía dưới."**
 > 
-> *Khi mô hình này được chuẩn hóa, doanh nghiệp có thể thay đổi mô hình AI (GPT, Claude, Gemini, DeepSeek...) hay thay đổi ứng dụng nghiệp vụ (Bella EIP, SAP, Oracle, Salesforce...) mà cấu trúc vận hành, tri thức tích lũy và tiêu chuẩn chất lượng của doanh nghiệp vẫn được giữ nguyên vẹn.*
+> *Khi mô hình này được chuẩn hóa thông qua Bella Kernel, doanh nghiệp có thể thay đổi mô hình AI (GPT, Claude, Gemini, DeepSeek...) hay thay đổi ứng dụng nghiệp vụ (Bella EIP, SAP, Oracle, Salesforce...) mà cấu trúc vận hành, tri thức tích lũy và tiêu chuẩn chất lượng của doanh nghiệp vẫn được giữ nguyên vẹn.*
 
 ---
 
-## 🏛️ Sơ Đồ Kiến Trúc Doanh Nghiệp 13 Lớp (13-Layer Enterprise OS System Architecture)
+## 🏛️ Chi Tiết 13 Lớp Hệ Thống Doanh Nghiệp (13-Layer System Architecture Blueprint)
 
 ```
                        BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
 
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 1. OBJECTIVE OS (Vision ➔ Strategy ➔ Objectives ➔ OKRs ➔ Projects)                     │
-│ • Company Vision       • Strategy 2026-2046     • Cascaded OKRs     • Project Mapping  │
+│ 13. PLATFORM ECOSYSTEM OS (Hệ Sinh Thái Mở - Plugin Architecture & Marketplace)         │
+│ • Plugin Architecture  • Enterprise Marketplace  • Extension SDK     • Enterprise CLI   │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 2. PORTFOLIO & PROJECT OS (Linh Hồn Doanh Nghiệp - Project-First Core & State Machine)   │
-│ • Project Hub          • State Machine Engine    • Timeline & Risks  • Lessons Learned  │
-│ • State Pipeline: Draft ➔ Planning ➔ Approved ➔ Executing ➔ Review ➔ Completed         │
+│ 12. ANALYTICS & OPTIMIZATION OS (Digital Twin Simulator & Enterprise Intelligence)       │
+│ • Digital Twin Clone   • Monte Carlo Simulation  • Optimization Engine • Risk & Forecast│
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 3. ORGANIZATION OS (Công ty, Phòng ban, Đội nhóm, Cơ cấu Tổ chức & SOP Tree)            │
-│ • Company Hierarchy    • Department SOPs         • Team Policies     • Job Matrix       │
+│ 11. ENTERPRISE INTELLIGENCE OS (Enterprise Knowledge Graph & Knowledge Engine)          │
+│ • Knowledge Graph Nodes• Reasoning Cache         • Semantic Search   • Lessons Learned  │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 4. IDENTITY & SECURITY OS (Quản Lý Định Danh Toàn Diện - Human, AI, App, Webhook, IoT)  │
-│ • Universal Identity   • Zero Trust Access       • RBAC & ABAC       • OAuth/Passkey    │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 5. POLICY & GOVERNANCE OS (Lớp Phanh An Toàn, Hạn Mạch Tài Chính & Guardrails)          │
-│ • Financial Guardrails • CEO Threshold Sign-off  • Security & Privacy • Compliance Shield│
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 6. DATA FABRIC OS (Chuẩn Hóa & Quản Trị Dữ Liệu Doanh Nghiệp - Canonical Data Model)    │
-│ • Raw Data Pipeline    • Standardized Data       • Canonical Model   • Unified Business │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 7. WORKFLOW & EVENT OS (Event Bus, Event Store, Temporal Saga Engine & Versioning)      │
-│ • Event Bus (Pub/Sub)  • Event Store (Replay)    • Saga Pattern      • Workflow v1/v2/v3│
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 8. AI RUNTIME OS (Bộ Máy Thực Thi AI Multi-LLM, Router, Cost Optimizer & History Log)   │
-│ • Execution Planner    • Model Router            • Retry & Fallback  • Cost Optimizer   │
-│ • Tool Invoker         • Execution History       • Response Validator• Sandbox Context  │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 9. INTEGRATION OS (Cổng Kết Nối Dịch Vụ - API Gateway, Connector SDK, MCP, Webhook)     │
-│ • API Gateway          • Connector SDK (SAP/MISA)• MCP Protocol      • Webhook Queue    │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 10. BUSINESS APPLICATIONS OS (Bella EIP Suite & Bộ Ứng Dụng Nghiệp Vụ)                  │
+│ 10. BUSINESS APPLICATIONS OS (Bella EIP Suite & Business Applications)                 │
 │ • Bella EIP Suite      • Bella CRM / POS / HR    • Bella Financial   • First-party Apps │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 11. ENTERPRISE MEMORY OS (Enterprise Knowledge Graph - Bộ Não Tri Thức Liên Kết)        │
-│ • Knowledge Graph Node • Campaign ➔ Customer     • Invoice ➔ Decision• Meeting ➔ Lessons│
+│ 9. INTEGRATION MESH OS (Cổng Kết Nối Dịch Vụ - API Gateway, Connector SDK, MCP)        │
+│ • API Gateway          • Connector SDK (SAP/MISA)• MCP Protocol      • Webhook Queue    │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 12. ANALYTICS & SIMULATION OS (Digital Twin Simulator & Enterprise Intelligence)       │
-│ • Digital Twin Clone   • Monte Carlo Simulation  • Forecast & Risk   • Recommendations  │
+│ 8. AI RUNTIME OS (Lớp Driver Thực Thi AI Multi-LLM, Router, Cost Optimizer & History Log) │
+│ • Execution Planner    • Model Router            • Retry & Fallback  • Cost Optimizer   │
+│ • Tool Invoker         • Execution History Log   • Response Validator• Sandbox Context  │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 13. PLATFORM OS (Hệ Sinh Thái Mở - Plugin Architecture, Marketplace, SDK & CLI)         │
-│ • Plugin Architecture  • Marketplace             • Extension SDK     • Enterprise CLI   │
+│ 7. WORKFLOW & PROCESS ENGINE OS (State-Driven Workflow, Temporal Saga & Event Bus/Store) │
+│ • State-Driven Workflow• Event Bus (Pub/Sub)     • Event Store (Replay)• Workflow v1/v2/v3│
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 6. BUSINESS DOMAIN ENGINE & TIME OS (Sales, HR, Finance, Inventory, Booking & Time Engine)│
+│ • Domain Services      • Business Calendar       • SLA & Time Engine • Asset Management │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 5. ENTERPRISE DATA FABRIC OS (Chuẩn Hóa & Quản Trị Dữ Liệu Doanh Nghiệp)                │
+│ • Raw Data Pipeline    • Standardized Data       • Canonical Model   • Unified Business │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 4. POLICY & GOVERNANCE OS (Phanh An Toàn, Hạn Mạch Tài Chính, Security & AI Governance) │
+│ • Financial Guardrails • CEO Threshold Sign-off  • AI Governance     • Privacy Shield   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 3. IDENTITY & SECURITY OS (Quản Lý Định Danh Toàn Diện - Human, AI, App, Webhook, IoT)  │
+│ • Universal Identity   • Zero Trust Access       • RBAC & ABAC       • OAuth/Passkey    │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 2. ORGANIZATION & OBJECTIVE OS (Chiến Lược, OKRs & Project State Machine Engine)        │
+│ • Company Vision       • Cascaded OKRs           • Project Hub       • State Machine    │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ 1. BELLA KERNEL (LÕI ĐIỀU HÀNH HẠT NHÂN HỆ THỐNG - OPERATING KERNEL CORE)               │
+│ • Identity Manager     • Transaction Engine      • Event Sourcing    • Audit Ledger     │
+│ • Permission Bus       • Context Storage         • Scheduling Core   • Policy Enforcer  │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```• Workload Capacity Engine• Priority Queue    • Dynamic Scheduler│
 │ • Resource Auto-Failover: Auto Redirection when Worker Workload > 90%                   │
