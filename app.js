@@ -3270,6 +3270,8 @@ function switchSidebarTab(tabName) {
 
     if (tabName === 'deliverables') {
         renderDeliverablesTab();
+    } else if (tabName === 'kanban') {
+        renderKanbanBoard();
     }
 }
 
@@ -4147,31 +4149,7 @@ function renderAgentCards() {
     });
 }
 
-// Sidebar Tab Switcher (Supports 3 Tabs: 11 AI Matrix, SOP, Task Kanban)
-function switchSidebarTab(tabKey) {
-    const tabs = ['agents', 'sops', 'kanban'];
-    tabs.forEach(t => {
-        const btn = document.getElementById(`tab-btn-${t}`);
-        const content = document.getElementById(`tab-content-${t}`);
-        if (!btn || !content) return;
-
-        if (t === tabKey) {
-            btn.classList.add('border-cyan-500', 'text-cyan-400', 'font-semibold');
-            btn.classList.remove('border-transparent', 'text-slate-400');
-            content.classList.remove('hidden');
-        } else {
-            btn.classList.add('border-transparent', 'text-slate-400');
-            btn.classList.remove('border-cyan-500', 'text-cyan-400', 'font-semibold');
-            content.classList.add('hidden');
-        }
-    });
-
-    if (tabKey === 'kanban') {
-        renderKanbanBoard();
-    }
-}
-
-['agents', 'sops', 'kanban'].forEach(t => {
+['agents', 'sops', 'kanban', 'deliverables'].forEach(t => {
     safeAddListener(`tab-btn-${t}`, 'click', () => switchSidebarTab(t));
 });
 
