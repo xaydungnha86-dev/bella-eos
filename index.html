@@ -22,85 +22,69 @@
 <body class="bg-[#020617] text-slate-100 font-['Inter'] antialiased flex flex-col overflow-hidden selection:bg-cyan-500 selection:text-slate-900" style="height: 100%; margin: 0; padding: 0; overflow: hidden;">
 
     <!-- TOP NAVIGATION HEADER -->
-    <header class="h-16 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl px-5 flex items-center justify-between z-30 shrink-0 shadow-lg">
+    <header class="h-14 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl px-5 flex items-center justify-between z-30 shrink-0 shadow-lg select-none">
         <!-- Left Brand & App Title -->
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/20 ring-1 ring-white/10 shrink-0">
-                <i class="fa-solid fa-users-gear text-white text-base"></i>
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/10 shrink-0">
+                <i class="fa-solid fa-users-gear text-white text-sm"></i>
             </div>
             <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="font-sans font-bold text-base text-white tracking-wide leading-tight">BELLA ENTERPRISE OS</h1>
-                    <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">AUTONOMOUS ENTERPRISE OS</span>
+                <div class="flex items-center gap-1.5">
+                    <h1 class="font-sans font-bold text-xs text-white tracking-wide leading-tight">BELLA ENTERPRISE OS</h1>
+                    <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">AUTONOMOUS</span>
                 </div>
-                <p class="text-[11px] text-slate-400 font-sans hidden md:block">Autonomous Business Operating System • First-party App: <span class="text-cyan-300 font-medium">Bella EIP Suite</span></p>
+                <p class="text-[9px] text-slate-400 font-sans hidden md:block">Autonomous Operating System • First-party App: <span class="text-cyan-300 font-medium">Bella EIP Suite</span></p>
             </div>
         </div>
 
         <!-- Center: Real-time Business Performance Center Bar -->
-        <div class="hidden 2xl:flex items-center gap-4 bg-slate-900/90 border border-slate-800 px-3.5 py-1.5 rounded-full text-xs font-mono shadow-inner">
-            <div class="flex items-center gap-1.5 text-slate-300" title="Tổng số giờ làm việc được AI thực hiện thay con người">
-                <i class="fa-solid fa-clock-rotate-left text-emerald-400 text-xs"></i>
-                <span class="font-sans text-[11px] text-slate-400">Hours Saved:</span>
-                <strong id="biz-metric-hours" class="text-emerald-400 font-bold">1,420 hrs</strong>
+        <div class="hidden xl:flex items-center gap-4 bg-slate-900/40 backdrop-blur-md border border-slate-800/50 px-4 py-1.5 rounded-full text-[10px] shadow-inner font-sans">
+            <div class="flex items-center gap-1.5" title="Hours Saved">
+                <i class="fa-solid fa-clock text-emerald-400"></i>
+                <span class="text-slate-400">Hours Saved:</span>
+                <strong id="biz-metric-hours" class="text-slate-100 font-mono font-bold text-[11px]">1,420 hrs</strong>
             </div>
-            <div class="h-3 w-px bg-slate-800"></div>
-            <div class="flex items-center gap-1.5 text-slate-300" title="Số nhiệm vụ/quy trình hoàn tất">
-                <i class="fa-solid fa-circle-check text-cyan-400 text-xs"></i>
-                <span class="font-sans text-[11px] text-slate-400">Tasks:</span>
-                <strong id="biz-metric-tasks" class="text-cyan-400 font-bold">8,950</strong>
+            <div class="h-2.5 w-px bg-slate-800"></div>
+            <div class="flex items-center gap-1.5" title="Tasks Completed">
+                <i class="fa-solid fa-circle-check text-cyan-400"></i>
+                <span class="text-slate-400">Tasks:</span>
+                <strong id="biz-metric-tasks" class="text-slate-100 font-mono font-bold text-[11px]">8,950</strong>
             </div>
-            <div class="h-3 w-px bg-slate-800"></div>
-            <div class="flex items-center gap-1.5 text-slate-300" title="Tỷ lệ tự động hóa không cần can thiệp">
-                <i class="fa-solid fa-robot text-purple-400 text-xs"></i>
-                <span class="font-sans text-[11px] text-slate-400">Auto:</span>
-                <strong id="biz-metric-auto" class="text-purple-400 font-bold">88%</strong>
+            <div class="h-2.5 w-px bg-slate-800"></div>
+            <div class="flex items-center gap-1.5" title="Automation Rate">
+                <i class="fa-solid fa-robot text-purple-400"></i>
+                <span class="text-slate-400">Auto:</span>
+                <strong id="biz-metric-auto" class="text-slate-100 font-mono font-bold text-[11px]">88%</strong>
             </div>
-            <div class="h-3 w-px bg-slate-800"></div>
-            <div class="flex items-center gap-1.5 text-slate-300" title="Tỷ lệ suất sinh lời năng suất doanh nghiệp">
-                <i class="fa-solid fa-chart-line text-amber-400 text-xs"></i>
-                <span class="font-sans text-[11px] text-slate-400">ROI:</span>
-                <strong id="biz-metric-roi" class="text-amber-400 font-bold">+420%</strong>
+            <div class="h-2.5 w-px bg-slate-800"></div>
+            <div class="flex items-center gap-1.5" title="ROI Suất sinh lời">
+                <i class="fa-solid fa-chart-line text-amber-400"></i>
+                <span class="text-slate-400">ROI:</span>
+                <strong id="biz-metric-roi" class="text-slate-100 font-mono font-bold text-[11px]">+420%</strong>
             </div>
         </div>
 
-        <!-- Right Header Actions & 3D Controls -->
-        <div class="flex items-center gap-2">
+        <!-- Right Header Actions -->
+        <div class="flex items-center gap-3">
             <button id="btn-trigger-approval" class="hidden bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
                 <i class="fa-solid fa-triangle-exclamation text-amber-500 animate-bounce text-xs"></i>
                 <span>Chờ duyệt (1)</span>
             </button>
 
-            <!-- 3D Controls Toolbar Group -->
-            <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 gap-1 shadow-inner">
-                <button id="btn-reset-cam" class="toolbar-btn px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 active:scale-95" title="Reset Camera 3D">
-                    <i class="fa-solid fa-video text-cyan-400 text-[11px]"></i>
-                    <span class="hidden lg:inline text-[11px]">Cam 3D</span>
-                </button>
-                <button id="btn-layout-dept" class="toolbar-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 active:scale-95" title="Di chuyển toàn bộ phòng ban cùng nhân sự">
-                    <i class="fa-solid fa-up-down-left-right text-cyan-400 text-[11px]"></i>
-                    <span id="layout-dept-status" class="text-[11px]">Sắp xếp Phòng ban</span>
-                </button>
-                <button id="btn-layout-seat" class="toolbar-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 active:scale-95" title="Di chuyển vị trí ngồi của nhân sự bên trong phòng">
-                    <i class="fa-solid fa-chair text-cyan-400 text-[11px]"></i>
-                    <span id="layout-seat-status" class="text-[11px]">Sắp xếp Chỗ ngồi</span>
-                </button>
-            </div>
-
             <!-- Settings API Keys Trigger Button -->
-            <button id="btn-open-settings" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95" title="Cấu hình API Keys cho các AI Models">
+            <button id="btn-open-settings" class="bg-slate-900/80 hover:bg-slate-800/90 text-slate-300 border border-slate-800/80 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm" title="Cấu hình API Keys">
                 <i class="fa-solid fa-key text-yellow-400"></i>
-                <span class="hidden md:inline">Cài đặt API Key</span>
+                <span>Cài đặt API Key</span>
             </button>
 
             <!-- User Avatar & Profile -->
-            <div class="flex items-center gap-2 border-l border-slate-800 pl-2.5 ml-1">
-                <div class="w-8 h-8 rounded-full bg-cyan-950/60 border border-cyan-800/80 flex items-center justify-center font-bold text-xs text-cyan-400 shrink-0 shadow-sm">
+            <div class="flex items-center gap-2 border-l border-slate-800 pl-3">
+                <div class="w-7 h-7 rounded-full bg-cyan-950/60 border border-cyan-800/80 flex items-center justify-center font-bold text-[10px] text-cyan-400 shrink-0 shadow-sm">
                     CEO
                 </div>
                 <div class="hidden lg:block text-left">
-                    <p class="text-[11px] font-semibold text-slate-200 leading-tight">Ban Lãnh Đạo</p>
-                    <p class="text-[9px] text-slate-400">Human-in-the-Loop</p>
+                    <p class="text-[10px] font-semibold text-slate-200 leading-tight">Ban Lãnh Đạo</p>
+                    <p class="text-[8px] text-slate-500">Human-in-the-Loop</p>
                 </div>
             </div>
         </div>
@@ -207,17 +191,37 @@
             <div id="canvas-container" class="w-full flex-1 relative cursor-grab active:cursor-grabbing">
                 <!-- Three.js Canvas will be appended here -->
 
-                <!-- Floating 3D Controls Helper -->
-                <div class="absolute top-4 left-4 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3 text-xs text-slate-300 pointer-events-none shadow-lg">
-                    <div class="flex items-center gap-2 font-semibold text-white mb-1">
-                        <i class="fa-solid fa-cubes text-cyan-400"></i>
-                        <span>Văn phòng 3D Phòng Ban AI</span>
+                <!-- Floating 3D Controls Helper & Actions -->
+                <div class="absolute top-4 left-4 flex flex-col gap-3 z-10 pointer-events-none select-none">
+                    <!-- Info Card -->
+                    <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3 text-xs text-slate-350 shadow-lg">
+                        <div class="flex items-center gap-2 font-semibold text-white mb-1">
+                            <i class="fa-solid fa-cubes text-cyan-400"></i>
+                            <span>Văn phòng 3D Phòng Ban AI</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 space-y-0.5 leading-normal">
+                            <p><i class="fa-solid fa-mouse text-slate-500"></i> Kéo chuột trái: Xoay góc nhìn 3D</p>
+                            <p><i class="fa-solid fa-arrows-up-down-left-right text-slate-500"></i> Kéo chuột phải / Shift: Di chuyển vị trí</p>
+                            <p><i class="fa-solid fa-scroll text-slate-500"></i> Cuộn chuột: Zoom vào / ra</p>
+                            <p><i class="fa-solid fa-hand-pointer text-cyan-400"></i> Kéo thả để di chuyển. Nhấn **[R]** hoặc **[Phím cách]** để xoay.</p>
+                        </div>
                     </div>
-                    <div class="text-[11px] text-slate-400 space-y-0.5">
-                        <p><i class="fa-solid fa-mouse text-slate-500"></i> Kéo chuột trái: Xoay góc nhìn 3D</p>
-                        <p><i class="fa-solid fa-arrows-up-down-left-right text-slate-500"></i> Kéo chuột phải / Shift: Di chuyển vị trí</p>
-                        <p><i class="fa-solid fa-scroll text-slate-500"></i> Cuộn chuột: Zoom vào / ra</p>
-                        <p><i class="fa-solid fa-hand-pointer text-cyan-400"></i> Kéo thả để di chuyển. Nhấn **[R]** hoặc **[Phím cách]** để xoay phòng ban/bàn ghế.</p>
+
+                    <!-- Interactive Layout Controls -->
+                    <div class="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 flex items-center gap-1.5 shadow-lg pointer-events-auto w-fit">
+                        <button id="btn-reset-cam" class="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all" title="Reset Camera 3D">
+                            <i class="fa-solid fa-video text-cyan-400"></i>
+                            <span>Cam 3D</span>
+                        </button>
+                        <div class="w-px h-3 bg-slate-800"></div>
+                        <button id="btn-layout-dept" class="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all" title="Di chuyển toàn bộ phòng ban">
+                            <i class="fa-solid fa-up-down-left-right text-cyan-400"></i>
+                            <span id="layout-dept-status">Sắp xếp Phòng ban</span>
+                        </button>
+                        <button id="btn-layout-seat" class="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all" title="Di chuyển vị trí ngồi">
+                            <i class="fa-solid fa-chair text-cyan-400"></i>
+                            <span id="layout-seat-status">Sắp xếp Chỗ ngồi</span>
+                        </button>
                     </div>
                 </div>
 
