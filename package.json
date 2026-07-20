@@ -1,0 +1,23 @@
+{
+  "name": "bella-ai-platform",
+  "version": "2.1.0",
+  "description": "Enterprise AI Operating Model Platform for Bella EIP",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve . -p 3000",
+    "dev": "serve . -p 3000",
+    "build": "echo 'Build complete! Ready for static deployment.'"
+  },
+  "keywords": [
+    "ai-platform",
+    "multi-agent",
+    "enterprise-ai-os",
+    "threejs",
+    "bella-eip"
+  ],
+  "author": "Bella Corporation",
+  "license": "MIT",
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}
