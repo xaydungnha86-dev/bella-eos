@@ -3284,6 +3284,50 @@ safeAddListener('btn-reset-layout', 'click', () => {
     window.location.reload();
 });
 
+// SUPABASE REALTIME SYNC SUBSYSTEM
+async function initSupabaseRealtimeSync() {
+    if (!supabaseClient) return;
+    try {
+        // 1. Fetch live AI Agents from Supabase
+        const { data: agentsData, error: agentsError } = await supabaseClient
+            .from('ai_agents')
+            .select('*');
+
+        if (!agentsError && agentsData && agentsData.length > 0) {
+            console.log(`⚡ [Supabase Realtime] Loaded ${agentsData.length} agents from Cloud Database.`);
+            agentsData.forEach(cloudAgent => {
+                const localAgent = AI_AGENTS.find(a => a.id === cloudAgent.id);
+                if (localAgent) {
+                    if (cloudAgent.status) localAgent.status = cloudAgent.status;
+                    if (cloudAgent.current_task) localAgent.task = cloudAgent.current_task;
+                }
+            });
+            renderAgentCards();
+        }
+
+        // 2. Subscribe to Realtime Updates
+        supabaseClient
+            .channel('public:ai_agents')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_agents' }, payload => {
+                console.log('⚡ [Supabase Realtime Payload]:', payload);
+                if (payload.new && payload.new.id) {
+                    const agent = AI_AGENTS.find(a => a.id === payload.new.id);
+                    if (agent) {
+                        agent.status = payload.new.status || agent.status;
+                        agent.task = payload.new.current_task || agent.task;
+                        renderAgentCards();
+                        appendLog('SUPABASE', `⚡ Realtime update: ${agent.name} is now ${agent.status}`, 'text-cyan-400 font-semibold');
+                    }
+                }
+            })
+            .subscribe();
+
+        appendLog('SYSTEM', '⚡ Đã kết nối thành công Supabase Realtime Bus (qwpyfhojxctrvqkjctcl)!', 'text-emerald-400 font-bold');
+    } catch (err) {
+        console.warn("[Supabase Sync Warning]", err);
+    }
+}
+
 // INITIALIZE APP ON LOAD
 function initApp() {
     loadAgentConfigsFromLocalStorage();
@@ -3291,6 +3335,7 @@ function initApp() {
     renderAgentCards();
     renderWorkflowPipeline();
     renderKanbanBoard();
+    initSupabaseRealtimeSync();
 }
 
 if (document.readyState === 'loading') {
