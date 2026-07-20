@@ -316,6 +316,93 @@ const AIRuntimeOS = {
 window.AIRuntimeOS = AIRuntimeOS;
 
 // =========================================================================
+// PHASE 4: BUSINESS DOMAIN ENGINE & INTEGRATION MESH (LAYER 6 & LAYER 9)
+// =========================================================================
+
+// 1. Business Domain Engine & Time OS (Layer 6)
+const BusinessDomainEngine = {
+    domains: {
+        Sales: {
+            createProposal(leadData) {
+                console.log(`💼 [DOMAIN SALES] Khởi tạo Đề xuất Báo giá cho Lead: ${leadData.name}`);
+                return { proposalId: `prop_${Date.now()}`, value: leadData.estimatedBudget || 50000000, status: 'DRAFT' };
+            }
+        },
+        Finance: {
+            calculateTaxAndNetRevenue(grossAmount) {
+                const vat = grossAmount * 0.1;
+                const net = grossAmount - vat;
+                return { grossAmount, vat, netRevenue: net };
+            }
+        },
+        Assets: {
+            registry: [
+                { id: 'asset_pos_01', type: 'POS Hardware', name: 'Bella Spa POS Terminal #1', status: 'ONLINE' },
+                { id: 'asset_gpu_cluster', type: 'Cloud Compute', name: 'NVIDIA H100 Cluster Node', status: 'ACTIVE' }
+            ],
+            getAssetList() { return this.registry; }
+        }
+    },
+
+    // Enterprise Time Engine (Fiscal Calendar, SLA & Escalation Rules)
+    TimeEngine: {
+        getCurrentQuarter() {
+            const month = new Date().getMonth() + 1;
+            return `Q${Math.ceil(month / 3)}-2026`;
+        },
+        calculateSlaDeadline(hours) {
+            const deadline = new Date(Date.now() + hours * 3600 * 1000);
+            return deadline.toISOString();
+        },
+        checkSlaBreach(contractCreatedAt, slaHours) {
+            const created = new Date(contractCreatedAt).getTime();
+            const now = Date.now();
+            const elapsedHours = (now - created) / (3600 * 1000);
+            return { breached: elapsedHours > slaHours, elapsedHours: elapsedHours.toFixed(1) };
+        }
+    }
+};
+
+// 2. Integration Mesh OS & Open Connector SDK (Layer 9)
+const IntegrationMeshOS = {
+    connectors: {
+        'misa': { name: 'MISA ERP Connector', status: 'CONNECTED', type: 'REST_API' },
+        'sap':  { name: 'SAP S/4HANA Enterprise', status: 'CONFIGURED', type: 'OAUTH2' },
+        'facebook': { name: 'Facebook Ads API Integration', status: 'LIVE', type: 'WEBHOOK' }
+    },
+
+    registerConnector(connectorId, connectorConfig) {
+        this.connectors[connectorId] = {
+            ...connectorConfig,
+            registeredAt: new Date().toISOString()
+        };
+        console.log(`🔌 [INTEGRATION MESH] Đã kết nối Connector SDK thành công: [${connectorId.toUpperCase()}]`);
+        return true;
+    },
+
+    // Model Context Protocol (MCP) Router Gateway
+    async invokeExternalService(connectorId, endpoint, payload) {
+        const conn = this.connectors[connectorId];
+        if (!conn) {
+            console.warn(`[Integration Mesh Error] Connector ID không khả dụng: ${connectorId}`);
+            return null;
+        }
+
+        console.log(`📡 [MCP GATEWAY] Gửi Request ➔ Connector [${conn.name}] (${endpoint})...`);
+        
+        // Execute Audit to Bella Kernel
+        if (typeof BellaKernel !== 'undefined' && BellaKernel.executeTransaction) {
+            BellaKernel.executeTransaction('integration_mesh', 'EXTERNAL_SERVICE_INVOKED', { connectorId, endpoint });
+        }
+
+        return { success: true, connector: conn.name, timestamp: new Date().toISOString() };
+    }
+};
+
+window.BusinessDomainEngine = BusinessDomainEngine;
+window.IntegrationMeshOS = IntegrationMeshOS;
+
+// =========================================================================
 // MILESTONE 1: ENTERPRISE ORGANIZATION MANAGER & WORKFORCE REGISTRY
 // =========================================================================
 
