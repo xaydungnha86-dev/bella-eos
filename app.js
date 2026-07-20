@@ -2966,12 +2966,41 @@ function openStepDetailModal(step) {
                 outputText = `📢 [CAMPAIGN CONTENT SPEC & MARKETING LAUNCH]
 - Biên soạn: AI Marketing
 - Kế hoạch Content: Tăng 20% Spa demo trong 30 ngày.
-- Người viết kịch bản quảng cáo: AI Marketing
-- Phân bổ 3 tuyến nội dung:
-  + Tuyến 1: Pain Point Short Video Reels (12 bài viết video) ➔ AI Marketing viết kịch bản, AI Designer dựng hình.
-  + Tuyến 2: Feature Carousel Infographics (10 bài viết) ➔ AI Designer thiết kế, AI Marketing tối ưu SEO.
-  + Tuyến 3: Customer Case Study Stories (5 bài viết).
-- Trạng thái Social: Đã xếp lịch auto-publish thông qua Zalo OA.`;
+
+--------------------------------------------------
+🎬 TUYẾN 1: KỊCH BẢN SHORT VIDEO REELS (12 CLIPS)
+--------------------------------------------------
+[Kịch bản Clip #1: Nỗi đau quản lý đặt lịch thủ công]
+• Thời lượng: 45 giây.
+• Visual: Cảnh chủ Spa bận rộn nghe 3 điện thoại cùng lúc, sổ sách ghi chép lung tung, khách hàng đến Spa phải ngồi chờ đợi lâu.
+• Voiceover (AI Marketing): "Bạn có mệt mỏi khi mỗi ngày phải trả lời hàng chục cuộc gọi đặt lịch, rồi ghi chép thủ công nhầm lẫn lung tung? Khách VIP đến Spa lại phải chờ đợi vì trùng lịch? Hãy chấm dứt ngay nỗi đau này!"
+• Action/CTA: Giới thiệu giao diện đặt lịch tự động 24/7 của Bella EIP trên điện thoại. Click link bio nhận dùng thử 30 ngày miễn phí!
+
+[Kịch bản Clip #2: Giải cứu giờ cao điểm cuối tuần]
+• Thời lượng: 60 giây.
+• Voiceover: "Làm thế nào để Spa tăng gấp đôi công suất phục vụ ngày cuối tuần mà nhân viên không bị kiệt sức? Bí quyết là tối ưu khung giờ trống (Time OS) tự động điều phối nhân sự rảnh tay của Bella EIP..."
+
+--------------------------------------------------
+📊 TUYẾN 2: BÀI VIẾT CAROUSEL INFOGRAPHICS (10 BÀI)
+--------------------------------------------------
+[Bài viết #1: 5 Lý do Spa của bạn cần App Đặt Lịch Tự Động]
+• Nội dung Slide 1: Tiêu đề "Spa thất thoát bao nhiêu khách hàng vì chậm trả lời tin nhắn?"
+• Nội dung Slide 2: 78% khách hàng sẽ chuyển sang Spa khác nếu không đặt được lịch trong vòng 5 phút.
+• Nội dung Slide 3: Hệ thống Bella EIP tự động giữ chỗ 24/7 không cần trực page.
+• Nội dung Slide 4: Giảm 95% tỷ lệ khách quên lịch (No-Show) nhờ tin nhắn nhắc nhở tự động qua Zalo.
+• Nội dung Slide 5: Nút kêu gọi hành động "Nhận ưu đãi giảm 50% trọn đời hôm nay".
+
+[Bài viết #2: Cách tối ưu 100% công suất kỹ thuật viên]
+• Nội dung: Hướng dẫn phân bổ phòng dịch vụ và quản trị ca kíp thông minh của phần mềm Bella EIP.
+
+--------------------------------------------------
+📖 TUYẾN 3: BÀI VIẾT CASE STUDY THỰC TẾ (5 BÀI)
+--------------------------------------------------
+[Case Study #1: An Nhiên Spa tăng 45% doanh thu sau 2 tháng]
+• Khách hàng: An Nhiên Spa (Hà Nội) - Quy mô 12 giường dịch vụ.
+• Thách thức trước khi dùng Bella EIP: Tỷ lệ khách hàng đặt lịch nhưng không đến (No-show) lên đến 28%. Quản lý không kiểm soát được ca làm việc của kỹ thuật viên dẫn đến trùng lịch dịch vụ.
+• Giải pháp áp dụng: Triển khai Bella EIP Booking & Zalo OA Auto-Notification.
+• Kết quả thực tế: Tỷ lệ No-show giảm xuống dưới 3%. Doanh thu tổng tăng vọt 45% nhờ tối ưu lịch trống cuối tuần. Chủ spa tự do đi du lịch không cần trực máy.`;
                 break;
             case 10:
                 outputText = `📊 [FINANCIAL COST ACCOUNTING & ROI REPORT]
