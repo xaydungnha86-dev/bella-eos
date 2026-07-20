@@ -194,12 +194,18 @@
                 <!-- Floating 3D Controls Helper & Actions -->
                 <div class="absolute top-4 left-4 flex flex-col gap-3 z-10 pointer-events-none select-none">
                     <!-- Info Card -->
-                    <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3 text-xs text-slate-350 shadow-lg">
-                        <div class="flex items-center gap-2 font-semibold text-white mb-1">
-                            <i class="fa-solid fa-cubes text-cyan-400"></i>
-                            <span>Văn phòng 3D Phòng Ban AI</span>
+                    <div id="controls-info-card" class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3 text-xs text-slate-350 shadow-lg pointer-events-auto w-[260px]">
+                        <div class="flex items-center justify-between gap-4 font-semibold text-white mb-1">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-cubes text-cyan-400"></i>
+                                <span>Văn phòng 3D Phòng Ban AI</span>
+                            </div>
+                            <!-- Collapse Toggle Button -->
+                            <button id="btn-toggle-info" class="w-5 h-5 rounded hover:bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-slate-200 transition active:scale-95" title="Thu gọn / Mở rộng">
+                                <i id="icon-toggle-info" class="fa-solid fa-chevron-up text-[9px]"></i>
+                            </button>
                         </div>
-                        <div class="text-[10px] text-slate-400 space-y-0.5 leading-normal">
+                        <div id="info-card-content" class="text-[10px] text-slate-400 space-y-0.5 leading-normal mt-1.5 transition-all duration-300">
                             <p><i class="fa-solid fa-mouse text-slate-500"></i> Kéo chuột trái: Xoay góc nhìn 3D</p>
                             <p><i class="fa-solid fa-arrows-up-down-left-right text-slate-500"></i> Kéo chuột phải / Shift: Di chuyển vị trí</p>
                             <p><i class="fa-solid fa-scroll text-slate-500"></i> Cuộn chuột: Zoom vào / ra</p>
@@ -225,27 +231,41 @@
                     </div>
                 </div>
 
-                <!-- Department Quick Focal Selectors (Top Right Flush) -->
-                <div class="absolute top-0 right-0 bg-slate-950/90 backdrop-blur-md border-l border-b border-slate-800/80 rounded-bl-2xl px-4 py-2 text-xs flex items-center gap-2 z-10 shadow-lg">
-                    <span class="text-[9px] uppercase font-bold text-slate-500 mr-1.5 whitespace-nowrap">Chuyển góc nhìn:</span>
-                    <button onclick="focusDepartment('executive')" class="bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-crown text-amber-400"></i> Phòng Chủ Tịch
-                    </button>
-                    <button onclick="focusDepartment('assistant')" class="bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-robot text-cyan-400"></i> Ban Trợ Lý
-                    </button>
-                    <button onclick="focusDepartment('product')" class="bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-compass-drafting text-cyan-400"></i> Kiến trúc & Sp
-                    </button>
-                    <button onclick="focusDepartment('tech')" class="bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-code text-cyan-400"></i> Dev & QA Lab
-                    </button>
-                    <button onclick="focusDepartment('ops')" class="bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-server text-cyan-400"></i> DevOps & Infra
-                    </button>
-                    <button onclick="focusDepartment('growth')" class="bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-800/80 text-[10px] px-2.5 py-1 rounded-lg transition flex items-center gap-1.5 shadow-sm whitespace-nowrap">
-                        <i class="fa-solid fa-chart-line text-cyan-400"></i> Marketing & Sales
-                    </button>
+                <!-- Department Quick Focal Selectors (Top Right Dropdown) -->
+                <div class="absolute top-4 right-4 z-10 select-none">
+                    <div class="relative inline-block text-left" id="dropdown-focal-container">
+                        <button id="btn-dropdown-focal" class="bg-slate-900/90 hover:bg-slate-800/90 text-slate-200 border border-slate-800/80 text-[10px] px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-lg active:scale-95 pointer-events-auto">
+                            <i class="fa-solid fa-eye text-cyan-400"></i>
+                            <span id="current-focal-name">Góc nhìn: Toàn cảnh</span>
+                            <i class="fa-solid fa-chevron-down text-[8px] text-slate-400"></i>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="menu-dropdown-focal" class="hidden absolute right-0 mt-1.5 w-44 bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-lg shadow-2xl py-1 z-20 transition-all origin-top-right pointer-events-auto">
+                            <button onclick="focusDeptDropdown('overview', 'Toàn cảnh')" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-350 hover:bg-cyan-500/10 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-solid fa-globe text-cyan-400 w-3.5"></i> Toàn cảnh văn phòng
+                            </button>
+                            <div class="h-px bg-slate-800/60 my-0.5"></div>
+                            <button onclick="focusDeptDropdown('executive', 'Phòng Chủ Tịch')" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-350 hover:bg-cyan-500/10 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-solid fa-crown text-amber-400 w-3.5"></i> Phòng Chủ Tịch
+                            </button>
+                            <button onclick="focusDeptDropdown('assistant', 'Ban Trợ Lý')" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-350 hover:bg-cyan-500/10 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-solid fa-robot text-cyan-400 w-3.5"></i> Ban Trợ Lý
+                            </button>
+                            <button onclick="focusDeptDropdown('product', 'Kiến trúc & Sp')" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-350 hover:bg-cyan-500/10 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-solid fa-compass-drafting text-cyan-400 w-3.5"></i> Kiến trúc & Sp
+                            </button>
+                            <button onclick="focusDeptDropdown('tech', 'Dev & QA Lab')" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-350 hover:bg-cyan-500/10 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-solid fa-code text-cyan-400 w-3.5"></i> Dev & QA Lab
+                            </button>
+                            <button onclick="focusDeptDropdown('ops', 'DevOps & Infra')" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-350 hover:bg-cyan-500/10 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-solid fa-server text-cyan-400 w-3.5"></i> DevOps & Infra
+                            </button>
+                            <button onclick="focusDeptDropdown('growth', 'Marketing & Sales')" class="w-full text-left px-3 py-1.5 text-[10px] text-slate-350 hover:bg-cyan-500/10 hover:text-white transition flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-cyan-400 w-3.5"></i> Marketing & Sales
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 

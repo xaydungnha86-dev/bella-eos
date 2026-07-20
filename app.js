@@ -4819,3 +4819,68 @@ if (document.readyState === 'loading') {
 
 EventBus.on('task.status.changed', () => renderKanbanBoard());
 EventBus.on('task.contract.created', () => renderKanbanBoard());
+
+// Dropdown camera focal selector & helper panel toggle logic
+function focusDeptDropdown(deptName, label) {
+    if (deptName === 'overview') {
+        if (typeof resetCamera === 'function') {
+            resetCamera();
+        }
+    } else {
+        if (typeof focusDepartment === 'function') {
+            focusDepartment(deptName);
+        }
+    }
+    const currentNameSpan = document.getElementById('current-focal-name');
+    if (currentNameSpan) {
+        currentNameSpan.innerText = `Góc nhìn: ${label}`;
+    }
+    const menu = document.getElementById('menu-dropdown-focal');
+    if (menu) {
+        menu.classList.add('hidden');
+    }
+}
+
+// Bind dropdown & helper collapse events on load
+document.addEventListener('DOMContentLoaded', () => {
+    // Dropdown click handlers
+    const btnDropdownFocal = document.getElementById('btn-dropdown-focal');
+    const menuDropdownFocal = document.getElementById('menu-dropdown-focal');
+    if (btnDropdownFocal && menuDropdownFocal) {
+        btnDropdownFocal.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuDropdownFocal.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('dropdown-focal-container');
+            if (container && !container.contains(e.target)) {
+                menuDropdownFocal.classList.add('hidden');
+            }
+        });
+    }
+
+    // Controls helper card toggle handlers
+    const btnToggleInfo = document.getElementById('btn-toggle-info');
+    const infoCardContent = document.getElementById('info-card-content');
+    const iconToggleInfo = document.getElementById('icon-toggle-info');
+
+    if (btnToggleInfo && infoCardContent && iconToggleInfo) {
+        btnToggleInfo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = infoCardContent.classList.toggle('hidden');
+            if (isHidden) {
+                iconToggleInfo.className = 'fa-solid fa-chevron-down text-[9px]';
+                localStorage.setItem('bella_controls_helper_collapsed', 'true');
+            } else {
+                iconToggleInfo.className = 'fa-solid fa-chevron-up text-[9px]';
+                localStorage.setItem('bella_controls_helper_collapsed', 'false');
+            }
+        });
+
+        // Restore saved preference
+        if (localStorage.getItem('bella_controls_helper_collapsed') === 'true') {
+            infoCardContent.classList.add('hidden');
+            iconToggleInfo.className = 'fa-solid fa-chevron-down text-[9px]';
+        }
+    }
+});
