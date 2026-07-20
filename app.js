@@ -4310,9 +4310,70 @@ async function initSupabaseRealtimeSync() {
     }
 }
 
+// GLOBAL SETTINGS MODAL CONTROLLER
+function openGlobalSettingsModal() {
+    const modal = document.getElementById('global-settings-modal');
+    if (!modal) return;
+
+    // Load existing keys from LocalStorage
+    document.getElementById('settings-gemini-key').value = localStorage.getItem('bella_gemini_api_key') || '';
+    document.getElementById('settings-supabase-key').value = localStorage.getItem('supabase_anon_key') || '';
+
+    modal.classList.remove('hidden');
+}
+
+function closeGlobalSettingsModal() {
+    const modal = document.getElementById('global-settings-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+safeAddListener('btn-open-settings', 'click', openGlobalSettingsModal);
+safeAddListener('btn-close-settings-modal', 'click', closeGlobalSettingsModal);
+safeAddListener('btn-cancel-settings', 'click', closeGlobalSettingsModal);
+
+safeAddListener('btn-save-settings', 'click', () => {
+    const geminiKey = document.getElementById('settings-gemini-key').value.trim();
+    const supabaseKey = document.getElementById('settings-supabase-key').value.trim();
+
+    // Store keys in LocalStorage
+    localStorage.setItem('bella_gemini_api_key', geminiKey);
+    localStorage.setItem('supabase_anon_key', supabaseKey);
+
+    // Apply Gemini key locally
+    window.GEMINI_API_KEY = geminiKey;
+
+    // Reinitialize Supabase client if key is updated
+    if (supabaseKey) {
+        try {
+            window.SUPABASE_ANON_KEY = supabaseKey;
+            if (typeof supabase !== 'undefined' && supabase.createClient) {
+                window.supabaseClient = supabase.createClient('https://qwpyfhojxctrvqkjctcl.supabase.co', supabaseKey);
+                console.log('⚡ [Supabase] Re-initialized client with user anon key.');
+                initSupabaseRealtimeSync();
+            }
+        } catch (e) {
+            console.error('[Supabase Re-init Error]', e);
+        }
+    }
+
+    closeGlobalSettingsModal();
+    appendLog('SYSTEM', '🔑 Cập nhật các khóa API và kết nối Cổng AI OS thành công!', 'text-yellow-400 font-bold');
+});
+
 // INITIALIZE APP ON LOAD
 function initApp() {
     loadAgentConfigsFromLocalStorage();
+    
+    // Auto-load API key from local storage on load
+    window.GEMINI_API_KEY = localStorage.getItem('bella_gemini_api_key') || '';
+    const storedSupaKey = localStorage.getItem('supabase_anon_key');
+    if (storedSupaKey) {
+        window.SUPABASE_ANON_KEY = storedSupaKey;
+        if (typeof supabase !== 'undefined' && supabase.createClient) {
+            window.supabaseClient = supabase.createClient('https://qwpyfhojxctrvqkjctcl.supabase.co', storedSupaKey);
+        }
+    }
+
     init3DScene();
     renderAgentCards();
     renderWorkflowPipeline();

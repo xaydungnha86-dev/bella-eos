@@ -87,6 +87,12 @@
                 </button>
             </div>
 
+            <!-- Settings API Keys Trigger Button -->
+            <button id="btn-open-settings" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95" title="Cấu hình API Keys cho các AI Models">
+                <i class="fa-solid fa-key text-yellow-400"></i>
+                <span class="hidden md:inline">Cài đặt API Key</span>
+            </button>
+
             <!-- User Avatar & Profile -->
             <div class="flex items-center gap-2 border-l border-slate-800 pl-2.5 ml-1">
                 <div class="w-8 h-8 rounded-full bg-cyan-950/60 border border-cyan-800/80 flex items-center justify-center font-bold text-xs text-cyan-400 shrink-0 shadow-sm">
@@ -866,6 +872,47 @@
                 </button>
                 <button id="btn-submit-create-task" class="px-4 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl shadow transition">
                     Tạo Task Mới
+                </button>
+            </div>
+        </div>
+    <!-- GLOBAL SYSTEM SETTINGS & API KEYS CONFIG MODAL -->
+    <div id="global-settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 animate-fade-in">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+                <h3 class="font-bold text-slate-100 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-gears text-yellow-400"></i>
+                    <span>CẤU HÌNH API KEYS & KẾT NỐI HỆ THỐNG</span>
+                </h3>
+                <button id="btn-close-settings-modal" class="w-6 h-6 rounded-lg bg-slate-850 hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4 text-xs">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">GOOGLE GEMINI API KEY</label>
+                    <div class="relative">
+                        <input id="settings-gemini-key" type="password" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono pr-10" placeholder="AIZAsy..." />
+                        <button type="button" onclick="const input = document.getElementById('settings-gemini-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2 text-slate-450 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-eye text-[11px]"></i>
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-slate-500 mt-1">Cung cấp khóa API để kích hoạt tác vụ phản hồi AI trực tuyến thời gian thực qua Gemini 1.5 Pro / Flash.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">SUPABASE ANON KEY (DATABASE CLOUD)</label>
+                    <textarea id="settings-supabase-key" rows="2" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono resize-none" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
+                    <p class="text-[9px] text-slate-500 mt-1">Khóa Supabase Anon dùng để đồng bộ bảng Task Kanban lên Cloud DB của bạn.</p>
+                </div>
+            </div>
+
+            <div class="px-5 py-3 border-t border-slate-800 bg-slate-950 flex items-center justify-end gap-2">
+                <button id="btn-cancel-settings" class="px-3.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl transition">
+                    Hủy
+                </button>
+                <button id="btn-save-settings" class="px-4 py-1.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-450 hover:to-amber-500 text-slate-950 text-xs font-bold rounded-xl shadow-lg transition">
+                    Lưu & Kết Nối Cổng AI
                 </button>
             </div>
         </div>
