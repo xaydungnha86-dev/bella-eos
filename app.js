@@ -2783,6 +2783,63 @@ function renderKanbanBoard() {
     });
 }
 
+// CREATE TASK KANBAN CONTROLLER
+function openCreateTaskModal() {
+    const modal = document.getElementById('create-task-modal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeCreateTaskModal() {
+    const modal = document.getElementById('create-task-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+safeAddListener('btn-create-task', 'click', openCreateTaskModal);
+safeAddListener('btn-close-task-modal', 'click', closeCreateTaskModal);
+safeAddListener('btn-cancel-create-task', 'click', closeCreateTaskModal);
+
+safeAddListener('btn-submit-create-task', 'click', async () => {
+    const title = document.getElementById('input-task-title').value.trim();
+    const assignee = document.getElementById('select-task-assignee').value;
+    const sla = parseInt(document.getElementById('input-task-sla').value) || 4;
+    const output = document.getElementById('input-task-output').value.trim() || 'Tài liệu bàn giao';
+
+    if (!title) {
+        alert('Vui lòng nhập tên công việc!');
+        return;
+    }
+
+    // 1. Create Task Contract in Memory
+    const newContract = TaskAssignmentEngine.createTaskContract({
+        taskTitle: title,
+        assignedToMemberId: assignee,
+        mandatoryOutputs: [output],
+        slaHours: sla
+    });
+
+    // 2. Sync to Supabase Cloud Task Table
+    if (supabaseClient) {
+        try {
+            await supabaseClient.from('task_contracts').insert({
+                task_title: title,
+                assigned_to_member_id: assignee,
+                status: 'ASSIGNED',
+                sla_hours: sla
+            });
+        } catch (err) {
+            console.warn('[Supabase Insert Task Warning]', err);
+        }
+    }
+
+    closeCreateTaskModal();
+    renderKanbanBoard();
+    appendLog('TASK KANBAN', `📋 ĐÃ TẠO TASK MỚI: "${title}" ➔ Giao cho AI [${assignee.toUpperCase()}] (SLA ${sla}h)`, 'text-cyan-400 font-bold');
+    
+    // Clear inputs
+    document.getElementById('input-task-title').value = '';
+    document.getElementById('input-task-output').value = '';
+});
+
 function formatModelName(modelId) {
     if (!modelId) return 'GEMINI';
     return modelId.replace('gemini-1-5-', 'GEMINI ').replace('claude-3-5-', 'CLAUDE ').replace('gpt-4o-', 'GPT-4O ').replace('llama-3-1-', 'LLAMA ').toUpperCase();
