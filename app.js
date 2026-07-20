@@ -2783,7 +2783,10 @@ function renderSopTabSteps() {
 
         const node = document.createElement('div');
         node.className = 'relative cursor-pointer group';
-        node.onclick = () => jumpToStep(idx);
+        node.onclick = () => {
+            jumpToStep(idx);
+            openStepDetailModal(step);
+        };
 
         const dotColor = isCurrent ? 'bg-cyan-400 ring-4 ring-cyan-500/20' : isPassed ? 'bg-emerald-500' : 'bg-slate-700';
 
@@ -2812,7 +2815,10 @@ function renderWorkflowPipeline() {
 
         const node = document.createElement('div');
         node.className = `pipeline-node px-3 py-2 rounded-xl border flex items-center gap-2 text-xs font-medium cursor-pointer ${isCurrent ? 'active' : isPassed ? 'completed' : ''}`;
-        node.onclick = () => jumpToStep(idx);
+        node.onclick = () => {
+            jumpToStep(idx);
+            openStepDetailModal(step);
+        };
 
         node.innerHTML = `
             <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isCurrent ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : isPassed ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 border border-slate-200'}">
@@ -2848,6 +2854,152 @@ function appendLog(agentName, text, colorClass = 'text-slate-700') {
     container.appendChild(logItem);
     container.scrollTop = container.scrollHeight;
 }
+
+function openStepDetailModal(step) {
+    const modal = document.getElementById('step-detail-modal');
+    if (!modal) return;
+
+    const agent = AI_AGENTS.find(a => a.id === step.agent);
+    
+    // Set titles
+    document.getElementById('step-modal-title').textContent = step.name;
+    document.getElementById('step-modal-executor').textContent = `Thực thi bởi: ${agent ? agent.name : 'Hệ thống'} (${agent ? agent.role : 'Hạt nhân'})`;
+    
+    // Change Icon & Color dynamically
+    const iconEl = document.getElementById('step-modal-icon');
+    const iconBgEl = document.getElementById('step-modal-icon-bg');
+    if (agent && iconEl && iconBgEl) {
+        iconEl.className = `fa-solid ${agent.icon}`;
+        const hexColor = '#' + agent.color.toString(16).padStart(6, '0');
+        iconBgEl.style.color = hexColor;
+        iconBgEl.style.borderColor = `${hexColor}4d`;
+        iconBgEl.style.backgroundColor = `${hexColor}1a`;
+    }
+
+    // Set Description
+    document.getElementById('step-modal-desc').textContent = step.text;
+
+    // Set Dynamic Deliverable details based on Step ID
+    const deliverableContainer = document.getElementById('step-modal-deliverable-container');
+    if (deliverableContainer) {
+        let outputText = '';
+        switch(step.id) {
+            case 1:
+                outputText = `🎯 [CEO STRATEGIC OBJECTIVE CONTRACT]
+- Mục tiêu chính: Bứt phá ký kết Spa Booking Module Q3-2026.
+- Ngân sách trích xuất: 150,000,000 VND (Cần duyệt qua CEO Approval Gate).
+- Trạng thái: ĐÃ BAN HÀNH QUYẾT ĐỊNH CHIẾN LƯỢC.
+- Ký duyệt bởi: CEO / Founder (Human-in-the-Loop)`;
+                break;
+            case 2:
+                outputText = `📝 [PRODUCT REQUIREMENT DOCUMENT (PRD v1.2)]
+- Module: Spa Appointment & Calendar Booking
+- Người viết: AI Product Manager (PM)
+- Yêu cầu chức năng:
+  + Quản lý khung giờ trống (Time OS Calendar).
+  + Cho phép Spa tạo dịch vụ, thiết lập giá trị.
+  + Trạng thái State: PLANNING ➔ APPROVED.
+- Output File: https://notion.bellaspa.vn/prd/spa-booking-v1.2`;
+                break;
+            case 3:
+                outputText = `🏛️ [SYSTEM ARCHITECTURE & DB SCHEMA SPEC]
+- Kiến trúc sư: AI CTO & Tech Lead
+- Database Schema:
+  CREATE TABLE spa_bookings (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      customer_id UUID REFERENCES customers(id),
+      scheduled_time TIMESTAMP WITH TIME ZONE,
+      status VARCHAR(50) DEFAULT 'DRAFT'
+  );
+- Security Protocol: Zero Trust Access Shield (Level 3 Permission Bus checked).`;
+                break;
+            case 4:
+                outputText = `🎨 [UI/UX GRAPHICAL TOKENS & WIREFRAME]
+- Thiết kế: AI Designer (UX/UI)
+- Hạng mục bàn giao:
+  + 4 Screen Wireframes (Mobile & Desktop POS layout).
+  + Design Tokens export:
+    {
+      "colors": { "primary": "#06b6d4", "background": "#020617" },
+      "font": "Inter"
+    }
+- Figma Design Link: figma.com/file/bella-spa-booking-module`;
+                break;
+            case 5:
+                outputText = `💻 [PRODUCTION SOURCE CODE SPECIFICATION]
+- Lập trình viên: AI Developer
+- Tech Stack: React SPA, Tailwind CSS v4, Supabase JS Client v2.
+- Hàm Core:
+  export const createNewBooking = async (bookingData) => {
+      const canonical = EnterpriseDataFabric.standardizeData('Customer', bookingData);
+      return await supabaseClient.from('bookings').insert(canonical);
+  };
+- Git Commit: hash: 7511f0e [feat: implement Spa Booking layout]`;
+                break;
+            case 6:
+                outputText = `🧪 [AUTOMATED QA INTEGRATION E2E REPORT]
+- Chuyên viên QA: AI QA Engineer
+- Kịch bản chạy: Playwright Automated Suite (42 Test cases).
+- Chi tiết:
+  + Test case 1: Create booking successfully ➔ PASS
+  + Test case 2: Time Slot double booking check ➔ PASS
+  + Test case 3: Policy Guardrail budget threshold ➔ PASS
+- Trạng thái: 100% SUCCESS (0 critical bugs).`;
+                break;
+            case 7:
+                outputText = `🛡️ [HUMAN CEO GATEWAY - DECISION REGISTERED]
+- Trạng thái: ĐÃ PHÊ DUYỆT (APPROVED).
+- Người phê duyệt: Human CEO (Ban Lãnh Đạo)
+- Hành động: Quyết định cho phép đóng gói Bundle v2.1-SPA và bắt đầu triển khai tự động lên hạ tầng Production Cloud.`;
+                break;
+            case 8:
+                outputText = `🚀 [AUTO STAGING & PRODUCTION DEPLOY LOGS]
+- Triển khai: AI DevOps
+- Môi trường: Vercel Serverless Edge & Docker Hub.
+- Deploy Logs:
+  ▲ Aliased: https://bella-eos.vercel.app
+  ▲ Status: ACTIVE (Production)
+  ▲ SSL Certificate: Active & Secure (Let's Encrypt).
+- Trạng thái: DEPLOY COMPLETED IN 1.8s.`;
+                break;
+            case 9:
+                outputText = `📢 [CAMPAIGN CONTENT SPEC & MARKETING LAUNCH]
+- Biên soạn: AI Marketing
+- Kế hoạch Content: Tăng 20% Spa demo trong 30 ngày.
+- Người viết kịch bản quảng cáo: AI Marketing
+- Phân bổ 3 tuyến nội dung:
+  + Tuyến 1: Pain Point Short Video Reels (12 bài viết video) ➔ AI Marketing viết kịch bản, AI Designer dựng hình.
+  + Tuyến 2: Feature Carousel Infographics (10 bài viết) ➔ AI Designer thiết kế, AI Marketing tối ưu SEO.
+  + Tuyến 3: Customer Case Study Stories (5 bài viết).
+- Trạng thái Social: Đã xếp lịch auto-publish thông qua Zalo OA.`;
+                break;
+            case 10:
+                outputText = `📊 [FINANCIAL COST ACCOUNTING & ROI REPORT]
+- Kế toán trưởng: AI Finance
+- Hạch toán Chi phí API Token:
+  + Gemini Flash: $0.00342
+  + Claude Sonnet: $0.01250
+  ➔ Tổng chi phí vận hành AI: $0.01592 USD.
+- ROI Dự báo: +420% hiệu suất, tiết kiệm 1,420 giờ làm việc thay con người.`;
+                break;
+            default:
+                outputText = `📝 Không có kết quả bàn giao cụ thể cho bước này.`;
+        }
+        deliverableContainer.textContent = outputText;
+    }
+
+    modal.classList.remove('hidden');
+}
+
+safeAddListener('btn-close-step-modal', 'click', () => {
+    const modal = document.getElementById('step-detail-modal');
+    if (modal) modal.classList.add('hidden');
+});
+
+safeAddListener('btn-close-step-modal-confirm', 'click', () => {
+    const modal = document.getElementById('step-detail-modal');
+    if (modal) modal.classList.add('hidden');
+});
 
 function showCampaignExecutiveReport() {
     const modal = document.getElementById('campaign-report-modal');
