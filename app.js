@@ -3285,13 +3285,19 @@ safeAddListener('btn-reset-layout', 'click', () => {
 });
 
 // INITIALIZE APP ON LOAD
-window.addEventListener('DOMContentLoaded', () => {
+function initApp() {
     loadAgentConfigsFromLocalStorage();
     init3DScene();
     renderAgentCards();
     renderWorkflowPipeline();
     renderKanbanBoard();
-});
+}
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
 
 EventBus.on('task.status.changed', () => renderKanbanBoard());
 EventBus.on('task.contract.created', () => renderKanbanBoard());
