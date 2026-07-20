@@ -2486,7 +2486,7 @@ const EnterprisePolicyEngine = {
             appendLog('POLICY ENGINE', `🛡️ POLICY BLOCK [POL-02]: Đề xuất ${amount.toLocaleString()} VND vượt ngưỡng 100M ➔ Bắt buộc chuyển Gate CEO Phê duyệt!`, 'text-rose-400 font-bold');
             return { allowed: false, requireHumanApproval: true };
         }
-        appendLog('POLICY ENGINE', `✅ POLICY PASSED [POL-01]: Ngân sách trong ngưỡng cho phép (<= 50M VND).`, 'text-emerald-400 font-medium');
+        appendLog('POLICY ENGINE', `✅ POLICY PASSED [POL-01]: Ngân sách cho phép tự chủ trong khung quy định.`, 'text-emerald-400 font-medium');
         return { allowed: true, requireHumanApproval: false };
     }
 };
@@ -2542,34 +2542,50 @@ const AICOOEngine = {
 
     decomposeObjectiveToDynamicWorkflow(objectiveText) {
         appendLog('AI COO (PORTFOLIO MANAGER)', `🎯 TIẾP NHẬN STRATEGIC OBJECTIVE TỪ CEO: "${objectiveText}"`, 'text-amber-400 font-bold');
-        appendLog('AI COO (PORTFOLIO MANAGER)', `📁 Khởi tạo PROJECT HUB: "Summer Spa Growth 2026" (OKRs: 500 Leads, Budget: 50M, Risk Matrix Checked).`, 'text-cyan-300 font-semibold');
-        appendLog('AI COO (RESOURCE ENGINE)', `⚙️ Kiểm tra Resource Capacity: AI Sales đang chạm mốc 92% Workload. Đã cân bằng tải cho AI CRM trợ lực.`, 'text-purple-300 font-medium');
-        appendLog('AI COO (PROJECT MEMORY)', `🧠 Tái sử dụng Tri thức từ 50 Chiến dịch trước: Áp dụng Mẫu Video Nỗi đau Quản lý Spa.`, 'text-emerald-400 font-medium');
 
-        if (typeof EnterprisePolicyEngine !== 'undefined') {
-            EnterprisePolicyEngine.evaluatePolicy('BUDGET_SPEND', 50000000);
+        // Extract budget dynamic from text or default
+        const budgetMatch = objectiveText.match(/(\d+)\s*(triệu|tr|m|tỷ)/i);
+        let budgetVND = 50000000;
+        if (budgetMatch) {
+            const num = parseInt(budgetMatch[1]);
+            const unit = budgetMatch[2].toLowerCase();
+            if (unit === 'tỷ') budgetVND = num * 1000000000;
+            else budgetVND = num * 1000000;
         }
+
+        const policyResult = (typeof EnterprisePolicyEngine !== 'undefined') ? 
+            EnterprisePolicyEngine.evaluatePolicy('BUDGET_SPEND', budgetVND) : { allowed: true };
+
+        appendLog('AI COO (PORTFOLIO MANAGER)', `📁 Khởi tạo PROJECT HUB cho Objective (Ngân sách: ${(budgetVND / 1000000).toFixed(0)}M VND, Risk Matrix Checked).`, 'text-cyan-300 font-semibold');
+        appendLog('AI COO (RESOURCE ENGINE)', `⚙️ Kiểm tra Resource Capacity & Cân bằng tải Workload các AI Employees.`, 'text-purple-300 font-medium');
+        appendLog('AI COO (PROJECT MEMORY)', `🧠 Tái sử dụng Tri thức kinh nghiệm các Chiến dịch quá quá quá trước.`, 'text-emerald-400 font-medium');
 
         if (typeof DecisionEngineOS !== 'undefined') {
             DecisionEngineOS.recordDecision({
                 category: 'PROJECT_LAUNCH',
-                summary: `Khởi tạo dự án Summer Spa Growth 2026 cho Objective: ${objectiveText}`,
-                approvedBy: 'CEO (Human)'
+                summary: `Khởi tạo dự án cho Objective: ${objectiveText}`,
+                approvedBy: policyResult.requireHumanApproval ? 'CEO (Pending Sign-off)' : 'Policy Engine (Auto Approved)'
             });
         }
 
         // Dynamic Workflow Steps Graph generated from Enterprise OS Hierarchy
         const dynamicSteps = [
-            { id: 1, name: '1. Khởi tạo Project & Thiết lập OKRs', agent: 'coo', text: 'AI COO khởi tạo Project Hub, cascaded OKRs (KR1: 500 Leads, KR2: 20% Conv, KR3: CAC <= 1.25M)' },
-            { id: 2, name: '2. Phân rã Topic & Risk Assessment', agent: 'pm', text: 'AI PM phân tích rủi ro & lập Content Matrix dựa trên Tri thức 50 dự án cũ' },
-            { id: 3, name: '3. Sáng tạo Copywriting & Banner Ads', agent: 'mkt', text: 'AI Marketing soạn 30 bài Facebook & Yêu cầu AI Designer làm Visual Video Reels' },
-            { id: 4, name: '4. Kiểm tra Resource & Xuất Design', agent: 'des', text: 'AI Designer (Workload 85%) hoàn thành bộ Visual Carousel & Video Thumbnails' },
-            { id: 5, name: '5. CRM Flow & Sales Script Ready', agent: 'sales', text: 'AI Sales & AI CRM cài đặt Kịch bản Inbox tự động lọc Lead chất lượng' },
-            { id: 6, name: '6. Quality Gate & Brand Compliance', agent: 'qa', text: 'AI QA kiểm duyệt Brand Voice & Tiêu chuẩn DoD (PASS 100%)' },
-            { id: 7, name: '7. Gate Phê duyệt CEO (Human Gate)', agent: 'ceo', text: 'CEO duyệt Kế hoạch Project & Ngân sách 50 triệu', isApprovalGate: true },
-            { id: 8, name: '8. Launch Multi-Channel Campaign', agent: 'devops', text: 'AI DevOps kết nối Meta Ads API & Bella EIP Telemetry Stream' },
-            { id: 9, name: '9. Whole-Enterprise Learning Engine', agent: 'mkt', text: 'Phân tích tương quan: Video CTR 10% nhưng Lead Sales Quality thấp ➔ Dồn Budget vào Carousel (Sales Conv 24%)' },
-            { id: 10, name: '10. Báo cáo Sức Khỏe Doanh Nghiệp CEO', agent: 'fin', text: 'CEO Executive Dashboard: Company Health 96.5% | Doanh thu +2.4B | CAC 1.2M | ROI 486%' }
+            { id: 1, name: '1. Khởi tạo Project & Thiết lập OKRs', agent: 'coo', text: `AI COO khởi tạo Project Hub cho mục tiêu "${objectiveText.substring(0, 40)}..." (Budget: ${(budgetVND / 1000000).toFixed(0)}M VND)` },
+            { id: 2, name: '2. Phân rã Topic & Risk Assessment', agent: 'pm', text: 'AI PM phân tích rủi ro & lập Content/Feature Matrix từ Tri thức cũ' },
+            { id: 3, name: '3. Sáng tạo Copywriting & Architecture Spec', agent: 'mkt', text: 'AI Marketing & AI CTO thiết kế Kiến trúc & Nội dung thực thi' },
+            { id: 4, name: '4. Kiểm tra Resource & Phân bổ Task', agent: 'des', text: 'AI Designer & AI Dev tiếp nhận Task theo năng lực Workload Realtime' },
+            { id: 5, name: '5. CRM Flow & Service Script Ready', agent: 'sales', text: 'AI Sales & AI CRM thiết lập Kịch bản tự động hóa tương tác' },
+            { id: 6, name: '6. Quality Gate & Security Barrier Audit', agent: 'qa', text: 'AI QA kiểm duyệt Brand Voice, Security Risk & Tiêu chuẩn DoD' },
+            { 
+                id: 7, 
+                name: policyResult.requireHumanApproval ? '7. Gate Phê duyệt CEO (Ngân sách Vượt Ngưỡng)' : '7. Gate Kiểm duyệt Tự động (Auto Approval Gate)', 
+                agent: 'ceo', 
+                text: policyResult.requireHumanApproval ? `⚠️ Ngân sách ${(budgetVND / 1000000).toFixed(0)}M > 100M VND limit. CEO cần ký duyệt trực tiếp!` : `✅ Ngân sách ${(budgetVND / 1000000).toFixed(0)}M VND nằm trong hạn mức tự chủ. Hệ thống phê duyệt tự động.`, 
+                isApprovalGate: policyResult.requireHumanApproval
+            },
+            { id: 8, name: '8. Launch Multi-Channel Campaign & Deploy', agent: 'devops', text: 'AI DevOps kết nối API & Kích hoạt Telemetry Stream Monitor' },
+            { id: 9, name: '9. Whole-Enterprise Learning Engine', agent: 'mkt', text: 'Hệ thống học tự động phân tích tương quan & tự tối ưu phân bổ nguồn lực' },
+            { id: 10, name: '10. Báo cáo Sức Khỏe Doanh Nghiệp CEO', agent: 'fin', text: 'CEO Executive Dashboard: Tổng hợp ROI, CAC & Sức khỏe Doanh nghiệp' }
         ];
 
         return dynamicSteps;
