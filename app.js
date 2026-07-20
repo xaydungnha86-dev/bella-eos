@@ -46,6 +46,67 @@ if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
 }
 
 // =========================================================================
+// PHASE 1: BELLA KERNEL CORE ENGINE (BELLA KERNEL OS LAYER 1)
+// =========================================================================
+const BellaKernel = {
+    version: '2026.1.0-KERNEL',
+    status: 'ACTIVE',
+    auditLedger: [],
+    eventsStore: [],
+
+    // 1. Transaction & Context Bus
+    executeTransaction(sourceIdentity, actionType, payload) {
+        const timestamp = new Date().toISOString();
+        const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+        // Security & Policy Check
+        const policyPass = EnterprisePolicyEngine.evaluatePolicy(sourceIdentity, actionType, payload);
+        
+        const ledgerRecord = {
+            transactionId,
+            timestamp,
+            sourceIdentity,
+            actionType,
+            payload,
+            status: policyPass.allowed ? 'COMMITTED' : 'BLOCKED_BY_POLICY',
+            reason: policyPass.reason || 'SUCCESS'
+        };
+
+        this.auditLedger.push(ledgerRecord);
+        this.emitKernelEvent('KERNEL_TRANSACTION_EXECUTED', ledgerRecord);
+
+        console.log(`⚡ [BELLA KERNEL] Transaction [${transactionId}] (${actionType}) ➔ ${ledgerRecord.status}`);
+        return ledgerRecord;
+    },
+
+    // 2. Kernel Event Sourcing & Replay Engine
+    emitKernelEvent(eventName, eventData) {
+        const eventRecord = {
+            eventId: `evt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+            timestamp: new Date().toISOString(),
+            eventName,
+            eventData
+        };
+        this.eventsStore.push(eventRecord);
+        return eventRecord;
+    },
+
+    // Replay past event stream for Audit & Digital Twin
+    replayEventStream(filterEventName = null) {
+        console.log(`📜 [BELLA KERNEL REPLAY] tua lại toàn bộ lịch sử sự kiện...`);
+        return filterEventName 
+            ? this.eventsStore.filter(e => e.eventName === filterEventName)
+            : this.eventsStore;
+    },
+
+    getAuditLedger() {
+        return this.auditLedger;
+    }
+};
+
+window.BellaKernel = BellaKernel;
+
+// =========================================================================
 // MILESTONE 1: ENTERPRISE ORGANIZATION MANAGER & WORKFORCE REGISTRY
 // =========================================================================
 
@@ -175,6 +236,44 @@ const CapabilityMatrix = {
     }
 };
 
+// ENTERPRISE GOVERNANCE & POLICY ENGINE (LAYER 4 POLICY & AI GOVERNANCE)
+const EnterprisePolicyEngine = {
+    policies: {
+        financialLimit: 100000000, // 100 triệu VND threshold for CEO sign-off
+        aiGovernance: {
+            allowPayrollAccess: false,
+            allowProductionCodeDeploy: ['devops', 'ceo'],
+            allowDirectDatabaseDrop: []
+        }
+    },
+
+    evaluatePolicy(sourceIdentity, actionType, payload = {}) {
+        // 1. Financial Threshold Check
+        if (actionType === 'BUDGET_APPROVAL' || actionType === 'WORKFLOW_EXECUTE') {
+            const budget = payload.budgetAmount || 0;
+            if (budget > this.policies.financialLimit && sourceIdentity !== 'ceo') {
+                return {
+                    allowed: false,
+                    reason: `Ngân sách ${budget.toLocaleString()} VND vượt hạn mức tự động 100M VND. Yêu cầu phê duyệt từ CEO Gate!`
+                };
+            }
+        }
+
+        // 2. AI Governance Check
+        if (actionType === 'PAYROLL_ACCESS' && !this.policies.aiGovernance.allowPayrollAccess) {
+            return { allowed: false, reason: 'AI Governance Shield: Nghiêm cấm mọi AI Worker truy cập bảng lương Payroll!' };
+        }
+
+        if (actionType === 'PRODUCTION_DEPLOY' && !this.policies.aiGovernance.allowProductionCodeDeploy.includes(sourceIdentity)) {
+            return { allowed: false, reason: `AI Governance Shield: Nhân sự ${sourceIdentity.toUpperCase()} không có quyền deploy Production!` };
+        }
+
+        return { allowed: true };
+    }
+};
+
+window.EnterprisePolicyEngine = EnterprisePolicyEngine;
+
 // Legacy compatibility mapping
 const AI_AGENTS = WorkforceRegistry.members;
 
@@ -197,16 +296,37 @@ const WORKFLOW_STEPS = [
 
 const EventBus = {
     listeners: {},
+    eventHistory: [],
+
     on(event, callback) {
         if (!this.listeners[event]) this.listeners[event] = [];
         this.listeners[event].push(callback);
     },
+    
     emit(event, data) {
+        const eventItem = {
+            id: `evt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+            event,
+            data,
+            timestamp: new Date().toISOString()
+        };
+        this.eventHistory.push(eventItem);
+
+        // Notify Bella Kernel Event Sourcing
+        if (typeof BellaKernel !== 'undefined' && BellaKernel.emitKernelEvent) {
+            BellaKernel.emitKernelEvent(event, data);
+        }
+
         if (this.listeners[event]) {
             this.listeners[event].forEach(cb => {
                 try { cb(data); } catch (e) { console.error(`[EventBus Error] ${event}:`, e); }
             });
         }
+    },
+
+    replayHistory() {
+        console.log(`🔄 [EVENT BUS REPLAY] Tua lại ${this.eventHistory.length} sự kiện...`);
+        return this.eventHistory;
     }
 };
 
