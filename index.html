@@ -1389,6 +1389,15 @@
                                             <span class="text-amber-400 font-mono text-[9px] animate-pulse">Live Update</span>
                                         </div>
                                         <div class="space-y-2 text-[10px]">
+                                            <div>
+                                                <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Loại Chỉ Số Mục Tiêu</label>
+                                                <select id="bce-edit-metric-type" onchange="onMetricTypeChange()" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-100 focus:outline-none focus:border-indigo-500 cursor-pointer text-[10px]">
+                                                    <option value="targetFollowers" data-label="Mục tiêu Followers">Followers (Người theo dõi)</option>
+                                                    <option value="targetRevenueVnd" data-label="Mục tiêu Doanh số (VND)">Doanh số (VND)</option>
+                                                    <option value="targetLeads" data-label="Mục tiêu Leads / Đăng ký">Leads / Đăng ký</option>
+                                                    <option value="targetStaffCount" data-label="Mục tiêu Nhân sự (Người)">Nhân sự (Người)</option>
+                                                </select>
+                                            </div>
                                             <div class="grid grid-cols-2 gap-2">
                                                 <div>
                                                     <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Ngân sách (VND)</label>

@@ -6638,6 +6638,35 @@ function updateLiveCompiledContext() {
 }
 window.updateLiveCompiledContext = updateLiveCompiledContext;
 
+function onMetricTypeChange() {
+    const selector = document.getElementById('bce-edit-metric-type');
+    const input = document.getElementById('bce-edit-followers');
+    const label = document.getElementById('bce-edit-followers-label');
+    
+    if (selector && input && label) {
+        const selectedOption = selector.options[selector.selectedIndex];
+        const newKey = selector.value;
+        const newLabel = selectedOption.dataset.label;
+        
+        input.dataset.metricKey = newKey;
+        label.textContent = newLabel;
+        
+        // Update input default value depending on type if it is currently default
+        if (newKey === 'targetRevenueVnd') {
+            if (parseInt(input.value) <= 5000) {
+                input.value = 50000000; // default 50M VND
+            }
+        } else {
+            if (parseInt(input.value) > 100000) {
+                input.value = 1000; // default count
+            }
+        }
+        
+        updateLiveCompiledContext();
+    }
+}
+window.onMetricTypeChange = onMetricTypeChange;
+
 // Initialize on script load
 loadFbChannels();
 
