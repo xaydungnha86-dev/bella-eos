@@ -1024,29 +1024,208 @@ const KnowledgeGraphService = {
 
     initGraph() {
         const nodesData = [
-            { id: 'company_bella', type: 'Company', label: 'Bella Group' },
-            { id: 'dept_mkt', type: 'Department', label: 'Marketing Dept' },
-            { id: 'role_ceo', type: 'Role', label: 'CEO Role' },
-            { id: 'emp_bella', type: 'Employee', label: 'Bella AI Employee' },
-            { id: 'obj_growth', type: 'Objective', label: 'Grow Sales 30%' },
-            { id: 'proj_summer', type: 'Project', label: 'Summer Campaign' },
-            { id: 'proc_mkt_automation', type: 'Process', label: 'MKT Automation' },
-            { id: 'stage_init', type: 'Stage', label: 'Initiation Stage' },
-            { id: 'task_post', type: 'Task', label: 'Publish Social Post' },
-            { id: 'cmd_post', type: 'Command', label: 'PublishPostCommand' },
-            { id: 'res_budget', type: 'Resource', label: 'Marketing Budget' },
-            { id: 'policy_spend', type: 'Policy', label: 'Max Spend Limit' },
-            { id: 'ev_post_id', type: 'Evidence', label: 'Facebook Post ID' },
-            { id: 'mem_audit', type: 'Memory', label: 'Historical Audit logs' },
-            { id: 'dec_approve', type: 'Decision', label: 'Budget Approval Dec' },
-            { id: 'metric_conversion', type: 'Metric', label: 'Demo Conversion Rate' },
-            { id: 'asset_pdf', type: 'Asset', label: 'SOP Document PDF' },
-            { id: 'cust_lead', type: 'Customer', label: 'VIP Spa Leads' },
-            { id: 'event_dispatched', type: 'Event', label: 'Task Dispatched Event' },
-            { id: 'invoice_lead', type: 'Invoice', label: 'Lead Gen Invoice' }
+            { 
+                id: 'company_bella', 
+                type: 'Company', 
+                label: 'Bella Group',
+                properties: {
+                    'Tên doanh nghiệp': 'Bella Group VN',
+                    'Lĩnh vực': 'Aesthetic & Spa POS Retail',
+                    'Năm thành lập': '2024',
+                    'Trụ sở': 'Hà Nội & TP. HCM'
+                }
+            },
+            { 
+                id: 'dept_mkt', 
+                type: 'Department', 
+                label: 'Marketing Dept',
+                properties: {
+                    'Trưởng bộ phận': 'AI CMO',
+                    'Số lượng nhân sự': 12,
+                    'Ngân sách tháng': '100,000,000 VND',
+                    'KPI cốt lõi': 'Chi phí chuyển đổi (CAC) < 200K VND'
+                }
+            },
+            { 
+                id: 'role_ceo', 
+                type: 'Role', 
+                label: 'CEO Role',
+                properties: {
+                    'Chức danh': 'Chief Executive Officer',
+                    'Cơ chế giám sát': 'Human-in-the-Loop',
+                    'Quyền quyết định': 'Toàn quyền (Duyệt ngân sách & SOP)'
+                }
+            },
+            { 
+                id: 'emp_bella', 
+                type: 'Employee', 
+                label: 'Bella AI Employee',
+                properties: {
+                    'Tên nhân sự': 'Hermes Operator Agent',
+                    'Độ khả dụng': '24/7 Online',
+                    'Năng lực': 'Facebook API, SMTP Mail, PDF Compiler'
+                }
+            },
+            { 
+                id: 'obj_growth', 
+                type: 'Objective', 
+                label: 'Grow Sales 30%',
+                properties: {
+                    'Mục tiêu': 'Tăng trưởng 1,000 Followers mới',
+                    'Hạn chót': '31/08/2026',
+                    'Trọng số': '0.85'
+                }
+            },
+            { 
+                id: 'proj_summer', 
+                type: 'Project', 
+                label: 'Summer Campaign',
+                properties: {
+                    'Tên dự án': 'Chiến dịch Summer Spa Growth 2026',
+                    'Trạng thái': 'Đang chạy (ACTIVE)',
+                    'Ngân sách khóa': '10,000,000 VND'
+                }
+            },
+            { 
+                id: 'proc_mkt_automation', 
+                type: 'Process', 
+                label: 'MKT Automation',
+                properties: {
+                    'Quy trình': 'Marketing SOP 30-Day Auto-Scheduler',
+                    'Số bước': 10,
+                    'Trọng số chất lượng': '95%'
+                }
+            },
+            { 
+                id: 'stage_init', 
+                type: 'Stage', 
+                label: 'Initiation Stage',
+                properties: {
+                    'Giai đoạn': 'Khởi chạy & Lập kế hoạch chiến dịch',
+                    'Người phụ trách': 'AI COO'
+                }
+            },
+            { 
+                id: 'task_post', 
+                type: 'Task', 
+                label: 'Publish Social Post',
+                properties: {
+                    'Nhiệm vụ': 'Đăng bài quảng bá & Xuất PDF Báo giá',
+                    'Cách thực hiện': 'Tự động qua Facebook Graph API Connector'
+                }
+            },
+            { 
+                id: 'cmd_post', 
+                type: 'Command', 
+                label: 'PublishPostCommand',
+                properties: {
+                    'Tên Command': 'PublishPostCommand',
+                    'Payload': '{ budgetVnd: 5000000, pageId: "1029384756" }',
+                    'Trạng thái Bus': 'COMPLETED'
+                }
+            },
+            { 
+                id: 'res_budget', 
+                type: 'Resource', 
+                label: 'Marketing Budget',
+                properties: {
+                    'Ngân sách phân bổ': '10,000,000 VND',
+                    'Đã khóa (Locked)': '5,000,000 VND',
+                    'Loại tiền tệ': 'VND'
+                }
+            },
+            { 
+                id: 'policy_spend', 
+                type: 'Policy', 
+                label: 'Max Spend Limit',
+                properties: {
+                    'Chính sách': 'Hạn mức chi tiêu đơn tối đa',
+                    'Giới hạn (Max Limit)': '15,000,000 VND/giao dịch',
+                    'Cần CEO duyệt': '> 5,000,000 VND'
+                }
+            },
+            { 
+                id: 'ev_post_id', 
+                type: 'Evidence', 
+                label: 'Facebook Post ID',
+                properties: {
+                    'Bằng chứng': 'Facebook Post Public ID',
+                    'Mã Post ID': 'FB-849204812',
+                    'Trạng thái kiểm tra': 'HTTP 200 OK (Đã xác minh)'
+                }
+            },
+            { 
+                id: 'mem_audit', 
+                type: 'Memory', 
+                label: 'Historical Audit logs',
+                properties: {
+                    'Nhật ký Ledger': 'Chữ ký số SHA-256 Event Sourcing',
+                    'Mã hash khối': '0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+                }
+            },
+            { 
+                id: 'dec_approve', 
+                type: 'Decision', 
+                label: 'Budget Approval Dec',
+                properties: {
+                    'Quyết định': 'Phê duyệt ngân sách chiến dịch Marketing',
+                    'Trạng thái': 'APPROVED (Đã thông qua)',
+                    'Người duyệt': 'CEO (Human-in-the-Loop)'
+                }
+            },
+            { 
+                id: 'metric_conversion', 
+                type: 'Metric', 
+                label: 'Demo Conversion Rate',
+                properties: {
+                    'Chỉ số đo lường': 'Tỷ lệ chuyển đổi Leads',
+                    'Giá trị hiện tại': '2.8%',
+                    'Giá trị mục tiêu': '3.5%'
+                }
+            },
+            { 
+                id: 'asset_pdf', 
+                type: 'Asset', 
+                label: 'SOP Document PDF',
+                properties: {
+                    'Tên tài sản': 'SOP_Document_Marketing.pdf',
+                    'Kích thước file': '1.2 MB',
+                    'Mã hash SHA-256': '#e3b0c442'
+                }
+            },
+            { 
+                id: 'cust_lead', 
+                type: 'Customer', 
+                label: 'VIP Spa Leads',
+                properties: {
+                    'Thông tin leads': 'Danh sách Khách hàng VIP Beauty',
+                    'Số lượng': 1289,
+                    'Trạng thái': 'Active'
+                }
+            },
+            { 
+                id: 'event_dispatched', 
+                type: 'Event', 
+                label: 'Task Dispatched Event',
+                properties: {
+                    'Sự kiện': 'TaskDispatchedEvent',
+                    'Nguồn phát': 'ExecutionCoordination',
+                    'Thời gian': 'Realtime Event Sourcing'
+                }
+            },
+            { 
+                id: 'invoice_lead', 
+                type: 'Invoice', 
+                label: 'Lead Gen Invoice',
+                properties: {
+                    'Số hóa đơn': 'INV-2026-0048',
+                    'Số tiền': '45,000,000 VND',
+                    'Trạng thái thanh toán': 'PAID (Đã thanh toán)'
+                }
+            }
         ];
 
-        nodesData.forEach(n => this.addNode(n.id, n.type, n.label));
+        nodesData.forEach(n => this.addNode(n.id, n.type, n.label, n.properties || {}));
 
         this.addEdge('company_bella', 'dept_mkt', 'CONTAINS');
         this.addEdge('dept_mkt', 'role_ceo', 'REPORTS_TO');
