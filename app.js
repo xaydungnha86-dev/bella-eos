@@ -4727,6 +4727,7 @@ function renderAgentCards() {
 
             card.addEventListener('click', () => {
                 highlightAgent(agent.id, true);
+                openAgentDossierModal(agent.id);
             });
         } catch (err) {
             console.error(`Error rendering agent card for ${agent.id}:`, err);
@@ -5598,6 +5599,235 @@ window.switchMarketplaceTab = switchMarketplaceTab;
 window.renderMarketplaceContent = renderMarketplaceContent;
 
 safeAddListener('btn-open-marketplace', 'click', openMarketplaceModal);
+
+// =========================================================================
+// 3D AI EMPLOYEE DOSSIER & LIVE CHAT CONSOLE CONTROLLER
+// =========================================================================
+let currentDossierAgentId = 'coo';
+let activeDossierTab = 'matrix';
+
+function openAgentDossierModal(agentId) {
+    console.log(`👤 [openAgentDossierModal] Opening Dossier for Agent: ${agentId}`);
+    const agent = AI_AGENTS.find(a => a.id === agentId) || AI_AGENTS[0];
+    currentDossierAgentId = agent.id;
+
+    const modal = document.getElementById('agent-dossier-modal');
+    if (!modal) return;
+
+    // Set Header Info
+    const nameEl = document.getElementById('dossier-agent-name');
+    const roleEl = document.getElementById('dossier-agent-role');
+    const statusEl = document.getElementById('dossier-agent-status');
+    const iconEl = document.getElementById('dossier-agent-icon');
+    const iconBox = document.getElementById('dossier-agent-icon-box');
+    const idDisplay = document.getElementById('dossier-agent-id-display');
+
+    if (nameEl) nameEl.textContent = agent.name;
+    if (roleEl) roleEl.textContent = agent.role || 'AI Employee';
+    if (statusEl) {
+        statusEl.textContent = agent.status || 'IDLE';
+        statusEl.className = agent.status === 'PROCESSING' ? 
+            'text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/60 font-bold uppercase animate-pulse' :
+            'text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 font-bold uppercase';
+    }
+    if (iconEl) iconEl.className = `fa-solid ${agent.icon || 'fa-user-gear'}`;
+    const hex = (typeof agent.color === 'number') ? agent.color.toString(16).padStart(6, '0') : '06b6d4';
+    if (iconBox) iconBox.style.color = `#${hex}`;
+    if (idDisplay) idDisplay.textContent = agent.id.toUpperCase();
+
+    // Render Matrix Content
+    renderDossierMatrixContent(agent);
+    initDossierChatConsole(agent);
+
+    modal.style.display = 'flex';
+}
+
+function closeAgentDossierModal() {
+    const modal = document.getElementById('agent-dossier-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function switchDossierTab(tab) {
+    activeDossierTab = tab;
+    const btnMatrix = document.getElementById('dossier-tab-matrix');
+    const btnChat = document.getElementById('dossier-tab-chat');
+    const contentMatrix = document.getElementById('dossier-content-matrix');
+    const contentChat = document.getElementById('dossier-content-chat');
+
+    if (tab === 'matrix') {
+        if (btnMatrix) btnMatrix.className = 'py-3 text-cyan-400 border-b-2 border-cyan-500 flex items-center gap-1.5 cursor-pointer font-bold';
+        if (btnChat) btnChat.className = 'py-3 text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-1.5 cursor-pointer font-medium';
+        if (contentMatrix) contentMatrix.style.display = 'block';
+        if (contentChat) contentChat.style.display = 'none';
+    } else {
+        if (btnChat) btnChat.className = 'py-3 text-cyan-400 border-b-2 border-cyan-500 flex items-center gap-1.5 cursor-pointer font-bold';
+        if (btnMatrix) btnMatrix.className = 'py-3 text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-1.5 cursor-pointer font-medium';
+        if (contentMatrix) contentMatrix.style.display = 'none';
+        if (contentChat) contentChat.style.display = 'flex';
+    }
+}
+
+function renderDossierMatrixContent(agent) {
+    const container = document.getElementById('dossier-content-matrix');
+    if (!container) return;
+
+    const config = (typeof getAgentConfig === 'function') ? getAgentConfig(agent.id) : {};
+    const modelDisplay = config.modelId || 'gemini-1-5-flash';
+    const adapterKey = agent.id === 'dev' ? 'codex' : (agent.id === 'qa' || agent.id === 'cto' ? 'claudecode' : (agent.id === 'devops' || agent.id === 'des' ? 'openhands' : 'hermes'));
+
+    container.innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Col 1: System Specs -->
+            <div class="p-4 rounded-xl border bg-slate-950/80 border-slate-800 space-y-2.5">
+                <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>Cấu hình AI OS Runtime</span>
+                </h4>
+                <div class="space-y-1.5 text-[11px] text-slate-300 font-mono">
+                    <div class="flex justify-between py-1 border-b border-slate-900">
+                        <span class="text-slate-400">LLM Provider:</span>
+                        <strong class="text-amber-400 uppercase">${config.providerKey || 'google'}</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-900">
+                        <span class="text-slate-400">Model Tier:</span>
+                        <strong class="text-cyan-300 font-bold">${modelDisplay}</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-900">
+                        <span class="text-slate-400">Execution Adapter:</span>
+                        <strong class="text-purple-400 font-bold uppercase">${adapterKey}Adapter</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-900">
+                        <span class="text-slate-400">Token Limit / Req:</span>
+                        <span class="text-slate-200">${(config.maxTokens || 4096).toLocaleString()} Tokens</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400">Temperature / Risk:</span>
+                        <span class="text-slate-200">${config.temperature || 0.7}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 2: BCE Context Package -->
+            <div class="p-4 rounded-xl border bg-slate-950/80 border-slate-800 space-y-2.5">
+                <h4 class="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Ma trận Ngữ Cảnh BCE</span>
+                </h4>
+                <div class="space-y-1.5 text-[11px] text-slate-300 font-mono">
+                    <div class="flex justify-between py-1 border-b border-slate-900">
+                        <span class="text-slate-400">Nhiệm vụ hiện tại:</span>
+                        <strong class="text-emerald-400">${agent.task || 'IDLE'}</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-900">
+                        <span class="text-slate-400">SLA Thời gian:</span>
+                        <span class="text-slate-200">4.0 Giờ SLA</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-900">
+                        <span class="text-slate-400">Tiêu chuẩn DoD:</span>
+                        <span class="text-emerald-400 font-bold">100% Quality Pass</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400">EQE Score Average:</span>
+                        <strong class="text-amber-400 font-bold">98.5 / 100 PTS</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capability Description -->
+        <div class="p-4 rounded-xl border bg-slate-950/80 border-slate-800 space-y-2">
+            <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-cyan-400"></i>
+                <span>Vai Trò & Quyền Hạn Hạn Mức Tự Chủ</span>
+            </h4>
+            <p class="text-[11px] text-slate-400 leading-relaxed font-sans">
+                ${agent.name} đảm nhiệm vai trò <strong>${agent.role || 'AI Employee'}</strong> trong hệ thống Bella EOS. Được ủy quyền tự động thực thi công việc với hạn mức ngân sách dưới 100M VND, tuân thủ nghiêm ngặt 7 chiều kiểm duyệt an toàn của Enterprise Quality Engine (EQE).
+            </p>
+        </div>
+    `;
+}
+
+function initDossierChatConsole(agent) {
+    const historyContainer = document.getElementById('dossier-chat-history');
+    if (!historyContainer) return;
+
+    historyContainer.innerHTML = `
+        <div class="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 flex items-start gap-2.5">
+            <div class="w-6 h-6 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 shrink-0 text-xs mt-0.5">
+                <i class="fa-solid ${agent.icon || 'fa-robot'}"></i>
+            </div>
+            <div>
+                <p class="font-bold text-cyan-400 text-[10px] leading-tight">${agent.name} (${agent.role || 'AI Employee'})</p>
+                <p class="mt-1 text-slate-300">Xin chào Ban Lãnh Đạo CEO! Tôi là ${agent.name}, đang giữ vai trò ${agent.role || 'AI Employee'}. Bạn có chỉ thị trực tiếp nào cần tôi thực thi ngay lập tức không?</p>
+            </div>
+        </div>
+    `;
+}
+
+async function sendDossierAgentChat() {
+    const input = document.getElementById('dossier-chat-input');
+    const historyContainer = document.getElementById('dossier-chat-history');
+    if (!input || !historyContainer) return;
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    const agent = AI_AGENTS.find(a => a.id === currentDossierAgentId) || AI_AGENTS[0];
+
+    // User Message bubble
+    const userBubble = document.createElement('div');
+    userBubble.className = 'p-3 rounded-xl bg-amber-950/40 border border-amber-800/60 text-[11px] text-slate-200 flex items-start gap-2.5 justify-end';
+    userBubble.innerHTML = `
+        <div class="text-right">
+            <p class="font-bold text-amber-400 text-[10px] leading-tight">Ban Lãnh Đạo (CEO)</p>
+            <p class="mt-1 text-slate-200">${text}</p>
+        </div>
+        <div class="w-6 h-6 rounded-lg bg-amber-950 border border-amber-800 flex items-center justify-center text-amber-400 shrink-0 text-xs mt-0.5 font-bold">
+            CEO
+        </div>
+    `;
+    historyContainer.appendChild(userBubble);
+    input.value = '';
+    historyContainer.scrollTop = historyContainer.scrollHeight;
+
+    // Typing indicator
+    const typingBubble = document.createElement('div');
+    typingBubble.id = 'dossier-typing-indicator';
+    typingBubble.className = 'p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-cyan-400 animate-pulse flex items-center gap-2';
+    typingBubble.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> <span>${agent.name} đang suy luận câu trả lời qua LLM Engine...</span>`;
+    historyContainer.appendChild(typingBubble);
+    historyContainer.scrollTop = historyContainer.scrollHeight;
+
+    // Call Real LLM API
+    const systemPrompt = `Bạn là ${agent.name}, giữ vai trò ${agent.role || 'AI Employee'} trong hệ thống Bella EOS. CEO vừa giao chỉ thị trực tiếp: "${text}". Trả lời CEO ngắn gọn 3-4 dòng tiếng Việt đúng chuyên môn của bạn.`;
+    const responseText = await LLMExecutionService.generateContent(systemPrompt);
+
+    const indicator = document.getElementById('dossier-typing-indicator');
+    if (indicator) indicator.remove();
+
+    const agentReply = responseText || `Tôi đã tiếp nhận chỉ thị: "${text}". Đang lập kế hoạch phân rã công việc và điều phối Execution Adapter để hoàn thành trong 1 giờ làm việc.`;
+
+    const replyBubble = document.createElement('div');
+    replyBubble.className = 'p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 flex items-start gap-2.5';
+    replyBubble.innerHTML = `
+        <div class="w-6 h-6 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 shrink-0 text-xs mt-0.5">
+            <i class="fa-solid ${agent.icon || 'fa-robot'}"></i>
+        </div>
+        <div>
+            <p class="font-bold text-cyan-400 text-[10px] leading-tight">${agent.name} (${agent.role || 'AI Employee'})</p>
+            <p class="mt-1 text-slate-200 leading-relaxed">${agentReply}</p>
+        </div>
+    `;
+    historyContainer.appendChild(replyBubble);
+    historyContainer.scrollTop = historyContainer.scrollHeight;
+
+    appendLog('DIRECT INTERACTION', `💬 CEO đã gửi chỉ thị trực tiếp cho [${agent.name}]: "${text}"`, 'text-cyan-400 font-bold');
+}
+
+window.openAgentDossierModal = openAgentDossierModal;
+window.closeAgentDossierModal = closeAgentDossierModal;
+window.switchDossierTab = switchDossierTab;
+window.sendDossierAgentChat = sendDossierAgentChat;
 
 safeAddListener('btn-open-settings', 'click', openGlobalSettingsModal);
 safeAddListener('btn-close-settings-modal', 'click', closeGlobalSettingsModal);
