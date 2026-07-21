@@ -1424,6 +1424,30 @@ const ExecutionEngineAdapterManager = {
 
                 if (task.requiredCapabilityIds && task.requiredCapabilityIds.includes('api.facebook')) {
                     appendLog('HERMES DRIVER', `📘 [Facebook Graph API] Đăng bài lên Trang: "${pageName}" (ID: ${pageId}) bằng Token: ${token.substring(0, 10)}...`, 'text-indigo-400 font-semibold');
+                    
+                    if (token && !token.includes('MOCK') && token.length > 15) {
+                        try {
+                            const response = await fetch(`https://graph.facebook.com/v18.0/${pageId}/feed`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    message: `Bella Campaign Post: ${task.name}. Budget: ${eilContext.erp?.approvedBudgetVnd || 10000000} VND`,
+                                    access_token: token
+                                })
+                            });
+                            const data = await response.json();
+                            if (response.ok && data.id) {
+                                appendLog('HERMES DRIVER', `✅ [Facebook Live Success] Đăng bài thật thành công! Post ID: ${data.id}`, 'text-emerald-400 font-bold');
+                                return { status: 'SUCCESS', runtime: 'Facebook API Live', output: data.id };
+                            } else {
+                                appendLog('HERMES DRIVER', `⚠️ [Facebook API Error] ${data.error ? data.error.message : 'Unknown error'}. Chạy giả lập...`, 'text-amber-400 italic');
+                            }
+                        } catch (err) {
+                            appendLog('HERMES DRIVER', `⚠️ [Facebook Connection Error] ${err.message}. Chạy giả lập...`, 'text-amber-400 italic');
+                        }
+                    } else {
+                        appendLog('HERMES DRIVER', `ℹ️ [Facebook Simulator] Chưa cấu hình Page Token thật. Chạy giả lập đăng bài thành công.`, 'text-slate-400 italic');
+                    }
                 }
                 return { status: 'SUCCESS', runtime: 'Hermes v3', output: `[Hermes Driver Output] Completed task via Facebook Page [${pageName} (${pageId})]: ${task.name}` };
             },

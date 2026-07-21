@@ -83,6 +83,72 @@ async function handleJsonRpc(body) {
                 if (name === "publish_facebook_post") {
                     const pageId = args.pageId || "1029384756";
                     const message = args.message || "Default marketing message";
+                    const accessToken = args.accessToken;
+
+                    if (accessToken && !accessToken.includes('MOCK') && accessToken.length > 15) {
+                        try {
+                            log(`Attempting real Facebook Graph API call to Page ID: ${pageId}...`);
+                            const fbResponse = await fetch(`https://graph.facebook.com/v18.0/${pageId}/feed`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    message: message,
+                                    access_token: accessToken
+                                })
+                            });
+                            
+                            const data = await fbResponse.json();
+                            if (fbResponse.ok && data.id) {
+                                log(`Successfully published to Facebook Page! Post ID: ${data.id}`);
+                                return {
+                                    jsonrpc: "2.0",
+                                    result: {
+                                        content: [
+                                            {
+                                                type: "text",
+                                                text: `✅ [Hermes MCP Server] Đăng bài THẬT thành công lên Facebook Page ID ${pageId}. Post ID: ${data.id}. Link: https://facebook.com/${data.id}`
+                                            }
+                                        ]
+                                    },
+                                    id
+                                };
+                            } else {
+                                const errMsg = data.error ? data.error.message : 'Unknown error';
+                                log(`Facebook Graph API failed: ${errMsg}`);
+                                return {
+                                    jsonrpc: "2.0",
+                                    result: {
+                                        content: [
+                                            {
+                                                type: "text",
+                                                text: `⚠️ [Hermes MCP Server Error] Không thể đăng bài lên Facebook: ${errMsg}. Đang kích hoạt chế độ giả lập...`
+                                            }
+                                        ]
+                                    },
+                                    id
+                                };
+                            }
+                        } catch (err) {
+                            log(`Facebook connection error: ${err.message}`);
+                            return {
+                                jsonrpc: "2.0",
+                                result: {
+                                    content: [
+                                        {
+                                            type: "text",
+                                            text: `⚠️ [Hermes MCP Server Connection Error] Lỗi kết nối: ${err.message}. Đang kích hoạt chế độ giả lập...`
+                                        }
+                                    ]
+                                },
+                                id
+                            };
+                        }
+                    } else {
+                        log(`No real Facebook Token provided. Running in simulation mode.`);
+                    }
+
                     // Simulated API call success
                     return {
                         jsonrpc: "2.0",
@@ -90,7 +156,7 @@ async function handleJsonRpc(body) {
                             content: [
                                 {
                                     type: "text",
-                                    text: `✅ [Hermes MCP Server] Đăng bài thành công lên Facebook Page ID ${pageId} qua Graph API. Nội dung: "${message.substring(0, 50)}..."`
+                                    text: `✅ [Hermes MCP Server Simulator] Đăng bài thành công lên Facebook Page ID ${pageId} (Mô phỏng). Nội dung: "${message.substring(0, 50)}..."`
                                 }
                             ]
                         },
