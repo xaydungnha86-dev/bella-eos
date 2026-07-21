@@ -6266,6 +6266,28 @@ const EnterpriseMarketplaceStore = {
             description: 'Tự động gửi tin nhắn Zalo OA, nhắc lịch hẹn Spa và chăm sóc khách hàng VIP theo thời gian thực.',
             stepsCount: 5,
             rating: '4.7/5 ⭐'
+        },
+        {
+            id: 'pkg_fin_reconcile',
+            name: 'Automated Financial Reconciliation & Invoice Audit SOP',
+            version: 'v1.5',
+            category: 'FINANCE',
+            author: 'Bella Official',
+            installed: false,
+            description: 'Quy trình tự đối soát số dư ngân hàng, kiểm tra khớp lệnh hóa đơn CRM và xuất báo cáo lưu chuyển tiền tệ hàng tuần.',
+            stepsCount: 7,
+            rating: '4.9/5 ⭐'
+        },
+        {
+            id: 'pkg_hr_onboard',
+            name: 'AI-Powered Candidate Screening & Onboarding SOP',
+            version: 'v1.0',
+            category: 'HR',
+            author: 'Bella Official',
+            installed: false,
+            description: 'Quy trình tự động sàng lọc CV từ VietnamWorks, phỏng vấn sơ loại bằng AI Voice, lập hợp đồng lao động điện tử và tạo mã nhân viên.',
+            stepsCount: 9,
+            rating: '4.8/5 ⭐'
         }
     ],
     connectorPackages: [
