@@ -246,3 +246,194 @@ CEO Intent ➔ [Executive Intent] ➔ Event: IntentCreated ➔ [Goal Engine] ➔
            ➔ Event: TaskDispatched ➔ [Execution Coordination] ➔ [Executor] ➔ [Evidence Store] ➔ Event: TaskDone 
            ➔ [Learning Engine] ➔ Event: SOPMutated
 ```
+
+---
+
+## 9. ARCHITECTURE FREEZE: THREE FOUNDATIONAL SCHEMAS
+
+Để đảm bảo tính ổn định tối cao trong suốt vòng đời phát triển 15-20 năm tới, chúng ta chính thức **đóng băng (Architecture Freeze)** 3 lược đồ nền tảng dưới đây. Mọi thay đổi nghiệp vụ tương lai chỉ được phép kế thừa từ các cấu trúc chuẩn này.
+
+### ① Lược đồ Đối tượng Doanh nghiệp chuẩn - Enterprise Object Model (EOM)
+Tất cả các thành phần trong hệ sinh thái (DB, API, SDK, UI, Event) đều bắt buộc sử dụng chung cấu trúc EOM:
+
+```typescript
+type EomType = 'Customer' | 'Invoice' | 'Booking' | 'Task' | 'Process' | 'Policy' | 'Resource' | 'Evidence' | 'Command' | 'Decision';
+
+interface EomObject {
+    id: string;
+    type: EomType;
+    createdAt: string;
+    updatedAt: string;
+    metadata: Record<string, any>;
+}
+
+// Chi tiết lược đồ của 10 thực thể EOM lõi:
+interface Customer extends EomObject {
+    name: string;
+    tier: 'VIP' | 'Regular';
+    segment: string;
+    contactInfo: { phone?: string; email?: string };
+}
+
+interface Invoice extends EomObject {
+    amountVnd: number;
+    taxCode?: string;
+    status: 'DRAFT' | 'PAID' | 'RECONCILED';
+    customerId: string;
+}
+
+interface Booking extends EomObject {
+    customerId: string;
+    time: string;
+    serviceName: string;
+    status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
+}
+
+interface Task extends EomObject {
+    title: string;
+    requiredCapabilities: string[];
+    assignedExecutor?: string;
+    status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
+}
+
+interface Process extends EomObject {
+    name: string;
+    activeStep: number;
+    stepsCount: number;
+    state: 'INIT' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'REVISED';
+}
+
+interface Policy extends EomObject {
+    ruleName: string;
+    conditions: string[];
+    maxSpendLimit: number;
+}
+
+interface Resource extends EomObject {
+    resourceType: 'API' | 'Compute' | 'TokenQuota';
+    limit: number;
+    used: number;
+}
+
+interface Evidence extends EomObject {
+    taskId: string;
+    hash: string;
+    payload: any;
+    verifiedAt: string;
+}
+
+interface Command extends EomObject {
+    commandName: string;
+    sender: string;
+    receiver: string;
+    payload: any;
+    dispatchedAt: string;
+}
+
+interface Decision extends EomObject {
+    objective: string;
+    pathChosen: string;
+    confidencePct: number;
+    reason: string;
+}
+```
+
+### ② Lược đồ Ngữ cảnh chuẩn - Canonical Context Package Schema
+Cấu trúc chuẩn của gói Context ECL phân phối đến mọi AI Model & Executor:
+
+```json
+{
+  "$schema": "https://bella.ai/schemas/canonical-context-v12.json",
+  "type": "object",
+  "required": ["taskId", "objective", "erp", "crm", "hr", "governance", "recalledMemoryExcerpt"],
+  "properties": {
+    "taskId": { "type": "string" },
+    "objective": { "type": "string" },
+    "erp": {
+      "type": "object",
+      "required": ["costCenter", "approvedBudgetVnd", "currency", "cashOnHandVnd", "payableAmountVnd", "inventoryAlerts"],
+      "properties": {
+        "costCenter": { "type": "string" },
+        "approvedBudgetVnd": { "type": "number" },
+        "currency": { "type": "string" },
+        "cashOnHandVnd": { "type": "number" },
+        "payableAmountVnd": { "type": "number" },
+        "inventoryAlerts": { "type": "number" }
+      }
+    },
+    "crm": {
+      "type": "object",
+      "required": ["targetSegment", "minEqeScore", "activeCustomers", "activeBookings", "dailyWebsiteSessions", "facebookReach24h"],
+      "properties": {
+        "targetSegment": { "type": "string" },
+        "minEqeScore": { "type": "number" },
+        "activeCustomers": { "type": "number" },
+        "activeBookings": { "type": "number" },
+        "dailyWebsiteSessions": { "type": "number" },
+        "facebookReach24h": { "type": "number" }
+      }
+    },
+    "hr": {
+      "type": "object",
+      "required": ["roleRequired", "slaHours", "approvalRole"],
+      "properties": {
+        "roleRequired": { "type": "string" },
+        "slaHours": { "type": "number" },
+        "approvalRole": { "type": "string" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": ["maxAutoSpendVnd", "policyId", "nightPostingAllowed"],
+      "properties": {
+        "maxAutoSpendVnd": { "type": "number" },
+        "policyId": { "type": "string" },
+        "nightPostingAllowed": { "type": "boolean" }
+      }
+    },
+    "recalledMemoryExcerpt": {
+      "type": "object",
+      "required": ["recentConversations"],
+      "properties": {
+        "recentConversations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["speaker", "text"],
+            "properties": {
+              "speaker": { "type": "string" },
+              "text": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### ③ Lược đồ Đăng ký Năng lực chuẩn - Capability Registry Schema
+Được sử dụng bởi tất cả các AI Workers và Human Operators khi gia nhập lực lượng lao động số (Bella Workers):
+
+```typescript
+type CapabilityName = 'SEO' | 'Coding' | 'Video' | 'Accounting' | 'Legal' | 'CRM' | 'Facebook' | 'TikTok' | 'Email';
+
+interface CapabilityRegistration {
+    executorId: string;                     // ID duy nhất của worker (ví dụ: 'hermes', 'claude-3-5')
+    workerType: 'AI' | 'Human';
+    activeCapabilities: {
+        name: CapabilityName;
+        proficiencyLevel: number;           // Thang điểm 1 - 100
+        avgLatencyMs: number;
+    }[];
+    financialConstraints: {
+        costPerTokenVnd?: number;
+        costPerHourVnd?: number;
+        remainingBudgetLimitVnd: number;
+    };
+    concurrencyLimits: {
+        maxRatePerMin: number;
+        activeTasksCount: number;
+    };
+}
+```
