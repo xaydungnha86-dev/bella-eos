@@ -5379,6 +5379,206 @@ window.openGlobalSettingsModal = openGlobalSettingsModal;
 window.closeGlobalSettingsModal = closeGlobalSettingsModal;
 window.saveGlobalSettings = saveGlobalSettings;
 
+// =========================================================================
+// ENTERPRISE MARKETPLACE & EXTENSIONS PLATFORM (GROUP 6 MARKETPLACE)
+// =========================================================================
+const EnterpriseMarketplaceStore = {
+    processPackages: [
+        {
+            id: 'pkg_mkt_30d',
+            name: 'Marketing Campaign SpaPOS 30-Day Growth SOP',
+            version: 'v2.0',
+            category: 'MARKETING',
+            author: 'Bella Official',
+            installed: true,
+            description: 'Quy trình chuẩn 10 bước tự động sinh bài viết SEO, Carousel, Case Studies và đặt lịch 08:00 AM qua Facebook Driver.',
+            stepsCount: 10,
+            rating: '4.9/5 ⭐'
+        },
+        {
+            id: 'pkg_prd_decomp',
+            name: 'Product Requirement Document (PRD) & Tech Spec SOP',
+            version: 'v1.2',
+            category: 'PRODUCT',
+            author: 'Bella Official',
+            installed: false,
+            description: 'Quy trình tự phân tích User Stories, lập Database Schema, thiết kế Figma Tokens và sinh mã nguồn React API.',
+            stepsCount: 8,
+            rating: '4.8/5 ⭐'
+        },
+        {
+            id: 'pkg_sec_audit',
+            name: 'Automated Software Security & OWASP Audit SOP',
+            version: 'v3.0',
+            category: 'SECURITY',
+            author: 'Bella Security Team',
+            installed: false,
+            description: 'Quy trình quét lỗ hổng an ninh Zero-Trust, audit quyền truy cập bảng Lương Payroll và xuất chứng chỉ EQE.',
+            stepsCount: 6,
+            rating: '5.0/5 ⭐'
+        },
+        {
+            id: 'pkg_crm_onboard',
+            name: 'Customer Support & Lead Nurturing SOP',
+            version: 'v1.0',
+            category: 'SALES',
+            author: 'Bella Sales Team',
+            installed: false,
+            description: 'Tự động gửi tin nhắn Zalo OA, nhắc lịch hẹn Spa và chăm sóc khách hàng VIP theo thời gian thực.',
+            stepsCount: 5,
+            rating: '4.7/5 ⭐'
+        }
+    ],
+    connectorPackages: [
+        {
+            id: 'conn_misa_erp',
+            name: 'MISA ERP Connector Plugin',
+            version: 'v2.1.0',
+            type: 'SYSTEM_RECORD',
+            installed: true,
+            description: 'Đồng bộ dữ liệu Hóa đơn, Doanh thu và Kho từ MISA ERP sang Layer 5 Enterprise Data Fabric.'
+        },
+        {
+            id: 'conn_zalo_oa',
+            name: 'Zalo Official Account Bot Driver',
+            version: 'v3.0.1',
+            type: 'EXECUTION_DRIVER',
+            installed: true,
+            description: 'Driver gửi tin nhắn Zalo tự động cho Khách hàng Spa & Nhắc ca hẹn.'
+        },
+        {
+            id: 'conn_fb_graph',
+            name: 'Facebook Graph API Driver',
+            version: 'v4.2.0',
+            type: 'EXECUTION_DRIVER',
+            installed: true,
+            description: 'Driver tự động đăng bài, quản lý Fanpage và xuất báo cáo tương tác.'
+        },
+        {
+            id: 'conn_sap_finance',
+            name: 'SAP Financial Ledger Connector',
+            version: 'v1.5.0',
+            type: 'ENTERPRISE_ERP',
+            installed: false,
+            description: 'Đồng bộ sổ sách tài chính kế toán từ SAP S/4HANA sang Bella EOS Ledger.'
+        }
+    ],
+
+    installPackage(pkgId) {
+        const pkg = this.processPackages.find(p => p.id === pkgId);
+        if (pkg) {
+            pkg.installed = true;
+            appendLog('MARKETPLACE', `🛍️ 1-CLICK INSTALL: Đã cài đặt thành công Quy trình [${pkg.name}] (${pkg.version}) vào Process Runtime!`, 'text-purple-400 font-bold');
+            return true;
+        }
+        return false;
+    },
+
+    installConnector(connId) {
+        const conn = this.connectorPackages.find(c => c.id === connId);
+        if (conn) {
+            conn.installed = true;
+            appendLog('MARKETPLACE', `🔌 1-CLICK INSTALL: Đã cài đặt Connector [${conn.name}] (${conn.version}) vào Integration Mesh!`, 'text-cyan-400 font-bold');
+            return true;
+        }
+        return false;
+    }
+};
+
+let activeMarketplaceTab = 'sops';
+
+function openMarketplaceModal() {
+    console.log("🛍️ [openMarketplaceModal] opening Marketplace store...");
+    const modal = document.getElementById('marketplace-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    renderMarketplaceContent();
+}
+
+function closeMarketplaceModal() {
+    const modal = document.getElementById('marketplace-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function switchMarketplaceTab(tab) {
+    activeMarketplaceTab = tab;
+    const btnSops = document.getElementById('mkt-tab-sops');
+    const btnConnectors = document.getElementById('mkt-tab-connectors');
+    if (tab === 'sops') {
+        if (btnSops) btnSops.className = 'py-3 text-purple-400 border-b-2 border-purple-500 flex items-center gap-1.5 cursor-pointer font-bold';
+        if (btnConnectors) btnConnectors.className = 'py-3 text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-1.5 cursor-pointer font-medium';
+    } else {
+        if (btnConnectors) btnConnectors.className = 'py-3 text-purple-400 border-b-2 border-purple-500 flex items-center gap-1.5 cursor-pointer font-bold';
+        if (btnSops) btnSops.className = 'py-3 text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-1.5 cursor-pointer font-medium';
+    }
+    renderMarketplaceContent();
+}
+
+function renderMarketplaceContent() {
+    const container = document.getElementById('marketplace-content-area');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (activeMarketplaceTab === 'sops') {
+        EnterpriseMarketplaceStore.processPackages.forEach(pkg => {
+            const card = document.createElement('div');
+            card.className = 'p-4 rounded-xl border bg-slate-950/80 border-slate-800 flex items-start justify-between gap-4 transition hover:border-purple-800/60';
+            card.innerHTML = `
+                <div class="space-y-1.5 flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800/50">${pkg.category}</span>
+                        <h4 class="font-bold text-xs text-slate-100">${pkg.name}</h4>
+                        <span class="text-[9px] font-mono text-slate-500">${pkg.version}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">${pkg.description}</p>
+                    <div class="flex items-center gap-3 text-[10px] text-slate-500 font-mono pt-1">
+                        <span>Tác giả: <strong class="text-slate-300">${pkg.author}</strong></span>
+                        <span>Quy mô: <strong>${pkg.stepsCount} Bước SOP</strong></span>
+                        <span>Đánh giá: <strong class="text-amber-400">${pkg.rating}</strong></span>
+                    </div>
+                </div>
+                <div class="shrink-0 pt-1">
+                    ${pkg.installed ? 
+                        `<button class="px-3.5 py-1.5 bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-xs font-bold rounded-xl cursor-default flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Đã Cài Đặt</button>` :
+                        `<button onclick="EnterpriseMarketplaceStore.installPackage('${pkg.id}'); renderMarketplaceContent();" class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-download"></i> 1-Click Install</button>`
+                    }
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    } else {
+        EnterpriseMarketplaceStore.connectorPackages.forEach(conn => {
+            const card = document.createElement('div');
+            card.className = 'p-4 rounded-xl border bg-slate-950/80 border-slate-800 flex items-start justify-between gap-4 transition hover:border-cyan-800/60';
+            card.innerHTML = `
+                <div class="space-y-1.5 flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[9px] font-bold font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/50">${conn.type}</span>
+                        <h4 class="font-bold text-xs text-slate-100">${conn.name}</h4>
+                        <span class="text-[9px] font-mono text-slate-500">${conn.version}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">${conn.description}</p>
+                </div>
+                <div class="shrink-0 pt-1">
+                    ${conn.installed ? 
+                        `<button class="px-3.5 py-1.5 bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-xs font-bold rounded-xl cursor-default flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Đã Kết Nối</button>` :
+                        `<button onclick="EnterpriseMarketplaceStore.installConnector('${conn.id}'); renderMarketplaceContent();" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-plug"></i> Kết Nối Ngay</button>`
+                    }
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+}
+
+window.EnterpriseMarketplaceStore = EnterpriseMarketplaceStore;
+window.openMarketplaceModal = openMarketplaceModal;
+window.closeMarketplaceModal = closeMarketplaceModal;
+window.switchMarketplaceTab = switchMarketplaceTab;
+window.renderMarketplaceContent = renderMarketplaceContent;
+
+safeAddListener('btn-open-marketplace', 'click', openMarketplaceModal);
+
 safeAddListener('btn-open-settings', 'click', openGlobalSettingsModal);
 safeAddListener('btn-close-settings-modal', 'click', closeGlobalSettingsModal);
 safeAddListener('btn-cancel-settings', 'click', closeGlobalSettingsModal);

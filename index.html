@@ -71,6 +71,12 @@
                 <span>Chờ duyệt (1)</span>
             </button>
 
+            <!-- Marketplace Store Button -->
+            <button id="btn-open-marketplace" onclick="openMarketplaceModal()" class="bg-purple-950/60 hover:bg-purple-900/80 text-purple-300 border border-purple-800/80 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer" title="Kho Quy Trình Mẫu & Extensions Marketplace">
+                <i class="fa-solid fa-store text-purple-400"></i>
+                <span>Marketplace Packages</span>
+            </button>
+
             <!-- Settings API Keys Trigger Button -->
             <button id="btn-open-settings" onclick="openGlobalSettingsModal()" class="bg-slate-900/80 hover:bg-slate-800/90 text-slate-300 border border-slate-800/80 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer" title="Cấu hình API Keys">
                 <i class="fa-solid fa-key text-amber-400"></i>
@@ -1034,7 +1040,49 @@
         </div>
     </div>
 
+    <!-- ENTERPRISE MARKETPLACE & EXTENSIONS STORE MODAL -->
+    <div id="marketplace-modal" style="display: none;" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-sans font-bold text-sm text-white">Kho Quy Trình Mẫu & Marketplace Packages</h3>
+                        <p class="text-[10px] text-slate-400 font-sans">App Store cho 1-Click Install SOP Marketing, PRD, Code Audit & System Connectors</p>
+                    </div>
+                </div>
+                <button onclick="closeMarketplaceModal()" class="text-slate-400 hover:text-white transition text-sm w-7 h-7 rounded-lg hover:bg-slate-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Category Tabs -->
+            <div class="flex items-center gap-4 px-6 border-b border-slate-800 bg-slate-950/40 text-xs font-semibold">
+                <button id="mkt-tab-sops" onclick="switchMarketplaceTab('sops')" class="py-3 text-purple-400 border-b-2 border-purple-500 flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <span>Quy trình SOPs (Process Packages)</span>
+                </button>
+                <button id="mkt-tab-connectors" onclick="switchMarketplaceTab('connectors')" class="py-3 text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-plug"></i>
+                    <span>Connectors & Adapters</span>
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div id="marketplace-content-area" class="p-6 overflow-y-auto space-y-4 font-sans text-xs custom-scrollbar max-h-[60vh]">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <div class="px-6 py-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
+                <span class="text-[10px] text-slate-400 font-mono">Status: <strong class="text-purple-400">BELLA MARKETPLACE v10.0 READY</strong></span>
+                <button onclick="closeMarketplaceModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition cursor-pointer">Đóng Kho</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom App Logic Script (Cache Buster) -->
-    <script src="app.js?v=20260721_12"></script>
+    <script src="app.js?v=20260721_13"></script>
 </body>
 </html>
