@@ -719,11 +719,13 @@ const EnterpriseContextLayer = {
         const targetSegment = editSegment ? editSegment.value.trim() : (brandGuidelines.tone ? 'VIP Spa Clients' : 'Enterprise VIP');
         const brandVoice = editVoice ? editVoice.value : (brandGuidelines.tone || 'Professional & Premium');
         const targetFollowers = editFollowers ? parseInt(editFollowers.value, 10) : 1000;
+        const metricKey = editFollowers && editFollowers.dataset.metricKey ? editFollowers.dataset.metricKey : 'targetFollowers';
+        const friendlyMetricName = metricKey.replace('target', '');
 
         // Compile the unified Enterprise Canonical Context Package
         const context = {
             taskId: task.id || `task_${Date.now()}`,
-            objective: objective || `Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày (Mục tiêu: +${targetFollowers} Followers)`,
+            objective: objective || `Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày (Mục tiêu: +${targetFollowers.toLocaleString()} ${friendlyMetricName})`,
             contextSources: [
                 { source: 'bella-eip', domain: 'crm', version: '1.0' },
                 { source: 'google-analytics', domain: 'marketing', version: '4.0' },
@@ -741,7 +743,6 @@ const EnterpriseContextLayer = {
             crm: {
                 targetSegment: targetSegment,
                 brandVoice: brandVoice,
-                targetFollowers: targetFollowers,
                 minEqeScore: 90,
                 activeCustomers: eipData.customersCount,
                 activeBookings: eipData.bookingsCount,
@@ -763,6 +764,9 @@ const EnterpriseContextLayer = {
                 recentConversations: this.EnterpriseMemory.recallMemory('conversation').slice(-2)
             }
         };
+
+        // Dynamically assign target metric value
+        context.crm[metricKey] = targetFollowers;
 
         // Store reasoning path memory
         this.EnterpriseMemory.storeMemory('reasoning', {
@@ -917,6 +921,20 @@ const GoalEngine = {
         let budget = 50000000;
         let followers = 1000;
         let segment = "VIP Beauty & Spa Clients";
+        let metricName = "Mục tiêu Followers";
+        let metricKey = "targetFollowers";
+        
+        const lowerVision = strategicVision.toLowerCase();
+        if (lowerVision.includes("doanh thu") || lowerVision.includes("doanh số") || lowerVision.includes("revenue") || lowerVision.includes("sales") || lowerVision.includes("tiền")) {
+            metricName = "Mục tiêu Doanh số (VND)";
+            metricKey = "targetRevenueVnd";
+        } else if (lowerVision.includes("lead") || lowerVision.includes("khách hàng") || lowerVision.includes("đăng ký") || lowerVision.includes("reg") || lowerVision.includes("user")) {
+            metricName = "Mục tiêu Leads / Đăng ký";
+            metricKey = "targetLeads";
+        } else if (lowerVision.includes("tuyển") || lowerVision.includes("nhân sự") || lowerVision.includes("hr") || lowerVision.includes("tuyển dụng") || lowerVision.includes("người")) {
+            metricName = "Mục tiêu Nhân sự (Người)";
+            metricKey = "targetStaffCount";
+        }
         
         // Parse budget
         const budgetMatch = strategicVision.match(/(\d+)\s*(triệu|tr|m|tỷ)/i);
@@ -928,9 +946,12 @@ const GoalEngine = {
         }
         
         // Parse quantity / followers / leads
-        const quantityMatch = strategicVision.match(/(\d+)\s*(follower|leads|khách hàng|kh|sub|tin nhắn)/i);
+        const quantityMatch = strategicVision.match(/(\d+)\s*(follower|leads|khách hàng|kh|sub|tin nhắn|người|%|triệu|tr)/i);
         if (quantityMatch) {
             followers = parseInt(quantityMatch[1], 10);
+            if (metricKey === "targetRevenueVnd" && strategicVision.includes(quantityMatch[1] + "tr")) {
+                followers = followers * 1000000;
+            }
         }
         
         // Parse segment keyword
@@ -943,10 +964,15 @@ const GoalEngine = {
         // Dynamically update UI input form elements if they are present!
         const editBudget = document.getElementById('bce-edit-budget');
         const editFollowers = document.getElementById('bce-edit-followers');
+        const editFollowersLabel = document.getElementById('bce-edit-followers-label');
         const editSegment = document.getElementById('bce-edit-segment');
         
         if (editBudget) editBudget.value = budget;
-        if (editFollowers) editFollowers.value = followers;
+        if (editFollowers) {
+            editFollowers.value = followers;
+            editFollowers.dataset.metricKey = metricKey;
+        }
+        if (editFollowersLabel) editFollowersLabel.textContent = metricName;
         if (editSegment) editSegment.value = segment;
         
         // Trigger live JSON update
