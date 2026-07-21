@@ -1077,11 +1077,38 @@
                         </button>
                     </div>
                 </div>
+                <!-- Multi-Fanpage Manager -->
                 <div>
-                    <label class="block text-slate-300 font-semibold mb-1 text-[11px]">Facebook Driver Access Token</label>
-                    <input type="password" id="settings-fb-token" placeholder="EAAX..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition mb-2">
-                    <label class="block text-slate-450 mb-1 text-[9px] font-mono">Target Page ID / Account ID</label>
-                    <input type="text" id="settings-fb-page-id" placeholder="1029384756..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-slate-300 font-semibold text-[11px]">
+                            <i class="fa-brands fa-facebook text-blue-400 mr-1"></i>
+                            Facebook Channels (Multi-Fanpage)
+                        </label>
+                        <button type="button" onclick="openAddFanpageForm()" class="text-[9px] font-bold px-2 py-0.5 rounded-lg bg-blue-900/60 hover:bg-blue-800/80 text-blue-300 border border-blue-800/60 transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Thêm kênh
+                        </button>
+                    </div>
+
+                    <!-- Fanpage list -->
+                    <div id="fb-channel-list" class="space-y-1.5 mb-2 max-h-[140px] overflow-y-auto pr-1 custom-scrollbar"></div>
+
+                    <!-- Add fanpage inline form (hidden by default) -->
+                    <div id="fb-add-form" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2">
+                        <p class="text-[9px] text-blue-400 font-bold uppercase tracking-wide">Thêm kênh Facebook mới</p>
+                        <input type="text" id="fb-new-name" placeholder="Tên kênh: VD. Spa Bella HN" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:outline-none focus:border-blue-500 transition">
+                        <input type="password" id="fb-new-token" placeholder="Access Token: EAAX..." class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:outline-none focus:border-blue-500 transition">
+                        <input type="text" id="fb-new-pageid" placeholder="Page ID: 1029384756" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:outline-none focus:border-blue-500 transition">
+                        <div class="flex gap-2">
+                            <button type="button" onclick="confirmAddFanpage()" class="flex-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition">Lưu kênh</button>
+                            <button type="button" onclick="cancelAddFanpage()" class="text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition">Huỷ</button>
+                        </div>
+                    </div>
+
+                    <!-- Active channel badge -->
+                    <div id="fb-active-badge" class="hidden mt-1 text-[9px] text-emerald-400 font-mono flex items-center gap-1">
+                        <i class="fa-solid fa-circle-dot animate-pulse"></i>
+                        <span id="fb-active-label">Đang dùng: —</span>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-slate-300 font-semibold mb-1 text-[11px]">Supabase URL & Anon Key</label>

@@ -1098,12 +1098,23 @@ const ExecutionEngineAdapterManager = {
             name: 'HermesExecutionAdapter',
             async execute(task, eilContext) {
                 console.log(`🚀 [HermesAdapter] Executing task [${task.name || task.id}] with ECL Context...`, eilContext);
-                const token = localStorage.getItem('bella_fb_driver_token') || 'DEFAULT_EAAX_TOKEN';
-                const pageId = localStorage.getItem('bella_fb_page_id') || '1029384756';
-                if (task.requiredCapabilityIds && task.requiredCapabilityIds.includes('api.facebook')) {
-                    appendLog('HERMES DRIVER', `📘 [Facebook Graph API] Posting to Target Page ID: "${pageId}" (Token: ${token.substring(0, 10)}...)`, 'text-indigo-400 font-semibold');
+                
+                // Ensure channels are loaded and retrieve the selected active channel
+                if (typeof loadFbChannels === 'function') {
+                    loadFbChannels();
                 }
-                return { status: 'SUCCESS', runtime: 'Hermes v3', output: `[Hermes Driver Output] Completed task via Facebook Page [${pageId}]: ${task.name}` };
+                const activeChannel = (typeof fbChannels !== 'undefined' && fbChannels[activeFbChannelIndex]) 
+                    ? fbChannels[activeFbChannelIndex] 
+                    : { name: "Default Page", token: "DEFAULT_EAAX_TOKEN", pageId: "1029384756" };
+                
+                const token = activeChannel.token || 'DEFAULT_EAAX_TOKEN';
+                const pageId = activeChannel.pageId || '1029384756';
+                const pageName = activeChannel.name || 'Default Page';
+
+                if (task.requiredCapabilityIds && task.requiredCapabilityIds.includes('api.facebook')) {
+                    appendLog('HERMES DRIVER', `📘 [Facebook Graph API] Đăng bài lên Trang: "${pageName}" (ID: ${pageId}) bằng Token: ${token.substring(0, 10)}...`, 'text-indigo-400 font-semibold');
+                }
+                return { status: 'SUCCESS', runtime: 'Hermes v3', output: `[Hermes Driver Output] Completed task via Facebook Page [${pageName} (${pageId})]: ${task.name}` };
             },
             async cancel(taskId) { return true; },
             async status(taskId) { return 'RUNNING'; },
@@ -5987,18 +5998,17 @@ function openGlobalSettingsModal() {
     const geminiInput = document.getElementById('settings-gemini-key');
     const openaiInput = document.getElementById('settings-openai-key');
     const anthropicInput = document.getElementById('settings-anthropic-key');
-    const fbInput = document.getElementById('settings-fb-token');
-    const fbPageInput = document.getElementById('settings-fb-page-id');
     const supabaseInput = document.getElementById('settings-supabase-key');
     const alertBox = document.getElementById('settings-status-alert');
 
     if (geminiInput) geminiInput.value = localStorage.getItem('bella_gemini_api_key') || '';
     if (openaiInput) openaiInput.value = localStorage.getItem('bella_openai_api_key') || '';
     if (anthropicInput) anthropicInput.value = localStorage.getItem('bella_anthropic_api_key') || '';
-    if (fbInput) fbInput.value = localStorage.getItem('bella_fb_driver_token') || '';
-    if (fbPageInput) fbPageInput.value = localStorage.getItem('bella_fb_page_id') || '';
     if (supabaseInput) supabaseInput.value = localStorage.getItem('supabase_anon_key') || '';
     if (alertBox) alertBox.style.display = 'none';
+
+    // Render multi-fanpage list
+    renderFbChannelList();
 
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
@@ -6016,16 +6026,12 @@ function saveGlobalSettings() {
     const geminiKey = (document.getElementById('settings-gemini-key')?.value || '').trim();
     const openaiKey = (document.getElementById('settings-openai-key')?.value || '').trim();
     const anthropicKey = (document.getElementById('settings-anthropic-key')?.value || '').trim();
-    const fbToken = (document.getElementById('settings-fb-token')?.value || '').trim();
-    const fbPageId = (document.getElementById('settings-fb-page-id')?.value || '').trim();
     const supabaseKey = (document.getElementById('settings-supabase-key')?.value || '').trim();
 
     // Store keys in LocalStorage
     localStorage.setItem('bella_gemini_api_key', geminiKey);
     localStorage.setItem('bella_openai_api_key', openaiKey);
     localStorage.setItem('bella_anthropic_api_key', anthropicKey);
-    localStorage.setItem('bella_fb_driver_token', fbToken);
-    localStorage.setItem('bella_fb_page_id', fbPageId);
     localStorage.setItem('supabase_anon_key', supabaseKey);
 
     // Apply keys globally
@@ -6062,6 +6068,155 @@ function saveGlobalSettings() {
 window.openGlobalSettingsModal = openGlobalSettingsModal;
 window.closeGlobalSettingsModal = closeGlobalSettingsModal;
 window.saveGlobalSettings = saveGlobalSettings;
+
+// =========================================================================
+// FACEBOOK MULTI-CHANNEL (FANPAGE) REGISTRY & CONTROLLER
+// =========================================================================
+let fbChannels = [];
+let activeFbChannelIndex = 0;
+
+function loadFbChannels() {
+    const saved = localStorage.getItem('bella_fb_channels');
+    if (saved) {
+        try {
+            fbChannels = JSON.parse(saved);
+        } catch (e) {
+            console.error('Error parsing Facebook channels', e);
+        }
+    }
+    
+    // Pre-populate with defaults if empty
+    if (!fbChannels || fbChannels.length === 0) {
+        fbChannels = [
+            { name: "Spa Bella Hà Nội", token: "EAAX_HN_MOCK_TOKEN_123456789", pageId: "1029384756" },
+            { name: "Spa Bella Sài Gòn", token: "EAAX_SG_MOCK_TOKEN_987654321", pageId: "9876543210" }
+        ];
+        localStorage.setItem('bella_fb_channels', JSON.stringify(fbChannels));
+    }
+    
+    const savedActive = localStorage.getItem('bella_fb_active_channel_index');
+    if (savedActive !== null) {
+        activeFbChannelIndex = parseInt(savedActive, 10);
+        if (activeFbChannelIndex >= fbChannels.length || activeFbChannelIndex < 0) {
+            activeFbChannelIndex = 0;
+        }
+    } else {
+        activeFbChannelIndex = 0;
+    }
+}
+
+function renderFbChannelList() {
+    loadFbChannels();
+    const listEl = document.getElementById('fb-channel-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    
+    fbChannels.forEach((channel, idx) => {
+        const isActive = idx === activeFbChannelIndex;
+        const item = document.createElement('div');
+        item.className = `flex items-center justify-between p-2 rounded-lg border text-[11px] ${isActive ? 'bg-blue-950/40 border-blue-800 text-blue-100' : 'bg-slate-900 border-slate-800 text-slate-400'}`;
+        
+        item.innerHTML = `
+            <div class="flex items-center gap-2 cursor-pointer flex-1" onclick="selectFbChannel(${idx})">
+                <input type="radio" name="active-fb-channel" ${isActive ? 'checked' : ''} class="accent-blue-500 cursor-pointer">
+                <div>
+                    <div class="font-bold text-[11px] text-slate-200">${channel.name}</div>
+                    <div class="font-mono text-[9px] text-slate-400">ID: ${channel.pageId} | Token: ${channel.token.substring(0, 10)}...</div>
+                </div>
+            </div>
+            <button type="button" onclick="deleteFbChannel(${idx})" class="text-rose-400 hover:text-rose-300 p-1 transition ml-2" title="Xoá kênh">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+        `;
+        listEl.appendChild(item);
+    });
+    
+    updateActiveFbBadge();
+}
+
+function updateActiveFbBadge() {
+    const badgeEl = document.getElementById('fb-active-badge');
+    const labelEl = document.getElementById('fb-active-label');
+    if (!badgeEl || !labelEl) return;
+    
+    if (fbChannels[activeFbChannelIndex]) {
+        badgeEl.classList.remove('hidden');
+        labelEl.innerText = `Đang dùng: ${fbChannels[activeFbChannelIndex].name} (${fbChannels[activeFbChannelIndex].pageId})`;
+    } else {
+        badgeEl.classList.add('hidden');
+    }
+}
+
+function openAddFanpageForm() {
+    const form = document.getElementById('fb-add-form');
+    if (form) form.classList.remove('hidden');
+}
+
+function cancelAddFanpage() {
+    const form = document.getElementById('fb-add-form');
+    if (form) form.classList.add('hidden');
+    // Reset inputs
+    const nameInput = document.getElementById('fb-new-name');
+    const tokenInput = document.getElementById('fb-new-token');
+    const pageIdInput = document.getElementById('fb-new-pageid');
+    if (nameInput) nameInput.value = '';
+    if (tokenInput) tokenInput.value = '';
+    if (pageIdInput) pageIdInput.value = '';
+}
+
+function confirmAddFanpage() {
+    const nameInput = document.getElementById('fb-new-name');
+    const tokenInput = document.getElementById('fb-new-token');
+    const pageIdInput = document.getElementById('fb-new-pageid');
+    
+    const name = nameInput ? nameInput.value.trim() : '';
+    const token = tokenInput ? tokenInput.value.trim() : '';
+    const pageId = pageIdInput ? pageIdInput.value.trim() : '';
+    
+    if (!name || !token || !pageId) {
+        alert('Vui lòng điền đầy đủ Tên kênh, Access Token và Page ID!');
+        return;
+    }
+    
+    fbChannels.push({ name, token, pageId });
+    localStorage.setItem('bella_fb_channels', JSON.stringify(fbChannels));
+    
+    cancelAddFanpage();
+    renderFbChannelList();
+}
+
+function selectFbChannel(index) {
+    activeFbChannelIndex = index;
+    localStorage.setItem('bella_fb_active_channel_index', index);
+    renderFbChannelList();
+}
+
+function deleteFbChannel(index) {
+    if (fbChannels.length <= 1) {
+        alert('Phải giữ lại ít nhất 1 kênh Fanpage!');
+        return;
+    }
+    if (confirm(`Bạn có chắc chắn muốn xoá kênh "${fbChannels[index].name}"?`)) {
+        fbChannels.splice(index, 1);
+        if (activeFbChannelIndex >= fbChannels.length) {
+            activeFbChannelIndex = fbChannels.length - 1;
+        }
+        localStorage.setItem('bella_fb_channels', JSON.stringify(fbChannels));
+        localStorage.setItem('bella_fb_active_channel_index', activeFbChannelIndex);
+        renderFbChannelList();
+    }
+}
+
+// Expose functions globally for HTML triggers
+window.openAddFanpageForm = openAddFanpageForm;
+window.cancelAddFanpage = cancelAddFanpage;
+window.confirmAddFanpage = confirmAddFanpage;
+window.selectFbChannel = selectFbChannel;
+window.deleteFbChannel = deleteFbChannel;
+window.loadFbChannels = loadFbChannels;
+
+// Initialize on script load
+loadFbChannels();
 
 // =========================================================================
 // ENTERPRISE MARKETPLACE & EXTENSIONS PLATFORM (GROUP 6 MARKETPLACE)
