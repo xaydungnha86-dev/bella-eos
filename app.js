@@ -130,6 +130,9 @@ const BellaKernel = {
         };
         this.auditLedger.push(ledgerRecord);
         this.emitKernelEvent('KERNEL_TRANSACTION_COMMITTED', ledgerRecord);
+        if (typeof SupabasePersistenceEngine !== 'undefined') {
+            SupabasePersistenceEngine.persistTransaction(ledgerRecord);
+        }
         console.log(`⚡ [BELLA MICRO-KERNEL] Txn [${transactionId}] (${actionType}) ➔ COMMITTED`);
         return ledgerRecord;
     },
@@ -306,6 +309,9 @@ const EvidenceService = {
         });
         this.evidences.push(evidence);
         BellaKernel.executeTransaction('qa', 'STORE_EXECUTION_EVIDENCE', evidence);
+        if (typeof SupabasePersistenceEngine !== 'undefined') {
+            SupabasePersistenceEngine.persistEvidence(evidence);
+        }
         appendLog('EVIDENCE SERVICE', `🔍 [VERIFIED EVIDENCE] Stored proof: ${proofType} | Hash: [${proofHash}]`, 'text-emerald-400 font-bold');
         return evidence;
     },
@@ -5340,11 +5346,45 @@ async function initSupabaseRealtimeSync() {
             })
             .subscribe();
 
-        appendLog('SYSTEM', '⚡ Đã kết nối thành công Supabase Realtime Bus (qwpyfhojxctrvqkjctcl)!', 'text-emerald-400 font-bold');
+        appendLog('SYSTEM', '⚡ Đã kết nối thành công Supabase Realtime Bus & Data Persistence (qwpyfhojxctrvqkjctcl)!', 'text-emerald-400 font-bold');
     } catch (err) {
         console.warn("[Supabase Sync Warning]", err);
     }
 }
+
+// SUPABASE DATA PERSISTENCE SUBSYSTEM
+const SupabasePersistenceEngine = {
+    async persistTransaction(txRecord) {
+        if (!window.supabaseClient) return;
+        try {
+            await window.supabaseClient.from('audit_ledger').insert([{
+                transaction_id: txRecord.transactionId,
+                actor_id: txRecord.actorId,
+                action_type: txRecord.actionType,
+                payload: txRecord.payload,
+                created_at: txRecord.timestamp
+            }]);
+        } catch (err) {
+            console.warn('[Supabase Audit Sync]', err);
+        }
+    },
+    async persistEvidence(evidenceRecord) {
+        if (!window.supabaseClient) return;
+        try {
+            await window.supabaseClient.from('evidence_store').insert([{
+                task_id: evidenceRecord.taskId,
+                proof_type: evidenceRecord.proofType,
+                proof_hash: evidenceRecord.proofHash,
+                proof_data: evidenceRecord.proofData,
+                created_at: evidenceRecord.timestamp
+            }]);
+        } catch (err) {
+            console.warn('[Supabase Evidence Sync]', err);
+        }
+    }
+};
+
+window.SupabasePersistenceEngine = SupabasePersistenceEngine;
 
 // GLOBAL SETTINGS MODAL CONTROLLER
 function openGlobalSettingsModal() {
