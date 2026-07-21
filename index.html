@@ -291,42 +291,48 @@
                 </div>
 
                 <!-- Live Business State (Enterprise Data Fabric) Floating Panel -->
-                <div class="absolute top-16 right-4 z-10 select-none bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3.5 text-xs text-slate-350 shadow-lg pointer-events-auto w-[240px]">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2">
+                <div id="eip-fabric-panel" class="absolute top-16 right-4 z-10 select-none bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3.5 text-xs text-slate-350 shadow-lg pointer-events-auto transition-all duration-300 w-[240px]">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-2 cursor-pointer" onclick="toggleEipFabricPanel()">
                         <div class="flex items-center gap-1.5">
                             <i class="fa-solid fa-database text-cyan-400"></i>
                             <span class="font-bold text-white uppercase text-[9px] tracking-wider">Enterprise Data Fabric</span>
                         </div>
-                        <span class="text-[8px] bg-slate-950 text-indigo-400 border border-indigo-800/40 px-1 py-0.5 rounded font-mono font-semibold">Mock EIP Connector</span>
-                    </div>
-                    <div class="space-y-1.5 font-mono text-[10px]">
-                        <div class="flex justify-between py-0.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Active Customers:</span>
-                            <strong class="text-slate-250 font-bold" id="eip-state-customers">1,289</strong>
-                        </div>
-                        <div class="flex justify-between py-0.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Today's Bookings:</span>
-                            <strong class="text-slate-250 font-bold" id="eip-state-bookings">42</strong>
-                        </div>
-                        <div class="flex justify-between py-0.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Revenue Today:</span>
-                            <strong class="text-emerald-400 font-bold" id="eip-state-revenue">156M VND</strong>
-                        </div>
-                        <div class="flex justify-between py-0.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">Inventory Alerts:</span>
-                            <strong class="text-rose-450 font-bold" id="eip-state-inventory">3 alerts</strong>
-                        </div>
-                        <div class="flex justify-between py-0.5 border-b border-slate-800/50">
-                            <span class="text-slate-400">HR Capacity:</span>
-                            <strong class="text-cyan-400 font-bold" id="eip-state-hr">87%</strong>
-                        </div>
-                        <div class="flex justify-between py-0.5">
-                            <span class="text-slate-400">Cash Flow:</span>
-                            <strong class="text-emerald-400 font-bold" id="eip-state-cashflow">HEALTHY</strong>
+                        <div class="flex items-center gap-1.5">
+                            <span id="eip-fabric-badge" class="text-[8px] bg-slate-950 text-indigo-400 border border-indigo-800/40 px-1 py-0.5 rounded font-mono font-semibold">Mock EIP</span>
+                            <button class="text-slate-400 hover:text-white transition text-[9px] cursor-pointer"><i id="eip-fabric-toggle-icon" class="fa-solid fa-chevron-up"></i></button>
                         </div>
                     </div>
-                    <div class="text-[8px] text-slate-500 italic mt-2.5 border-t border-slate-800/60 pt-1.5 leading-normal">
-                        * Dữ liệu được lấy thời gian thực từ Connector của Bella EIP. Bella EOS không quản trị hay lưu trữ trực tiếp các bảng nghiệp vụ này.
+                    <!-- Collapsible Container -->
+                    <div id="eip-fabric-content" class="space-y-1.5 transition-all duration-300">
+                        <div class="space-y-1.5 font-mono text-[10px]">
+                            <div class="flex justify-between py-0.5 border-b border-slate-800/50">
+                                <span class="text-slate-400">Active Customers:</span>
+                                <strong class="text-slate-250 font-bold" id="eip-state-customers">1,289</strong>
+                            </div>
+                            <div class="flex justify-between py-0.5 border-b border-slate-800/50">
+                                <span class="text-slate-400">Today's Bookings:</span>
+                                <strong class="text-slate-250 font-bold" id="eip-state-bookings">42</strong>
+                            </div>
+                            <div class="flex justify-between py-0.5 border-b border-slate-800/50">
+                                <span class="text-slate-400">Revenue Today:</span>
+                                <strong class="text-emerald-400 font-bold" id="eip-state-revenue">156M VND</strong>
+                            </div>
+                            <div class="flex justify-between py-0.5 border-b border-slate-800/50">
+                                <span class="text-slate-400">Inventory Alerts:</span>
+                                <strong class="text-rose-450 font-bold" id="eip-state-inventory">3 alerts</strong>
+                            </div>
+                            <div class="flex justify-between py-0.5 border-b border-slate-800/50">
+                                <span class="text-slate-400">HR Capacity:</span>
+                                <strong class="text-cyan-400 font-bold" id="eip-state-hr">87%</strong>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span class="text-slate-400">Cash Flow:</span>
+                                <strong class="text-emerald-400 font-bold" id="eip-state-cashflow">HEALTHY</strong>
+                            </div>
+                        </div>
+                        <div class="text-[8px] text-slate-500 italic mt-2.5 border-t border-slate-800/60 pt-1.5 leading-normal">
+                            * Dữ liệu được lấy thời gian thực từ Connector của Bella EIP. Bella EOS không quản trị hay lưu trữ trực tiếp các bảng nghiệp vụ này.
+                        </div>
                     </div>
                 </div>
             </div>

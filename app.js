@@ -6907,3 +6907,26 @@ function switchEilTab(tabName) {
         contentGraph.classList.add('hidden');
     }
 }
+
+function toggleEipFabricPanel() {
+    const content = document.getElementById('eip-fabric-content');
+    const icon = document.getElementById('eip-fabric-toggle-icon');
+    const panel = document.getElementById('eip-fabric-panel');
+    const badge = document.getElementById('eip-fabric-badge');
+    
+    if (!content || !icon || !panel) return;
+
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.className = 'fa-solid fa-chevron-up';
+        panel.style.width = '240px';
+        if (badge) badge.classList.remove('hidden');
+    } else {
+        content.classList.add('hidden');
+        icon.className = 'fa-solid fa-chevron-down';
+        panel.style.width = '175px';
+        if (badge) badge.classList.add('hidden');
+    }
+}
+
+window.toggleEipFabricPanel = toggleEipFabricPanel;
