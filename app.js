@@ -236,9 +236,10 @@ const ProcessRuntimeService = {
     }
 };
 
-// Service 2: Execution Service (Scheduler, Command Bus Pub/Sub, Dispatcher, Retry Queue)
-const ExecutionService = {
+// Service 2: Execution Coordination Layer (Queue, Dispatcher, Heartbeat, Retry, Audit)
+const ExecutionCoordination = {
     topics: {},
+    queue: [],
     subscribe(topic, subscriberId, handler) {
         if (!this.topics[topic]) this.topics[topic] = [];
         this.topics[topic].push({ subscriberId, handler });
@@ -246,10 +247,30 @@ const ExecutionService = {
     publishCommand(commandType, payload) {
         const cmd = EnterpriseObjectModel.createObject('Command', { type: commandType, payload, targetTopic: commandType, status: 'DISPATCHED' });
         BellaKernel.executeTransaction('coo', 'PUBLISH_COMMAND', cmd);
-        appendLog('EXECUTION SERVICE', `⚡ [COMMAND BUS] Distributed command [${commandType}] ➔ Subscriber [Hermes Driver]`, 'text-cyan-400 font-bold');
+        appendLog('EXECUTION COORDINATION', `⚡ [COMMAND BUS] Distributed command [${commandType}] ➔ Subscriber [Hermes Driver]`, 'text-cyan-400 font-bold');
         return cmd;
+    },
+    async dispatch(task, context) {
+        appendLog('EXECUTION COORDINATION', `🗂️ [TASK QUEUED] Task [${task.name || task.id}] registered to active executor queue.`, 'text-slate-400');
+        // Heartbeat simulation
+        appendLog('EXECUTION COORDINATION', `💓 [HEARTBEAT] Active monitor established for Executor of task [${task.name || task.id}]`, 'text-slate-500 italic');
+        
+        // Simulating the capability routing & dispatch
+        const executor = CapabilityRegistry.findOptimalExecutor(task.requiredCapabilityIds || ['mgmt.strategy'], context.erp.approvedBudgetVnd);
+        
+        appendLog('EXECUTION COORDINATION', `⚖️ [CAPABILITY SCHEDULER] Selected Executor [${executor.executorId}] for capabilities [${(task.requiredCapabilityIds || ['mgmt.strategy']).join(', ')}] (Cost: ${executor.selectedCapability.avgLatencyMs}ms lat, quota left: ${executor.tokenQuotaRemaining} tokens).`, 'text-purple-400 font-semibold');
+        
+        // Dynamic adapter invocation
+        const adapter = ExecutionEngineAdapterManager.getAdapter(executor.adapterKey);
+        const result = await adapter.execute(task, context);
+        
+        return result;
     }
 };
+
+const ExecutionService = ExecutionCoordination;
+window.ExecutionCoordination = ExecutionCoordination;
+window.ExecutionService = ExecutionService;
 
 // Service 3: Resource Service (Quota, Budget, Tokens, API, License, Capacity, Locks)
 const ResourceService = {
@@ -744,6 +765,135 @@ const EnterpriseContextLayer = {
 window.EnterpriseContextLayer = EnterpriseContextLayer;
 window.EnterpriseIntelligenceLayer = EnterpriseContextLayer; // Backward compatibility alias
 
+// ==========================================
+// CAPABILITY REGISTRY & INTELLIGENT SCHEDULER
+// ==========================================
+const CapabilityRegistry = {
+    // Registered Capabilities Directory
+    capabilities: {
+        'mgmt.strategy': { id: 'mgmt.strategy', name: 'Strategic Vision & OKRs Decomposing', version: '1.0', category: 'Management', tags: ['strategy', 'planning'] },
+        'mgmt.planning': { id: 'mgmt.planning', name: 'Process Planning & Flow Setup', version: '1.0', category: 'Management', tags: ['planning', 'operations'] },
+        'risk.assessment': { id: 'risk.assessment', name: 'Security & Operations Risk Scan', version: '1.2', category: 'Security', tags: ['risk', 'audit'] },
+        'mkt.copywriting': { id: 'mkt.copywriting', name: 'SEO & Social Copywriting', version: '2.1', category: 'Marketing', tags: ['copy', 'seo', 'content'] },
+        'arch.design': { id: 'arch.design', name: 'Software & Process Architecture Design', version: '1.0', category: 'Architecture', tags: ['spec', 'design'] },
+        'design.ui': { id: 'design.ui', name: 'UI/UX Visual Design Layouts', version: '2.0', category: 'Design', tags: ['ui', 'ux', 'figma'] },
+        'dev.coding': { id: 'dev.coding', name: 'Programming & Logic Implementation', version: '3.0', category: 'Development', tags: ['coding', 'backend', 'frontend'] },
+        'sales.crm': { id: 'sales.crm', name: 'Sales Pipeline & Customer Script Setup', version: '1.5', category: 'Sales', tags: ['crm', 'sales', 'intercom'] },
+        'api.facebook': { id: 'api.facebook', name: 'Facebook Graph API Integration', version: '1.0', category: 'Integration', tags: ['api', 'facebook', 'social'] },
+        'qa.audit': { id: 'qa.audit', name: 'DoD Standards & Quality Review', version: '1.1', category: 'Quality', tags: ['qa', 'audit', 'compliance'] },
+        'security.scan': { id: 'security.scan', name: 'Static & Dynamic Vulnerability Audits', version: '2.0', category: 'Security', tags: ['security', 'scan'] },
+        'mgmt.approval': { id: 'mgmt.approval', name: 'Executive Overrides & Approvals Manager', version: '1.0', category: 'Management', tags: ['approval', 'ceo'] },
+        'devops.deploy': { id: 'devops.deploy', name: 'Cloud Infrastructure & App Deployment', version: '2.1', category: 'Infrastructure', tags: ['devops', 'deploy', 'k8s'] },
+        'api.telemetry': { id: 'api.telemetry', name: 'Live Metrics Stream & Telemetry Watch', version: '1.0', category: 'Infrastructure', tags: ['telemetry', 'monitor'] },
+        'learning.optimization': { id: 'learning.optimization', name: 'SOP & Skills Mutation Trainer', version: '1.2', category: 'AI Engine', tags: ['learning', 'optimize'] },
+        'finance.reporting': { id: 'finance.reporting', name: 'Financial Margin & ROI Analysis', version: '1.0', category: 'Finance', tags: ['finance', 'roi'] }
+    },
+
+    // Registered AI & Human Workers (Executors)
+    executors: [
+        {
+            executorId: 'hermes',
+            workerType: 'AI',
+            adapterKey: 'hermes',
+            activeCapabilities: [
+                { capabilityId: 'mgmt.strategy', proficiencyLevel: 95, avgLatencyMs: 400 },
+                { capabilityId: 'mgmt.planning', proficiencyLevel: 90, avgLatencyMs: 500 },
+                { capabilityId: 'api.facebook', proficiencyLevel: 85, avgLatencyMs: 650 },
+                { capabilityId: 'mgmt.approval', proficiencyLevel: 95, avgLatencyMs: 100 },
+                { capabilityId: 'learning.optimization', proficiencyLevel: 88, avgLatencyMs: 800 },
+                { capabilityId: 'finance.reporting', proficiencyLevel: 92, avgLatencyMs: 600 }
+            ],
+            costPerTokenVnd: 0.1,
+            tokenQuotaRemaining: 950000
+        },
+        {
+            executorId: 'claude-3-5',
+            workerType: 'AI',
+            adapterKey: 'claudecode',
+            activeCapabilities: [
+                { capabilityId: 'arch.design', proficiencyLevel: 98, avgLatencyMs: 1200 },
+                { capabilityId: 'qa.audit', proficiencyLevel: 96, avgLatencyMs: 900 },
+                { capabilityId: 'security.scan', proficiencyLevel: 95, avgLatencyMs: 1100 },
+                { capabilityId: 'dev.coding', proficiencyLevel: 97, avgLatencyMs: 1500 },
+                { capabilityId: 'risk.assessment', proficiencyLevel: 94, avgLatencyMs: 1000 }
+            ],
+            costPerTokenVnd: 0.5,
+            tokenQuotaRemaining: 480000
+        },
+        {
+            executorId: 'gemini-1-5',
+            workerType: 'AI',
+            adapterKey: 'openhands',
+            activeCapabilities: [
+                { capabilityId: 'mkt.copywriting', proficiencyLevel: 92, avgLatencyMs: 800 },
+                { capabilityId: 'design.ui', proficiencyLevel: 94, avgLatencyMs: 1400 },
+                { capabilityId: 'dev.coding', proficiencyLevel: 90, avgLatencyMs: 1600 }
+            ],
+            costPerTokenVnd: 0.2,
+            tokenQuotaRemaining: 890000
+        },
+        {
+            executorId: 'openai-gpt4',
+            workerType: 'AI',
+            adapterKey: 'codex',
+            activeCapabilities: [
+                { capabilityId: 'dev.coding', proficiencyLevel: 93, avgLatencyMs: 1100 },
+                { capabilityId: 'sales.crm', proficiencyLevel: 95, avgLatencyMs: 950 }
+            ],
+            costPerTokenVnd: 0.4,
+            tokenQuotaRemaining: 670000
+        }
+    ],
+
+    findOptimalExecutor(requiredCapabilityIds, budgetLimitVnd = 50000000) {
+        let bestExecutor = null;
+        let bestScore = -1;
+        let selectedCapReg = null;
+
+        // Iterate executors to find the one matching the highest count of required capabilities
+        this.executors.forEach(exec => {
+            // Check if executor's token budget is exhausted
+            if (exec.tokenQuotaRemaining <= 0) return;
+
+            let matchesCount = 0;
+            let sumProficiency = 0;
+            let firstMatchedCap = null;
+
+            requiredCapabilityIds.forEach(reqId => {
+                const found = exec.activeCapabilities.find(c => c.capabilityId === reqId);
+                if (found) {
+                    matchesCount++;
+                    sumProficiency += found.proficiencyLevel;
+                    if (!firstMatchedCap) firstMatchedCap = found;
+                }
+            });
+
+            if (matchesCount > 0) {
+                // Calculate simple scoring: matches * 1000 + avg proficiency - cost factor
+                const score = (matchesCount * 1000) + (sumProficiency / matchesCount) - (exec.costPerTokenVnd * 100);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestExecutor = exec;
+                    selectedCapReg = firstMatchedCap;
+                }
+            }
+        });
+
+        // Fallback to hermes if no match is found
+        if (!bestExecutor) {
+            bestExecutor = this.executors[0];
+            selectedCapReg = bestExecutor.activeCapabilities[0];
+        }
+
+        return {
+            ...bestExecutor,
+            selectedCapability: selectedCapReg
+        };
+    }
+};
+
+window.CapabilityRegistry = CapabilityRegistry;
+
 // 1. Goal Engine
 const GoalEngine = {
     goals: [],
@@ -995,10 +1145,8 @@ const ExecutionEngineAdapterManager = {
     },
 
     async dispatchTask(adapterKey, task, objective) {
-        const adapter = this.getAdapter(adapterKey);
-        const eilContext = EnterpriseIntelligenceLayer.compileContext(task, objective);
-        console.log(`⚡ [EXECUTION SERVICE] Dispatching via [${adapter.name}] with EIL Package:`, eilContext);
-        return await adapter.execute(task, eilContext);
+        const eilContext = EnterpriseContextLayer.compileContext(task, objective);
+        return await ExecutionCoordination.dispatch(task, eilContext);
     }
 };
 
@@ -1492,16 +1640,16 @@ const CapabilityMatrix = {
 const AI_AGENTS = WorkforceRegistry.members;
 
 const WORKFLOW_STEPS = [
-    { id: 1, name: '1. Định hướng Chiến lược (Objective)', agent: 'ceo', text: 'CEO duyệt Mục tiêu Spa Booking & Ngân sách Chiến dịch 50M VND' },
-    { id: 2, name: '2. Phân tích & Lập PRD (Objective OS)', agent: 'pm', text: 'AI PM lập PRD v1.2 & phân rã 30 Nội dung Marketing' },
-    { id: 3, name: '3. Sáng tạo Content & SEO (Generate)', agent: 'mkt', text: 'AI Marketing soạn 30 bài viết chuẩn SEO & Brand Voice' },
-    { id: 4, name: '4. Thẩm định Chất lượng (Quality Gate)', agent: 'qa', text: 'Quality Gate kiểm duyệt Grammar, Brand, SEO & Legal (Pass 96%)' },
-    { id: 5, name: '5. Phê duyệt & Đặt lịch 8h AM (Approve & Schedule)', agent: 'ceo', text: 'CEO Ký duyệt Release & Đặt lịch đăng tự động lúc 08:00 AM', isApprovalGate: true },
-    { id: 6, name: '6. Điều phối Tác vụ (Dispatch Engine)', agent: 'coo', text: 'Dispatch Engine khớp Task Contract ➔ Tìm Executor Hermes phù hợp' },
-    { id: 7, name: '7. Robot Thực thi Action (Hermes Operator)', agent: 'hermes', text: 'Hermes gọi Facebook API đăng bài & xuất PDF Báo giá cho CRM' },
-    { id: 8, name: '8. Xác minh Đầu ra (Verification Engine)', agent: 'qa', text: 'Verification Engine kiểm tra Post ID công khai & HTTP 200 OK' },
-    { id: 9, name: '9. Lưu vết Event & Ledger (Bella Kernel)', agent: 'devops', text: 'Bella Kernel lưu Transaction, Event Sourcing & Audit Ledger' },
-    { id: 10, name: '10. Học & Tối ưu (Feedback Engine)', agent: 'fin', text: 'Feedback Engine nạp dữ liệu vào Knowledge Graph & Tối ưu ROI' }
+    { id: 1, name: '1. Định hướng Chiến lược (Objective)', agent: 'ceo', text: 'CEO duyệt Mục tiêu Spa Booking & Ngân sách Chiến dịch 50M VND', requiredCapabilityIds: ['mgmt.strategy'] },
+    { id: 2, name: '2. Phân tích & Lập PRD (Objective OS)', agent: 'pm', text: 'AI PM lập PRD v1.2 & phân rã 30 Nội dung Marketing', requiredCapabilityIds: ['mgmt.planning', 'risk.assessment'] },
+    { id: 3, name: '3. Sáng tạo Content & SEO (Generate)', agent: 'mkt', text: 'AI Marketing soạn 30 bài viết chuẩn SEO & Brand Voice', requiredCapabilityIds: ['mkt.copywriting'] },
+    { id: 4, name: '4. Thẩm định Chất lượng (Quality Gate)', agent: 'qa', text: 'Quality Gate kiểm duyệt Grammar, Brand, SEO & Legal (Pass 96%)', requiredCapabilityIds: ['qa.audit'] },
+    { id: 5, name: '5. Phê duyệt & Đặt lịch 8h AM (Approve & Schedule)', agent: 'ceo', text: 'CEO Ký duyệt Release & Đặt lịch đăng tự động lúc 08:00 AM', isApprovalGate: true, requiredCapabilityIds: ['mgmt.approval'] },
+    { id: 6, name: '6. Điều phối Tác vụ (Dispatch Engine)', agent: 'coo', text: 'Dispatch Engine khớp Task Contract ➔ Tìm Executor Hermes phù hợp', requiredCapabilityIds: ['mgmt.planning'] },
+    { id: 7, name: '7. Robot Thực thi Action (Hermes Operator)', agent: 'hermes', text: 'Hermes gọi Facebook API đăng bài & xuất PDF Báo giá cho CRM', requiredCapabilityIds: ['api.facebook'] },
+    { id: 8, name: '8. Xác minh Đầu ra (Verification Engine)', agent: 'qa', text: 'Verification Engine kiểm tra Post ID công khai & HTTP 200 OK', requiredCapabilityIds: ['qa.audit', 'security.scan'] },
+    { id: 9, name: '9. Lưu vết Event & Ledger (Bella Kernel)', agent: 'devops', text: 'Bella Kernel lưu Transaction, Event Sourcing & Audit Ledger', requiredCapabilityIds: ['devops.deploy'] },
+    { id: 10, name: '10. Học & Tối ưu (Feedback Engine)', agent: 'fin', text: 'Feedback Engine nạp dữ liệu vào Knowledge Graph & Tối ưu ROI', requiredCapabilityIds: ['learning.optimization', 'finance.reporting'] }
 ];
 
 // =========================================================================
@@ -4426,7 +4574,7 @@ function stepForward() {
     appendLog('OPTIMIZATION ENGINE', `⚖️ [Path Optimization] Chọn: "${optReport.optimalPath.path}" (Độ tin cậy: ${optReport.optimalPath.successRate}%, Tiết kiệm: ${optReport.savingsPct}%)`, 'text-purple-400 font-semibold');
 
     // Flywheel Step 3: Execution
-    appendLog('EXECUTION ADAPTER', `⚡ [Execution Adapter] Dispatched task via [${currentStep.adapterKey || 'hermes'}] Adapter. EIL context attached.`, 'text-amber-500');
+    ExecutionCoordination.dispatch(currentStep, activeEilContext);
 
     // Flywheel Step 4: Observation
     appendLog('OBSERVATION ENGINE', `📊 [Observation Telemetry] Real-time tracking activated. CAC: 1.2M VND | Active Reach: 145,200 users`, 'text-slate-400');
