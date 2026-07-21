@@ -912,11 +912,53 @@ const GoalEngine = {
     goals: [],
     decomposeGoal(strategicVision) {
         const id = `GOAL-${Date.now().toString(36).toUpperCase()}`;
+        
+        // Dynamic extraction
+        let budget = 50000000;
+        let followers = 1000;
+        let segment = "VIP Beauty & Spa Clients";
+        
+        // Parse budget
+        const budgetMatch = strategicVision.match(/(\d+)\s*(triệu|tr|m|tỷ)/i);
+        if (budgetMatch) {
+            const num = parseInt(budgetMatch[1]);
+            const unit = budgetMatch[2].toLowerCase();
+            if (unit === 'tỷ') budget = num * 1000000000;
+            else budget = num * 1000000;
+        }
+        
+        // Parse quantity / followers / leads
+        const quantityMatch = strategicVision.match(/(\d+)\s*(follower|leads|khách hàng|kh|sub|tin nhắn)/i);
+        if (quantityMatch) {
+            followers = parseInt(quantityMatch[1], 10);
+        }
+        
+        // Parse segment keyword
+        if (strategicVision.toLowerCase().includes("hà nội") || strategicVision.toLowerCase().includes("hn")) {
+            segment = "VIP Spa Clients Hà Nội";
+        } else if (strategicVision.toLowerCase().includes("sài gòn") || strategicVision.toLowerCase().includes("sg")) {
+            segment = "VIP Spa Clients Sài Gòn";
+        }
+        
+        // Dynamically update UI input form elements if they are present!
+        const editBudget = document.getElementById('bce-edit-budget');
+        const editFollowers = document.getElementById('bce-edit-followers');
+        const editSegment = document.getElementById('bce-edit-segment');
+        
+        if (editBudget) editBudget.value = budget;
+        if (editFollowers) editFollowers.value = followers;
+        if (editSegment) editSegment.value = segment;
+        
+        // Trigger live JSON update
+        if (typeof updateLiveCompiledContext === 'function') {
+            updateLiveCompiledContext();
+        }
+
         const subGoals = {
-            marketing: { title: 'Marketing Goal', leads: 1500, reach: 50000, description: 'Thu hút 1500 lead chất lượng cao' },
-            sales: { title: 'Sales Goal', conversionRate: 25, revenueVND: 450000000, description: 'Đạt tỷ lệ chuyển đổi demo 25%' },
+            marketing: { title: 'Marketing Goal', leads: followers, reach: followers * 10, description: `Thu hút ${followers} leads/followers chất lượng` },
+            sales: { title: 'Sales Goal', conversionRate: 25, revenueVND: budget * 3, description: `Đạt tỷ lệ chuyển đổi demo 25%` },
             hr: { title: 'HR Goal', trainees: 10, skillUpgrades: ['AI Agent Operations', 'SOP Writing'], description: 'Đào tạo 10 nhân sự sử dụng AI' },
-            finance: { title: 'Finance Goal', budgetCapVND: 120000000, minNetMargin: 35, description: 'Giới hạn ngân sách 120M VND, Margin tối thiểu 35%' },
+            finance: { title: 'Finance Goal', budgetCapVND: budget, minNetMargin: 35, description: `Giới hạn ngân sách ${budget.toLocaleString()} VND, Margin tối thiểu 35%` },
             operations: { title: 'Operations Goal', avgSlaHours: 4.5, compliancesPassed: 100, description: 'Thời gian SLA trung bình dưới 4.5h, 100% pass' }
         };
         const goalRecord = {
@@ -5430,6 +5472,12 @@ async function sendCeoCommand() {
     if (!val) return;
 
     appendLog('CEO (OBJECTIVE)', `🎯 MỤC TIÊU CHIẾN LƯỢC MỚI TỪ CEO: "${val}"`, 'text-amber-400 font-bold');
+    
+    // Parse and decompose the CEO's directive immediately to update the BCE Context Inputs
+    if (typeof GoalEngine !== 'undefined' && typeof GoalEngine.decomposeGoal === 'function') {
+        GoalEngine.decomposeGoal(val);
+    }
+    
     input.value = '';
 
     appendLog('AI COO', '🤖 AI COO đang phân tích và tự lập trình Quy trình SOP qua LLM Engine...', 'text-cyan-400 font-semibold animate-pulse');
