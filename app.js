@@ -5215,6 +5215,9 @@ function closeGlobalSettingsModal() {
     if (modal) modal.classList.add('hidden');
 }
 
+window.openGlobalSettingsModal = openGlobalSettingsModal;
+window.closeGlobalSettingsModal = closeGlobalSettingsModal;
+
 safeAddListener('btn-open-settings', 'click', openGlobalSettingsModal);
 safeAddListener('btn-close-settings-modal', 'click', closeGlobalSettingsModal);
 safeAddListener('btn-cancel-settings', 'click', closeGlobalSettingsModal);
