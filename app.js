@@ -5186,9 +5186,11 @@ async function initSupabaseRealtimeSync() {
 
 // GLOBAL SETTINGS MODAL CONTROLLER
 function openGlobalSettingsModal() {
+    console.log("🔑 [openGlobalSettingsModal] opening modal...");
     const modal = document.getElementById('global-settings-modal');
     if (!modal) {
         console.warn("[Settings Modal] Could not find #global-settings-modal element");
+        alert("Không tìm thấy bảng Cấu hình API Key!");
         return;
     }
 
@@ -5205,24 +5207,21 @@ function openGlobalSettingsModal() {
     if (anthropicInput) anthropicInput.value = localStorage.getItem('bella_anthropic_api_key') || '';
     if (fbInput) fbInput.value = localStorage.getItem('bella_fb_driver_token') || '';
     if (supabaseInput) supabaseInput.value = localStorage.getItem('supabase_anon_key') || '';
-    if (alertBox) alertBox.classList.add('hidden');
+    if (alertBox) alertBox.style.display = 'none';
 
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
 }
 
 function closeGlobalSettingsModal() {
     const modal = document.getElementById('global-settings-modal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
 }
 
-window.openGlobalSettingsModal = openGlobalSettingsModal;
-window.closeGlobalSettingsModal = closeGlobalSettingsModal;
-
-safeAddListener('btn-open-settings', 'click', openGlobalSettingsModal);
-safeAddListener('btn-close-settings-modal', 'click', closeGlobalSettingsModal);
-safeAddListener('btn-cancel-settings', 'click', closeGlobalSettingsModal);
-
-safeAddListener('btn-save-settings', 'click', () => {
+function saveGlobalSettings() {
     const geminiKey = (document.getElementById('settings-gemini-key')?.value || '').trim();
     const openaiKey = (document.getElementById('settings-openai-key')?.value || '').trim();
     const anthropicKey = (document.getElementById('settings-anthropic-key')?.value || '').trim();
@@ -5244,7 +5243,7 @@ safeAddListener('btn-save-settings', 'click', () => {
     // Show inline alert in modal
     const alertBox = document.getElementById('settings-status-alert');
     if (alertBox) {
-        alertBox.classList.remove('hidden');
+        alertBox.style.display = 'flex';
     }
 
     // Reinitialize Supabase client if key is updated
@@ -5265,7 +5264,16 @@ safeAddListener('btn-save-settings', 'click', () => {
         closeGlobalSettingsModal();
         appendLog('SYSTEM', '🔑 Cập nhật các khóa API (Gemini, OpenAI, Anthropic, Facebook, Supabase) thành công!', 'text-amber-400 font-bold');
     }, 600);
-});
+}
+
+window.openGlobalSettingsModal = openGlobalSettingsModal;
+window.closeGlobalSettingsModal = closeGlobalSettingsModal;
+window.saveGlobalSettings = saveGlobalSettings;
+
+safeAddListener('btn-open-settings', 'click', openGlobalSettingsModal);
+safeAddListener('btn-close-settings-modal', 'click', closeGlobalSettingsModal);
+safeAddListener('btn-cancel-settings', 'click', closeGlobalSettingsModal);
+safeAddListener('btn-save-settings', 'click', saveGlobalSettings);
 
 // INITIALIZE APP ON LOAD
 function initApp() {
