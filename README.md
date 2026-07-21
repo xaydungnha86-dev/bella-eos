@@ -1,7 +1,15 @@
-# 🏛️ BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
-## Autonomous Enterprise Business Operating System v11.0
+# 🏛️ BELLA AI PLATFORM
+## Hệ sinh thái AI vận hành doanh nghiệp tự trị v11.0
 
-> **Định Vị Cốt Lõi**: Bella AI Platform không phải là một "AI Platform" hay "AI Agent Tool", mà là một **Enterprise Operating System (Enterprise OS)** hoàn chỉnh dành cho Doanh nghiệp Số. AI chỉ đóng vai trò **Execution Layer** (tương tự CPU/ARM trong Windows/Android). Doanh nghiệp mua Mô hình Vận hành Doanh nghiệp Tự trị, chứ không mua công cụ AI đơn lẻ.
+> **Định Vị Thương Hiệu Nhiều Tầng (Brand Hierarchy)**:
+> 
+> * **Bella AI Platform**: Thương hiệu tổng của toàn bộ hệ sinh thái AI dành cho doanh nghiệp.
+> * **Bella EOS (Enterprise Operating System)**: Bộ não điều hành doanh nghiệp (Lõi Kernel, Quy trình SOP, Phân quyền, Policy, Memory, Học hỏi tiến hóa).
+> * **Bella EIP (Enterprise Integration Platform / Business Suite)**: Hệ thống quản trị nghiệp vụ sinh dữ liệu (`CRM`, `Booking`, `POS`, `Inventory`, `Finance`, `Payroll`, `BI`).
+> * **Bella Workers**: Lực lượng lao động số AI (các Agent trực tiếp nhận việc).
+> * **Hermes / Codex / Adapters**: Lớp thực thi kỹ thuật (Execution Engine).
+> 
+> *Khi giới thiệu với khách hàng:* **"Bella AI Platform là nền tảng AI dành cho doanh nghiệp. Trong đó, Bella EOS là bộ não điều hành, Bella EIP là hệ thống nghiệp vụ và dữ liệu, các AI Workers là lực lượng lao động số trực tiếp thực thi qua lớp Hermes."**
 
 ---
 

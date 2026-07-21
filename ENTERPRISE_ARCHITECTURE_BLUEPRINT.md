@@ -4,26 +4,33 @@
 
 ---
 
-## 1. EXECUTIVE SUMMARY & TRI-PARTITE ARCHITECTURE
+## 1. HỆ SINH THÁI THƯƠNG HIỆU BELLA AI PLATFORM
 
-Bella EOS is an **Autonomous Enterprise Operating System (Autonomous EOS)** designed around the **Tri-Partite System Separation**:
+Hệ sinh thái được định vị theo mô hình thương hiệu nhiều tầng rõ ràng để phát triển bền vững trong 10-20 năm:
 
 ```
-                       Bella EIP Suite (System of Record + Data Fabric)
-                                       │
-                                       ▼
-                       Bella EOS (System of Orchestration)
-                       ├── Enterprise Intelligence Layer (EIL)
-                       └── Pluggable Execution Adapters
-                                       │
-                                       ▼
-             Pluggable Execution Runtimes (System of Execution)
-         [Hermes • Codex • Claude Code • OpenHands • Custom REST]
+Bella AI Platform (Thương hiệu hệ sinh thái)
+        │
+        ├── Bella EOS (Enterprise Operating System - Hệ điều hành Doanh nghiệp)
+        │
+        ├── Bella EIP (Enterprise Integration Platform / Business Suite - Ứng dụng nghiệp vụ)
+        │
+        ├── Bella Workers (Lực lượng lao động số AI)
+        │
+        ├── Bella SDK (Bộ công cụ phát triển)
+        │
+        ├── Bella Connect (Cổng kết nối SAP, MISA, Facebook, TikTok...)
+        │
+        └── Bella Marketplace (Chợ quy trình SOP & Extension Packages)
 ```
 
-1. **Bella EIP (System of Record)**: Business Data Fabric (Customer, Invoice, Booking, Financial Ledger, Inventory, HR).
-2. **Bella EOS (System of Orchestration)**: Operating Kernel, Enterprise Services, Intent Decomposition, Process Life Cycle, Quality & Evidence, and **Enterprise Intelligence Layer (EIL)**.
-3. **Pluggable Execution Runtimes (System of Execution)**: Framework-agnostic execution engines (Hermes, Codex, Claude Code, OpenHands, Custom REST) managed via unified `ExecutionEngineAdapter`.
+### Phân vai và Định vị thành phần:
+
+1. **Bella AI Platform (Thương hiệu tổng)**: Tên của toàn bộ hệ sinh thái công nghệ AI dành cho doanh nghiệp.
+2. **Bella EOS (Lõi Điều hành - System of Orchestration)**: "Hệ điều hành doanh nghiệp" đóng vai trò là bộ não điều khiển toàn bộ quy trình, chịu trách nhiệm cho các dịch vụ nền tảng: `Kernel`, `Process Runtime`, `Scheduler`, `Policy`, `Context`, `Memory`, `Command Bus`, `Dispatch`, `Evidence` và `Learning`.
+3. **Bella EIP (Hệ thống Nghiệp vụ - System of Record / Business Suite)**: Gói ứng dụng nghiệp vụ sinh dữ liệu bao gồm `CRM`, `Booking`, `POS`, `Inventory`, `Finance`, `Payroll` và `BI Dashboard`. EIP là nơi dữ liệu nghiệp vụ sinh ra, Bella EOS sẽ sử dụng dữ liệu này để ra quyết định và điều hành.
+4. **Bella Workers**: Lực lượng lao động số thực hiện các nhiệm vụ được chỉ định.
+5. **Hermes / Codex / Claude Code**: Các Execution Engines (Lớp thực thi).
 
 ---
 
