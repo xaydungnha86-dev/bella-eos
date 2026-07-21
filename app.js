@@ -3283,8 +3283,9 @@ function setupRaycaster() {
         startY = e.clientY;
         
         // Accurate coordinates on canvas
-        mouse.x = (e.offsetX / dom.clientWidth) * 2 - 1;
-        mouse.y = -(e.offsetY / dom.clientHeight) * 2 + 1;
+        const rect = dom.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
         dragRaycaster.setFromCamera(mouse, camera);
         
@@ -3377,8 +3378,9 @@ function setupRaycaster() {
     dom.addEventListener('pointermove', (e) => {
         if (layoutMode === 'none' || !draggedObject) return;
         
-        dragMouse.x = (e.offsetX / dom.clientWidth) * 2 - 1;
-        dragMouse.y = -(e.offsetY / dom.clientHeight) * 2 + 1;
+        const rect = dom.getBoundingClientRect();
+        dragMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        dragMouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
         dragRaycaster.setFromCamera(dragMouse, camera);
         const intersection = new THREE.Vector3();
@@ -3426,8 +3428,8 @@ function setupRaycaster() {
                 const rawX = dragStartPositions.agentPos.x + deltaX;
                 const rawZ = dragStartPositions.agentPos.z + deltaZ;
 
-                meshGroup.position.x = Math.max(-15, Math.min(15, Math.round(rawX)));
-                meshGroup.position.z = Math.max(-15, Math.min(15, Math.round(rawZ)));
+                meshGroup.position.x = Math.max(-15, Math.min(15, Math.round(rawX * 2) / 2));
+                meshGroup.position.z = Math.max(-15, Math.min(15, Math.round(rawZ * 2) / 2));
             }
         }
     });
@@ -3438,8 +3440,9 @@ function setupRaycaster() {
 
         // Click detection: if mouse clicked on an agent/dept without dragging
         if (diffX < 10 && diffY < 10 && !draggedObject) {
-            mouse.x = (e.offsetX / dom.clientWidth) * 2 - 1;
-            mouse.y = -(e.offsetY / dom.clientHeight) * 2 + 1;
+            const rect = dom.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
             dragRaycaster.setFromCamera(mouse, camera);
             const agentGroups = Object.values(agentMeshes).map(m => m.group);
