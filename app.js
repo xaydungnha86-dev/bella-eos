@@ -709,10 +709,21 @@ const EnterpriseContextLayer = {
         // Recall Guidelines from Memory
         const brandGuidelines = this.EnterpriseMemory.recallMemory('document')[0] || {};
         
+        // Read dynamic user edits from BCE config table if they exist
+        const editBudget = document.getElementById('bce-edit-budget');
+        const editFollowers = document.getElementById('bce-edit-followers');
+        const editVoice = document.getElementById('bce-edit-voice');
+        const editSegment = document.getElementById('bce-edit-segment');
+
+        const approvedBudget = editBudget ? parseInt(editBudget.value, 10) : 50000000;
+        const targetSegment = editSegment ? editSegment.value.trim() : (brandGuidelines.tone ? 'VIP Spa Clients' : 'Enterprise VIP');
+        const brandVoice = editVoice ? editVoice.value : (brandGuidelines.tone || 'Professional & Premium');
+        const targetFollowers = editFollowers ? parseInt(editFollowers.value, 10) : 1000;
+
         // Compile the unified Enterprise Canonical Context Package
         const context = {
             taskId: task.id || `task_${Date.now()}`,
-            objective: objective || 'Tăng trưởng Vận hành & Doanh thu Doanh nghiệp',
+            objective: objective || `Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày (Mục tiêu: +${targetFollowers} Followers)`,
             contextSources: [
                 { source: 'bella-eip', domain: 'crm', version: '1.0' },
                 { source: 'google-analytics', domain: 'marketing', version: '4.0' },
@@ -721,14 +732,16 @@ const EnterpriseContextLayer = {
             ],
             erp: {
                 costCenter: 'CC-BELLA-2026',
-                approvedBudgetVnd: 50000000,
+                approvedBudgetVnd: approvedBudget,
                 currency: 'VND',
                 cashOnHandVnd: misaData.cashOnHandVnd,
                 payableAmountVnd: misaData.payableAmountVnd,
                 inventoryAlerts: eipData.inventoryAlerts || misaData.inventoryAlerts
             },
             crm: {
-                targetSegment: brandGuidelines.tone ? 'VIP Spa Clients' : 'Enterprise VIP',
+                targetSegment: targetSegment,
+                brandVoice: brandVoice,
+                targetFollowers: targetFollowers,
                 minEqeScore: 90,
                 activeCustomers: eipData.customersCount,
                 activeBookings: eipData.bookingsCount,
@@ -6475,6 +6488,24 @@ window.confirmAddFanpage = confirmAddFanpage;
 window.selectFbChannel = selectFbChannel;
 window.deleteFbChannel = deleteFbChannel;
 window.loadFbChannels = loadFbChannels;
+
+function updateLiveCompiledContext() {
+    const currentStep = (typeof WORKFLOW_STEPS !== 'undefined' && typeof currentStepIndex !== 'undefined') 
+        ? (WORKFLOW_STEPS[currentStepIndex] || WORKFLOW_STEPS[0]) 
+        : { id: 1, name: "1. Khởi tạo Project & Thiết lập OKRs" };
+        
+    const objInput = document.getElementById('ceo-command-input');
+    const objectiveText = objInput && objInput.value ? objInput.value : 'Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày';
+    
+    if (typeof EnterpriseContextLayer !== 'undefined' && typeof EnterpriseContextLayer.compileContext === 'function') {
+        const activeEilContext = EnterpriseContextLayer.compileContext(currentStep, objectiveText);
+        const elCompiledContext = document.getElementById('eil-compiled-context-display');
+        if (elCompiledContext) {
+            elCompiledContext.innerHTML = JSON.stringify(activeEilContext, null, 4);
+        }
+    }
+}
+window.updateLiveCompiledContext = updateLiveCompiledContext;
 
 // Initialize on script load
 loadFbChannels();
