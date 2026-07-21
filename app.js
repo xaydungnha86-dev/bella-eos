@@ -1391,8 +1391,8 @@ const ExecutionEngineAdapterManager = {
 
                 // Attempt calling local Hermes MCP Server
                 try {
-                    appendLog('HERMES MCP CLIENT', `📡 Đang tìm kiếm cổng Hermes MCP Server (localhost:8080)...`, 'text-slate-400 italic');
-                    const mcpResponse = await fetch('http://localhost:8080/jsonrpc', {
+                    appendLog('HERMES MCP CLIENT', `📡 Đang tìm kiếm cổng Hermes MCP Server (localhost:8888)...`, 'text-slate-400 italic');
+                    const mcpResponse = await fetch('http://localhost:8888/jsonrpc', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

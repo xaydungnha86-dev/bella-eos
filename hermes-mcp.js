@@ -1,11 +1,11 @@
 /**
  * standalone-hermes-mcp.js
  * Standalone Zero-Dependency Model Context Protocol (MCP) Server for Hermes Execution Engine.
- * Runs on http://localhost:8080.
+ * Runs on http://localhost:8888.
  */
 const http = require('http');
 
-const PORT = 8080;
+const PORT = 8888;
 
 // Internal State
 const logHistory = [];
