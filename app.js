@@ -478,6 +478,102 @@ window.EnterpriseDataFabric = EnterpriseDataFabric;
 window.EnterpriseStateMachine = EnterpriseStateMachine;
 
 // =========================================================================
+// BUSINESS CONTEXT ENGINE (BCE) & PLUGGABLE EXECUTION ADAPTERS
+// =========================================================================
+const BusinessContextEngine = {
+    compileContext(task, objective = null) {
+        return {
+            taskId: task.id || `task_${Date.now()}`,
+            objective: objective || 'Tăng trưởng Vận hành & Doanh thu Doanh nghiệp',
+            erp: {
+                costCenter: 'CC-BELLA-2026',
+                approvedBudgetVnd: 50000000,
+                currency: 'VND'
+            },
+            crm: {
+                targetSegment: 'Enterprise VIP',
+                minEqeScore: 90,
+                customerChannel: 'Multichannel (FB/Zalo/Email)'
+            },
+            hr: {
+                roleRequired: task.agent || 'AI Specialist',
+                slaHours: 24,
+                approvalRole: 'CEO'
+            },
+            governance: {
+                maxAutoSpendVnd: 100000000,
+                policyId: 'POL-ENTERPRISE-GOV-2026',
+                nightPostingAllowed: false
+            },
+            decisionLineage: ['DEC-INITIAL-INTENT-001']
+        };
+    }
+};
+
+const ExecutionEngineAdapterManager = {
+    adapters: {
+        hermes: {
+            name: 'HermesExecutionAdapter',
+            async execute(task, bceContext) {
+                console.log(`🚀 [HermesAdapter] Executing task [${task.name || task.id}] with BCE Context...`, bceContext);
+                return { status: 'SUCCESS', runtime: 'Hermes v3', output: `[Hermes Driver Output] Completed task: ${task.name}` };
+            },
+            async cancel(taskId) { return true; },
+            async status(taskId) { return 'RUNNING'; },
+            async retry(taskId) { return { status: 'SUCCESS' }; },
+            async approve(taskId, role) { return true; }
+        },
+        codex: {
+            name: 'CodexExecutionAdapter',
+            async execute(task, bceContext) {
+                console.log(`🤖 [CodexAdapter] Code generation task [${task.name}] with BCE Context...`, bceContext);
+                return { status: 'SUCCESS', runtime: 'OpenAI Codex', output: `[Codex Output] Executed code generation for: ${task.name}` };
+            },
+            async cancel(taskId) { return true; },
+            async status(taskId) { return 'IDLE'; },
+            async retry(taskId) { return { status: 'SUCCESS' }; },
+            async approve(taskId, role) { return true; }
+        },
+        claudecode: {
+            name: 'ClaudeCodeExecutionAdapter',
+            async execute(task, bceContext) {
+                console.log(`🧠 [ClaudeCodeAdapter] High-reasoning task [${task.name}] with BCE Context...`, bceContext);
+                return { status: 'SUCCESS', runtime: 'Claude Code CLI', output: `[Claude Code Output] Refactored & audited: ${task.name}` };
+            },
+            async cancel(taskId) { return true; },
+            async status(taskId) { return 'IDLE'; },
+            async retry(taskId) { return { status: 'SUCCESS' }; },
+            async approve(taskId, role) { return true; }
+        },
+        openhands: {
+            name: 'OpenHandsExecutionAdapter',
+            async execute(task, bceContext) {
+                console.log(`👐 [OpenHandsAdapter] Autonomous agent task [${task.name}] with BCE Context...`, bceContext);
+                return { status: 'SUCCESS', runtime: 'OpenHands Runtime', output: `[OpenHands Output] Completed browser & file workflow: ${task.name}` };
+            },
+            async cancel(taskId) { return true; },
+            async status(taskId) { return 'IDLE'; },
+            async retry(taskId) { return { status: 'SUCCESS' }; },
+            async approve(taskId, role) { return true; }
+        }
+    },
+
+    getAdapter(adapterKey = 'hermes') {
+        return this.adapters[adapterKey] || this.adapters.hermes;
+    },
+
+    async dispatchTask(adapterKey, task, objective) {
+        const adapter = this.getAdapter(adapterKey);
+        const bceContext = BusinessContextEngine.compileContext(task, objective);
+        console.log(`⚡ [EXECUTION SERVICE] Dispatching via [${adapter.name}] with BCE Package:`, bceContext);
+        return await adapter.execute(task, bceContext);
+    }
+};
+
+window.BusinessContextEngine = BusinessContextEngine;
+window.ExecutionEngineAdapterManager = ExecutionEngineAdapterManager;
+
+// =========================================================================
 // PHASE 3: AI RUNTIME OS DRIVER & COST OPTIMIZER (LAYER 8 AI RUNTIME OS)
 // =========================================================================
 const AIRuntimeOS = {
