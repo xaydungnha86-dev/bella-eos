@@ -3291,7 +3291,7 @@ function setupRaycaster() {
         // Raycast against agent group meshes AND department floor zone meshes
         const agentGroups = Object.values(agentMeshes).map(m => m.group);
         const deptZoneMeshes = Object.values(departmentZones).map(z => z.group);
-        const targetsToIntersect = [...agentGroups, ...deptZoneMeshes];
+        const targetsToIntersect = (layoutMode === 'seat') ? agentGroups : [...agentGroups, ...deptZoneMeshes];
         
         const intersects = dragRaycaster.intersectObjects(targetsToIntersect, true);
 
@@ -3444,7 +3444,7 @@ function setupRaycaster() {
             dragRaycaster.setFromCamera(mouse, camera);
             const agentGroups = Object.values(agentMeshes).map(m => m.group);
             const deptZoneMeshes = Object.values(departmentZones).map(z => z.group);
-            const targetsToIntersect = [...agentGroups, ...deptZoneMeshes];
+            const targetsToIntersect = (layoutMode === 'seat') ? agentGroups : [...agentGroups, ...deptZoneMeshes];
             
             const intersects = dragRaycaster.intersectObjects(targetsToIntersect, true);
 
