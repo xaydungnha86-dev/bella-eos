@@ -961,206 +961,10 @@
                 </button>
             </div>
         </div>
+    </div>
+
     <!-- GLOBAL SYSTEM SETTINGS & API KEYS CONFIG MODAL -->
-    <div id="global-settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 animate-fade-in">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
-                <h3 class="font-bold text-slate-100 text-xs flex items-center gap-2">
-                    <i class="fa-solid fa-gears text-yellow-400"></i>
-                    <span>CẤU HÌNH API KEYS & KẾT NỐI HỆ THỐNG</span>
-                </h3>
-                <button id="btn-close-settings-modal" class="w-6 h-6 rounded-lg bg-slate-850 hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-xs"></i>
-                </button>
-            </div>
-
-            <div class="p-5 space-y-4 text-xs max-h-[60vh] overflow-y-auto custom-scrollbar">
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">GOOGLE GEMINI API KEY</label>
-                    <div class="relative">
-                        <input id="settings-gemini-key" type="password" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono pr-10" placeholder="AIZAsy..." />
-                        <button type="button" onclick="const input = document.getElementById('settings-gemini-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2 text-slate-450 hover:text-slate-200 transition">
-                            <i class="fa-solid fa-eye text-[11px]"></i>
-                        </button>
-                    </div>
-                    <p class="text-[9px] text-slate-500 mt-1">Dành cho: Gemini 1.5 Pro, Gemini 1.5 Flash.</p>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">OPENAI API KEY</label>
-                    <div class="relative">
-                        <input id="settings-openai-key" type="password" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono pr-10" placeholder="sk-proj-..." />
-                        <button type="button" onclick="const input = document.getElementById('settings-openai-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2 text-slate-450 hover:text-slate-200 transition">
-                            <i class="fa-solid fa-eye text-[11px]"></i>
-                        </button>
-                    </div>
-                    <p class="text-[9px] text-slate-500 mt-1">Dành cho: GPT-4o, GPT-4o Mini.</p>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">ANTHROPIC API KEY</label>
-                    <div class="relative">
-                        <input id="settings-anthropic-key" type="password" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono pr-10" placeholder="sk-ant-..." />
-                        <button type="button" onclick="const input = document.getElementById('settings-anthropic-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2 text-slate-450 hover:text-slate-200 transition">
-                            <i class="fa-solid fa-eye text-[11px]"></i>
-                        </button>
-                    </div>
-                    <p class="text-[9px] text-slate-500 mt-1">Dành cho: Claude 3.5 Sonnet, Claude 3 Haiku.</p>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">SUPABASE ANON KEY (DATABASE CLOUD)</label>
-                    <textarea id="settings-supabase-key" rows="2" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs px-3 py-2 rounded-xl focus:ring-1 focus:ring-cyan-500 font-mono resize-none" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
-                    <p class="text-[9px] text-slate-500 mt-1">Đồng bộ bảng Task Kanban lên Cloud DB.</p>
-                </div>
-            </div>
-
-            <div class="px-5 py-3 border-t border-slate-800 bg-slate-950 flex items-center justify-end gap-2">
-                <button id="btn-cancel-settings" class="px-3.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl transition">
-                    Hủy
-                </button>
-                <button id="btn-save-settings" class="px-4 py-1.5 bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-450 hover:to-amber-500 text-slate-950 text-xs font-bold rounded-xl shadow-lg transition">
-                    Lưu & Kết Nối Cổng AI
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- DELIVERABLE DETAIL (EQE PASSPORT) MODAL -->
-    <div id="deliverable-detail-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 animate-fade-in">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-            <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800/80 flex items-center justify-center text-cyan-400">
-                        <i class="fa-solid fa-passport"></i>
-                    </div>
-                    <div>
-                        <h3 id="dlv-modal-title" class="font-bold text-slate-100 text-sm leading-tight">Tài sản: PRD v1.2</h3>
-                        <p class="text-[10px] text-slate-400 font-mono mt-0.5">Mã tài sản: <strong id="dlv-modal-id" class="text-cyan-300 font-bold">#DLV-STEP2-2048</strong> • Phiên bản: <strong id="dlv-modal-version" class="text-slate-200">v1</strong></p>
-                    </div>
-                </div>
-                <button id="btn-close-dlv-modal" class="w-7 h-7 rounded-lg bg-slate-850 hover:bg-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-xs"></i>
-                </button>
-            </div>
-
-            <div class="p-5 overflow-y-auto custom-scrollbar space-y-4 text-xs">
-                <!-- Status & Quality Overview -->
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-slate-950/60 border border-slate-850 p-3 rounded-xl flex flex-col justify-center">
-                        <span class="text-[9px] uppercase font-bold text-slate-500 block">Chủ sở hữu (Owner)</span>
-                        <span id="dlv-modal-owner" class="text-slate-200 font-semibold mt-1">AI Product Manager</span>
-                    </div>
-                    <div class="bg-slate-950/60 border border-slate-850 p-3 rounded-xl flex flex-col justify-center">
-                        <span class="text-[9px] uppercase font-bold text-slate-500 block">Trạng thái phê duyệt</span>
-                        <div class="mt-1" id="dlv-modal-status-badge">
-                            <!-- Badge injection -->
-                        </div>
-                    </div>
-                    <div class="bg-slate-950/60 border border-slate-850 p-3 rounded-xl flex flex-col justify-center text-center">
-                        <span class="text-[9px] uppercase font-bold text-slate-500 block">Điểm EQE Overall</span>
-                        <strong id="dlv-modal-score" class="text-lg text-emerald-400 font-bold mt-0.5">96%</strong>
-                    </div>
-                </div>
-
-                <!-- EQE Scorecard Details -->
-                <div class="bg-slate-950/80 border border-slate-850 p-4 rounded-xl space-y-3 font-mono">
-                    <span class="text-[10px] text-slate-400 font-sans font-bold uppercase tracking-wider block">Phiếu đánh giá chất lượng EQE (Metric Card):</span>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                            <span class="text-slate-500 block text-[8px] font-sans">Grammar & Text</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-grammar" class="text-slate-200">95%</strong>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                            <span class="text-slate-500 block text-[8px] font-sans">Brand voice</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-brand" class="text-slate-200">92%</strong>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                            <span class="text-slate-500 block text-[8px] font-sans">Policy & Gov</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-policy" class="text-slate-200">100%</strong>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                            <span class="text-slate-500 block text-[8px] font-sans">Security Shield</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-security" class="text-slate-200">98%</strong>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                            <span class="text-slate-500 block text-[8px] font-sans">Evidence Check</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-evidence" class="text-slate-200">90%</strong>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                            <span class="text-slate-500 block text-[8px] font-sans">Risk Assessment</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-risk" class="text-slate-200">94%</strong>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                            <span class="text-slate-500 block text-[8px] font-sans">Compliance Rate</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-compliance" class="text-slate-200">96%</strong>
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/60 p-2 rounded-lg border border-slate-850 bg-gradient-to-r from-emerald-950/40 to-teal-950/40 border-emerald-900/30">
-                            <span class="text-emerald-500 block text-[8px] font-sans font-bold">Overall Rating</span>
-                            <div class="flex items-center justify-between mt-1">
-                                <strong id="dlv-score-overall" class="text-emerald-400 font-bold">96%</strong>
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Definition of Done Checklist -->
-                <div class="bg-slate-950 border border-slate-850 rounded-xl p-3.5 space-y-2">
-                    <span class="text-[10px] text-slate-400 font-sans font-bold uppercase tracking-wider block">Thẩm định danh sách Definition of Done (DoD):</span>
-                    <ul id="dlv-dod-list" class="space-y-1.5 font-sans text-slate-350 text-[11px]">
-                        <!-- Populated by JS -->
-                    </ul>
-                </div>
-
-                <!-- Deliverable Evidence Preview -->
-                <div class="space-y-1.5">
-                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Bản xem trước sản phẩm bàn giao (Evidence Preview)</span>
-                    <div id="dlv-modal-evidence" class="bg-slate-950 border border-slate-850 rounded-xl p-4 font-mono text-[11px] leading-relaxed text-cyan-400 whitespace-pre-wrap max-h-48 overflow-y-auto custom-scrollbar">
-                        <!-- Content -->
-                    </div>
-                </div>
-
-                <!-- History of Approvals & Version Timeline -->
-                <div class="bg-slate-950/60 border border-slate-850 p-3.5 rounded-xl space-y-2">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Lịch sử phê duyệt & Nhật ký Version:</span>
-                    <div id="dlv-modal-history" class="space-y-2.5 font-mono text-[10px] text-slate-400 max-h-36 overflow-y-auto custom-scrollbar">
-                        <!-- Timeline items populated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-5 py-3 border-t border-slate-800 bg-slate-950 flex items-center justify-end shrink-0">
-                <button id="btn-close-dlv-modal-confirm" class="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition shadow">
-                    Đóng Hộ Chiếu
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Global Settings & API Key Modal -->
-    <div id="global-settings-modal" style="display: none;" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div id="global-settings-modal" style="display: none;" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
                 <div class="flex items-center gap-2.5">
@@ -1180,15 +984,30 @@
             <div class="p-6 overflow-y-auto space-y-4 font-sans text-xs custom-scrollbar">
                 <div>
                     <label class="block text-slate-300 font-semibold mb-1 text-[11px]">Google Gemini API Key</label>
-                    <input type="password" id="settings-gemini-key" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition">
+                    <div class="relative">
+                        <input type="password" id="settings-gemini-key" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition pr-10">
+                        <button type="button" onclick="const input = document.getElementById('settings-gemini-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-slate-300 font-semibold mb-1 text-[11px]">OpenAI API Key</label>
-                    <input type="password" id="settings-openai-key" placeholder="sk-proj-..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition">
+                    <div class="relative">
+                        <input type="password" id="settings-openai-key" placeholder="sk-proj-..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition pr-10">
+                        <button type="button" onclick="const input = document.getElementById('settings-openai-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-slate-300 font-semibold mb-1 text-[11px]">Anthropic Claude API Key</label>
-                    <input type="password" id="settings-anthropic-key" placeholder="sk-ant-..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition">
+                    <div class="relative">
+                        <input type="password" id="settings-anthropic-key" placeholder="sk-ant-..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition pr-10">
+                        <button type="button" onclick="const input = document.getElementById('settings-anthropic-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition">
+                            <i class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-slate-300 font-semibold mb-1 text-[11px]">Facebook Driver Access Token</label>
@@ -1216,6 +1035,6 @@
     </div>
 
     <!-- Custom App Logic Script (Cache Buster) -->
-    <script src="app.js?v=20260721_11"></script>
+    <script src="app.js?v=20260721_12"></script>
 </body>
 </html>
