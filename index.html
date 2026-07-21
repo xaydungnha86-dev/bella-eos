@@ -1259,35 +1259,119 @@
 
             <!-- Content Area: Split View -->
             <div class="flex-1 min-h-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-800">
-                <!-- Left: Knowledge Graph Visualizer -->
+                <!-- Left panel with tabs -->
                 <div class="flex-1 p-6 flex flex-col min-h-0">
-                    <div class="flex items-center justify-between mb-3 shrink-0">
-                        <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-network-wired text-indigo-500"></i>
-                            <span>Bản Đồ Tri Thức Doanh Nghiệp (Knowledge Graph)</span>
-                        </h3>
-                        <div class="flex items-center gap-2 text-[10px]">
-                            <span class="flex items-center gap-1 text-slate-400">
-                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block shadow-[0_0_8px_rgba(99,102,241,0.5)]"></span> EOM Object
-                            </span>
-                            <span class="flex items-center gap-1 text-slate-400">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Task Approved
-                            </span>
-                            <button onclick="resetGraphVisuals()" class="text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-0.5 bg-indigo-950/40 border border-indigo-800/60 rounded">Làm mới</button>
+                    <!-- Tab Headers -->
+                    <div class="flex border-b border-slate-800 text-xs font-semibold mb-4 shrink-0 gap-2">
+                        <button id="eil-tab-btn-graph" onclick="switchEilTab('graph')" class="px-4 py-2 border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-network-wired"></i> 1. Bản Đồ Tri Thức (EOM Graph)
+                        </button>
+                        <button id="eil-tab-btn-bce" onclick="switchEilTab('bce')" class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-folder-tree"></i> 2. Business Context Engine (BCE)
+                        </button>
+                    </div>
+
+                    <!-- EIL Tab 1: Graph Explorer -->
+                    <div id="eil-tab-content-graph" class="flex-1 flex flex-col min-h-0">
+                        <div class="flex items-center justify-between mb-3 shrink-0">
+                            <span class="text-[10px] text-slate-400 font-sans">Biểu đồ quan hệ EOM (Enterprise Object Model) liên kết động theo tiến độ SOP</span>
+                            <div class="flex items-center gap-2 text-[10px]">
+                                <span class="flex items-center gap-1 text-slate-400 font-sans">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block shadow-[0_0_8px_rgba(99,102,241,0.5)]"></span> EOM Object
+                                </span>
+                                <span class="flex items-center gap-1 text-slate-400 font-sans">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Task Approved
+                                </span>
+                                <button onclick="resetGraphVisuals()" class="text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-0.5 bg-indigo-950/40 border border-indigo-800/60 rounded cursor-pointer">Làm mới</button>
+                            </div>
+                        </div>
+                        <!-- The Interactive SVG Graph Canvas -->
+                        <div class="flex-1 bg-slate-950 border border-slate-800/80 rounded-xl relative overflow-hidden flex items-center justify-center min-h-[300px]">
+                            <!-- Interactive node diagram using custom CSS/HTML/SVG overlay -->
+                            <div id="eil-graph-canvas" class="absolute inset-0 select-none cursor-grab active:cursor-grabbing flex items-center justify-center">
+                                <!-- SVG lines dynamically generated -->
+                                <svg id="eil-graph-edges" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
+                                <!-- Nodes absolute containers -->
+                                <div id="eil-graph-nodes" class="absolute inset-0 w-full h-full pointer-events-none"></div>
+                            </div>
+                            <div class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur border border-slate-800 px-2.5 py-1.5 rounded-lg text-[9px] text-slate-400 space-y-0.5 pointer-events-none shadow-md">
+                                <div>💡 Kéo thả chuột để di chuyển canvas</div>
+                                <div>💡 Click vào Node để xem chi tiết Meta Object</div>
+                            </div>
                         </div>
                     </div>
-                    <!-- The Interactive SVG Graph Canvas -->
-                    <div class="flex-1 bg-slate-950 border border-slate-800/80 rounded-xl relative overflow-hidden flex items-center justify-center min-h-[300px]">
-                        <!-- Interactive node diagram using custom CSS/HTML/SVG overlay -->
-                        <div id="eil-graph-canvas" class="absolute inset-0 select-none cursor-grab active:cursor-grabbing flex items-center justify-center">
-                            <!-- SVG lines dynamically generated -->
-                            <svg id="eil-graph-edges" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
-                            <!-- Nodes absolute containers -->
-                            <div id="eil-graph-nodes" class="absolute inset-0 w-full h-full pointer-events-none"></div>
-                        </div>
-                        <div class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur border border-slate-800 px-2.5 py-1.5 rounded-lg text-[9px] text-slate-400 space-y-0.5 pointer-events-none shadow-md">
-                            <div>💡 Kéo thả chuột để di chuyển canvas</div>
-                            <div>💡 Click vào Node để xem chi tiết Meta Object</div>
+
+                    <!-- EIL Tab 2: Business Context Engine Inspector -->
+                    <div id="eil-tab-content-bce" class="hidden flex-1 flex flex-col min-h-0 space-y-4 overflow-y-auto pr-1 custom-scrollbar text-xs">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Left: Active Corporate Connectors Feeds -->
+                            <div class="space-y-3 bg-slate-950/60 border border-slate-850 p-4 rounded-xl">
+                                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wide flex items-center gap-1.5 pb-2 border-b border-slate-800 font-sans">
+                                    <i class="fa-solid fa-plug text-indigo-500"></i>
+                                    <span>Active Corporate Connectors (Dữ liệu nguồn)</span>
+                                </h4>
+                                <div class="space-y-2.5">
+                                    <!-- GA Connector -->
+                                    <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                                        <div class="flex justify-between items-center text-[10px] mb-1 font-semibold text-slate-350 font-sans">
+                                            <span>📈 Google Analytics Connector</span>
+                                            <span class="text-emerald-400 font-mono text-[9px]">Connected</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 font-mono text-[9px] text-slate-400">
+                                            <div>Sessions: <strong class="text-slate-200">4,200/ngày</strong></div>
+                                            <div>Bounce Rate: <strong class="text-slate-200">41.5%</strong></div>
+                                            <div>Conv Rate: <strong class="text-emerald-400">2.8%</strong></div>
+                                        </div>
+                                    </div>
+                                    <!-- Facebook Connector -->
+                                    <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                                        <div class="flex justify-between items-center text-[10px] mb-1 font-semibold text-slate-350 font-sans">
+                                            <span>📘 Facebook Graph API Connector</span>
+                                            <span class="text-emerald-400 font-mono text-[9px]">Connected</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 font-mono text-[9px] text-slate-400">
+                                            <div>Likes: <strong class="text-slate-200">25.4K</strong></div>
+                                            <div>Reach 24h: <strong class="text-slate-200">14.5K</strong></div>
+                                            <div>Engagement: <strong class="text-emerald-400">5.4%</strong></div>
+                                        </div>
+                                    </div>
+                                    <!-- Misa Connector -->
+                                    <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                                        <div class="flex justify-between items-center text-[10px] mb-1 font-semibold text-slate-350 font-sans">
+                                            <span>📊 MISA ERP Connector</span>
+                                            <span class="text-emerald-400 font-mono text-[9px]">Connected</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 font-mono text-[9px] text-slate-400">
+                                            <div>Alerts: <strong class="text-rose-400">3 Low Stock</strong></div>
+                                            <div>Cash: <strong class="text-slate-200">12.4B VND</strong></div>
+                                            <div>Payables: <strong class="text-slate-200">45M VND</strong></div>
+                                        </div>
+                                    </div>
+                                    <!-- Internal documentation -->
+                                    <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                                        <div class="flex justify-between items-center text-[10px] mb-1 font-semibold text-slate-350 font-sans">
+                                            <span>📄 Internal Docs & Brand Guidelines</span>
+                                            <span class="text-slate-400 font-mono text-[9px]">Indexed</span>
+                                        </div>
+                                        <div class="text-[9px] text-slate-400 space-y-0.5">
+                                            <div>Brand Voice policy: <strong class="text-slate-200 font-mono">Professional & Premium</strong></div>
+                                            <div>Night Posting restriction: <strong class="text-amber-400 font-mono">True (No posts 10 PM - 6 AM)</strong></div>
+                                            <div>Target Segment: <strong class="text-slate-200 font-mono">VIP Beauty & Spa Clients</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Compiled Enterprise Context (Canonical Model) -->
+                            <div class="space-y-3 bg-slate-950/60 border border-slate-850 p-4 rounded-xl flex flex-col">
+                                <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5 pb-2 border-b border-slate-800 font-sans">
+                                    <i class="fa-solid fa-code text-emerald-500"></i>
+                                    <span>Compiled Enterprise Context (Canonical Context)</span>
+                                </h4>
+                                <div class="flex-1 bg-slate-950 p-3 rounded-lg border border-slate-850 font-mono text-[10px] text-slate-350 whitespace-pre-wrap overflow-y-auto custom-scrollbar max-h-[300px]" id="eil-compiled-context-display">
+                                    Chưa chạy mô phỏng. Hãy nhấn nút "Chạy Mô Phỏng Workflow" để bắt đầu nạp và hiển thị Gói Ngữ Cảnh Doanh Nghiệp Biên Dịch (EIL Context Package).
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

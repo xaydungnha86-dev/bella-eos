@@ -4337,6 +4337,17 @@ function stepForward() {
     const currentStep = WORKFLOW_STEPS[currentStepIndex];
     const taskId = `task-step-${currentStep.id}`;
 
+    // Compile EIL Context dynamically for this active step
+    const objInput = document.getElementById('ceo-command-input');
+    const objectiveText = objInput && objInput.value ? objInput.value : 'Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày';
+    const activeEilContext = EnterpriseIntelligenceLayer.compileContext(currentStep, objectiveText);
+    
+    // Update compiled context in the modal dashboard
+    const elCompiledContext = document.getElementById('eil-compiled-context-display');
+    if (elCompiledContext) {
+        elCompiledContext.innerHTML = JSON.stringify(activeEilContext, null, 4);
+    }
+
     // Flywheel Step 1: Goal Formulation
     const strategicVision = `Mục tiêu tối ưu hóa quy trình [Step ${currentStep.id}: ${currentStep.name}]`;
     const goalObj = GoalEngine.decomposeGoal(strategicVision);
@@ -6658,5 +6669,28 @@ function resetGraphVisuals() {
     const metaContent = document.getElementById('graph-meta-content');
     if (metaContent) {
         metaContent.innerHTML = `<div class="text-slate-500 italic py-4 text-center">Click vào một Node trên Bản đồ để xem thông tin thuộc tính Enterprise Object Model (EOM)</div>`;
+    }
+}
+
+function switchEilTab(tabName) {
+    const btnGraph = document.getElementById('eil-tab-btn-graph');
+    const btnBce = document.getElementById('eil-tab-btn-bce');
+    const contentGraph = document.getElementById('eil-tab-content-graph');
+    const contentBce = document.getElementById('eil-tab-content-bce');
+
+    if (!btnGraph || !btnBce || !contentGraph || !contentBce) return;
+
+    if (tabName === 'graph') {
+        btnGraph.className = 'px-4 py-2 border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-1.5 cursor-pointer';
+        btnBce.className = 'px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 cursor-pointer';
+        contentGraph.classList.remove('hidden');
+        contentBce.classList.add('hidden');
+        // Redraw graph to ensure lines are updated
+        renderEilGraph();
+    } else if (tabName === 'bce') {
+        btnBce.className = 'px-4 py-2 border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-1.5 cursor-pointer';
+        btnGraph.className = 'px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 cursor-pointer';
+        contentBce.classList.remove('hidden');
+        contentGraph.classList.add('hidden');
     }
 }
