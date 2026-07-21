@@ -587,63 +587,109 @@ const EIPProvider = {
 
 window.EIPProvider = EIPProvider;
 
-// Business Context Engine Connectors definitions (Canonical Context Model)
-const EipConnector = {
-    fetchData() {
-        return EIPProvider.getLiveBusinessState();
-    }
-};
-
-const GoogleAnalyticsConnector = {
-    fetchData() {
-        return {
-            source: 'GoogleAnalytics',
-            dailySessions: 4200,
-            bounceRatePct: 41.5,
-            conversionRatePct: 2.8
-        };
-    }
-};
-
-const FacebookConnector = {
-    fetchData() {
-        return {
-            source: 'FacebookGraphAPI',
-            pageLikes: 25400,
-            postReach24h: 14500,
-            engagementRatePct: 5.4
-        };
-    }
-};
-
-const MisaConnector = {
-    fetchData() {
-        return {
-            source: 'MisaERP',
-            inventoryAlerts: 3,
-            cashOnHandVnd: 12400000000,
-            payableAmountVnd: 45000000
-        };
-    }
-};
-
-const EnterpriseIntelligenceLayer = {
+// ==========================================
+// BELLA CONNECT - DECOUPLED CONNECTORS HUB
+// ==========================================
+const BellaConnect = {
     connectors: {
-        eip: EipConnector,
-        ga: GoogleAnalyticsConnector,
-        facebook: FacebookConnector,
-        misa: MisaConnector
+        eip: {
+            fetchData() {
+                if (typeof EIPProvider !== 'undefined') {
+                    return EIPProvider.getLiveBusinessState();
+                }
+                return { customersCount: 1289, bookingsCount: 42, revenueTodayVnd: 156000000, inventoryAlerts: 3 };
+            }
+        },
+        ga: {
+            fetchData() {
+                return {
+                    source: 'GoogleAnalytics',
+                    dailySessions: 4200,
+                    bounceRatePct: 41.5,
+                    conversionRatePct: 2.8
+                };
+            }
+        },
+        facebook: {
+            fetchData() {
+                return {
+                    source: 'FacebookGraphAPI',
+                    pageLikes: 25400,
+                    postReach24h: 14500,
+                    engagementRatePct: 5.4
+                };
+            }
+        },
+        misa: {
+            fetchData() {
+                return {
+                    source: 'MisaERP',
+                    inventoryAlerts: 3,
+                    cashOnHandVnd: 12400000000,
+                    payableAmountVnd: 45000000
+                };
+            }
+        }
+    }
+};
+
+window.BellaConnect = BellaConnect;
+
+// ==========================================
+// ENTERPRISE CONTEXT LAYER (ECL)
+// ==========================================
+const EnterpriseContextLayer = {
+    // 1. Business Context Engine
+    BusinessContextEngine: {
+        fetchContextData() {
+            const eipData = BellaConnect.connectors.eip.fetchData();
+            const gaData = BellaConnect.connectors.ga.fetchData();
+            const fbData = BellaConnect.connectors.facebook.fetchData();
+            const misaData = BellaConnect.connectors.misa.fetchData();
+            return { eipData, gaData, fbData, misaData };
+        }
+    },
+
+    // 2. Enterprise Memory Subsystem
+    EnterpriseMemory: {
+        operationalMemory: [
+            { timestamp: '2026-07-21T08:00:00Z', event: 'SOP v1.1 Activated', status: 'OK' }
+        ],
+        businessMemory: [
+            { month: 'June', roi: '145%', revenueM: 420, failReason: 'None' }
+        ],
+        reasoningMemory: [],
+        conversationMemory: [
+            { speaker: 'CEO', text: 'Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày' }
+        ],
+        documentMemory: [
+            { docId: 'BRAND-GUIDELINE-2026', tone: 'Professional & Premium', nightLimit: true }
+        ],
+
+        recallMemory(type) {
+            if (type === 'operational') return this.operationalMemory;
+            if (type === 'business') return this.businessMemory;
+            if (type === 'conversation') return this.conversationMemory;
+            if (type === 'document') return this.documentMemory;
+            return [];
+        },
+
+        storeMemory(type, item) {
+            if (type === 'reasoning') this.reasoningMemory.push(item);
+            else if (type === 'operational') this.operationalMemory.push(item);
+            else if (type === 'business') this.businessMemory.push(item);
+        }
     },
 
     compileContext(task, objective = null) {
-        // Fetch raw data from all active connectors
-        const eipData = this.connectors.eip.fetchData();
-        const gaData = this.connectors.ga.fetchData();
-        const fbData = this.connectors.facebook.fetchData();
-        const misaData = this.connectors.misa.fetchData();
-
-        // Business Context Engine normalizes everything into a unified Enterprise Context
-        return {
+        // Fetch raw data from Business Context Engine via BellaConnect
+        const { eipData, gaData, fbData, misaData } = this.BusinessContextEngine.fetchContextData();
+        
+        // Recall Guidelines from Memory
+        const brandGuidelines = this.EnterpriseMemory.recallMemory('document')[0] || {};
+        
+        // Compile the unified Enterprise Canonical Context Package
+        const context = {
             taskId: task.id || `task_${Date.now()}`,
             objective: objective || 'Tăng trưởng Vận hành & Doanh thu Doanh nghiệp',
             erp: {
@@ -655,7 +701,7 @@ const EnterpriseIntelligenceLayer = {
                 inventoryAlerts: eipData.inventoryAlerts || misaData.inventoryAlerts
             },
             crm: {
-                targetSegment: 'Enterprise VIP',
+                targetSegment: brandGuidelines.tone ? 'VIP Spa Clients' : 'Enterprise VIP',
                 minEqeScore: 90,
                 activeCustomers: eipData.customersCount,
                 activeBookings: eipData.bookingsCount,
@@ -670,14 +716,27 @@ const EnterpriseIntelligenceLayer = {
             governance: {
                 maxAutoSpendVnd: 100000000,
                 policyId: 'POL-ENTERPRISE-GOV-2026',
-                nightPostingAllowed: false
+                nightPostingAllowed: !brandGuidelines.nightLimit
             },
-            decisionLineage: ['DEC-INITIAL-INTENT-001']
+            decisionLineage: ['DEC-INITIAL-INTENT-001'],
+            recalledMemoryExcerpt: {
+                recentConversations: this.EnterpriseMemory.recallMemory('conversation').slice(-2)
+            }
         };
+
+        // Store reasoning path memory
+        this.EnterpriseMemory.storeMemory('reasoning', {
+            taskId: context.taskId,
+            timestamp: new Date().toISOString(),
+            decisionReason: `Compiled EIL/ECL context model for strategic goal: "${context.objective}"`
+        });
+
+        return context;
     }
 };
 
-window.EnterpriseIntelligenceLayer = EnterpriseIntelligenceLayer;
+window.EnterpriseContextLayer = EnterpriseContextLayer;
+window.EnterpriseIntelligenceLayer = EnterpriseContextLayer; // Backward compatibility alias
 
 // 1. Goal Engine
 const GoalEngine = {
