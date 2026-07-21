@@ -1,91 +1,83 @@
-# 🏛️ Master Implementation Plan: Autonomous Enterprise OS (Bella EOS)
+# 🏛️ Bella AI Platform Ecosystem Implementation Plan (v12.0)
 
-## Executive Summary & Architectural Core
-
-Bella EOS matures into an **Autonomous Enterprise Operating System** anchored on three golden architectural principles:
-1. **Pristine Micro-Kernel**: Ultra-minimalist kernel containing ONLY 6 primitives (`Identity`, `Permission`, `Transaction`, `Context`, `Audit`, `Event Store`). Completely agnostic to business domains, AI, or external drivers.
-2. **Enterprise Object Model (EOM)**: Unified data language shared across all Kernel Services, Executors, APIs, Database, and UI.
-3. **Decoupled Kernel Services & Plugins**: All capabilities (Process Runtime, Execution Scheduler, Resource Service, Policy Service, Enterprise Memory) exist outside the micro-kernel as independent services.
+This plan defines the step-by-step roadmap to build, integrate, and launch the complete **Bella AI Platform** ecosystem. It establishes a multi-tiered development framework for the core operating system, business suite, digital workforce, connectivity, SDKs, and the extensions marketplace.
 
 ---
 
-## 🏛️ The 5-Layer Autonomous Enterprise OS Architecture
+## 🌟 The Ecosystem Brand Architecture
+
+The platform separates strategy, business state, orchestration, and execution:
 
 ```
-                          Enterprise Intent Layer
-               (CEO Intent ➔ Objectives ➔ Projects ➔ Processes)
-                                     │
-                                     ▼
-                       Enterprise Object Model (EOM)
-  Intent • Objective • Process • Stage • Task • Command • Resource • Evidence
-     Memory • Decision • Policy • Metric • Role • Company • Asset • Event
-                                     │
-                                     ▼
-                          Kernel Services Layer
-  Process Runtime • Execution Scheduler • Resource Manager • Policy Service
-        Dependency Service • Time Service • Recovery Service • Evidence Verification
-        Continuous Improvement Engine • Enterprise Memory (Reasoning XAI)
-                                     │
-                                     ▼
-                           Bella Micro-Kernel (Pure)
-  Identity Core • Permission Engine • Transaction Engine • Context • Event Store • Audit Ledger
-                                     │
-                                     ▼
-                       Execution Coordination Layer
-      Hermes Operator • Human CEO/Staff • Bella AI Worker • Third-Party Drivers
-                                     │
-                                     ▼
-                           External Systems Layer
-     Bella EIP Suite • Facebook • TikTok • YouTube • SAP • MISA • CRM • LibreOffice
+                      Bella AI Platform (Ecosystem Brand)
+                                      │
+       ┌──────────────┬───────────────┼───────────────┬──────────────┐
+       ▼              ▼               ▼               ▼              ▼
+   Bella EOS      Bella EIP     Bella Workers     Bella SDK    Bella Connect / Marketplace
+  (Core OS /   (Business Apps  (Digital Agent  (Developer Kits & (Integrations & SOP Store)
+  Orchestrator) & Data Fabric)    Workforce)     API Interfaces)
 ```
 
 ---
 
-## 🛠️ Detailed Implementation Plan
+## 🗺️ Phase-by-Phase Implementation Roadmap
 
-### Task 1: Master Blueprint Document Update
-- **Target File**: [ENTERPRISE_ARCHITECTURE_BLUEPRINT.md](file:///d:/Antigravity/Projects/DN%20WORKFLOW/ENTERPRISE_ARCHITECTURE_BLUEPRINT.md)
-- **Changes**:
-  - Rewrite blueprint to document the 5-Layer Stack.
-  - Document the Ultra-Minimalist Micro-Kernel (6 primitives).
-  - Document the **Enterprise Intent Layer** (`Business Intent` ➔ `Objectives` ➔ `Projects` ➔ `Living Processes`).
-  - Document the **Enterprise Object Model (EOM)**.
-  - Document **Enterprise Memory** (Operational Memory, Business Memory, Reasoning Memory / Explainable AI).
-  - Update module names: `Process Runtime`, `Execution Scheduler`, `Enterprise Memory`, `Continuous Improvement Engine`.
+The ecosystem is implemented in 6 parallelized development phases:
 
-### Task 2: Core System Engines & Micro-Kernel (`app.js`)
-- **Target File**: [app.js](file:///d:/Antigravity/Projects/DN%20WORKFLOW/app.js)
-- **Changes**:
-  - Refactor `BellaKernel` to a pristine 6-primitive Micro-Kernel (`Identity`, `Permission`, `Transaction`, `Context`, `Audit`, `EventStore`).
-  - Implement `IntentEngine` to decompose business intents into `Objectives`, `Projects`, and `Process Instances`.
-  - Implement `EnterpriseObjectModel`: Unified schema & registry for EOM primitives.
-  - Implement `ProcessRuntime` (formerly Workflow Engine): Handles Process Templates, Process Instances, 12-state lifecycle.
-  - Implement `ExecutionScheduler` (formerly Scheduler): Capability negotiation, cost, latency, rate limits.
-  - Implement `ResourceService` (formerly Resource OS): Universal resource lifecycle (`Available`, `Reserved`, `Locked`, `Busy`, `Released`, `Expired`).
-  - Implement `PolicyService`: Dynamic guardrail checks.
-  - Implement `EnterpriseMemory`: Triple memory system — `OperationalMemory`, `BusinessMemory`, and `ReasoningMemory` (XAI rationale logging).
-  - Implement `ContinuousImprovementEngine`: Process ROI optimization.
-  - Update `stepForward()` simulation flow to process `Intent` ➔ `Process` ➔ `Stage` ➔ `Task` ➔ `Command` ➔ `Event` ➔ `Evidence` ➔ `Reasoning Memory`.
+### Phase 1: Bella EOS (Enterprise Operating System) - The Brain
+* **Core Objective**: Implement the system of orchestration, operating kernel, and closed-loop flywheel.
+* **Component Milestones**:
+  1. **Pure Micro-Kernel**: Secure the 6 primitives (`Identity`, `Permission`, `Transaction`, `Context`, `Audit`, `Event Store`) for database-agnostic state changes.
+  2. **Process Runtime & State Machine**: Manage workflow templates and enforce 12-state lifecycles for complex SOPs.
+  3. **Real-Time Policy Engine**: Apply compliance check guardrails (e.g., budget locks, safety overrides) before dispatches.
+  4. **Closed-Loop Flywheel**: Run the 8-step continuous optimization loop (Goal Decompose ➔ Simulation ➔ Selection ➔ Execution ➔ Observation ➔ EQE Evaluation ➔ Learning Mutation ➔ Graph Sync).
+  5. **Explainable AI (XAI)**: Maintain audit trails for decision logs and reasoning chains.
 
-### Task 3: UI Control Panel & Status Indicators (`index.html`)
-- **Target File**: [index.html](file:///d:/Antigravity/Projects/DN%20WORKFLOW/index.html)
-- **Changes**:
-  - Update Header status bar: `Micro-Kernel: PRISTINE (6 Primitives)`, `Intent Engine: ONLINE`, `EOM: UNIFIED`, `Enterprise Memory (XAI): ACTIVE`.
-  - Add Intent Decomposition & Reasoning Memory (Explainable AI) inspector panels.
+### Phase 2: Bella EIP (Enterprise Business Suite) - The Data Generator
+* **Core Objective**: Build the suite of operational business apps that feed data into the OS.
+* **Component Milestones**:
+  1. **Bella CRM & Booking**: Manage customers, lead scores, scheduling, and service booking entries.
+  2. **Bella POS & Inventory**: Keep track of sales transactions, invoice status, and stock levels.
+  3. **Bella HR & Payroll**: Manage employee registries, active roles, capability matrices, and payroll details.
+  4. **Bella Finance**: Store expense tracking, cost centers, profit limits, and cash flow ledger.
+  5. **Bella BI Dashboard**: Display operational reports, ROI analytics, and company health cards.
 
-### Task 4: Verification & Testing
-- Run `node --check app.js` to ensure 100% syntax validity.
-- Verify simulation flow from Intent ➔ Process ➔ Execution ➔ Evidence ➔ Reasoning Log.
-- Generate `walkthrough.md`.
+### Phase 3: Bella Workers (Digital Workforce Matrix)
+* **Core Objective**: Develop the standard capability registry and execution dispatchers for AI Employees.
+* **Component Milestones**:
+  1. **Workforce Registry**: Implement unified profiles for human employees and AI employees (e.g. `devops`, `sales`, `mkt`, `fin`).
+  2. **Capability Matching**: Map worker profiles to SOP required capabilities (e.g., `SEO Optimization`, `API Integration`).
+  3. **Execution Adapters**: Unified adapters (`Hermes`, `Codex`, `Claude Code`, `OpenHands`) mapping tasks to underlying LLM agents.
+  4. **Human-in-the-Loop Gates**: Dynamic manual approval gates for tasks marked with high risk or high expense.
+
+### Phase 4: Bella Connect (External Enterprise Integrations)
+* **Core Objective**: Create plug-and-play integrations with external platforms.
+* **Component Milestones**:
+  1. **Social Connectors**: Facebook Page API, TikTok Content API, YouTube Analytics Connector.
+  2. **ERP & Accounting Connectors**: MISA, SAP Business One, Oracle NetSuite.
+  3. **Communication Connectors**: Zalo OA, Telegram Bot API, Gmail/SMTP.
+
+### Phase 5: Bella SDK (Developer Toolkits)
+* **Core Objective**: Enable third-party developers to extend the ecosystem.
+* **Component Milestones**:
+  1. **EOM Bindings**: Typescript, Python, and Go libraries mapping the 20 EOM Objects.
+  2. **Kernel Service Hooks**: Listeners and publishers for the Command Bus and Event Store.
+  3. **Custom Adapter Scaffold**: Boilerplate code to build new runtime execution engines.
+
+### Phase 6: Bella Marketplace (SOP & Extensions Platform)
+* **Core Objective**: Establish the distribution hub for custom packages.
+* **Component Milestones**:
+  1. **SOP Package Format**: Standardized JSON/YAML format containing roles, policies, task contracts, and state machines.
+  2. **Extension Packages**: Custom UI widgets, integration connectors, and workflow rules.
+  3. **1-Click Installation & Activation**: Automated deployment into the target Enterprise Tenant.
 
 ---
 
-## Verification Plan
+## 🧪 Verification & Integration Plan
 
-### Automated Verification
-- Run `node --check app.js` to confirm syntax validity.
+To verify that the components integrate seamlessly:
 
-### Manual Verification
-1. **Intent Decomposition Test**: Type or trigger a CEO Intent (e.g. *"Tăng 20% doanh thu tháng 8"*) and observe IntentEngine decompose it into Objectives, Projects, and Process Instances.
-2. **Micro-Kernel Agnostic Test**: Verify transactions run through clean 6-primitive Micro-Kernel.
-3. **Reasoning Memory (XAI) Test**: Verify that AI decision rationale, policy checks, and confidence scores are stored in ReasoningMemory for audit.
+1. **Data Lifecycle Check**: Verify that data generated by **Bella EIP** (e.g. new invoice in POS) correctly triggers a **Bella EOS** process run (e.g. payment reconciliation SOP).
+2. **Workforce Dispatch Check**: Verify that **Bella EOS** dispatches tasks to **Bella Workers** matching the required capability profile.
+3. **Connector Callback Check**: Verify that webhook logs from **Bella Connect** (e.g., Zalo OA) trigger event handlers in the **Bella EOS Event Store**.
+4. **Marketplace Installation Check**: Install a package from **Bella Marketplace** and verify that it registers its SOPs and Custom Policies into the active database.
