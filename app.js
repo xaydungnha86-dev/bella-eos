@@ -692,6 +692,12 @@ const EnterpriseContextLayer = {
         const context = {
             taskId: task.id || `task_${Date.now()}`,
             objective: objective || 'Tăng trưởng Vận hành & Doanh thu Doanh nghiệp',
+            contextSources: [
+                { source: 'bella-eip', domain: 'crm', version: '1.0' },
+                { source: 'google-analytics', domain: 'marketing', version: '4.0' },
+                { source: 'facebook-graph', domain: 'marketing', version: '2.8' },
+                { source: 'misa-erp', domain: 'erp', version: '2026.1' }
+            ],
             erp: {
                 costCenter: 'CC-BELLA-2026',
                 approvedBudgetVnd: 50000000,

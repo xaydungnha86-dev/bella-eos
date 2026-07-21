@@ -257,7 +257,7 @@ CEO Intent ➔ [Executive Intent] ➔ Event: IntentCreated ➔ [Goal Engine] ➔
 Tất cả các thành phần trong hệ sinh thái (DB, API, SDK, UI, Event) đều bắt buộc sử dụng chung cấu trúc EOM:
 
 ```typescript
-type EomType = 'Customer' | 'Invoice' | 'Booking' | 'Task' | 'Process' | 'Policy' | 'Resource' | 'Evidence' | 'Command' | 'Decision';
+type EomType = 'Customer' | 'Invoice' | 'Booking' | 'Task' | 'ProcessTemplate' | 'ProcessInstance' | 'Policy' | 'Resource' | 'Evidence' | 'Command' | 'Decision';
 
 interface EomObject {
     id: string;
@@ -267,7 +267,7 @@ interface EomObject {
     metadata: Record<string, any>;
 }
 
-// Chi tiết lược đồ của 10 thực thể EOM lõi:
+// Chi tiết lược đồ của 11 thực thể EOM lõi:
 interface Customer extends EomObject {
     name: string;
     tier: 'VIP' | 'Regular';
@@ -291,16 +291,24 @@ interface Booking extends EomObject {
 
 interface Task extends EomObject {
     title: string;
-    requiredCapabilities: string[];
+    requiredCapabilityIds: string[];
     assignedExecutor?: string;
     status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
 }
 
-interface Process extends EomObject {
+interface ProcessTemplate extends EomObject {
     name: string;
-    activeStep: number;
+    version: string;
+    description: string;
     stepsCount: number;
+    tasksContract: { title: string; requiredCapabilityIds: string[] }[];
+}
+
+interface ProcessInstance extends EomObject {
+    templateId: string;
+    activeStep: number;
     state: 'INIT' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'REVISED';
+    variables: Record<string, any>;
 }
 
 interface Policy extends EomObject {
@@ -345,10 +353,22 @@ Cấu trúc chuẩn của gói Context ECL phân phối đến mọi AI Model & 
 {
   "$schema": "https://bella.ai/schemas/canonical-context-v12.json",
   "type": "object",
-  "required": ["taskId", "objective", "erp", "crm", "hr", "governance", "recalledMemoryExcerpt"],
+  "required": ["taskId", "objective", "erp", "crm", "hr", "governance", "recalledMemoryExcerpt", "contextSources"],
   "properties": {
     "taskId": { "type": "string" },
     "objective": { "type": "string" },
+    "contextSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "domain", "version"],
+        "properties": {
+          "source": { "type": "string" },
+          "domain": { "type": "string" },
+          "version": { "type": "string" }
+        }
+      }
+    },
     "erp": {
       "type": "object",
       "required": ["costCenter", "approvedBudgetVnd", "currency", "cashOnHandVnd", "payableAmountVnd", "inventoryAlerts"],
@@ -416,14 +436,20 @@ Cấu trúc chuẩn của gói Context ECL phân phối đến mọi AI Model & 
 Được sử dụng bởi tất cả các AI Workers và Human Operators khi gia nhập lực lượng lao động số (Bella Workers):
 
 ```typescript
-type CapabilityName = 'SEO' | 'Coding' | 'Video' | 'Accounting' | 'Legal' | 'CRM' | 'Facebook' | 'TikTok' | 'Email';
+interface Capability {
+    id: string;               // Ví dụ: 'mkt.seo', 'dev.coding.nodejs', 'connector.misa'
+    name: string;             // Ví dụ: 'SEO Copywriting', 'NodeJS Programming', 'Misa API Integration'
+    version: string;          // Ví dụ: '1.0'
+    category: string;         // Ví dụ: 'Marketing' | 'Development' | 'Integration'
+    tags: string[];           // Ví dụ: ['social', 'api', 'backend']
+}
 
 interface CapabilityRegistration {
-    executorId: string;                     // ID duy nhất của worker (ví dụ: 'hermes', 'claude-3-5')
+    executorId: string;       // ID duy nhất của worker (ví dụ: 'hermes', 'claude-3-5')
     workerType: 'AI' | 'Human';
     activeCapabilities: {
-        name: CapabilityName;
-        proficiencyLevel: number;           // Thang điểm 1 - 100
+        capability: Capability;
+        proficiencyLevel: number; // Thang điểm 1 - 100
         avgLatencyMs: number;
     }[];
     financialConstraints: {
@@ -437,3 +463,16 @@ interface CapabilityRegistration {
     };
 }
 ```
+
+---
+
+## 10. ARCHITECTURE FREEZE POLICY
+
+Để duy trì tính toàn vẹn và ổn định lâu dài của hệ thống trong 15-20 năm, chính sách đóng băng kiến trúc dưới đây được áp dụng bắt buộc:
+
+1. **Brand Architecture**: Cấu trúc thương hiệu 6 lớp (`Bella AI Platform` ➔ `Bella EOS` ➔ `Bella EIP` ➔ `Bella Workers` ➔ `Bella Connect` ➔ `Bella SDK` / `Marketplace`) là cố định và không thay đổi.
+2. **Module Boundary**: Ranh giới độc lập giữa các module được phân định nghiêm ngặt. Lõi điều phối (EOS) không được chứa mã nguồn nghiệp vụ của ứng dụng (EIP).
+3. **EOM Backward Compatibility**: Enterprise Object Model chỉ được phép thêm đối tượng mới khi có nhu cầu đặc thù của Extensions. Tuyệt đối không xóa hay sửa đổi các thuộc tính đã đóng băng của 11 EOM lõi.
+4. **Canonical Context Extensibility**: Gói ngữ cảnh chuẩn hóa cung cấp cho các AI Models chỉ được phép bổ sung trường (extension fields), không được thay đổi ý nghĩa của các trường cũ để tránh làm lỗi các SOP cũ.
+5. **Capability Registry Stability**: Giao thức kết nối năng lực đóng vai trò là hợp đồng giao dịch bất biến giữa Bella EOS và các AI/Human Workers.
+6. **Kernel Rules**: Mọi tính năng mới phải được phát triển dưới dạng Kernel Services, Connectors, Workers, Packages hoặc SDK Extensions, không chỉnh sửa kiến trúc lõi của Hệ điều hành.
