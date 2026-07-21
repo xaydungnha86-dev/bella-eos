@@ -1389,6 +1389,39 @@ const ExecutionEngineAdapterManager = {
                 const pageId = activeChannel.pageId || '1029384756';
                 const pageName = activeChannel.name || 'Default Page';
 
+                // Attempt calling local Hermes MCP Server
+                try {
+                    appendLog('HERMES MCP CLIENT', `📡 Đang tìm kiếm cổng Hermes MCP Server (localhost:8080)...`, 'text-slate-400 italic');
+                    const mcpResponse = await fetch('http://localhost:8080/jsonrpc', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            jsonrpc: "2.0",
+                            method: "tools/call",
+                            params: {
+                                name: "publish_facebook_post",
+                                arguments: {
+                                    message: `Bella Campaign Post: ${task.name}. Budget: ${eilContext.erp?.approvedBudgetVnd || 10000000} VND`,
+                                    pageId: pageId,
+                                    accessToken: token
+                                }
+                            },
+                            id: Date.now()
+                        })
+                    });
+                    
+                    if (mcpResponse.ok) {
+                        const mcpData = await mcpResponse.json();
+                        if (mcpData.result && mcpData.result.content) {
+                            const resultText = mcpData.result.content[0].text;
+                            appendLog('HERMES MCP CLIENT', `📡 [MCP Response Received] ${resultText}`, 'text-emerald-400 font-bold');
+                            return { status: 'SUCCESS', runtime: 'Hermes MCP Server (Local)', output: resultText };
+                        }
+                    }
+                } catch (e) {
+                    appendLog('HERMES DRIVER', `ℹ️ Local Hermes MCP Server offline. Chuyển sang Driver nội bộ...`, 'text-slate-400 italic');
+                }
+
                 if (task.requiredCapabilityIds && task.requiredCapabilityIds.includes('api.facebook')) {
                     appendLog('HERMES DRIVER', `📘 [Facebook Graph API] Đăng bài lên Trang: "${pageName}" (ID: ${pageId}) bằng Token: ${token.substring(0, 10)}...`, 'text-indigo-400 font-semibold');
                 }
