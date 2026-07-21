@@ -132,25 +132,56 @@ Bella EOS implements an **8-step Closed-Loop Learning Flywheel** that continuous
 
 ---
 
-## 4. ENTERPRISE INTELLIGENCE LAYER (EIL) CONTEXT PACKAGE
+## 4. BUSINESS CONTEXT ENGINE (BCE) & EIL CONNECTORS
 
-The EIL context packages the following metadata into every task dispatch:
+Lớp Ngữ cảnh Doanh nghiệp (Enterprise Intelligence Layer - EIL) tích hợp bộ điều phối **Business Context Engine (BCE)** để lấy thông tin từ các cổng kết nối độc lập, sau đó chuẩn hóa thành một gói **Canonical Context Model** duy nhất:
+
+```
+    [Bella EIP Connector] ────┐
+    [Facebook Connector]  ────┼───► [Business Context Engine] ───► Unified Enterprise Context
+    [MISA ERP Connector]  ────┤
+    [Google Analytics]    ────┘
+```
+
+### Các Cổng kết nối tích hợp (Active Connectors):
+* **Bella EIP Connector (`EipConnector`)**: Đọc trạng thái dữ liệu nghiệp vụ: Số khách hàng hoạt động, hôm nay có bao nhiêu lượt đặt lịch (active bookings), doanh thu hiện tại.
+* **Google Analytics Connector (`GoogleAnalyticsConnector`)**: Theo dõi lượt truy cập Website hàng ngày, tỷ lệ thoát (bounce rate), tỷ lệ chuyển đổi.
+* **Facebook Graph Connector (`FacebookConnector`)**: Đo lường lượt tiếp cận trang 24h, tỷ lệ tương tác của bài viết.
+* **MISA ERP Connector (`MisaConnector`)**: Giám sát lượng hàng tồn kho cảnh báo, lượng tiền mặt lưu động (cash on hand), công nợ phải trả.
+* **Brand Guidelines Indexer**: Phân tích quy định thương hiệu (ví dụ: cấm đăng bài ban đêm, cấm sử dụng từ ngữ phi chuẩn).
+
+### Cấu trúc Gói Ngữ Cảnh Chuẩn Hóa (EIL Context Package JSON):
 ```json
 {
-  "taskId": "TSK-MKT-008",
-  "enterpriseIntelligenceLayer": {
-    "objective": "Tăng 20% doanh thu tháng 8",
-    "departmentOKRs": {
-      "marketing": "Generate 1000 VIP leads",
-      "finance": "Keep cost below 50M VND"
-    },
-    "erp": { "costCenter": "CC-MKT-2026", "approvedBudgetVnd": 50000000 },
-    "crm": { "targetSegment": "VIP Beauty", "minEqeScore": 90 },
-    "governance": { "maxAutoBudget": 100000000, "policyId": "POL-NO-NIGHT-POSTING" },
-    "decisionLineage": ["DEC-98201", "DEC-98204"]
+  "taskId": "task-step-6",
+  "objective": "Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu",
+  "erp": {
+    "costCenter": "CC-BELLA-2026",
+    "approvedBudgetVnd": 50000000,
+    "currency": "VND",
+    "cashOnHandVnd": 12400000000,
+    "payableAmountVnd": 45000000,
+    "inventoryAlerts": 3
   },
-  "executionAdapter": "HermesExecutionAdapter",
-  "timestamp": "2026-07-21T09:15:00Z"
+  "crm": {
+    "targetSegment": "Enterprise VIP",
+    "minEqeScore": 90,
+    "activeCustomers": 1289,
+    "activeBookings": 42,
+    "dailyWebsiteSessions": 4200,
+    "facebookReach24h": 14500
+  },
+  "hr": {
+    "roleRequired": "mkt",
+    "slaHours": 24,
+    "approvalRole": "CEO"
+  },
+  "governance": {
+    "maxAutoSpendVnd": 100000000,
+    "policyId": "POL-ENTERPRISE-GOV-2026",
+    "nightPostingAllowed": false
+  },
+  "decisionLineage": ["DEC-INITIAL-INTENT-001"]
 }
 ```
 

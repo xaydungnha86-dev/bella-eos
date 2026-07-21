@@ -37,15 +37,21 @@ Enterprise OS (Bella EOS)
 
 ---
 
-## 🗺️ Lộ Trình 5 Phase Thực Thi Chiến Lược (10-Year Strategic Roadmap)
+## 🗺️ Lộ Trình Triển Khai Chiến Lược (Strategic Roadmap)
 
-| Phase | Module / System | Mục Tiêu Kỹ Thuật & Nghiệp Vụ Vận Hành |
-| :--- | :--- | :--- |
-| **Phase 1** | **Organization OS** | Xây dựng Cơ cấu Tổ chức, Unified Workforce Registry (`Human` + `AI`), Role Matrix & Capability Permissions. |
-| **Phase 2** | **Project & Workflow OS** | Quản trị Gốc Dự án (Project-First Hub), Strategic Objectives, Task Contracts, Standard DoD & Workflow DAG Graph. |
-| **Phase 3** | **Knowledge, Decision & Policy OS** | Enterprise Business Memory, SOPs Tree, Decision Log Audit Trail & **Enterprise Policy Engine** (Guardrails & Sign-off). |
-| **Phase 4** | **Business Applications OS** | Tích hợp **Bella EIP Suite** (EIP, CRM, POS, HR, Finance) làm First-party Business App & Cổng kết nối Third-party (SAP, Oracle, Salesforce). |
-| **Phase 5** | **Autonomous Enterprise OS** | Vận hành Tự trị Toàn diện: `Objective` $\rightarrow$ `AI COO` $\rightarrow$ `Dynamic Projects` $\rightarrow$ `OKRs` $\rightarrow$ `Continuous Learning` $\rightarrow$ `Self Optimization`. |
+Lộ trình được triển khai qua 9 module tích hợp đồng bộ:
+
+| STT | Phân hệ / Module | Vai Trò & Mục Tiêu Kỹ Thuật | Trạng thái |
+| :--- | :--- | :--- | :--- |
+| **1** | **Bella EOS Core** | Lõi hệ điều hành doanh nghiệp tự trị (Kernel, Transaction, Process Runtime). | ✅ Hoàn thành |
+| **2** | **Bella EIP Connector** | Cổng kết nối tích hợp an toàn (Decoupled EIP Connector & Enterprise Data Fabric). | ✅ Hoàn thành |
+| **3** | **Business Context Engine** | Chuẩn hóa ngữ cảnh doanh nghiệp đa chiều (EIP, GA, FB, MISA, Brand Guidelines). | ⚡ Đang chạy |
+| **4** | **Capability Registry** | Quản trị bằng năng lực (Capability Requirement, Policy & Budget check, Select executor). | 📋 Kế hoạch |
+| **5** | **Bella Workforce Runtime** | Điều phối vòng đời nhiệm vụ (Queue, Dispatch, Retry, Heartbeat, Compensation). | 📋 Kế hoạch |
+| **6** | **Command Bus** | Quản lý Pub/Sub Commands an toàn giữa EOS và các EIP. | 📋 Kế hoạch |
+| **7** | **Learning Engine** | Đột biến và tiến hóa kỹ năng/SOP tự động qua phản hồi chất lượng. | 📋 Kế hoạch |
+| **8** | **Marketplace** | Chợ phân phối quy trình SOP & Extensions 1-Click. | 📋 Kế hoạch |
+| **9** | **SDK** | Bộ công cụ phát triển mở rộng dành cho bên thứ ba. | 📋 Kế hoạch |
 
 ---
 
