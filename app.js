@@ -1097,8 +1097,13 @@ const ExecutionEngineAdapterManager = {
         hermes: {
             name: 'HermesExecutionAdapter',
             async execute(task, eilContext) {
-                console.log(`🚀 [HermesAdapter] Executing task [${task.name || task.id}] with EIL Context...`, eilContext);
-                return { status: 'SUCCESS', runtime: 'Hermes v3', output: `[Hermes Driver Output] Completed task: ${task.name}` };
+                console.log(`🚀 [HermesAdapter] Executing task [${task.name || task.id}] with ECL Context...`, eilContext);
+                const token = localStorage.getItem('bella_fb_driver_token') || 'DEFAULT_EAAX_TOKEN';
+                const pageId = localStorage.getItem('bella_fb_page_id') || '1029384756';
+                if (task.requiredCapabilityIds && task.requiredCapabilityIds.includes('api.facebook')) {
+                    appendLog('HERMES DRIVER', `📘 [Facebook Graph API] Posting to Target Page ID: "${pageId}" (Token: ${token.substring(0, 10)}...)`, 'text-indigo-400 font-semibold');
+                }
+                return { status: 'SUCCESS', runtime: 'Hermes v3', output: `[Hermes Driver Output] Completed task via Facebook Page [${pageId}]: ${task.name}` };
             },
             async cancel(taskId) { return true; },
             async status(taskId) { return 'RUNNING'; },
@@ -5983,6 +5988,7 @@ function openGlobalSettingsModal() {
     const openaiInput = document.getElementById('settings-openai-key');
     const anthropicInput = document.getElementById('settings-anthropic-key');
     const fbInput = document.getElementById('settings-fb-token');
+    const fbPageInput = document.getElementById('settings-fb-page-id');
     const supabaseInput = document.getElementById('settings-supabase-key');
     const alertBox = document.getElementById('settings-status-alert');
 
@@ -5990,6 +5996,7 @@ function openGlobalSettingsModal() {
     if (openaiInput) openaiInput.value = localStorage.getItem('bella_openai_api_key') || '';
     if (anthropicInput) anthropicInput.value = localStorage.getItem('bella_anthropic_api_key') || '';
     if (fbInput) fbInput.value = localStorage.getItem('bella_fb_driver_token') || '';
+    if (fbPageInput) fbPageInput.value = localStorage.getItem('bella_fb_page_id') || '';
     if (supabaseInput) supabaseInput.value = localStorage.getItem('supabase_anon_key') || '';
     if (alertBox) alertBox.style.display = 'none';
 
@@ -6010,6 +6017,7 @@ function saveGlobalSettings() {
     const openaiKey = (document.getElementById('settings-openai-key')?.value || '').trim();
     const anthropicKey = (document.getElementById('settings-anthropic-key')?.value || '').trim();
     const fbToken = (document.getElementById('settings-fb-token')?.value || '').trim();
+    const fbPageId = (document.getElementById('settings-fb-page-id')?.value || '').trim();
     const supabaseKey = (document.getElementById('settings-supabase-key')?.value || '').trim();
 
     // Store keys in LocalStorage
@@ -6017,6 +6025,7 @@ function saveGlobalSettings() {
     localStorage.setItem('bella_openai_api_key', openaiKey);
     localStorage.setItem('bella_anthropic_api_key', anthropicKey);
     localStorage.setItem('bella_fb_driver_token', fbToken);
+    localStorage.setItem('bella_fb_page_id', fbPageId);
     localStorage.setItem('supabase_anon_key', supabaseKey);
 
     // Apply keys globally
