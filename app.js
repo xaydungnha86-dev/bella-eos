@@ -997,6 +997,24 @@ const KnowledgeGraphService = {
         return edge;
     },
 
+    getNodes() {
+        return Array.from(this.nodes.values()).map(n => ({
+            id: n.id,
+            type: n.type,
+            name: n.label,
+            properties: n.data
+        }));
+    },
+
+    getEdges() {
+        return this.edges.map(e => ({
+            id: e.id,
+            source: e.sourceId,
+            target: e.targetId,
+            type: e.relationType
+        }));
+    },
+
     getGraphStats() {
         return {
             nodesCount: this.nodes.size,
