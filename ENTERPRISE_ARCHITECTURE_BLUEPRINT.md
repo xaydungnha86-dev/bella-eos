@@ -1,19 +1,19 @@
 # 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
-> **STATUS**: `ARCHITECTURE FROZEN` • **SPECIFICATION VERSION**: `v10.0 (FROZEN)`  
+> **STATUS**: `OPERATIONAL` • **SPECIFICATION VERSION**: `v11.0 (ENTERPRISE INTELLIGENCE LAYER)`  
 > **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
 ---
 
 ## 1. EXECUTIVE SUMMARY & TRI-PARTITE ARCHITECTURE
 
-Bella EOS is a frozen **Autonomous Enterprise Operating System (Autonomous EOS)** designed around the **Tri-Partite System Separation**:
+Bella EOS is an **Autonomous Enterprise Operating System (Autonomous EOS)** designed around the **Tri-Partite System Separation**:
 
 ```
                        Bella EIP Suite (System of Record + Data Fabric)
                                        │
                                        ▼
                        Bella EOS (System of Orchestration)
-                       ├── Business Context Engine (BCE)
+                       ├── Enterprise Intelligence Layer (EIL)
                        └── Pluggable Execution Adapters
                                        │
                                        ▼
@@ -22,79 +22,139 @@ Bella EOS is a frozen **Autonomous Enterprise Operating System (Autonomous EOS)*
 ```
 
 1. **Bella EIP (System of Record)**: Business Data Fabric (Customer, Invoice, Booking, Financial Ledger, Inventory, HR).
-2. **Bella EOS (System of Orchestration)**: Operating Kernel, Enterprise Services, Intent Decomposition, Process Life Cycle, Quality & Evidence, and **Business Context Engine (BCE)**.
+2. **Bella EOS (System of Orchestration)**: Operating Kernel, Enterprise Services, Intent Decomposition, Process Life Cycle, Quality & Evidence, and **Enterprise Intelligence Layer (EIL)**.
 3. **Pluggable Execution Runtimes (System of Execution)**: Framework-agnostic execution engines (Hermes, Codex, Claude Code, OpenHands, Custom REST) managed via unified `ExecutionEngineAdapter`.
 
 ---
 
-## 2. THE 6 FROZEN ARCHITECTURE GROUPS
+## 2. THE 10-LAYER ENTERPRISE STACK
+
+Bella EOS v11.0 is structured into **10 strict architectural layers** to decouple strategy, planning, execution, and learning:
 
 ```
-                                  CEO Intent
-                                      │
-                                      ▼
-                        Enterprise Object Model (EOM)
-                                      │
-                                      ▼
-                         Kernel Services Layer (6 Services)
-       ┌──────────────────┬──────────────────┬──────────────────┐
-       │ Process Runtime  │ Execution Service│ Resource Service │
-       ├──────────────────┼──────────────────┼──────────────────┤
-       │  Policy Service  │ Evidence Service │Enterprise Memory │
-       │                  │                  │ & Business Context│
-       └──────────────────┴──────────────────┴──────────────────┘
-                                      │
-                                      ▼
-                           Bella Micro-Kernel (Pure)
-     [Identity • Permission • Transaction • Context • Audit • Event Store]
-                                      │
-                                      ▼
-                     Pluggable Execution Adapters Layer
-           [HermesAdapter • CodexAdapter • ClaudeCodeAdapter • OpenHandsAdapter]
-                                      │
-                                      ▼
-                             External Systems Layer
-            [Bella EIP • Facebook • YouTube • CRM • SAP • MISA]
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. Human Layer (CEO / HĐQT / Human-in-the-Loop Approval Gates)         │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 2. AI CEO Layer (Strategic Vision & Enterprise Directive Definition)    │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 3. Goal Engine (OKR & Cross-Department Goal Decomposition Core)          │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 4. AI COO Layer (Portfolio Management & Operational Coordination)        │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 5. Planning Engine (Multi-Agent Task Dependency Graph & DAG Generator)  │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 6. Workflow Engine / Process Runtime (State Machine & Stage Execution)  │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 7. Policy Engine (Compliance, Risk Matrix & Realtime Guardrails)        │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 8. Enterprise Intelligence Layer (EIL - Multi-Dimensional Context)     │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 9. Execution Adapter Layer (Pluggable Manager Interface)               │
+├─────────────────────────────────────────────────────────────────────────┤
+│ 10. Execution Runtimes (Hermes • Codex • Claude Code • OpenHands)       │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Group 1: Bella Micro-Kernel (Pure & Agnostic)
-- Strictly contains **6 primitives**:
-  1. `Identity`: Universal Identity & Auth Core.
-  2. `Permission`: Capability & RBAC Access Matrix.
-  3. `Transaction`: ACID Transaction Engine.
-  4. `Context`: Global Runtime Execution Context.
-  5. `Audit`: Immutable Compliance Audit Ledger.
-  6. `Event Store`: Append-Only Event Store.
-- *Kernel Rule*: The Micro-Kernel is 100% domain-agnostic. It does not contain AI, Workflow, Scheduler, Marketing, or External API logic.
+1. **Human Layer**: Human operators, board directives, and manual approval overrides.
+2. **AI CEO Layer**: Translates high-level corporate visions into actionable enterprise intents.
+3. **Goal Engine**: Decomposes vision into departmental OKRs (Marketing, Sales, HR, Finance, Operations).
+4. **AI COO Layer**: Manages the operational roadmap, schedules and assigns tasks.
+5. **Planning Engine**: Dynamically compiles dependency graphs (DAGs) for process steps.
+6. **Workflow Engine (Process Runtime)**: Executes stage-by-stage processes with a 12-state machine.
+7. **Policy Engine**: Evaluates guardrails, budget limits, and risk matrices in real-time.
+8. **Enterprise Intelligence Layer (EIL)**: Combines ERP, CRM, HR, and historical context into unified intelligence packages.
+9. **Execution Adapter Layer**: Framework-agnostic runtime broker interface.
+10. **Execution Runtimes**: Concrete agents (Hermes, Codex, Claude Code, OpenHands) that execute the work.
 
-### Group 2: Enterprise Object Model (EOM)
-Unified domain language shared across API, Database, Event Sourcing, and UI:
-- **Org & Identity**: `Company`, `Department`, `Role`.
-- **Operating**: `Objective`, `Project`, `Process`, `Stage`, `Task`, `Command`.
-- **Resource & Security**: `Resource`, `Capability`, `Policy`.
-- **Telemetry & Asset**: `Evidence`, `Knowledge`, `Decision`, `Asset`, `Metric`, `Document`, `Event`.
+---
 
-### Group 3: Consolidated Kernel Services (6 Services)
-All capabilities are consolidated into **6 Kernel Services**:
-1. **Process Runtime**: Consolidates Workflow OS, State Machine (12 states), Process Templates (`v1`, `v2`), Process Instances, Stages, and Tasks.
-2. **Execution Service & Pluggable Adapters**: Manages standard `ExecutionEngineAdapter` contract (`execute`, `cancel`, `status`, `retry`, `approve`) for Hermes, Codex, Claude Code, and OpenHands.
-3. **Resource Service**: Consolidates Quota Allocation, Budget Locks, AI Token Accounting, API Quotas, License Management, Human & Machine Capacity, and Deadlock Prevention.
-4. **Policy Service**: Consolidates Business Rules, Approval Gates, Realtime Guardrails, and Legal Compliance.
-5. **Evidence Service**: Consolidates Verification Engine, Cryptographic Evidence, Proof Storage, Replay Engine, VM Snapshots, and Process Recovery.
-6. **Enterprise Memory & Business Context Engine (BCE)**:
-   - **Business Context Engine (BCE)**: Compiles and embeds multi-dimensional enterprise context into every task payload before dispatching to an execution runtime:
-     - `ERP Context` (Stock, Cost Center, Invoices)
-     - `CRM Context` (Customer segment, EQE history)
-     - `HR & Delegation Context` (Role, Skill SLA)
-     - `Financial & KPI Context` (Budget caps, Margin target)
-     - `Governance & Policy Context` (Sign-off rules, Legal guardrails)
-     - `Decision Lineage` (Historical XAI rationale, past rollback reasons)
+## 3. CLOSED-LOOP FLYWHEEL & 5 EVOLUTION ENGINES
 
-### Group 4: Pluggable Execution Adapters Layer
+Bella EOS implements an **8-step Closed-Loop Learning Flywheel** that continuously observes and mutates the enterprise:
+
+```
+        Goal Formulation (Goal Engine)
+                     │
+                     ▼
+        Planning & Simulation (Simulation & Optimization Engine)
+                     │
+                     ▼
+        Execution (Adapters & Runtimes)
+                     │
+                     ▼
+        Observation (Evidence & Realtime Telemetry)
+                     │
+                     ▼
+        Evaluation (Enterprise Quality Engine - EQE)
+                     │
+                     ▼
+        Learning (Learning Engine - SOP & Skill Mutation)
+                     │
+                     ▼
+        Knowledge Graph (Enterprise Knowledge Graph Sync)
+                     │
+                     ▼
+        Next Decision (Optimized Goal & Policy Refinement)
+```
+
+### The 5 Evolutionary Engines:
+
+1. **Goal Engine (`GoalEngine`)**:
+   - Decomposes high-level strategic visions (e.g. *"Increase revenue by 30% in Q3"*) into departmental objectives:
+     - *Marketing*: Lead target and campaign reach.
+     - *Sales*: Conversion rate and bookings target.
+     - *HR*: Workforce skills acquisition and training throughput.
+     - *Finance*: Cost thresholds and net margin targets.
+     - *Operations*: SOP cycle speed and SLA compliance metrics.
+
+2. **Simulation Engine (`SimulationEngine`)**:
+   - Runs a Monte Carlo simulator before execution to project KPIs.
+   - Forecasts **ROI, Cashflow, and Net profit** for different decision vectors (Ad Spend vs. Personnel Expansion vs. AI Automation).
+
+3. **OptimizationEngine**:
+   - Analyzes telemetry logs from 100+ workflow runs.
+   - Mathematically calculates the **Optimal Workflow Path** based on performance, cost, and historical SLA compliance.
+
+4. **Knowledge Graph Subsystem (`KnowledgeGraphService`)**:
+   - Maps 20 EOM object nodes (Company, Employee, Task, Resource, Invoice, Policy, Decision, Asset, etc.).
+   - Establishes relationships (`GOVERNS`, `APPROVED_BY`, `DEPENDS_ON`, `GENERATED_BY`) to trace decision lineage.
+
+5. **Learning Engine (`LearningEngine`)**:
+   - Evaluates verification proofs from the `EvidenceService` and overall quality scorecards from the `EnterpriseQualityEngine` (EQE).
+   - Mutates future SOP rules and adjusts the workforce skill weight matrix automatically.
+
+---
+
+## 4. ENTERPRISE INTELLIGENCE LAYER (EIL) CONTEXT PACKAGE
+
+The EIL context packages the following metadata into every task dispatch:
+```json
+{
+  "taskId": "TSK-MKT-008",
+  "enterpriseIntelligenceLayer": {
+    "objective": "Tăng 20% doanh thu tháng 8",
+    "departmentOKRs": {
+      "marketing": "Generate 1000 VIP leads",
+      "finance": "Keep cost below 50M VND"
+    },
+    "erp": { "costCenter": "CC-MKT-2026", "approvedBudgetVnd": 50000000 },
+    "crm": { "targetSegment": "VIP Beauty", "minEqeScore": 90 },
+    "governance": { "maxAutoBudget": 100000000, "policyId": "POL-NO-NIGHT-POSTING" },
+    "decisionLineage": ["DEC-98201", "DEC-98204"]
+  },
+  "executionAdapter": "HermesExecutionAdapter",
+  "timestamp": "2026-07-21T09:15:00Z"
+}
+```
+
+---
+
+## 5. PLUGGABLE EXECUTION ADAPTERS
+
 Standard `ExecutionEngineAdapter` interface contract:
 ```typescript
 interface ExecutionEngineAdapter {
-    execute(task: Task, context: BusinessContextPackage): Promise<ExecutionResult>;
+    execute(task: Task, context: EilContextPackage): Promise<ExecutionResult>;
     cancel(taskId: string): Promise<boolean>;
     status(taskId: string): Promise<TaskStatus>;
     retry(taskId: string): Promise<ExecutionResult>;
@@ -107,53 +167,3 @@ Concrete Adapter Implementations:
 - `ClaudeCodeExecutionAdapter`: Anthropic Claude Code engine driver.
 - `OpenHandsExecutionAdapter`: OpenHands autonomous agent driver.
 - `CustomRESTExecutionAdapter`: Third-party enterprise REST/gRPC engine driver.
-
-### Group 5: External Systems
-- `Bella EIP Suite`, `Facebook API`, `TikTok API`, `YouTube API`, `Email SMTP`, `CRM`, `SAP`.
-
-### Group 6: Marketplace & Extensions Platform
-- `Process Packages` (App Store for enterprise processes like `Marketing v2`, `Sales SOP v4`).
-- `Execution Engine Packages` (Pluggable runtime drivers for new AI engines).
-
----
-
-## 3. REASONING MEMORY & BUSINESS CONTEXT PACKAGE (BCE)
-
-Bella EOS records AI decision rationale in **Reasoning Memory** and attaches complete **Business Context Packages**:
-```json
-{
-  "taskId": "TSK-MKT-008",
-  "businessContextPackage": {
-    "objective": "Tăng 20% doanh thu tháng 8",
-    "erp": { "costCenter": "CC-MKT-2026", "approvedBudgetVnd": 50000000 },
-    "crm": { "targetSegment": "VIP Beauty", "minEqeScore": 90 },
-    "governance": { "maxAutoBudget": 100000000, "policyId": "POL-NO-NIGHT-POSTING" },
-    "historyLineage": ["DEC-98201", "DEC-98204"]
-  },
-  "executionAdapter": "HermesExecutionAdapter",
-  "timestamp": "2026-07-21T09:15:00Z"
-}
-```
-
----
-
-## 4. ARCHITECTURE FREEZE DIRECTIVE
-
-By order of Architecture Freeze, **no new engines or layers shall be added**. All future extensions must be implemented as:
-1. An extension to one of the 6 Consolidated Kernel Services.
-2. A new `ExecutionEngineAdapter` implementation.
-3. A Marketplace Process/Connector Package.OL-NO-NIGHT-POSTING",
-  "llmModel": "gemini-2.5-flash",
-  "toolInvoked": "PublishPostCommand",
-  "timestamp": "2026-07-21T09:15:00Z"
-}
-```
-
----
-
-## 4. ARCHITECTURE FREEZE DIRECTIVE
-
-By order of Architecture Freeze, **no new engines or layers shall be added**. All future extensions must be implemented as:
-1. An extension to one of the 6 Consolidated Kernel Services.
-2. A new Executor Driver.
-3. A Marketplace Process/Connector Package.

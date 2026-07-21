@@ -1,5 +1,5 @@
 # 🏛️ BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
-## Autonomous Enterprise Business Operating System v3.0
+## Autonomous Enterprise Business Operating System v11.0
 
 > **Định Vị Cốt Lõi**: Bella AI Platform không phải là một "AI Platform" hay "AI Agent Tool", mà là một **Enterprise Operating System (Enterprise OS)** hoàn chỉnh dành cho Doanh nghiệp Số. AI chỉ đóng vai trò **Execution Layer** (tương tự CPU/ARM trong Windows/Android). Doanh nghiệp mua Mô hình Vận hành Doanh nghiệp Tự trị, chứ không mua công cụ AI đơn lẻ.
 
@@ -11,20 +11,20 @@
 
 ---
 
-## 🏛️ Sơ Đồ Kiến Trúc Doanh Nghiệp 10 Lớp (10-Layer Enterprise OS)
+## 🏛️ Sơ Đồ Kiến Trúc Doanh Nghiệp 10 Lớp (10-Layer Enterprise OS v11.0)
 
 ```
 Enterprise OS (Bella EOS)
-├── 🎯 1. Objective Center OS (Vision ➔ Strategy ➔ Objectives ➔ OKRs ➔ Projects)
-├── 📂 2. Project Operating System (Project-First Core: Goals, Budget, Risks, Memory)
-├── 🏛️ 3. Organization OS (Company ➔ Dept ➔ Team ➔ Role ➔ SOPs ➔ Policies)
-├── 🛡️ 4. Enterprise Policy Engine (Lớp Quản Trị Phanh An Toàn & Quyền Hạn Độc Lập)
-├── ⚖️ 5. Decision Engine OS (Enterprise Decision Log & Audit Trail)
-├── 🤖 6. Workforce OS (Unified Human & AI Employees Matrix)
-├── 🔄 7. Workflow OS (Task Contracts, DoD, Multi-Agent Topology Stream)
-├── 🏢 8. Business Applications OS (First-party: Bella EIP/CRM | Third-party: SAP/Oracle)
-├── 🧠 9. Business Memory & Knowledge OS (Enterprise Memory & 50+ Campaign Evolution)
-└── 📊 10. Organization Analytics OS (Company Health, Dept Health, Project ROI)
+├── 🎯 1. Human Layer (CEO / HĐQT / Human-in-the-Loop Approval Gates)
+├── 📢 2. AI CEO Layer (Strategic Vision & Enterprise Directive Definition)
+├── 📈 3. Goal Engine (OKR & Cross-Department Goal Decomposition Core)
+├── 🗃️ 4. AI COO Layer (Portfolio Management & Operational Coordination)
+├── 🗺️ 5. Planning Engine (Multi-Agent Task Dependency Graph & DAG Generator)
+├── 🔄 6. Workflow Engine / Process Runtime (State Machine & Stage Execution)
+├── 🛡️ 7. Policy Engine (Compliance, Risk Matrix & Realtime Guardrails)
+├── 🧠 8. Enterprise Intelligence Layer (EIL - Multi-Dimensional Context)
+├── 🔌 9. Execution Adapter Layer (Pluggable Manager Interface)
+└── 🤖 10. Execution Runtimes (Hermes • Codex • Claude Code • OpenHands)
 ```
 
 ---

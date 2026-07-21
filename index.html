@@ -25,42 +25,46 @@
     <header class="h-14 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl px-5 flex items-center justify-between z-30 shrink-0 shadow-lg select-none">
         <!-- Left Brand & App Title -->
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 ring-1 ring-white/10 shrink-0">
-                <i class="fa-solid fa-users-gear text-white text-sm"></i>
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/10 shrink-0">
+                <i class="fa-solid fa-brain text-white text-sm"></i>
             </div>
             <div>
                 <div class="flex items-center gap-1.5">
                     <h1 class="font-sans font-bold text-xs text-white tracking-wide leading-tight">BELLA ENTERPRISE OS</h1>
-                    <span class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">FROZEN ARCHITECTURE v10.0</span>
+                    <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">v11.0</span>
                 </div>
-                <p class="text-[9px] text-slate-400 font-sans hidden md:block">Micro-Kernel: <span class="text-emerald-400 font-medium">PRISTINE (6 Primitives)</span> • EOM: <span class="text-cyan-300 font-medium">20 Objects</span> • Services: <span class="text-purple-400 font-medium">6 Kernel Services</span></p>
+                <p class="text-[9px] text-slate-500 font-sans hidden sm:block">Enterprise Intelligence Operating System</p>
             </div>
         </div>
 
-        <!-- Center: Real-time Business Performance Center Bar -->
-        <div class="hidden xl:flex items-center gap-4 bg-slate-900/40 backdrop-blur-md border border-slate-800/50 px-4 py-1.5 rounded-full text-[10px] shadow-inner font-sans">
-            <div class="flex items-center gap-1.5" title="Architecture Status">
-                <i class="fa-solid fa-snowflake text-cyan-400"></i>
-                <span class="text-slate-400">Architecture:</span>
-                <strong class="text-cyan-400 font-mono font-bold text-[10px] bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800/60">FROZEN</strong>
+        <!-- Center: Sleek, Premium Real-time System Status Bar -->
+        <div class="hidden lg:flex items-center gap-3.5 bg-slate-900/30 backdrop-blur-md border border-slate-800/60 px-4 py-1.5 rounded-full text-[10px] shadow-[0_0_15px_rgba(99,102,241,0.05)] font-sans transition-all hover:border-indigo-500/30">
+            <!-- System Status -->
+            <div class="flex items-center gap-1.5">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-slate-400 font-medium">EIL System:</span>
+                <strong class="text-emerald-400 font-bold tracking-wide uppercase">ONLINE</strong>
             </div>
-            <div class="h-2.5 w-px bg-slate-800"></div>
-            <div class="flex items-center gap-1.5" title="Kernel Status">
-                <i class="fa-solid fa-microchip text-emerald-400"></i>
-                <span class="text-slate-400">Micro-Kernel:</span>
-                <strong class="text-emerald-400 font-mono font-bold text-[10px] bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800/60">6 PRIMITIVES</strong>
+            
+            <div class="h-3 w-px bg-slate-800"></div>
+            
+            <!-- Flywheel status -->
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-arrows-spin text-indigo-400 animate-spin" style="animation-duration: 8s;"></i>
+                <span class="text-slate-400 font-medium">Evolution Flywheel:</span>
+                <strong class="text-indigo-300 font-bold">8-STEP ACTIVE</strong>
             </div>
-            <div class="h-2.5 w-px bg-slate-800"></div>
-            <div class="flex items-center gap-1.5" title="Kernel Services">
-                <i class="fa-solid fa-cubes text-purple-400"></i>
-                <span class="text-slate-400">Kernel Services:</span>
-                <strong class="text-purple-300 font-mono font-bold text-[10px] bg-purple-950/80 px-1.5 py-0.5 rounded border border-purple-800/60">6 CONSOLIDATED</strong>
-            </div>
-            <div class="h-2.5 w-px bg-slate-800"></div>
-            <div class="flex items-center gap-1.5" title="Explainable AI Memory">
-                <i class="fa-solid fa-brain text-amber-400"></i>
-                <span class="text-slate-400">Memory (XAI):</span>
-                <strong class="text-amber-400 font-mono font-bold text-[10px] bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-800/60">ACTIVE</strong>
+            
+            <div class="h-3 w-px bg-slate-800"></div>
+            
+            <!-- System version -->
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-network-wired text-purple-400"></i>
+                <span class="text-slate-400 font-medium">Arch:</span>
+                <strong class="text-purple-300 font-mono font-bold bg-purple-950/45 px-2 py-0.5 rounded border border-purple-800/40">EIL v11.0</strong>
             </div>
         </div>
 
@@ -81,6 +85,12 @@
             <button id="btn-open-replay" onclick="openProcessReplayModal()" class="bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-800/80 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer" title="Process Replay & Rollback Engine">
                 <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
                 <span>Replay & Rollback</span>
+            </button>
+
+            <!-- EIL Dashboard Button -->
+            <button id="btn-open-eil-dashboard" onclick="openEilDashboardModal()" class="bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-800/80 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer" title="Enterprise Intelligence Layer (EIL) Dashboard">
+                <i class="fa-solid fa-brain text-indigo-400 animate-pulse"></i>
+                <span>EIL Dashboard</span>
             </button>
 
             <!-- Settings API Keys Trigger Button -->
@@ -1181,6 +1191,126 @@
                     </button>
                 </div>
                 <button onclick="closeProcessReplayModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition cursor-pointer">Đóng Cửa Sổ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EIL DASHBOARD MODAL: Knowledge Graph & Learning Loop -->
+    <div id="eil-dashboard-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="w-full max-w-5xl h-[85vh] bg-slate-900/95 border border-indigo-500/30 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-slate-100 ring-1 ring-slate-800 animate-[fadeIn_0.2s_ease-out]">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500 flex items-center justify-center">
+                        <i class="fa-solid fa-brain text-indigo-400"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold tracking-tight text-white uppercase flex items-center gap-2">
+                            <span>🧠 Enterprise Intelligence Layer (EIL) Dashboard</span>
+                            <span class="text-[9px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full font-normal lowercase tracking-normal">flywheel v11.0</span>
+                        </h2>
+                        <p class="text-[10px] text-slate-400">Knowledge Graph, Evolution Optimization, and Learning Feedback Loop</p>
+                    </div>
+                </div>
+                <button onclick="closeEilDashboardModal()" class="text-slate-400 hover:text-white transition text-sm w-7 h-7 rounded-lg hover:bg-slate-800 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Content Area: Split View -->
+            <div class="flex-1 min-h-0 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-slate-800">
+                <!-- Left: Knowledge Graph Visualizer -->
+                <div class="flex-1 p-6 flex flex-col min-h-0">
+                    <div class="flex items-center justify-between mb-3 shrink-0">
+                        <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-network-wired text-indigo-500"></i>
+                            <span>Bản Đồ Tri Thức Doanh Nghiệp (Knowledge Graph)</span>
+                        </h3>
+                        <div class="flex items-center gap-2 text-[10px]">
+                            <span class="flex items-center gap-1 text-slate-400">
+                                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block shadow-[0_0_8px_rgba(99,102,241,0.5)]"></span> EOM Object
+                            </span>
+                            <span class="flex items-center gap-1 text-slate-400">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Task Approved
+                            </span>
+                            <button onclick="resetGraphVisuals()" class="text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-0.5 bg-indigo-950/40 border border-indigo-800/60 rounded">Làm mới</button>
+                        </div>
+                    </div>
+                    <!-- The Interactive SVG Graph Canvas -->
+                    <div class="flex-1 bg-slate-950 border border-slate-800/80 rounded-xl relative overflow-hidden flex items-center justify-center min-h-[300px]">
+                        <!-- Interactive node diagram using custom CSS/HTML/SVG overlay -->
+                        <div id="eil-graph-canvas" class="absolute inset-0 select-none cursor-grab active:cursor-grabbing flex items-center justify-center">
+                            <!-- SVG lines dynamically generated -->
+                            <svg id="eil-graph-edges" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
+                            <!-- Nodes absolute containers -->
+                            <div id="eil-graph-nodes" class="absolute inset-0 w-full h-full pointer-events-none"></div>
+                        </div>
+                        <div class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur border border-slate-800 px-2.5 py-1.5 rounded-lg text-[9px] text-slate-400 space-y-0.5 pointer-events-none shadow-md">
+                            <div>💡 Kéo thả chuột để di chuyển canvas</div>
+                            <div>💡 Click vào Node để xem chi tiết Meta Object</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Learning Loop & Optimization Status -->
+                <div class="w-full md:w-80 p-6 flex flex-col min-h-0 bg-slate-900/40">
+                    <!-- Engine List status -->
+                    <div class="shrink-0 mb-4">
+                        <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrows-spin text-indigo-500"></i>
+                            <span>Closed-Loop Flywheel</span>
+                        </h3>
+                        <div class="space-y-2">
+                            <!-- Goal formulation status -->
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/60 text-[10px]">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center"><i class="fa-solid fa-bullseye text-[9px] text-indigo-400"></i></div>
+                                    <span class="font-medium text-slate-300">1. Goal Decompose</span>
+                                </div>
+                                <span class="text-emerald-400 font-semibold font-mono">Active</span>
+                            </div>
+                            <!-- Simulation status -->
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/60 text-[10px]">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center"><i class="fa-solid fa-chart-line text-[9px] text-indigo-400"></i></div>
+                                    <span class="font-medium text-slate-300">2. Monte Carlo Planning</span>
+                                </div>
+                                <span class="text-emerald-400 font-semibold font-mono">Active</span>
+                            </div>
+                            <!-- Optimization status -->
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/60 text-[10px]">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center"><i class="fa-solid fa-scale-balanced text-[9px] text-indigo-400"></i></div>
+                                    <span class="font-medium text-slate-300">3. Path Optimization</span>
+                                </div>
+                                <span class="text-emerald-400 font-semibold font-mono">Active</span>
+                            </div>
+                            <!-- Learning Mutation status -->
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-950/60 border border-slate-800/60 text-[10px]">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center"><i class="fa-solid fa-dna text-[9px] text-indigo-400"></i></div>
+                                    <span class="font-medium text-slate-300">4. SOP Learning Loop</span>
+                                </div>
+                                <span class="text-emerald-400 font-semibold font-mono">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selected Node Meta Detail Panel -->
+                    <div class="flex-1 min-h-0 flex flex-col bg-slate-950 border border-slate-800/80 rounded-xl p-4 overflow-y-auto custom-scrollbar">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2" id="graph-meta-title">Metadata Viewer</h4>
+                        <div id="graph-meta-content" class="text-[10px] font-mono text-slate-300 space-y-2">
+                            <!-- Dynamically loaded on node click -->
+                            <div class="text-slate-500 italic py-4 text-center">Click vào một Node trên Bản đồ để xem thông tin thuộc tính Enterprise Object Model (EOM)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-3.5 border-t border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
+                <span class="text-[9px] text-slate-500">© 2026 Bella Intelligence Layer. Powered by Hermes-Engine & Codex-Adapter.</span>
+                <button onclick="closeEilDashboardModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition cursor-pointer">Đóng Cửa Sổ</button>
             </div>
         </div>
     </div>

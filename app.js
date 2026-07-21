@@ -130,8 +130,8 @@ const BellaKernel = {
         };
         this.auditLedger.push(ledgerRecord);
         this.emitKernelEvent('KERNEL_TRANSACTION_COMMITTED', ledgerRecord);
-        if (typeof SupabasePersistenceEngine !== 'undefined') {
-            SupabasePersistenceEngine.persistTransaction(ledgerRecord);
+        if (typeof window !== 'undefined' && window.SupabasePersistenceEngine) {
+            window.SupabasePersistenceEngine.persistTransaction(ledgerRecord);
         }
         console.log(`⚡ [BELLA MICRO-KERNEL] Txn [${transactionId}] (${actionType}) ➔ COMMITTED`);
         return ledgerRecord;
@@ -309,8 +309,8 @@ const EvidenceService = {
         });
         this.evidences.push(evidence);
         BellaKernel.executeTransaction('qa', 'STORE_EXECUTION_EVIDENCE', evidence);
-        if (typeof SupabasePersistenceEngine !== 'undefined') {
-            SupabasePersistenceEngine.persistEvidence(evidence);
+        if (typeof window !== 'undefined' && window.SupabasePersistenceEngine) {
+            window.SupabasePersistenceEngine.persistEvidence(evidence);
         }
         appendLog('EVIDENCE SERVICE', `🔍 [VERIFIED EVIDENCE] Stored proof: ${proofType} | Hash: [${proofHash}]`, 'text-emerald-400 font-bold');
         return evidence;
@@ -529,9 +529,9 @@ window.EnterpriseDataFabric = EnterpriseDataFabric;
 window.EnterpriseStateMachine = EnterpriseStateMachine;
 
 // =========================================================================
-// BUSINESS CONTEXT ENGINE (BCE) & PLUGGABLE EXECUTION ADAPTERS
+// ENTERPRISE INTELLIGENCE LAYER (EIL) & PLUGGABLE EXECUTION ADAPTERS
 // =========================================================================
-const BusinessContextEngine = {
+const EnterpriseIntelligenceLayer = {
     compileContext(task, objective = null) {
         return {
             taskId: task.id || `task_${Date.now()}`,
@@ -561,12 +561,210 @@ const BusinessContextEngine = {
     }
 };
 
+// 1. Goal Engine
+const GoalEngine = {
+    goals: [],
+    decomposeGoal(strategicVision) {
+        const id = `GOAL-${Date.now().toString(36).toUpperCase()}`;
+        const subGoals = {
+            marketing: { title: 'Marketing Goal', leads: 1500, reach: 50000, description: 'Thu hút 1500 lead chất lượng cao' },
+            sales: { title: 'Sales Goal', conversionRate: 25, revenueVND: 450000000, description: 'Đạt tỷ lệ chuyển đổi demo 25%' },
+            hr: { title: 'HR Goal', trainees: 10, skillUpgrades: ['AI Agent Operations', 'SOP Writing'], description: 'Đào tạo 10 nhân sự sử dụng AI' },
+            finance: { title: 'Finance Goal', budgetCapVND: 120000000, minNetMargin: 35, description: 'Giới hạn ngân sách 120M VND, Margin tối thiểu 35%' },
+            operations: { title: 'Operations Goal', avgSlaHours: 4.5, compliancesPassed: 100, description: 'Thời gian SLA trung bình dưới 4.5h, 100% pass' }
+        };
+        const goalRecord = {
+            id,
+            strategicVision,
+            decomposedAt: new Date().toISOString(),
+            subGoals
+        };
+        this.goals.push(goalRecord);
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('goal.decomposed', goalRecord);
+        }
+        return goalRecord;
+    }
+};
+
+// 2. Simulation Engine (Monte Carlo Simulation for ROI, Cashflow & Net Profit)
+const SimulationEngine = {
+    scenarios: {
+        ads_focus: { name: 'Kịch bản A: Dồn ngân sách Quảng cáo Ads', roi: 320, cashflow: 'Dương', profitMargin: 28 },
+        sales_hire: { name: 'Kịch bản B: Mở rộng nhân sự Sales', roi: 210, cashflow: 'Trung tính', profitMargin: 22 },
+        ai_automation: { name: 'Kịch bản C: Tự động hóa công nghệ qua AI', roi: 450, cashflow: 'Tốt', profitMargin: 42 }
+    },
+    runMonteCarlo(scenarioKey) {
+        const scenario = this.scenarios[scenarioKey] || this.scenarios.ai_automation;
+        const runs = [];
+        for(let i = 0; i < 1000; i++) {
+            const randFactor = 0.85 + Math.random() * 0.3;
+            runs.push(scenario.roi * randFactor);
+        }
+        const avgRoi = Math.round(runs.reduce((a, b) => a + b, 0) / runs.length);
+        const projectedNetProfitVND = Math.round(500000000 * (scenario.profitMargin / 100));
+
+        const result = {
+            scenario: scenario.name,
+            runs: 1000,
+            avgRoi,
+            projectedRoi: `+${avgRoi}%`,
+            cashflow: scenario.cashflow,
+            projectedNetProfitVND,
+            confidence: 94.5,
+            timestamp: new Date().toISOString()
+        };
+
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('simulation.completed', result);
+        }
+        return result;
+    }
+};
+
+// 3. Optimization Engine (Optimal Path Analysis)
+const OptimizationEngine = {
+    findOptimalPath(processId) {
+        const paths = [
+            { path: 'Path A: 100% AI Workers via Hermes (SOP v2)', costUsd: 15.2, timeHours: 0.8, successRate: 98.4, rank: 1, recommend: true },
+            { path: 'Path B: Hybrid AI-Human Verification Gate (SOP v1)', costUsd: 45.0, timeHours: 4.2, successRate: 99.1, rank: 2, recommend: false },
+            { path: 'Path C: Full Human Executed Process Flow', costUsd: 180.0, timeHours: 24.0, successRate: 95.0, rank: 3, recommend: false }
+        ];
+        
+        const optimal = paths[0];
+        const result = {
+            processId,
+            evaluatedPaths: paths.length,
+            optimalPath: optimal,
+            savingsPct: 75.5,
+            timestamp: new Date().toISOString()
+        };
+
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('optimization.completed', result);
+        }
+        return result;
+    }
+};
+
+// 4. Knowledge Graph Service (Semantic linkages for 20 EOM objects)
+const KnowledgeGraphService = {
+    nodes: new Map(),
+    edges: [],
+    
+    addNode(id, type, label, data = {}) {
+        const node = { id, type, label, data, createdAt: new Date().toISOString() };
+        this.nodes.set(id, node);
+        return node;
+    },
+
+    addEdge(sourceId, targetId, relationType) {
+        const edge = { id: `edge_${sourceId}_${targetId}`, sourceId, targetId, relationType };
+        this.edges.push(edge);
+        return edge;
+    },
+
+    getGraphStats() {
+        return {
+            nodesCount: this.nodes.size,
+            edgesCount: this.edges.length
+        };
+    },
+
+    initGraph() {
+        const nodesData = [
+            { id: 'company_bella', type: 'Company', label: 'Bella Group' },
+            { id: 'dept_mkt', type: 'Department', label: 'Marketing Dept' },
+            { id: 'role_ceo', type: 'Role', label: 'CEO Role' },
+            { id: 'emp_bella', type: 'Employee', label: 'Bella AI Employee' },
+            { id: 'obj_growth', type: 'Objective', label: 'Grow Sales 30%' },
+            { id: 'proj_summer', type: 'Project', label: 'Summer Campaign' },
+            { id: 'proc_mkt_automation', type: 'Process', label: 'MKT Automation' },
+            { id: 'stage_init', type: 'Stage', label: 'Initiation Stage' },
+            { id: 'task_post', type: 'Task', label: 'Publish Social Post' },
+            { id: 'cmd_post', type: 'Command', label: 'PublishPostCommand' },
+            { id: 'res_budget', type: 'Resource', label: 'Marketing Budget' },
+            { id: 'policy_spend', type: 'Policy', label: 'Max Spend Limit' },
+            { id: 'ev_post_id', type: 'Evidence', label: 'Facebook Post ID' },
+            { id: 'mem_audit', type: 'Memory', label: 'Historical Audit logs' },
+            { id: 'dec_approve', type: 'Decision', label: 'Budget Approval Dec' },
+            { id: 'metric_conversion', type: 'Metric', label: 'Demo Conversion Rate' },
+            { id: 'asset_pdf', type: 'Asset', label: 'SOP Document PDF' },
+            { id: 'cust_lead', type: 'Customer', label: 'VIP Spa Leads' },
+            { id: 'event_dispatched', type: 'Event', label: 'Task Dispatched Event' },
+            { id: 'invoice_lead', type: 'Invoice', label: 'Lead Gen Invoice' }
+        ];
+
+        nodesData.forEach(n => this.addNode(n.id, n.type, n.label));
+
+        this.addEdge('company_bella', 'dept_mkt', 'CONTAINS');
+        this.addEdge('dept_mkt', 'role_ceo', 'REPORTS_TO');
+        this.addEdge('role_ceo', 'dec_approve', 'MAKES');
+        this.addEdge('emp_bella', 'task_post', 'EXECUTES');
+        this.addEdge('task_post', 'cmd_post', 'TRIGGERS');
+        this.addEdge('cmd_post', 'res_budget', 'CONSUMES');
+        this.addEdge('res_budget', 'policy_spend', 'GOVERNED_BY');
+        this.addEdge('task_post', 'ev_post_id', 'PRODUCES');
+        this.addEdge('ev_post_id', 'mem_audit', 'STORED_IN');
+        this.addEdge('dec_approve', 'obj_growth', 'SUPPORTS');
+        this.addEdge('obj_growth', 'proj_summer', 'ALIGNED_WITH');
+        this.addEdge('proj_summer', 'proc_mkt_automation', 'HAS_PROCESS');
+        this.addEdge('proc_mkt_automation', 'stage_init', 'STARTS_WITH');
+        this.addEdge('stage_init', 'task_post', 'CONTAINS_TASK');
+        this.addEdge('task_post', 'metric_conversion', 'TRACKED_BY');
+        this.addEdge('task_post', 'asset_pdf', 'ATTACHES');
+        this.addEdge('cust_lead', 'invoice_lead', 'PAYS');
+        this.addEdge('task_post', 'event_dispatched', 'EMITS');
+    }
+};
+
+// 5. Learning Engine (Self-optimization, SOP mutation & Skill weights adjusting)
+const LearningEngine = {
+    mutations: [],
+    mutateAndLearn(evidenceData, qualityScorecard) {
+        let mutation = null;
+        const score = (qualityScorecard && qualityScorecard.overall) || 95;
+        if (score >= 90) {
+            mutation = {
+                type: 'SKILL_UPGRADE',
+                target: 'bella_worker',
+                skill: 'SEO Copywriting',
+                oldWeight: 85,
+                newWeight: 92,
+                reason: `Hiệu suất xuất sắc (${score}%) trong nhiệm vụ đăng bài Content.`,
+                timestamp: new Date().toISOString()
+            };
+            if (typeof WorkforceRegistry !== 'undefined') {
+                const member = WorkforceRegistry.getMemberById('bella_worker');
+                if (member && member.skills) {
+                    const sIndex = member.skills.findIndex(s => s.name === 'SEO Optimization');
+                    if (sIndex !== -1) member.skills[sIndex].level = 92;
+                }
+            }
+        } else {
+            mutation = {
+                type: 'SOP_REVISION',
+                target: 'SOP-MARKETING-SEO-V2',
+                action: 'Thêm bước kiểm duyệt tiêu chuẩn đầu ra',
+                reason: `Phát hiện lỗi chất lượng (Điểm EQE: ${score}%). Tự động bổ sung check gate.`,
+                timestamp: new Date().toISOString()
+            };
+        }
+        
+        this.mutations.push(mutation);
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('learning.mutation.registered', mutation);
+        }
+        return mutation;
+    }
+};
+
 const ExecutionEngineAdapterManager = {
     adapters: {
         hermes: {
             name: 'HermesExecutionAdapter',
-            async execute(task, bceContext) {
-                console.log(`🚀 [HermesAdapter] Executing task [${task.name || task.id}] with BCE Context...`, bceContext);
+            async execute(task, eilContext) {
+                console.log(`🚀 [HermesAdapter] Executing task [${task.name || task.id}] with EIL Context...`, eilContext);
                 return { status: 'SUCCESS', runtime: 'Hermes v3', output: `[Hermes Driver Output] Completed task: ${task.name}` };
             },
             async cancel(taskId) { return true; },
@@ -576,8 +774,8 @@ const ExecutionEngineAdapterManager = {
         },
         codex: {
             name: 'CodexExecutionAdapter',
-            async execute(task, bceContext) {
-                console.log(`🤖 [CodexAdapter] Code generation task [${task.name}] with BCE Context...`, bceContext);
+            async execute(task, eilContext) {
+                console.log(`🤖 [CodexAdapter] Code generation task [${task.name}] with EIL Context...`, eilContext);
                 return { status: 'SUCCESS', runtime: 'OpenAI Codex', output: `[Codex Output] Executed code generation for: ${task.name}` };
             },
             async cancel(taskId) { return true; },
@@ -587,8 +785,8 @@ const ExecutionEngineAdapterManager = {
         },
         claudecode: {
             name: 'ClaudeCodeExecutionAdapter',
-            async execute(task, bceContext) {
-                console.log(`🧠 [ClaudeCodeAdapter] High-reasoning task [${task.name}] with BCE Context...`, bceContext);
+            async execute(task, eilContext) {
+                console.log(`🧠 [ClaudeCodeAdapter] High-reasoning task [${task.name}] with EIL Context...`, eilContext);
                 return { status: 'SUCCESS', runtime: 'Claude Code CLI', output: `[Claude Code Output] Refactored & audited: ${task.name}` };
             },
             async cancel(taskId) { return true; },
@@ -598,8 +796,8 @@ const ExecutionEngineAdapterManager = {
         },
         openhands: {
             name: 'OpenHandsExecutionAdapter',
-            async execute(task, bceContext) {
-                console.log(`👐 [OpenHandsAdapter] Autonomous agent task [${task.name}] with BCE Context...`, bceContext);
+            async execute(task, eilContext) {
+                console.log(`👐 [OpenHandsAdapter] Autonomous agent task [${task.name}] with EIL Context...`, eilContext);
                 return { status: 'SUCCESS', runtime: 'OpenHands Runtime', output: `[OpenHands Output] Completed browser & file workflow: ${task.name}` };
             },
             async cancel(taskId) { return true; },
@@ -615,14 +813,22 @@ const ExecutionEngineAdapterManager = {
 
     async dispatchTask(adapterKey, task, objective) {
         const adapter = this.getAdapter(adapterKey);
-        const bceContext = BusinessContextEngine.compileContext(task, objective);
-        console.log(`⚡ [EXECUTION SERVICE] Dispatching via [${adapter.name}] with BCE Package:`, bceContext);
-        return await adapter.execute(task, bceContext);
+        const eilContext = EnterpriseIntelligenceLayer.compileContext(task, objective);
+        console.log(`⚡ [EXECUTION SERVICE] Dispatching via [${adapter.name}] with EIL Package:`, eilContext);
+        return await adapter.execute(task, eilContext);
     }
 };
 
-window.BusinessContextEngine = BusinessContextEngine;
+window.EnterpriseIntelligenceLayer = EnterpriseIntelligenceLayer;
+window.GoalEngine = GoalEngine;
+window.SimulationEngine = SimulationEngine;
+window.OptimizationEngine = OptimizationEngine;
+window.KnowledgeGraphService = KnowledgeGraphService;
+window.LearningEngine = LearningEngine;
 window.ExecutionEngineAdapterManager = ExecutionEngineAdapterManager;
+
+// Initialise the default EIL Knowledge Graph Nodes/Edges
+KnowledgeGraphService.initGraph();
 
 // =========================================================================
 // PHASE 3: AI RUNTIME OS DRIVER & COST OPTIMIZER (LAYER 8 AI RUNTIME OS)
@@ -4012,6 +4218,24 @@ function stepForward() {
 
     const currentStep = WORKFLOW_STEPS[currentStepIndex];
     const taskId = `task-step-${currentStep.id}`;
+
+    // Flywheel Step 1: Goal Formulation
+    const strategicVision = `Mục tiêu tối ưu hóa quy trình [Step ${currentStep.id}: ${currentStep.name}]`;
+    const goalObj = GoalEngine.decomposeGoal(strategicVision);
+    appendLog('GOAL ENGINE', `🎯 [Goal Formulation] OKRs Decomposed: Mkt Leads: ${goalObj.subGoals.marketing.leads} | Sales Conv: ${goalObj.subGoals.sales.conversionRate}% | Margin: ${goalObj.subGoals.finance.minNetMargin}%`, 'text-indigo-400 font-semibold');
+
+    // Flywheel Step 2: Planning & Simulation (Monte Carlo & Optimization)
+    const simReport = SimulationEngine.runMonteCarlo('ai_automation');
+    appendLog('SIMULATION ENGINE', `🔮 [Monte Carlo Simulation] ROI dự kiến: ${simReport.projectedRoi} | Cashflow: ${simReport.cashflow} | Net Profit: ${(simReport.projectedNetProfitVND / 1000000).toFixed(1)}M VND | Confidence: ${simReport.confidence}%`, 'text-cyan-400 font-semibold');
+
+    const optReport = OptimizationEngine.findOptimalPath(currentStep.id);
+    appendLog('OPTIMIZATION ENGINE', `⚖️ [Path Optimization] Chọn: "${optReport.optimalPath.path}" (Độ tin cậy: ${optReport.optimalPath.successRate}%, Tiết kiệm: ${optReport.savingsPct}%)`, 'text-purple-400 font-semibold');
+
+    // Flywheel Step 3: Execution
+    appendLog('EXECUTION ADAPTER', `⚡ [Execution Adapter] Dispatched task via [${currentStep.adapterKey || 'hermes'}] Adapter. EIL context attached.`, 'text-amber-500');
+
+    // Flywheel Step 4: Observation
+    appendLog('OBSERVATION ENGINE', `📊 [Observation Telemetry] Real-time tracking activated. CAC: 1.2M VND | Active Reach: 145,200 users`, 'text-slate-400');
     
     appendLog('EQE GATEWAY', `🛡️ ĐANG QUÉT CHẤT LƯỢNG (LIVE SCANNING): "${currentStep.name}"...`, 'text-cyan-400 font-medium');
 
@@ -4023,7 +4247,7 @@ function stepForward() {
         DeliverableManager.registerVersion(taskId, getStepOutputText(currentStep.id));
     }
 
-    // Run EQE assessment
+    // Run EQE assessment (Flywheel Step 5: Evaluation)
     EnterpriseQualityEngine.evaluate(dlv);
 
     // Update deliverables sidebar tab
@@ -4037,6 +4261,16 @@ function stepForward() {
     if (decision.action.startsWith('APPROVED')) {
         // Step Passed!
         appendLog('DECISION ENGINE', `✅ ĐẠT YÊU CẦU: [${dlv.id}] v${dlv.version} được duyệt với điểm ${dlv.score}%.`, 'text-emerald-400 font-bold');
+        
+        // Flywheel Step 6: Learning
+        const learningMutation = LearningEngine.mutateAndLearn(dlv.evidence, { overall: dlv.score });
+        appendLog('LEARNING ENGINE', `🧠 [Learning Engine] SOP Mutated: "${learningMutation.target}". Skill weight updated for "bella_worker".`, 'text-emerald-400 font-bold');
+
+        // Flywheel Step 7: Knowledge Graph Sync
+        const stepNodeId = `step_node_${currentStep.id}_${Date.now()}`;
+        KnowledgeGraphService.addNode(stepNodeId, 'Task', currentStep.name, { score: dlv.score });
+        KnowledgeGraphService.addEdge(stepNodeId, 'company_bella', 'BELONGS_TO');
+        appendLog('KNOWLEDGE GRAPH', `🔗 [Graph Sync] Linked EOM Object [Task: ${currentStep.name}] to Company [Bella Group]. Nodes: ${KnowledgeGraphService.getGraphStats().nodesCount}`, 'text-teal-400 font-semibold');
         
         // Log agent text
         const activeAgent = AI_AGENTS.find(a => a.id === currentStep.agent);
@@ -4451,23 +4685,23 @@ const AICOOEngine = {
             { id: 10, name: '10. Báo cáo Sức Khỏe Doanh Nghiệp CEO', agent: 'fin', adapterKey: 'hermes', text: 'CEO Executive Dashboard: Tổng hợp ROI, CAC & Sức khỏe Doanh nghiệp' }
         ];
 
-        // Compile Business Context Engine (BCE) Package for each dynamic step
+        // Compile Enterprise Intelligence Layer (EIL) Package for each dynamic step
         const dynamicSteps = rawSteps.map(step => {
-            const bceContext = (typeof BusinessContextEngine !== 'undefined') ? 
-                BusinessContextEngine.compileContext(step, objectiveText) : null;
+            const eilContext = (typeof EnterpriseIntelligenceLayer !== 'undefined') ? 
+                EnterpriseIntelligenceLayer.compileContext(step, objectiveText) : null;
             
-            if (bceContext && bceContext.erp) {
-                bceContext.erp.approvedBudgetVnd = budgetVND;
+            if (eilContext && eilContext.erp) {
+                eilContext.erp.approvedBudgetVnd = budgetVND;
             }
 
             return {
                 ...step,
-                bceContext,
+                eilContext,
                 executionAdapter: step.adapterKey || 'hermes'
             };
         });
 
-        appendLog('BUSINESS CONTEXT ENGINE (BCE)', `💼 Đã biên dịch Gói Ngữ Cảnh Doanh Nghiệp (BCE Package) cho 10/10 bước SOP.`, 'text-cyan-400 font-bold');
+        appendLog('ENTERPRISE INTELLIGENCE LAYER (EIL)', `💼 Đã biên dịch Gói Ngữ Cảnh Doanh Nghiệp (EIL Package) cho 10/10 bước SOP.`, 'text-cyan-400 font-bold');
         appendLog('EXECUTION ADAPTER MANAGER', `🔌 Gán bộ điều hướng thực thi: Hermes (4), Codex (1), ClaudeCode (3), OpenHands (2).`, 'text-purple-400 font-bold');
 
         return dynamicSteps;
@@ -5779,11 +6013,11 @@ function renderDossierMatrixContent(agent) {
                 </div>
             </div>
 
-            <!-- Col 2: BCE Context Package -->
+            <!-- Col 2: EIL Context Package -->
             <div class="p-4 rounded-xl border bg-slate-950/80 border-slate-800 space-y-2.5">
                 <h4 class="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
                     <i class="fa-solid fa-briefcase"></i>
-                    <span>Ma trận Ngữ Cảnh BCE</span>
+                    <span>Ma trận Ngữ Cảnh EIL</span>
                 </h4>
                 <div class="space-y-1.5 text-[11px] text-slate-300 font-mono">
                     <div class="flex justify-between py-1 border-b border-slate-900">
@@ -6091,3 +6325,214 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+// EIL Interactive Dashboard and Knowledge Graph Controller
+let graphDragOffset = { x: 0, y: 0 };
+let isDraggingGraph = false;
+let startDragPos = { x: 0, y: 0 };
+
+function openEilDashboardModal() {
+    const modal = document.getElementById('eil-dashboard-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        renderEilGraph();
+        initGraphDragHandler();
+    }
+}
+
+function closeEilDashboardModal() {
+    const modal = document.getElementById('eil-dashboard-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function initGraphDragHandler() {
+    const canvas = document.getElementById('eil-graph-canvas');
+    if (!canvas) return;
+    
+    // reset position
+    graphDragOffset = { x: 0, y: 0 };
+    canvas.style.transform = `translate(0px, 0px)`;
+
+    canvas.onmousedown = (e) => {
+        if (e.target.closest('.graph-node-btn')) return; // let buttons capture clicks
+        isDraggingGraph = true;
+        startDragPos = { x: e.clientX - graphDragOffset.x, y: e.clientY - graphDragOffset.y };
+        canvas.style.cursor = 'grabbing';
+    };
+
+    window.onmousemove = (e) => {
+        if (!isDraggingGraph) return;
+        graphDragOffset.x = e.clientX - startDragPos.x;
+        graphDragOffset.y = e.clientY - startDragPos.y;
+        canvas.style.transform = `translate(${graphDragOffset.x}px, ${graphDragOffset.y}px)`;
+    };
+
+    window.onmouseup = () => {
+        if (isDraggingGraph) {
+            isDraggingGraph = false;
+            canvas.style.cursor = 'grab';
+        }
+    };
+}
+
+function renderEilGraph() {
+    const nodesContainer = document.getElementById('eil-graph-nodes');
+    const edgesContainer = document.getElementById('eil-graph-edges');
+    if (!nodesContainer || !edgesContainer) return;
+
+    // Clear previous elements
+    nodesContainer.innerHTML = '';
+    edgesContainer.innerHTML = '';
+
+    // Fetch dynamic knowledge graph nodes
+    const rawNodes = KnowledgeGraphService.getNodes();
+    const rawEdges = KnowledgeGraphService.getEdges();
+
+    // Layout configuration
+    const width = 600;
+    const height = 400;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    const nodeCoords = {};
+
+    // Center of container (Root node)
+    const rootNode = rawNodes.find(n => n.type === 'Root') || { id: 'company_bella', name: 'Bella OS Core', type: 'Root' };
+    nodeCoords[rootNode.id] = { x: centerX, y: centerY };
+
+    // Engines
+    const engineNodes = rawNodes.filter(n => n.type === 'Engine');
+    engineNodes.forEach((node, idx) => {
+        const angle = (idx / engineNodes.length) * 2 * Math.PI;
+        const radius = 100;
+        nodeCoords[node.id] = {
+            x: centerX + radius * Math.cos(angle),
+            y: centerY + radius * Math.sin(angle)
+        };
+    });
+
+    // Dynamic Tasks and other entities
+    const dynamicNodes = rawNodes.filter(n => n.type !== 'Root' && n.type !== 'Engine');
+    dynamicNodes.forEach((node, idx) => {
+        const angle = (idx / (dynamicNodes.length || 1)) * 2 * Math.PI + Math.PI / 4;
+        const radius = 180;
+        nodeCoords[node.id] = {
+            x: centerX + radius * Math.cos(angle),
+            y: centerY + radius * Math.sin(angle)
+        };
+    });
+
+    // Render Edges (Paths)
+    edgesContainer.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    rawEdges.forEach(edge => {
+        const sourcePos = nodeCoords[edge.source];
+        const targetPos = nodeCoords[edge.target];
+        if (sourcePos && targetPos) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', sourcePos.x);
+            line.setAttribute('y1', sourcePos.y);
+            line.setAttribute('x2', targetPos.x);
+            line.setAttribute('y2', targetPos.y);
+            line.setAttribute('stroke', '#4f46e5');
+            line.setAttribute('stroke-width', '1.5');
+            line.setAttribute('stroke-dasharray', edge.type === 'MUTATED_BY' ? '4 2' : 'none');
+            line.setAttribute('opacity', '0.5');
+            edgesContainer.appendChild(line);
+        }
+    });
+
+    // Render Nodes (Interactive Buttons)
+    rawNodes.forEach(node => {
+        const pos = nodeCoords[node.id];
+        if (!pos) return;
+
+        const nodeEl = document.createElement('button');
+        nodeEl.className = 'graph-node-btn absolute pointer-events-auto transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center p-2 rounded-xl border text-[9px] font-semibold transition-all hover:scale-110 active:scale-95 shadow-lg group';
+        nodeEl.style.left = `${pos.x}px`;
+        nodeEl.style.top = `${pos.y}px`;
+
+        // Color & style based on node type
+        let colorClasses = 'bg-slate-900 border-indigo-500/50 text-indigo-300 hover:border-indigo-400';
+        let glowClass = 'shadow-[0_0_8px_rgba(99,102,241,0.2)]';
+        let iconHtml = '<i class="fa-solid fa-square-nodes text-[10px] mb-1"></i>';
+
+        if (node.type === 'Root') {
+            colorClasses = 'bg-slate-950 border-indigo-500 text-white font-bold text-[10px]';
+            glowClass = 'shadow-[0_0_15px_rgba(99,102,241,0.6)] animate-pulse';
+            iconHtml = '<i class="fa-solid fa-crown text-[11px] text-indigo-400 mb-1"></i>';
+        } else if (node.type === 'Engine') {
+            colorClasses = 'bg-slate-900 border-indigo-400/70 text-indigo-200';
+            glowClass = 'shadow-[0_0_10px_rgba(99,102,241,0.4)]';
+            iconHtml = '<i class="fa-solid fa-gears text-[10px] text-indigo-300 mb-1"></i>';
+        } else if (node.type === 'Task') {
+            colorClasses = 'bg-slate-900 border-emerald-500/50 text-emerald-300 hover:border-emerald-400';
+            glowClass = 'shadow-[0_0_8px_rgba(16,185,129,0.3)]';
+            iconHtml = '<i class="fa-solid fa-circle-check text-[10px] text-emerald-400 mb-1"></i>';
+        }
+
+        nodeEl.className += ` ${colorClasses} ${glowClass}`;
+        nodeEl.innerHTML = `${iconHtml}<span class="max-w-[80px] truncate text-center">${node.name}</span>`;
+
+        nodeEl.onclick = (e) => {
+            e.stopPropagation();
+            showGraphMeta(node);
+        };
+
+        nodesContainer.appendChild(nodeEl);
+    });
+}
+
+function showGraphMeta(node) {
+    const metaTitle = document.getElementById('graph-meta-title');
+    const metaContent = document.getElementById('graph-meta-content');
+    if (!metaTitle || !metaContent) return;
+
+    metaTitle.innerText = `${node.type.toUpperCase()}: ${node.name}`;
+    
+    let html = `
+        <div class="space-y-2.5">
+            <div class="flex justify-between border-b border-slate-800 pb-1">
+                <span class="text-slate-500">ID:</span>
+                <span class="text-slate-300 select-all">${node.id}</span>
+            </div>
+            <div class="flex justify-between border-b border-slate-800 pb-1">
+                <span class="text-slate-500">Loại:</span>
+                <span class="text-indigo-400 font-bold">${node.type}</span>
+            </div>
+    `;
+
+    // Dynamic metrics based on properties
+    if (node.properties) {
+        Object.entries(node.properties).forEach(([key, val]) => {
+            let valStr = (typeof val === 'object') ? JSON.stringify(val) : val;
+            html += `
+                <div class="flex flex-col gap-0.5 border-b border-slate-800 pb-1">
+                    <span class="text-slate-500 capitalize">${key}:</span>
+                    <span class="text-emerald-400 break-all">${valStr}</span>
+                </div>
+            `;
+        });
+    }
+
+    html += `
+            <div class="text-[9px] text-slate-500 pt-2 italic">
+                * Thuộc tính được đồng bộ thời gian thực vào Enterprise Object Model (EOM).
+            </div>
+        </div>
+    `;
+
+    metaContent.innerHTML = html;
+}
+
+function resetGraphVisuals() {
+    renderEilGraph();
+    initGraphDragHandler();
+    
+    // reset meta view
+    const metaContent = document.getElementById('graph-meta-content');
+    if (metaContent) {
+        metaContent.innerHTML = `<div class="text-slate-500 italic py-4 text-center">Click vào một Node trên Bản đồ để xem thông tin thuộc tính Enterprise Object Model (EOM)</div>`;
+    }
+}
