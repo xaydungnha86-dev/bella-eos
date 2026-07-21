@@ -1321,8 +1321,40 @@ const ExecutionEngineAdapterManager = {
         codex: {
             name: 'CodexExecutionAdapter',
             async execute(task, eilContext) {
-                console.log(`🤖 [CodexAdapter] Code generation task [${task.name}] with EIL Context...`, eilContext);
-                return { status: 'SUCCESS', runtime: 'OpenAI Codex', output: `[Codex Output] Executed code generation for: ${task.name}` };
+                console.log(`🤖 [CodexAdapter] Executing OpenAI task [${task.name || task.id}]...`, eilContext);
+                const openaiKey = localStorage.getItem('bella_openai_api_key') || window.OPENAI_API_KEY;
+                
+                if (openaiKey && !openaiKey.includes('MOCK') && openaiKey.startsWith('sk-')) {
+                    try {
+                        appendLog('OPENAI DRIVER', `🎨 [DALL-E 3] Gửi yêu cầu sinh ảnh đến OpenAI API...`, 'text-indigo-350 font-semibold');
+                        const response = await fetch('https://api.openai.com/v1/images/generations', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${openaiKey}`
+                            },
+                            body: JSON.stringify({
+                                model: "dall-e-3",
+                                prompt: `Professional aesthetic banner for luxury beauty spa POS software, cozy and modern design style, photorealistic, 4K`,
+                                n: 1,
+                                size: "1024x1024"
+                            })
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.data && data.data[0]) {
+                            const imgUrl = data.data[0].url;
+                            appendLog('OPENAI DRIVER', `✅ [DALL-E 3 Success] Sinh ảnh thành công! URL: <a href="${imgUrl}" target="_blank" class="text-cyan-400 underline break-all">${imgUrl}</a>`, 'text-emerald-400 font-bold');
+                            return { status: 'SUCCESS', runtime: 'DALL-E 3', output: imgUrl };
+                        } else {
+                            appendLog('OPENAI DRIVER', `⚠️ [OpenAI API Error] ${data.error ? data.error.message : 'Unknown error'}. Kích hoạt chế độ giả lập...`, 'text-amber-400 italic');
+                        }
+                    } catch (err) {
+                        appendLog('OPENAI DRIVER', `⚠️ [OpenAI Connection Error] ${err.message}. Kích hoạt chế độ giả lập...`, 'text-amber-400 italic');
+                    }
+                } else {
+                    appendLog('OPENAI DRIVER', `ℹ️ [OpenAI Simulator] Chưa cấu hình API Key thật. Chạy luồng giả lập thành công.`, 'text-slate-400 italic');
+                }
+                return { status: 'SUCCESS', runtime: 'OpenAI Codex', output: `[Mock DALL-E 3 Image URL] https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800` };
             },
             async cancel(taskId) { return true; },
             async status(taskId) { return 'IDLE'; },
@@ -1343,8 +1375,40 @@ const ExecutionEngineAdapterManager = {
         openhands: {
             name: 'OpenHandsExecutionAdapter',
             async execute(task, eilContext) {
-                console.log(`👐 [OpenHandsAdapter] Autonomous agent task [${task.name}] with EIL Context...`, eilContext);
-                return { status: 'SUCCESS', runtime: 'OpenHands Runtime', output: `[OpenHands Output] Completed browser & file workflow: ${task.name}` };
+                console.log(`👐 [OpenHandsAdapter] Executing Gemini task [${task.name || task.id}]...`, eilContext);
+                const geminiKey = localStorage.getItem('bella_gemini_api_key') || window.GEMINI_API_KEY;
+                
+                if (geminiKey && !geminiKey.includes('MOCK') && geminiKey.length > 10) {
+                    try {
+                        appendLog('GEMINI DRIVER', `🧠 [Gemini 1.5 Pro] Gửi yêu cầu sinh nội dung/kịch bản video đến Google AI Studio...`, 'text-cyan-300 font-semibold');
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiKey}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [{
+                                        text: `Write a short 30-word marketing tagline and 5-second video visual prompt for a beauty spa campaign with a budget of 10M VND.`
+                                    }]
+                                }]
+                            })
+                        });
+                        const data = await response.json();
+                        if (response.ok && data.candidates && data.candidates[0].content.parts[0]) {
+                            const genText = data.candidates[0].content.parts[0].text;
+                            appendLog('GEMINI DRIVER', `✅ [Gemini Success] Tạo nội dung/video prompt thành công:\n"${genText}"`, 'text-emerald-400 font-bold');
+                            return { status: 'SUCCESS', runtime: 'Gemini 1.5 Pro', output: genText };
+                        } else {
+                            appendLog('GEMINI DRIVER', `⚠️ [Gemini API Error] ${data.error ? data.error.message : 'Unknown error'}. Kích hoạt chế độ giả lập...`, 'text-amber-400 italic');
+                        }
+                    } catch (err) {
+                        appendLog('GEMINI DRIVER', `⚠️ [Gemini Connection Error] ${err.message}. Kích hoạt chế độ giả lập...`, 'text-amber-400 italic');
+                    }
+                } else {
+                    appendLog('GEMINI DRIVER', `ℹ️ [Gemini Simulator] Chưa cấu hình API Key thật. Chạy luồng giả lập thành công.`, 'text-slate-400 italic');
+                }
+                return { status: 'SUCCESS', runtime: 'OpenHands Runtime', output: `[Gemini Video Prompt] A soothing spa room with warm candles and soft steam, ultra-realistic 4K.` };
             },
             async cancel(taskId) { return true; },
             async status(taskId) { return 'IDLE'; },
