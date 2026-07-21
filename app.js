@@ -7012,6 +7012,12 @@ function renderEilGraph() {
         nodeEl.className += ` ${colorClasses} ${glowClass}`;
         nodeEl.innerHTML = `${iconHtml}<span class="max-w-[80px] truncate text-center">${node.name}</span>`;
 
+        nodeEl.onmousedown = (e) => {
+            e.stopPropagation();
+        };
+        nodeEl.onpointerdown = (e) => {
+            e.stopPropagation();
+        };
         nodeEl.onclick = (e) => {
             e.stopPropagation();
             showGraphMeta(node);
