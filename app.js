@@ -283,17 +283,30 @@ const PolicyService = {
 const EvidenceService = {
     evidences: [],
     snapshots: [],
+    generateProofHash(data) {
+        const str = typeof data === 'string' ? data : JSON.stringify(data);
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash |= 0;
+        }
+        const hex = Math.abs(hash).toString(16).padStart(8, '0');
+        return `0x${hex}${Date.now().toString(16)}`;
+    },
     verifyAndStoreEvidence(taskId, proofType, proofData) {
+        const proofHash = this.generateProofHash(proofData);
         const evidence = EnterpriseObjectModel.createObject('Evidence', {
             taskId,
             proofType,
             proofData,
+            proofHash,
             verified: true,
             timestamp: new Date().toISOString()
         });
         this.evidences.push(evidence);
         BellaKernel.executeTransaction('qa', 'STORE_EXECUTION_EVIDENCE', evidence);
-        appendLog('EVIDENCE SERVICE', `🔍 [VERIFIED EVIDENCE] Stored proof: ${proofType} (Pass 100%)`, 'text-emerald-400 font-bold');
+        appendLog('EVIDENCE SERVICE', `🔍 [VERIFIED EVIDENCE] Stored proof: ${proofType} | Hash: [${proofHash}]`, 'text-emerald-400 font-bold');
         return evidence;
     },
     takeSnapshot(processInstanceId) {
