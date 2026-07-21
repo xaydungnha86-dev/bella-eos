@@ -531,20 +531,136 @@ window.EnterpriseStateMachine = EnterpriseStateMachine;
 // =========================================================================
 // ENTERPRISE INTELLIGENCE LAYER (EIL) & PLUGGABLE EXECUTION ADAPTERS
 // =========================================================================
+// ==========================================
+// BELLA EIP CONNECTOR & CANONICAL DATA FABRIC
+// ==========================================
+const EIPProvider = {
+    // Current active Mock database representation (simulating Bella EIP API state)
+    mockDatabase: {
+        customersCount: 1289,
+        bookingsCount: 42,
+        revenueTodayVnd: 156000000,
+        inventoryAlerts: 3,
+        hrCapacityPct: 87,
+        cashFlowStatus: 'HEALTHY'
+    },
+
+    getLiveBusinessState() {
+        return { ...this.mockDatabase };
+    },
+
+    sendCommand(commandName, payload) {
+        appendLog('EIP CONNECTOR', `🔌 Outgoing Command: Sent "${commandName}" to Bella EIP API. Dispatching state changes...`, 'text-indigo-400 font-semibold');
+        
+        // Mutate mock db state based on commands sent by EOS Workflow
+        if (commandName === 'PublishPostCommand') {
+            this.mockDatabase.bookingsCount += 2;
+            this.mockDatabase.revenueTodayVnd += 12000000;
+        } else if (commandName === 'AllocateBudgetCommand') {
+            this.mockDatabase.revenueTodayVnd -= payload.budgetVnd || 5000000;
+        }
+
+        // Update UI widget
+        this.updateUiWidget();
+        return { status: 200, message: 'Command executed successfully on Bella EIP API' };
+    },
+
+    updateUiWidget() {
+        const elCustomers = document.getElementById('eip-state-customers');
+        const elBookings = document.getElementById('eip-state-bookings');
+        const elRevenue = document.getElementById('eip-state-revenue');
+        const elInventory = document.getElementById('eip-state-inventory');
+        const elHr = document.getElementById('eip-state-hr');
+        const elCashflow = document.getElementById('eip-state-cashflow');
+
+        if (elCustomers) elCustomers.innerText = this.mockDatabase.customersCount.toLocaleString();
+        if (elBookings) elBookings.innerText = this.mockDatabase.bookingsCount.toString();
+        if (elRevenue) elRevenue.innerText = `${(this.mockDatabase.revenueTodayVnd / 1000000).toFixed(0)}M VND`;
+        if (elInventory) elInventory.innerText = `${this.mockDatabase.inventoryAlerts} alerts`;
+        if (elHr) elHr.innerText = `${this.mockDatabase.hrCapacityPct}%`;
+        if (elCashflow) {
+            elCashflow.innerText = this.mockDatabase.cashFlowStatus;
+            elCashflow.className = this.mockDatabase.cashFlowStatus === 'HEALTHY' ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold';
+        }
+    }
+};
+
+window.EIPProvider = EIPProvider;
+
+// Business Context Engine Connectors definitions (Canonical Context Model)
+const EipConnector = {
+    fetchData() {
+        return EIPProvider.getLiveBusinessState();
+    }
+};
+
+const GoogleAnalyticsConnector = {
+    fetchData() {
+        return {
+            source: 'GoogleAnalytics',
+            dailySessions: 4200,
+            bounceRatePct: 41.5,
+            conversionRatePct: 2.8
+        };
+    }
+};
+
+const FacebookConnector = {
+    fetchData() {
+        return {
+            source: 'FacebookGraphAPI',
+            pageLikes: 25400,
+            postReach24h: 14500,
+            engagementRatePct: 5.4
+        };
+    }
+};
+
+const MisaConnector = {
+    fetchData() {
+        return {
+            source: 'MisaERP',
+            inventoryAlerts: 3,
+            cashOnHandVnd: 12400000000,
+            payableAmountVnd: 45000000
+        };
+    }
+};
+
 const EnterpriseIntelligenceLayer = {
+    connectors: {
+        eip: EipConnector,
+        ga: GoogleAnalyticsConnector,
+        facebook: FacebookConnector,
+        misa: MisaConnector
+    },
+
     compileContext(task, objective = null) {
+        // Fetch raw data from all active connectors
+        const eipData = this.connectors.eip.fetchData();
+        const gaData = this.connectors.ga.fetchData();
+        const fbData = this.connectors.facebook.fetchData();
+        const misaData = this.connectors.misa.fetchData();
+
+        // Business Context Engine normalizes everything into a unified Enterprise Context
         return {
             taskId: task.id || `task_${Date.now()}`,
             objective: objective || 'Tăng trưởng Vận hành & Doanh thu Doanh nghiệp',
             erp: {
                 costCenter: 'CC-BELLA-2026',
                 approvedBudgetVnd: 50000000,
-                currency: 'VND'
+                currency: 'VND',
+                cashOnHandVnd: misaData.cashOnHandVnd,
+                payableAmountVnd: misaData.payableAmountVnd,
+                inventoryAlerts: eipData.inventoryAlerts || misaData.inventoryAlerts
             },
             crm: {
                 targetSegment: 'Enterprise VIP',
                 minEqeScore: 90,
-                customerChannel: 'Multichannel (FB/Zalo/Email)'
+                activeCustomers: eipData.customersCount,
+                activeBookings: eipData.bookingsCount,
+                dailyWebsiteSessions: gaData.dailySessions,
+                facebookReach24h: fbData.postReach24h
             },
             hr: {
                 roleRequired: task.agent || 'AI Specialist',
@@ -560,6 +676,8 @@ const EnterpriseIntelligenceLayer = {
         };
     }
 };
+
+window.EnterpriseIntelligenceLayer = EnterpriseIntelligenceLayer;
 
 // 1. Goal Engine
 const GoalEngine = {
@@ -4291,6 +4409,9 @@ function stepForward() {
                 taskTitle: 'Đăng bài Facebook & Xuất Báo Giá PDF',
                 executorId: 'hermes'
             });
+            if (typeof EIPProvider !== 'undefined') {
+                EIPProvider.sendCommand('PublishPostCommand', { budgetVnd: 5000000 });
+            }
         }
 
         if (currentStep.id === 8 && typeof EvidenceService !== 'undefined') {
@@ -6284,6 +6405,9 @@ function focusDeptDropdown(deptName, label) {
 
 // Bind dropdown & helper collapse events on load
 document.addEventListener('DOMContentLoaded', () => {
+    if (typeof EIPProvider !== 'undefined') {
+        EIPProvider.updateUiWidget();
+    }
     // Dropdown click handlers
     const btnDropdownFocal = document.getElementById('btn-dropdown-focal');
     const menuDropdownFocal = document.getElementById('menu-dropdown-focal');
