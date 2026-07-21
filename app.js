@@ -309,10 +309,42 @@ const EvidenceService = {
         appendLog('EVIDENCE SERVICE', `🔍 [VERIFIED EVIDENCE] Stored proof: ${proofType} | Hash: [${proofHash}]`, 'text-emerald-400 font-bold');
         return evidence;
     },
-    takeSnapshot(processInstanceId) {
-        const snapshot = { snapshotId: `SNAP-${Date.now()}`, processInstanceId, timestamp: new Date().toISOString() };
+    takeSnapshot(processInstanceId, stepIndex = 0) {
+        const step = (typeof WORKFLOW_STEPS !== 'undefined' && WORKFLOW_STEPS[stepIndex]) ? WORKFLOW_STEPS[stepIndex] : { name: 'Step 1' };
+        const snapshot = {
+            snapshotId: `SNAP-${Date.now().toString(36).toUpperCase()}`,
+            processInstanceId: processInstanceId || 'PROC-MAIN',
+            stepIndex,
+            stepName: step.name,
+            agentId: step.agent || 'coo',
+            timestamp: new Date().toISOString(),
+            proofHash: this.generateProofHash({ processInstanceId, stepIndex, time: Date.now() }),
+            stepsSnapshot: (typeof WORKFLOW_STEPS !== 'undefined') ? JSON.parse(JSON.stringify(WORKFLOW_STEPS)) : []
+        };
         this.snapshots.push(snapshot);
+        appendLog('EVIDENCE SERVICE', `📸 [SNAPSHOT RECORDED] Created Snapshot [${snapshot.snapshotId}] at Step ${stepIndex + 1} (${step.name})`, 'text-cyan-400 font-semibold');
         return snapshot;
+    },
+    rollbackToSnapshot(snapshotId) {
+        const snap = this.snapshots.find(s => s.snapshotId === snapshotId);
+        if (!snap) return false;
+
+        if (typeof currentStepIndex !== 'undefined') {
+            currentStepIndex = snap.stepIndex;
+        }
+
+        if (snap.stepsSnapshot && snap.stepsSnapshot.length > 0 && typeof WORKFLOW_STEPS !== 'undefined') {
+            WORKFLOW_STEPS.length = 0;
+            snap.stepsSnapshot.forEach(s => WORKFLOW_STEPS.push(s));
+        }
+
+        if (typeof jumpToStep === 'function') {
+            jumpToStep(snap.stepIndex);
+        }
+
+        BellaKernel.executeTransaction('coo', 'ROLLBACK_PROCESS_SNAPSHOT', { snapshotId, stepIndex: snap.stepIndex });
+        appendLog('RECOVERY ENGINE', `🔄 [ROLLBACK SUCCESSFUL] Restored Workflow State to Snapshot [${snapshotId}] (Step ${snap.stepIndex + 1})`, 'text-amber-400 font-bold');
+        return true;
     }
 };
 
@@ -5828,6 +5860,93 @@ window.openAgentDossierModal = openAgentDossierModal;
 window.closeAgentDossierModal = closeAgentDossierModal;
 window.switchDossierTab = switchDossierTab;
 window.sendDossierAgentChat = sendDossierAgentChat;
+
+// =========================================================================
+// PROCESS REPLAY & SNAPSHOT ROLLBACK ENGINE CONTROLLER
+// =========================================================================
+function openProcessReplayModal() {
+    console.log("⏪ [openProcessReplayModal] opening Replay modal...");
+    const modal = document.getElementById('process-replay-modal');
+    if (!modal) return;
+
+    // Ensure sample snapshots exist if empty
+    if (EvidenceService.snapshots.length === 0) {
+        EvidenceService.takeSnapshot('PROC-MAIN', 0);
+        EvidenceService.takeSnapshot('PROC-MAIN', 2);
+        EvidenceService.takeSnapshot('PROC-MAIN', 5);
+        EvidenceService.takeSnapshot('PROC-MAIN', 7);
+    }
+
+    renderProcessReplaySnapshots();
+    modal.style.display = 'flex';
+}
+
+function closeProcessReplayModal() {
+    const modal = document.getElementById('process-replay-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function renderProcessReplaySnapshots() {
+    const container = document.getElementById('replay-snapshots-list');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    EvidenceService.snapshots.forEach((snap, idx) => {
+        const agent = AI_AGENTS.find(a => a.id === snap.agentId) || { name: 'AI Employee', icon: 'fa-robot' };
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl border bg-slate-950/80 border-slate-800 flex items-center justify-between gap-4 transition hover:border-cyan-800/60';
+        
+        const timeStr = new Date(snap.timestamp).toLocaleTimeString();
+        const hashStr = snap.proofHash || `0x${(idx + 1).toString(16).padStart(8, '0')}`;
+
+        card.innerHTML = `
+            <div class="flex items-center gap-3 flex-1">
+                <div class="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 font-bold text-xs shrink-0">
+                    #${idx + 1}
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h4 class="font-bold text-xs text-slate-100">${snap.stepName || `Step ${snap.stepIndex + 1}`}</h4>
+                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-cyan-400 border border-slate-800 font-bold">${snap.snapshotId}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-mono mt-0.5">Thời gian: ${timeStr} | Agent: <strong class="text-slate-300">${agent.name}</strong></p>
+                    <p class="text-[9px] text-slate-500 font-mono">Cryptographic Hash: <span class="text-emerald-400">${hashStr}</span></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="EvidenceService.rollbackToSnapshot('${snap.snapshotId}'); closeProcessReplayModal();" class="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl transition flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Rollback</span>
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function startProcessReplayPlayback() {
+    closeProcessReplayModal();
+    appendLog('REPLAY ENGINE', '▶️ KHỞI CHẠY BỘ PHÁT LẠI REPLAY PLAYBACK (REPLAY STEP 1 ➔ 10)...', 'text-cyan-400 font-bold animate-pulse');
+    
+    let replayIndex = 0;
+    const interval = setInterval(() => {
+        if (replayIndex < WORKFLOW_STEPS.length) {
+            jumpToStep(replayIndex);
+            replayIndex++;
+        } else {
+            clearInterval(interval);
+            appendLog('REPLAY ENGINE', '✨ HOÀN TẤT PHÁT LẠI REPLAY PLAYBACK!', 'text-emerald-400 font-bold');
+        }
+    }, 1000);
+}
+
+window.openProcessReplayModal = openProcessReplayModal;
+window.closeProcessReplayModal = closeProcessReplayModal;
+window.renderProcessReplaySnapshots = renderProcessReplaySnapshots;
+window.startProcessReplayPlayback = startProcessReplayPlayback;
+
+safeAddListener('btn-open-replay', 'click', openProcessReplayModal);
 
 safeAddListener('btn-open-settings', 'click', openGlobalSettingsModal);
 safeAddListener('btn-close-settings-modal', 'click', closeGlobalSettingsModal);

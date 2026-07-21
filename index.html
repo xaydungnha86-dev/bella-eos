@@ -77,6 +77,12 @@
                 <span>Marketplace Packages</span>
             </button>
 
+            <!-- Process Replay & Rollback Button -->
+            <button id="btn-open-replay" onclick="openProcessReplayModal()" class="bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-800/80 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer" title="Process Replay & Rollback Engine">
+                <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i>
+                <span>Replay & Rollback</span>
+            </button>
+
             <!-- Settings API Keys Trigger Button -->
             <button id="btn-open-settings" onclick="openGlobalSettingsModal()" class="bg-slate-900/80 hover:bg-slate-800/90 text-slate-300 border border-slate-800/80 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer" title="Cấu hình API Keys">
                 <i class="fa-solid fa-key text-amber-400"></i>
@@ -1142,7 +1148,44 @@
         </div>
     </div>
 
+    <!-- PROCESS REPLAY & SNAPSHOT ROLLBACK MODAL -->
+    <div id="process-replay-modal" style="display: none;" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-sans font-bold text-sm text-white">Process Replay & Snapshot Rollback Engine</h3>
+                        <p class="text-[10px] text-slate-400 font-sans">Xem lại dòng thời gian thực thi, xem lại chứng cứ mã hóa & Phục hồi quy trình 1-Click</p>
+                    </div>
+                </div>
+                <button onclick="closeProcessReplayModal()" class="text-slate-400 hover:text-white transition text-sm w-7 h-7 rounded-lg hover:bg-slate-800 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Content Area: Snapshot Timeline -->
+            <div id="replay-snapshots-list" class="p-6 overflow-y-auto space-y-3 font-sans text-xs custom-scrollbar max-h-[60vh]">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Footer Controls -->
+            <div class="px-6 py-3 border-t border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <button id="btn-start-replay" onclick="startProcessReplayPlayback()" class="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-play"></i>
+                        <span>Phát Lại Replay Flow</span>
+                    </button>
+                </div>
+                <button onclick="closeProcessReplayModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition cursor-pointer">Đóng Cửa Sổ</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom App Logic Script (Cache Buster) -->
-    <script src="app.js?v=20260721_15"></script>
+    <script src="app.js?v=20260721_16"></script>
 </body>
 </html>
