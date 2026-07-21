@@ -1,276 +1,121 @@
-# 🏛️ BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
-## Master Enterprise Blueprint - Architectural Standard 2026-2046
-
-> **Định Vị Cốt Lõi**: Bella AI Platform không phải là "AI Platform", "AI Agent Tool" hay "Automation Platform", mà là một **Enterprise Operating System (Bella EOS)** hoàn chỉnh dành cho Doanh nghiệp Số. Hệ thống được thiết kế theo tư duy **Operating System-Centric** với **Bella Kernel** làm lõi hạt nhân điều phối. AI chỉ đóng vai trò **AI Runtime Driver** (tương tự CPU/ARM Driver trong Windows/Android). Doanh nghiệp mua Mô hình Vận hành Doanh nghiệp Tự trị (Operating Model), chứ không mua công cụ AI đơn lẻ.
-
----
-
-## 🌐 Sơ Đồ Kiến Trúc Lõi Bella Kernel & 13 Tầng Enterprise OS (Bella EOS Architecture)
-
-```
-                       BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
-
- 📦 13. Platform Ecosystem OS     │ Marketplace, Plugin Architecture, Extension SDK, Enterprise CLI
- 🔮 12. Analytics & Optimization  │ Digital Twin Simulator, Monte Carlo Engine, Optimization & Forecasting
- 🧠 11. Enterprise Intelligence   │ Knowledge Graph, Enterprise Memory, Reasoning Cache, Decision History
- 🏢 10. Business Applications OS │ Bella EIP Suite, ERP/CRM/POS/HR Services, First-party Apps
- 🔌 9.  Integration Mesh OS       │ API Gateway, Connector SDK, MCP Protocol, Webhook Queue, OAuth
- ⚡ 8.  AI Runtime OS (Driver)    │ Execution Planner, Model Router (GPT/Claude/Gemini), Cost Optimizer
- 🔄 7.  Workflow & Process Engine │ Enterprise State Machine, Temporal-like Process, Saga, Event Bus/Store
- 🏛️ 6.  Business Domain Engine    │ Sales, HR, Finance, Inventory, POS, Booking & Time Engine (Calendar/SLA)
- 📊 5.  Enterprise Data Fabric OS │ Raw Data Pipeline, Standardized Data, Canonical Data Model
- ⚖️ 4.  Policy & Governance OS    │ Financial Guardrails, CEO Sign-off, Legal, Security & AI Governance
- 🆔 3.  Identity & Security OS    │ Universal Identity (Human, AI, App, Webhook, IoT Assets), Zero Trust
- 🎯 2.  Organization & Objective  │ Vision, Strategy 2026-2046, Cascaded OKRs, Project State Hub
- ⚙️ 1.  BELLA KERNEL (LÕI OS)     │ Transaction, Event Sourcing, Audit Ledger, Context & Permission Bus
-```
+# 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
+> **STATUS**: `ARCHITECTURE FROZEN` • **SPECIFICATION VERSION**: `v10.0 (FROZEN)`  
+> **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
 ---
 
-## 👁️ Tuyên Bố Triết Lý Cốt Lõi (Core Enterprise OS Philosophy)
+## 1. EXECUTIVE SUMMARY & TRI-PARTITE ARCHITECTURE
 
-> **"Giá trị lớn nhất của Bella OS nằm ở việc SỐ HÓA MÔ HÌNH VẬN HÀNH DOANH NGHIỆP TỰ TRỊ (Vision ➔ Objectives ➔ States ➔ Domains ➔ Learning). AI chỉ là một Driver thực thi phía dưới."**
-> 
-> *Khi mô hình này được chuẩn hóa thông qua Bella Kernel, doanh nghiệp có thể thay đổi mô hình AI (GPT, Claude, Gemini, DeepSeek...) hay thay đổi ứng dụng nghiệp vụ (Bella EIP, SAP, Oracle, Salesforce...) mà cấu trúc vận hành, tri thức tích lũy và tiêu chuẩn chất lượng của doanh nghiệp vẫn được giữ nguyên vẹn.*
+Bella EOS is a frozen **Autonomous Enterprise Operating System (Autonomous EOS)** designed around the **Tri-Partite System Separation**:
+
+```
+                       Bella EIP Suite (System of Record + Data Fabric)
+                                       │
+                                       ▼
+                       Bella EOS (System of Orchestration)
+                                       │
+                                       ▼
+                     Hermes & Drivers (System of Execution)
+```
+
+1. **Bella EIP (System of Record)**: Business Data Fabric (Customer, Invoice, Booking, Financial Ledger, Inventory, HR).
+2. **Bella EOS (System of Orchestration)**: Operating Kernel, Enterprise Services, Intent Decomposition, Process Life Cycle, Quality & Evidence.
+3. **Hermes & Drivers (System of Execution)**: Operational Drivers (Facebook API, TikTok API, Email SMTP, LibreOffice PDF, CRM, SAP).
 
 ---
 
-## 🏛️ Chi Tiết 13 Lớp Hệ Thống Doanh Nghiệp (13-Layer System Architecture Blueprint)
+## 2. THE 6 FROZEN ARCHITECTURE GROUPS
 
 ```
-                       BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
+                                  CEO Intent
+                                      │
+                                      ▼
+                        Enterprise Object Model (EOM)
+                                      │
+                                      ▼
+                         Kernel Services Layer (6 Services)
+       ┌──────────────────┬──────────────────┬──────────────────┐
+       │ Process Runtime  │ Execution Service│ Resource Service │
+       ├──────────────────┼──────────────────┼──────────────────┤
+       │  Policy Service  │ Evidence Service │Enterprise Memory │
+       └──────────────────┴──────────────────┴──────────────────┘
+                                      │
+                                      ▼
+                           Bella Micro-Kernel (Pure)
+     [Identity • Permission • Transaction • Context • Audit • Event Store]
+                                      │
+                                      ▼
+                           Executors / Drivers Layer
+          [Hermes Operator • Human Staff • Bella Worker • System Drivers]
+                                      │
+                                      ▼
+                             External Systems Layer
+            [Bella EIP • Facebook • YouTube • CRM • SAP • MISA]
+```
 
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 13. PLATFORM ECOSYSTEM OS (Hệ Sinh Thái Mở - Plugin Architecture & Marketplace)         │
-│ • Plugin Architecture  • Enterprise Marketplace  • Extension SDK     • Enterprise CLI   │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 12. ANALYTICS & OPTIMIZATION OS (Digital Twin Simulator & Enterprise Intelligence)       │
-│ • Digital Twin Clone   • Monte Carlo Simulation  • Optimization Engine • Risk & Forecast│
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 11. ENTERPRISE INTELLIGENCE OS (Enterprise Knowledge Graph & Knowledge Engine)          │
-│ • Knowledge Graph Nodes• Reasoning Cache         • Semantic Search   • Lessons Learned  │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 10. BUSINESS APPLICATIONS OS (Bella EIP Suite & Business Applications)                 │
-│ • Bella EIP Suite      • Bella CRM / POS / HR    • Bella Financial   • First-party Apps │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 9. INTEGRATION MESH OS (Cổng Kết Nối Dịch Vụ - API Gateway, Connector SDK, MCP)        │
-│ • API Gateway          • Connector SDK (SAP/MISA)• MCP Protocol      • Webhook Queue    │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 8. AI RUNTIME OS (Lớp Driver Thực Thi AI Multi-LLM, Router, Cost Optimizer & History Log) │
-│ • Execution Planner    • Model Router            • Retry & Fallback  • Cost Optimizer   │
-│ • Tool Invoker         • Execution History Log   • Response Validator• Sandbox Context  │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 7. WORKFLOW & PROCESS ENGINE OS (State-Driven Workflow, Temporal Saga & Event Bus/Store) │
-│ • State-Driven Workflow• Event Bus (Pub/Sub)     • Event Store (Replay)• Workflow v1/v2/v3│
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 6. BUSINESS DOMAIN ENGINE & TIME OS (Sales, HR, Finance, Inventory, Booking & Time Engine)│
-│ • Domain Services      • Business Calendar       • SLA & Time Engine • Asset Management │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 5. ENTERPRISE DATA FABRIC OS (Chuẩn Hóa & Quản Trị Dữ Liệu Doanh Nghiệp)                │
-│ • Raw Data Pipeline    • Standardized Data       • Canonical Model   • Unified Business │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 4. POLICY & GOVERNANCE OS (Phanh An Toàn, Hạn Mạch Tài Chính, Security & AI Governance) │
-│ • Financial Guardrails • CEO Threshold Sign-off  • AI Governance     • Privacy Shield   │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 3. IDENTITY & SECURITY OS (Quản Lý Định Danh Toàn Diện - Human, AI, App, Webhook, IoT)  │
-│ • Universal Identity   • Zero Trust Access       • RBAC & ABAC       • OAuth/Passkey    │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 2. ORGANIZATION & OBJECTIVE OS (Chiến Lược, OKRs & Project State Machine Engine)        │
-│ • Company Vision       • Cascaded OKRs           • Project Hub       • State Machine    │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 1. BELLA KERNEL (LÕI ĐIỀU HÀNH HẠT NHÂN HỆ THỐNG - OPERATING KERNEL CORE)               │
-│ • Identity Manager     • Transaction Engine      • Event Sourcing    • Audit Ledger     │
-│ • Permission Bus       • Context Storage         • Scheduling Core   • Policy Enforcer  │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-```• Workload Capacity Engine• Priority Queue    • Dynamic Scheduler│
-│ • Resource Auto-Failover: Auto Redirection when Worker Workload > 90%                   │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 6. WORKFLOW & EVENT BUS OS (Trục Xương Sống Sự Kiện Event-Driven & Workflow Stream)     │
-│ • Event Bus (Pub/Sub)  • Task Contracts (DoD)    • Inter-Agent Stream • Realtime Webhooks │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 7. EXECUTION RUNTIME & COST ENGINE OS (Tối Ưu Chi Phí Multi-LLM & Runtime Routing)     │
-│ • Multi-LLM Smart Router (Gemini/Claude/GPT)     • Cost/ROI Ledger   • Execution Sandbox│
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 8. BUSINESS APPLICATIONS OS (First-party Apps & Connector SDK Open Plugin)             │
-│ • Bella EIP Suite      • Bella CRM / POS / HR    • Connector SDK (SAP/Oracle/MISA)      │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 9. KNOWLEDGE & ENTERPRISE MEMORY GRAPH OS (Trí Nhớ Doanh Nghiệp & Knowledge Graph)       │
-│ • Knowledge Graph      • Project Memory          • Decision History  • Campaign Memory  │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 10. ANALYTICS & SIMULATION OS (Digital Twin Simulator & Dashboard Điều Hành CEO)        │
-│ • Monte Carlo Simulation• ROI Forecasting       • Company Health Index• Workforce Analytics│
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+### Group 1: Bella Micro-Kernel (Pure & Agnostic)
+- Strictly contains **6 primitives**:
+  1. `Identity`: Universal Identity & Auth Core.
+  2. `Permission`: Capability & RBAC Access Matrix.
+  3. `Transaction`: ACID Transaction Engine.
+  4. `Context`: Global Runtime Execution Context.
+  5. `Audit`: Immutable Compliance Audit Ledger.
+  6. `Event Store`: Append-Only Event Store.
+- *Kernel Rule*: The Micro-Kernel is 100% domain-agnostic. It does not contain AI, Workflow, Scheduler, Marketing, or External API logic.
+
+### Group 2: Enterprise Object Model (EOM)
+Unified domain language shared across API, Database, Event Sourcing, and UI:
+- **Org & Identity**: `Company`, `Department`, `Role`.
+- **Operating**: `Objective`, `Project`, `Process`, `Stage`, `Task`, `Command`.
+- **Resource & Security**: `Resource`, `Capability`, `Policy`.
+- **Telemetry & Asset**: `Evidence`, `Knowledge`, `Decision`, `Asset`, `Metric`, `Document`, `Event`.
+
+### Group 3: Consolidated Kernel Services (6 Services)
+All capabilities are consolidated into **6 Kernel Services**:
+1. **Process Runtime**: Consolidates Workflow OS, State Machine (12 states), Process Templates (`v1`, `v2`), Process Instances, Stages, and Tasks.
+2. **Execution Service**: Consolidates Execution Scheduler, Command Dispatcher, Command Bus (Topic Pub/Sub), Capability Matcher, Retry Engine, and Concurrency Queue.
+3. **Resource Service**: Consolidates Quota Allocation, Budget Locks, AI Token Accounting, API Quotas, License Management, Human & Machine Capacity, and Deadlock Prevention.
+4. **Policy Service**: Consolidates Business Rules, Approval Gates, Realtime Guardrails, and Legal Compliance.
+5. **Evidence Service**: Consolidates Verification Engine, Cryptographic Evidence, Proof Storage, Replay Engine, VM Snapshots, and Process Recovery.
+6. **Enterprise Memory**: Consolidates Operational Memory, Business Memory, Reasoning Memory (Explainable AI - XAI), Continuous Learning, and ROI Optimization.
+
+### Group 4: Executors / Drivers
+Operational execution drivers without business logic:
+- `Hermes Operator`: Primary automation driver (Facebook, TikTok, PDF, Email).
+- `Bella Worker`: Core AI worker driver (Content, PRD, SEO, QA).
+- `Human Staff`: CEO & Manager sign-off driver.
+- `Third-Party Drivers`: SAP, Oracle, MISA, LibreOffice connectors.
+
+### Group 5: External Systems
+- `Bella EIP Suite`, `Facebook API`, `TikTok API`, `YouTube API`, `Email SMTP`, `CRM`, `SAP`.
+
+### Group 6: Marketplace & Extensions Platform
+- `Process Packages` (App Store for enterprise processes like `Marketing v2`, `Sales SOP v4`).
+- `Connector Packages` (Integrations for third-party systems).
+
+---
+
+## 3. REASONING MEMORY (EXPLAINABLE AI - XAI)
+
+Bella EOS records AI decision rationale in **Reasoning Memory**:
+```json
+{
+  "decisionId": "DEC-98201",
+  "intent": "Tăng 20% doanh thu tháng 8",
+  "rationale": "Phân bổ 50M VND ngân sách vào 30 bài viết SEO & FB Ads lúc 08:00 AM",
+  "confidenceScore": 0.96,
+  "policyApplied": "POL-NO-NIGHT-POSTING",
+  "llmModel": "gemini-2.5-flash",
+  "toolInvoked": "PublishPostCommand",
+  "timestamp": "2026-07-21T09:15:00Z"
+}
 ```
 
 ---
 
-## 👤 Hồ Sơ Nhân Viên Số 12 Hạng Mục (Digital Employee HR Profile)
+## 4. ARCHITECTURE FREEZE DIRECTIVE
 
-Một **AI Employee** trên Bella AI Platform không chỉ là một chuỗi Prompt đơn lẻ, mà sở hữu bộ **Hồ sơ Nhân sự Số (Digital HR Profile)** chuẩn hóa như một nhân sự ngoài đời thực:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ DIGITAL EMPLOYEE HR PROFILE (HỒ SƠ NHÂN VIÊN SỐ)                                        │
-├───────────────────────────────────────┬─────────────────────────────────────────────────┤
-│ 1. Tên Nhân Viên (Employee Name)       │ Ví dụ: AI Content Writer (Bella Marketing Executive)│
-│ 2. Phòng Ban (Department)             │ Marketing Department                            │
-│ 3. Chức Danh & Vai Trò (Role/Title)   │ Content Executive                               │
-│ 4. Mục Tiêu Công Việc (Goal)          │ Viết bài chuẩn SEO & Thương hiệu tăng chuyển đổi│
-│ 5. Chỉ Số Năng Suất (KPIs)            │ Approve Rate >= 90%, Cost/Task <= $0.10          │
-│ 6. Bộ Kỹ Năng (Skill Matrix)          │ Copywriting, Brand Alignment, SEO, Social Copy  │
-│ 7. Quyền Hạn Truy Cập (Capabilities)  │ Notion, Social Drafts (Không có quyền Payroll)  │
-│ 8. Quy Trình Phù Hợp (Workflows)       │ Product Release Campaign, Social Post Pipeline  │
-│ 9. Tri Thức & Quy Trình SOPs          │ Brand Voice Guideline, Marketing SOP v2.1       │
-│ 10. Quản Lý Trực Tiếp (Manager)       │ Marketing Manager (Human / AI Manager)          │
-│ 11. Nhân Sự Bàn Giao (Handover To)    │ Graphic Designer (AI) & Legal Reviewer (Human)  │
-│ 12. Lịch Sử & Đánh Giá Performance    │ Performance Scorecards, Historical Tasks Ledger │
-└───────────────────────────────────────┴─────────────────────────────────────────────────┘
-```
-
----
-
-## 🛡️ Hệ Thống Kiểm Soát Chất Lượng Doanh Nghiệp (Enterprise Quality & Control System - EQCS)
-
-Chu trình đầy đủ của mọi hoạt động trong Bella EOS được quản lý nghiêm ngặt qua trục EQCS nằm ngang với Workflow Engine:
-
-$$\text{Objective} \longrightarrow \text{Project} \longrightarrow \text{Workflow Engine} \longrightarrow \text{AI Runtime} \longrightarrow \text{EQCS Gateway (Passport)} \longrightarrow \text{Decision Engine} \longrightarrow \text{Memory & Continuous Learning}$$
-
-### 🎫 Hộ Chiếu Thực Thi (Execution Passport)
-Mỗi tác vụ (Task) phát sinh trong hệ thống đều đi kèm một Hộ chiếu điện tử để ghi nhận toàn bộ vòng đời chất lượng công việc:
-* **Passport ID**: Ví dụ `#EQCS-MKT-2048`.
-* **Vòng đời trạng thái (Life-cycle)**: `RUNNING` ➔ `REVIEW` ➔ `APPROVED / REJECTED` ➔ `LEARN`.
-* **Báo cáo chấm điểm (EQCS Scores)**:
-  * **Grammar Score**: Độ chính xác và chuẩn hóa ngôn ngữ.
-  * **SEO Score**: Tỷ lệ tối ưu hóa từ khóa và nội dung.
-  * **Brand Score**: Mức độ đồng bộ với tiếng nói thương hiệu (Brand Voice).
-  * **Policy Score**: Kiểm duyệt tính hợp lệ của quy chế tài chính/pháp lý.
-  * **Overall Score**: Điểm chất lượng trung bình (Yêu cầu phải đạt $\ge 90$ để đi tiếp).
-* **DoD Rules Engine**: Định nghĩa Definition of Done chặt chẽ dưới dạng các bộ rules kiểm tra tự động.
-* **Retry & Escalation Logs**: Ghi nhận số lần sửa đổi và tự động leo thang (Escalate) lên CEO nếu vượt quá giới hạn 2 lần rollback.
-
----
-
-## 📊 Dashboard Quản Lý Vận Hành (CEO / Manager Operating View)
-
-Cấp quản lý và CEO quản lý doanh nghiệp thông qua **Dashboard Vận Hành Doanh Nghiệp (Operating Dashboard)**:
-- **Cơ cấu Đội Nhóm**: 6 AI Workers | 3 Human Managers
-- **Tổng Tác Vụ Đã Xử Lý**: 850 Tasks (Hoàn thành 840 Tasks - 98.8%)
-- **SLA Trung Bình**: 15 phút / Task
-- **Tỷ Lệ Duyệt Ngay (First Approve)**: 96%
-- **Số Giờ Tiết Kiệm (Hours Saved)**: 280 hrs
-- **Chi Phí Trung Bình**: $0.08 / Task
-- **Tỷ Suất ROI Năng Suất**: +580%
-
----
-
-## 🛠️ Triển Khai Doanh Nghiệp Mới (Custom Multi-Tenant Onboarding)
-
-Nhờ kiến trúc **Framework-Neutral Phi Phụ Thuộc Doanh Nghiệp**, khi chuyển giao dự án cho một Doanh nghiệp mới với quy trình hoàn toàn khác, bạn chỉ cần thay đổi **3 vị trí cấu hình chính**:
-
-### 1. Cấu Hình Cơ Cấu Tổ Chức & Nhân Sự AI Mới (`app.js`)
-- **`OrganizationManager`**: Đổi tên công ty, khai báo lại cây phòng ban và đội nhóm (`Company`, `Departments`, `Teams`).
-- **`WorkforceRegistry`**: Khai báo danh sách các AI Agents của doanh nghiệp mới (Tên Agent, Icon, Tọa độ 3D, Task mặc định).
-- **`RoleSkillCenter`**: Thiết lập lại Chức danh công việc (Job Descriptions), Kỹ năng (Skills) và tiêu chuẩn KPI mới.
-
-### 2. Quy Trình Phối Hợp SOP & Structured Prompt Mới (`app.js`)
-- **`WORKFLOW_STEPS`**: Khai báo lại chuỗi các bước phối hợp của quy trình làm việc tự động mới.
-- **`DEFAULT_AGENT_CONFIGS`**: Khai báo System Prompt 5 tầng mới gồm Vai trò (Role), Mục tiêu (Goal), Ràng buộc (Constraints), Luồng làm việc (Workflow) và Định dạng đầu ra (Output Format).
-
-### 3. Đầu Nối Ứng Dụng Nghiệp Vụ & Phân Quyền (`app.js`)
-- **`BusinessApplicationConnectors`**: Khai báo danh sách các ứng dụng phần mềm mà doanh nghiệp mới sử dụng (*Salesforce, MISA, SAP, HubSpot, WooCommerce, v.v.*).
-- **`CapabilityMatrix`**: Thiết lập ma trận phân quyền đọc/ghi dữ liệu cổng ứng dụng riêng cho từng vị trí nhân sự AI.
-
----
-
-## 📦 Đóng Gói & Triển Khai Production (Deployment Pipeline)
-
-Hệ thống cung cấp sẵn bộ các file đóng gói Production tiêu chuẩn:
-- **`package.json`**: Lệnh khởi chạy Production `npm start`.
-- **`Dockerfile` & `.dockerignore`**: Đóng gói Docker Container nhẹ tối ưu Node 18-alpine.
-- **`docker-compose.yml`**: Triển khai Container 1-click trên cổng `3000`.
-- **`vercel.json`**: Triển khai 1-click lên nền tảng Cloud Hosting Vercel với HTTPS SSL.
-
----
-
-## 🗺️ KẾ HOẠCH TRIỂN KHAI CHIẾN LƯỢC 6 GIAI ĐOẠN (IMPLEMENTATION ROADMAP)
-
-Để đưa toàn bộ **Sơ đồ Kiến trúc 13 Lớp Bella EOS** vào vận hành thực tế mà không làm gián đoạn hệ thống hiện tại, kế hoạch triển khai được chia thành **6 Giai đoạn Chiến lược (Phased Engineering Approach)** với tinh thần: **Xây Lõi Kernel vững chắc trước $\rightarrow$ Chuẩn hóa Dữ liệu & Nghiệp vụ $\rightarrow$ Mở rộng Hệ sinh thái về sau**.
-
-```mermaid
-graph LR
-    P1["Phase 1: Bella Kernel Core"] --> P2["Phase 2: Data Fabric & State"]
-    P2 --> P3["Phase 3: Event Engine & AI Runtime"]
-    P3 --> P4["Phase 4: Domain Engine & Integration Mesh"]
-    P4 --> P5["Phase 5: Knowledge Graph & Digital Twin"]
-    P5 --> P6["Phase 6: Platform Ecosystem & Marketplace"]
-```
-
----
-
-### 📌 CHI TIẾT 6 GIAI ĐOẠN TRIỂN KHAI KỸ THUẬT:
-
-#### 🟢 GIAI ĐOẠN 1: BELLA KERNEL CORE & UNIVERSAL IDENTITY (Lõi OS & Định Danh)
-- **Mục tiêu**: Xây dựng **Bella Kernel Core** làm nền tảng điều phối hạt nhân.
-- **Hạng mục thực thi**:
-  1. Xây dựng **Identity Engine (Layer 3)**: Khai báo Universal Identity cho `Human`, `AI Employee`, `Applications`, `Webhooks` và `IoT Assets`.
-  2. Xây dựng **Enterprise Governance & Policy Engine (Layer 4)**: Cấu hình hạn mạch tài chính, phanh an toàn và cổng phê duyệt CEO Gate (`Financial`, `Legal`, `Security`, `AI Policy`).
-  3. Đóng gói **Audit Ledger & Event Sourcing Core**: Lưu vết 100% mọi truy vấn và quyết định trong Kernel.
-
-#### 🔵 GIAI ĐOẠN 2: ENTERPRISE DATA FABRIC & STATE MACHINE (Dữ Liệu & Trạng Thái Nghiệp Vụ)
-- **Mục tiêu**: Chuyển đổi từ mô hình chạy Task đơn thuần sang **State-Driven Enterprise Model**.
-- **Hạng mục thực thi**:
-  1. Xây dựng **Enterprise Data Fabric (Layer 5)**: Chuẩn hóa Raw Data thành **Canonical Data Model** duy nhất cho toàn doanh nghiệp.
-  2. Thiết lập **Enterprise State Machine (Layer 2)**: Quản trị luồng trạng thái chuẩn cho các thực thể (`Project`, `Lead`, `Invoice`, `Employee Candidate`).
-
-#### 🟣 GIAI ĐOẠN 3: WORKFLOW & EVENT OS + AI RUNTIME DRIVER (Sự Kiện & Thực Thi AI)
-- **Mục tiêu**: Độc lập hoàn toàn tầng thực thi AI với quy trình vận hành.
-- **Hạng mục thực thi**:
-  1. Xây dựng **Event Bus & Event Store (Layer 7)**: Mô hình Pub/Sub Event-Driven hỗ trợ Replay sự kiện quá khứ (Kafka/Temporal pattern).
-  2. Triển khai **AI Runtime OS (Layer 8)**: Bộ máy Multi-LLM Model Router (Gemini/Claude/GPT), Cost Optimizer và Retry/Fallback Sandbox.
-
-#### 🟡 GIAI ĐOẠN 4: BUSINESS DOMAIN ENGINE & INTEGRATION MESH (Nghiệp Vụ & Kết Nối)
-- **Mục tiêu**: Tách biệt rõ nghiệp vụ các phòng ban và mở rộng khả năng kết nối bên ngoài.
-- **Hạng mục thực thi**:
-  1. Xây dựng **Business Domain Engine & Time OS (Layer 6)**: Động cơ nghiệp vụ Sales, HR, Finance, Inventory và Time Engine (Business Calendar, SLA Escalation).
-  2. Phát triển **Integration Mesh OS & Connector SDK (Layer 9)**: Cổng API Gateway, MCP Protocol và SDK kết nối ERP (MISA, SAP, Salesforce, HubSpot).
-
-#### 🟠 GIAI ĐOẠN 5: ENTERPRISE INTELLIGENCE & DIGITAL TWIN SIMULATOR (Bộ Não & Mô Phỏng)
-- **Mục tiêu**: Biến Bella EOS thành Trí nhớ và Bộ não tự học của Doanh nghiệp.
-- **Hạng mục thực thi**:
-  1. Xây dựng **Enterprise Knowledge Graph (Layer 11)**: Nối liền tất cả các Nút tri thức (`Campaign` $\rightarrow$ `Customer` $\rightarrow$ `Decision` $\rightarrow$ `Lessons Learned`).
-  2. Triển khai **Analytics & Digital Twin Simulator (Layer 12)**: Bộ máy chạy thử kịch bản giả định Monte Carlo (Optimization Engine) trước khi chi tiền thật.
-
-#### 🔴 GIAI ĐOẠN 6: PLATFORM ECOSYSTEM & ENTERPRISE MARKETPLACE (Hệ Sinh Thái Mở)
-- **Mục tiêu**: Mở rộng Bella EOS thành một Nền tảng OS có hệ sinh thái đối tác.
-- **Hạng mục thực thi**:
-  1. Xây dựng **Plugin Architecture & Extension SDK (Layer 13)**: Cho phép lập trình viên bên ngoài phát triển Plugin mà không sửa code Core.
-  2. Khởi chạy **Bella Enterprise Marketplace & CLI**: Nơi các doanh nghiệp cài đặt 1-Click các bộ SOP, Connectors và AI Employees Mới.
-
----
-
-| Giai Đoạn | Tên Module System | Thời Gian Dự Kiến | Đầu Ra Bắt Buộc (Key Deliverables) |
-| :---: | :--- | :---: | :--- |
-| **Phase 1** | **Bella Kernel & Identity** | Quý 3 / 2026 | Kernel Transaction Core, Universal Identity, Policy Guardrails, Audit Ledger. |
-| **Phase 2** | **Data Fabric & State Machine** | Quý 4 / 2026 | Canonical Data Model, Project & Business State Machine Engines. |
-| **Phase 3** | **Event OS & AI Runtime** | Quý 1 / 2027 | Event Bus (Pub/Sub), Event Store Replay, Multi-LLM Cost Router & Sandbox. |
-| **Phase 4** | **Domain Engine & Integration** | Quý 2 / 2027 | Sales/HR/Finance Domains, Time Engine (SLA), Connector SDK & MCP API Gateway. |
-| **Phase 5** | **Knowledge Graph & Digital Twin** | Quý 3 / 2027 | Enterprise Knowledge Graph, Digital Twin Simulator (Monte Carlo What-If). |
-| **Phase 6** | **Platform OS & Marketplace** | Quý 4 / 2027 | Plugin Architecture, Extension SDK, Enterprise CLI & Marketplace Hub. |
-
+By order of Architecture Freeze, **no new engines or layers shall be added**. All future extensions must be implemented as:
+1. An extension to one of the 6 Consolidated Kernel Services.
+2. A new Executor Driver.
+3. A Marketplace Process/Connector Package.
