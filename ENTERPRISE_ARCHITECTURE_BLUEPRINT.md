@@ -28,9 +28,7 @@ Enterprise Brain                  Business Applications
 
 ---
 
-## 2. HIỂN PHÁP KIẾN TRÚC & MA TRẬN PHỤ THUỘC (ARCHITECTURE CONSTITUTION)
-
-Để bảo vệ kiến trúc sạch không bị xói mòn trong 20 năm phát triển:
+## 2. HIỂN PHÁP KIẾN TRÚC & QUY TẮC PHỤ THUỘC (ARCHITECTURE CONSTITUTION)
 
 ```
 Presentation Layer (Outer Adapter)
@@ -53,7 +51,7 @@ Domain 1 & Infrastructure Layer (Kernel, Events, Secrets)
 
 ### 🚫 Bảng Quy Tắc Phụ Thuộc Cấm (Forbidden Dependency Rules):
 
-| Module | Được phép phụ thuộc vào | KHÔNG ĐƯỢC BÉP phụ thuộc vào |
+| Module | Được phép phụ thuộc vào | KHÔNG ĐƯỢC PHÉP phụ thuộc vào |
 | :--- | :--- | :--- |
 | **Infrastructure** | Không phụ thuộc vào Business logic | Brain, Orchestration, Presentation UI |
 | **Storage Domain** | Storage Interfaces v1.0, Secrets Store | Presentation UI, Brain internals |
@@ -65,163 +63,69 @@ Domain 1 & Infrastructure Layer (Kernel, Events, Secrets)
 
 ---
 
-## 3. CHÍNH SÁCH PHIÊN BẢN HỢP ĐỒNG (CONTRACT VERSIONING POLICY)
+## 3. THÁP KIỂM THỬ 5 TẦNG (5-LAYER TEST PYRAMID)
 
-Tất cả Frozen Platform Contracts tuân thủ nghiêm ngặt Semantic Versioning (SemVer):
+```
+              ┌──────────────────────────┐
+              │        E2E Tests         │
+              ├──────────────────────────┤
+              │    Architecture Tests    │
+              ├──────────────────────────┤
+              │    Integration Tests     │
+              ├──────────────────────────┤
+              │      Contract Tests      │
+              ├──────────────────────────┤
+              │        Unit Tests        │
+              └──────────────────────────┘
+```
 
-- **Major Version (`v1.0` ➔ `v2.0`)**: Chứa breaking changes. Yêu cầu tạo adapter tương thích ngược.
-- **Minor Version (`v1.0` ➔ `v1.1`)**: Chỉ được phép bổ sung thuộc tính optional. Tuyệt đối không xóa thuộc tính hiện có.
-- **Patch Version (`v1.1.0` ➔ `v1.1.1`)**: Sửa lỗi bug mà không đổi schema.
+1. **Unit Tests**: Kiểm thử logic hàm nội bộ của từng module.
+2. **Contract Tests**: Verify 100% tính tương thích của 9 Platform Contracts.
+3. **Integration Tests**: Kiểm thử tích hợp liên module (Kernel ➔ Storage ➔ Brain).
+4. **Architecture Tests**: Kiểm thử tự động không vi phạm Forbidden Dependency Rules.
+5. **E2E Tests**: Kiểm thử toàn trình từ CEO Prompt đến Realtime Dashboard UI.
 
 ---
 
-## 4. MA TRẬN TƯƠNG THÍCH HỢP ĐỒNG (CONTRACT COMPATIBILITY MATRIX)
+## 4. QUẢN TRỊ SPRINT (DEFINITION OF DONE & ADR GATE)
 
-```
-┌─────────────────────────┬─────────────────────────────────────────┐
-│ Frozen Platform Contract│ Consumer Components                     │
-├─────────────────────────┼─────────────────────────────────────────┤
-│ CBV v1.0                │ Connectors, EOM Converter               │
-│ EOM v1.0                │ Enterprise Brain, Orchestration         │
-│ EnterpriseEvent v1.0    │ Enterprise Event Bus, Audit Logger      │
-│ MemoryAPI v1.0          │ Cognitive Memory Centers                │
-│ IPlanner v1.0           │ Planning Engine, Simulation Engine      │
-│ IPolicy v1.0            │ Policy Engine, Learning Center          │
-│ IService v1.0           │ Execution Domain, Service Registry      │
-│ IWorker v1.0            │ Worker Gateway, Stateless Executors     │
-│ IConnector v1.0         │ Connector Framework, Bella Connect      │
-│ AssetManifest v1.0      │ Marketplace Suite                       │
-└─────────────────────────┴─────────────────────────────────────────┘
-```
+Mỗi Sprint thi công bắt buộc tuân thủ 5 điều kiện nghiệm thu:
+
+1. **Definition of Done (DoD)**: `npm run build` PASS, 100% Contract Tests & Architecture Tests PASS.
+2. **Exit Criteria & Exit Tests**: Kịch bản chạy thực tế qua hết chuỗi subsystem của Sprint.
+3. **ADR Gate**: Cập nhật ADR tương ứng trước khi merge code vào nhánh chính.
+4. **Performance Baseline Tracking**: Đo đạc latency và token usage để theo dõi qua các Sprint.
+5. **Technical Debt Log**: Ghi nhận Known Issues và Deferred Decisions của Sprint.
 
 ---
 
 ## 5. 🔒 BỘ 9 HỢP ĐỒNG KHÓA CỨNG (FROZEN PLATFORM CONTRACTS)
 
 ### 1. Enterprise Message Contract (`EnterpriseEvent<T>`)
-```typescript
-interface EnterpriseEvent<T> {
-  id: string;
-  type: string;
-  source: string;
-  tenantId: string;
-  timestamp: Date;
-  correlationId: string;
-  causationId: string;
-  payload: T;
-  metadata: Record<string, any>;
-}
-```
-
 ### 2. Service Contract Interface (`IService`)
-```typescript
-interface IService {
-  execute(input: any): Promise<any>;
-  validate(input: any): Promise<boolean>;
-  rollback(executionId: string): Promise<boolean>;
-  health(): Promise<{ status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' }>;
-  metadata(): { id: string; version: string; capability: string };
-}
-```
-
 ### 3. Cognitive Memory API (`MemoryAPI`)
-```typescript
-interface MemoryAPI {
-  store(memory: BusinessMemory): Promise<string>;
-  retrieve(id: string): Promise<BusinessMemory | null>;
-  search(query: MemorySearchQuery): Promise<BusinessMemory[]>;
-  forget(id: string): Promise<boolean>;
-  link(sourceId: string, targetId: string, relation: string): Promise<boolean>;
-  version(id: string): Promise<MemoryVersionHistory>;
-}
-```
-
 ### 4. Worker Contract Interface (`IWorker`)
-```typescript
-interface IWorker {
-  id: string;
-  type: 'AI' | 'HUMAN' | 'MCP' | 'API' | 'SCRIPT' | 'ROBOT' | 'EXTERNAL';
-  execute(context: CanonicalContextPackage): Promise<Evidence>;
-  cancel(taskId: string): Promise<boolean>;
-  heartbeat(): Promise<boolean>;
-  health(): Promise<{ status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' }>;
-  dispose(): Promise<void>;
-}
-```
-
 ### 5. Connector Contract Interface (`IConnector`)
-```typescript
-interface IConnector {
-  authenticate(credentials: Record<string, any>): Promise<boolean>;
-  discover(): Promise<CapabilitiesDescription>;
-  fetch(query: Record<string, any>): Promise<any>;
-  push(payload: any): Promise<any>;
-  mapToCBV(rawData: any): CanonicalBusinessVocabulary;
-}
-```
-
 ### 6. Enterprise Policy Contract (`IPolicy`)
-```typescript
-interface IPolicy {
-  evaluate(context: any): Promise<PolicyEvaluationResult>;
-  approve(actionId: string, approverId: string): Promise<boolean>;
-  reject(actionId: string, reason: string): Promise<boolean>;
-  explain(policyId: string): string;
-}
-```
-
 ### 7. Planner Engine Contract (`IPlanner`)
-```typescript
-interface IPlanner {
-  plan(goal: Goal): Promise<ExecutionPlan>;
-  optimize(plan: ExecutionPlan): Promise<ExecutionPlan>;
-  estimate(plan: ExecutionPlan): Promise<ResourceCostEstimate>;
-  rollback(planId: string): Promise<boolean>;
-}
-```
-
 ### 8. Asset Manifest Specification (`AssetManifest`)
-```typescript
-interface AssetManifest {
-  id: string;
-  name: string;
-  version: string;
-  type: 'SKILL' | 'SOP' | 'DNA_PACK' | 'CONNECTOR' | 'PROMPT_PACK' | 'WORKFLOW';
-  author: string;
-  dependencies: Record<string, string>;
-  compatibility: { eosVersion: string };
-  license: string;
-  signature: string;
-  checksum: string;
-}
-```
+### 9. Marketplace Plugin Lifecycle Specification
 
 ---
 
-## 6. DANH MỤC AD RS GOVERNANCE INDEX
+## 6. 🎯 KHUNG THI CÔNG SPRINT-BY-SPRINT (SPRINT EXECUTION ROADMAP)
 
-Hệ thống tài liệu quản trị kiến trúc chi tiết tại [`docs/architecture/adr/`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/):
-
-- `ADR-001 Platform Vision & Core Philosophy`
-- `ADR-002 Canonical Business Vocabulary (CBV)`
-- `ADR-003 Enterprise Object Model (EOM)`
-- `ADR-004 Enterprise Event Message Contract`
-- `ADR-005 Cognitive Memory API Interface`
-- `ADR-006 Storage Domain Abstraction`
-- `ADR-007 Worker Contract & Stateless Execution`
-- `ADR-008 Marketplace Suite & Asset Manifest`
-- `ADR-009 Context Isolation & Security Optimizer`
-- `ADR-010 Plugin Lifecycle Governance`
+| Sprint | Mục tiêu Phân hệ | Deliverable & Output Chạy Được | Sprint Exit Criteria Test |
+| :--- | :--- | :--- | :--- |
+| **Sprint 1** | Foundation Contracts | `CBV v1.0`, `EOM v1.0`, `EnterpriseEvent`, `EventBus`, `StorageInterfaces`, `SecretsStore`, `MemoryAPI` | Platform compile PASS, Pub/Sub Event PASS, MemoryAPI & Storage Interfaces compile PASS |
+| **Sprint 2** | Brain Runtime | Memory Center, Knowledge Center, Context Security & Token Optimizer, DNA Packs, Human Approval Gate | Brain Subsystem khởi tạo PASS, Memory API CRUD PASS, Context Optimizer (-90% tokens) PASS |
+| **Sprint 3** | Business Runtime | Intent Engine, Goal Engine, Strategy Engine, Simulation Engine, Planning Engine (IPlanner), Workflow | CEO Prompt ➔ Intent ➔ Goal ➔ Strategy ➔ Simulation ➔ Planning ➔ Workflow PASS |
+| **Sprint 4** | Execution Runtime | Capability Registry, Service Contracts (IService), Stateless Worker Gateway (IWorker), Connectors (IConnector) | Capability ➔ Service Contract ➔ Worker Gateway execute PASS với Connector mẫu |
+| **Sprint 5** | Presentation Layer | CEO Console, Manager Portal, Employee Portal, Realtime Dashboard, Observability UI | CEO Console & Dashboard hoạt động thực tế với API của Orchestration & Execution PASS |
+| **Sprint 6** | Marketplace Suite | Registry, Manifest (AssetManifest), Versioning, Dependency Resolver, Installer, Upgrade & Rollback Suite | Cài đặt, nâng cấp và gỡ bỏ Asset mẫu (Skill/SOP/DNA Pack) qua Manifest & Registry PASS |
 
 ---
 
-## 7. 🎯 SPRINT EXECUTION ROADMAP
+## 7. ARCHITECTURE FREEZE COMPLIANCE
 
-```
-Sprint 1: Infrastructure Contracts ➔ Event Bus, Storage Interfaces, Secrets, CBV/EOM
-Sprint 2: Brain Runtime ➔ Memory API, Knowledge Center, Context Optimizer, DNA Packs
-Sprint 3: Business Runtime ➔ Intent Engine, Goal Engine, Strategy Engine, Simulation
-Sprint 4: Execution Runtime ➔ Capability Registry, Service Contracts, Worker Gateway
-Sprint 5: Presentation ➔ CEO Console, Manager Portal, Realtime Dashboard
-Sprint 6: Marketplace ➔ Registry, Resolver, Installer, Upgrade & Publisher Suite
-```
+> **Mọi hoạt động thiết kế kiến trúc chính thức dứt điểm tại v17.3.** Dự án bắt đầu thi công Sprint 1 ngay lập tức.
