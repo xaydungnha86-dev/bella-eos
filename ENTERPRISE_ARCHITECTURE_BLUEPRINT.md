@@ -19,7 +19,7 @@ Enterprise Brain                  Business Applications
         │ (Installed & Managed via Marketplace Suite)
  Bella Marketplace ──► Assets Distribution (Skills, SOPs, DNA Packs, Prompts, Connectors)
         │ ├── Registry ├── Manifest ├── Versioning ├── Dependency Graph Resolver
-        │ └── Installer ├── Upgrade  ├── Rollback   └── Publisher
+        │ ├── Compatibility Policy ├── SemVer Resolver ├── Conflict Resolver └── License Policy
         │
         ├─► Bella Workers (Stateless Executors: AI, Human, MCP, API, Script, Robot, External)
         ├─► Bella Connect (Connector ➔ Normalizer ➔ Validator ➔ Transformer ➔ CBV)
@@ -28,10 +28,10 @@ Enterprise Brain                  Business Applications
 
 ---
 
-## 2. KERNEL CONTAINER & HỆ THỐNG RUNTIMES (OPERATIONAL RUNTIMES)
+## 2. KERNEL CONTAINER & RUNTIME COMPOSER
 
 ```
-Presentation Layer (Outer Adapter: Consoles, Portals, Realtime UI)
+Presentation Layer (Adapters: CEO Console, Manager Portal, Employee Portal, Dashboards)
     │
     ▼
 CQRS Query API Layer & Projection Engine (Read Models, Dashboards, Realtime Views)
@@ -40,13 +40,16 @@ CQRS Query API Layer & Projection Engine (Read Models, Dashboards, Realtime View
 Governance & Policy Runtime (Authorization, Compliance, Approval Matrix, Risk, Lineage)
     │
     ▼
-Observability Runtime (ITrace, IMetric, IAudit, IHealth, Telemetry)
+Observability Runtime (ITrace, IMetric, IAudit, IHealth, Correlation ID, Distributed Trace, Span)
     │
     ▼
-Domain 5: Execution Runtime (Resource Manager: Quota, RateLimit, Cost; Workers: IWorker)
+Resource Runtime (Quota, Budget, GPU, AI Credits, Tokens, Concurrency Governor)
     │
     ▼
-Domain 4: Orchestration & Scheduler Runtime (Cron, Delay, Retry, Timeout, DLQ, Compensation)
+Domain 5: Execution Runtime (Workers: IWorker, Gateway)
+    │
+    ▼
+Domain 4: Orchestration Runtime (Intent, Goal, Planning, Workflow, Scheduler: Cron, DLQ, Retry)
     │
     ▼
 Decision Runtime (Strategy, Simulation, Optimizer, Tradeoff, Forecast Engine)
@@ -58,7 +61,7 @@ Domain 3: Enterprise Brain Runtimes (Memory, Knowledge, Context, Reasoning, Lear
 Domain 2: Storage Domain Interfaces (v1.0) & Secrets Store
     │
     ▼
-Domain 1: Kernel Runtime Container (Lifecycle, Boot, Shutdown, Module Discovery, Health, Dependency Graph)
+Kernel Runtime Container & Runtime Composer (Lifecycle, Boot, Module Discovery, Health, Dependency Graph)
     │
     ▼
 Partitioned Event Bus (Domain Events, Application Events, Integration Events)
@@ -66,45 +69,33 @@ Partitioned Event Bus (Domain Events, Application Events, Integration Events)
 
 ---
 
-## 3. CQRS QUERY LAYER & PROJECTION ENGINE
+## 3. RUNTIME COMPOSITION ARCHITECTURE
 
-Để đảm bảo hiệu năng tối đa cho giao diện người dùng và không truy vấn trực tiếp Event Store:
-
+**Runtime Composer** đóng vai trò là single Composition Root cho **Kernel Container**:
 ```
-[ Command / Intent ] ➔ Orchestration ➔ Execution ➔ Event Bus (Domain Event: e.g. BookingCreated)
-                                                           │
-                                                           ▼
-                                                   Projection Engine
-                                                           │
-                                                           ▼
-                                                CQRS Read Models / Tables
-                                                           │
-                                                           ▼
-                                                CQRS Query API Layer
-                                                           │
-                                                           ▼
-                                          Presentation Layer (Consoles & UI)
+Kernel Runtime Container
+         │
+         ▼
+  Runtime Composer
+         │
+         ├── 1. Boot Storage Domain Interfaces & Secrets Store
+         ├── 2. Boot Enterprise Brain Runtimes
+         ├── 3. Boot Decision Runtime
+         ├── 4. Boot Orchestration Runtime & Scheduler
+         ├── 5. Boot Resource Runtime & Execution Runtime
+         ├── 6. Boot Governance & Observability Runtimes
+         └── 7. Boot CQRS Projection Engine & Experience Layer
 ```
 
 ---
 
-## 4. KERNEL RUNTIME CONTAINER (BOOTSTRAPPING & LIFECYCLE)
-
-Lõi **Kernel Runtime Container** hoạt động như một Container quản lý (tương tự NestJS Container / Spring Host):
-- **Lifecycle Management**: Quản lý các trạng thái `Boot`, `Init`, `Ready`, `Suspend`, `Shutdown`.
-- **Module Discovery**: Tự động phát hiện các Runtimes dựa theo `Core Module Manifests`.
-- **Dependency Graph Manager**: Xây dựng đồ thị phụ thuộc giữa các module và giải quyết khởi tạo theo thứ tự.
-- **Health Governor**: Theo dõi sức khỏe toàn hệ thống theo thời gian thực.
-
----
-
-## 5. BẢNG PHÂN ĐỊNH KHÓA CỨNG (FROZEN CONTRACTS VS EXTENSIBLE)
+## 4. BẢNG PHÂN ĐỊNH KHÓA CỨNG (FROZEN CONTRACTS VS EXTENSIBLE)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ ❄️ FROZEN PLATFORM CONTRACTS (KHÓA CỨNG BẤT BIẾN 20 NĂM)         │
 ├─────────────────────────────────────────────────────────────────┤
-│ 1. 5 Core Domains & Kernel Runtime Container                    │
+│ 1. 5 Core Domains & Runtime Composer Container Specification    │
 │ 2. Canonical Business Vocabulary (CBV v1.0) & EOM (v1.0)        │
 │ 3. Enterprise Message Contract (EnterpriseEvent<T> v1.0)        │
 │ 4. Cognitive Memory API Interface (MemoryAPI v1.0)             │
@@ -134,7 +125,7 @@ Lõi **Kernel Runtime Container** hoạt động như một Container quản lý
 
 ---
 
-## 6. THÁP KIỂM THỬ 5 TẦNG (5-LAYER TEST PYRAMID)
+## 5. THÁP KIỂM THỬ 5 TẦNG (5-LAYER TEST PYRAMID)
 
 ```
               ┌──────────────────────────┐
@@ -152,22 +143,22 @@ Lõi **Kernel Runtime Container** hoạt động như một Container quản lý
 
 ---
 
-## 7. 🎯 SPRINT EXECUTION ROADMAP CHÍNH THỨC (SPRINT 1 - 9)
+## 6. 🎯 SPRINT EXECUTION ROADMAP CHÍNH THỨC (SPRINT 1 - 9)
 
 | Sprint | Mục tiêu Phân hệ | Deliverable & Output Chạy Được | Sprint Exit Criteria Test |
 | :--- | :--- | :--- | :--- |
-| **Sprint 1** | Platform Contracts | `CBV v1.0`, `EOM v1.0`, `EnterpriseEvent`, `MemoryAPI`, `IService`, `IWorker`, `IConnector`, `IPolicy`, `IPlanner` | All Platform Contracts compile PASS |
-| **Sprint 2** | Kernel Container & Infrastructure | Kernel Container (Boot, Lifecycle, Discovery), Partitioned EventBus, StorageInterfaces, SecretsStore | Platform Container boot success PASS, Pub/Sub Event PASS, Storage Interfaces compile PASS |
-| **Sprint 3** | Brain Runtime & Memory API | Memory Runtime, Knowledge Runtime, Context Security & Token Optimizer, DNA Packs, Human Approval Gate | Brain Runtimes khởi tạo PASS, Memory API CRUD PASS, Context Optimizer (-90% tokens) PASS |
-| **Sprint 4** | Decision Runtime | Decision Runtime (Strategy, Simulation, Optimizer, Tradeoff, Forecast), Business Domain Registry | Intent ➔ Goal ➔ Strategy ➔ Simulation ➔ Optimizer PASS |
-| **Sprint 5** | Execution Runtime & Resource Manager | Resource Manager (Quota, RateLimit, Cost), Capability Registry, Service Contracts (IService), Worker Gateway (IWorker), Connectors | Resource Manager Quota ➔ Service Contract ➔ Worker Gateway execute PASS với Connector |
-| **Sprint 6** | Experience Runtime & CQRS Query Layer | CQRS Query API Layer, Projection Engine, CEO Console, Manager Portal, Realtime Dashboard | Projection Engine biến Event ➔ Read Model ➔ Realtime UI Consoles PASS |
-| **Sprint 7** | Marketplace Suite | Suite (Registry, Manifest, Versioning, Dependency Graph Resolver, Installer, Upgrade & Rollback Suite) | Cài đặt, nâng cấp và gỡ bỏ Asset mẫu với Dependency Graph Resolver PASS |
-| **Sprint 8** | Governance, Policy & Observability | Policy & Governance Runtime (Authorization, Compliance, Risk, Lineage), Observability Contracts (ITrace, IMetric, IAudit, IHealth) | Policy Runtime Check & Observability Tracing PASS |
-| **Sprint 9** | Production Hardening | Contract Tests Suite, Architecture Tests, Performance Baseline Tracking, Production E2E Hardening | All 5-Layer Tests PASS, 0 Architecture Violations PASS |
+| **Sprint 1** | Contracts & Foundation | `CBV v1.0`, `EOM v1.0`, `EnterpriseEvent`, `MemoryAPI`, `IService`, `IWorker`, `IConnector`, `IPolicy`, `IPlanner` | All Platform Contracts compile PASS |
+| **Sprint 2** | Kernel & Infrastructure | Kernel Container, Runtime Composer, Partitioned EventBus, StorageInterfaces, SecretsStore | Platform Container & Composer boot PASS, Pub/Sub Event PASS |
+| **Sprint 3** | Brain Runtime | Memory Runtime, Knowledge Runtime, Context Security & Token Optimizer, DNA Packs, Human Approval Gate | Brain Runtimes khởi tạo PASS, Memory API CRUD PASS, Context Optimizer (-90% tokens) PASS |
+| **Sprint 4** | Decision + Orchestration | Decision Runtime (Strategy, Simulation, Optimizer, Forecast), Orchestration Runtime (Intent, Goal, Planning, Scheduler) | Strategy ➔ Simulation ➔ Intent ➔ Goal ➔ Planning ➔ Workflow PASS |
+| **Sprint 5** | Execution + Resource Runtime | Resource Runtime (Quota, Budget, AI Credits, Concurrency), Capability Registry, Service Contracts (IService), Workers (IWorker), Connectors | Resource Runtime Quota ➔ Service Contract ➔ Worker Gateway execute PASS |
+| **Sprint 6** | Experience + CQRS | CQRS Query API Layer, Projection Engine, CEO Console, Manager Portal, Realtime Dashboard | Projection Engine biến Event ➔ Read Model ➔ Realtime UI Consoles PASS |
+| **Sprint 7** | Marketplace | Suite (Registry, Manifest, Versioning, Dependency Resolver, Conflict Resolver, License Policy, Installer, Rollback) | Cài đặt, nâng cấp và gỡ bỏ Asset mẫu với Dependency & License Resolver PASS |
+| **Sprint 8** | Governance + Observability | Policy & Governance Runtime (Authorization, Compliance, Risk, Lineage), Observability Runtime (ITrace, Correlation ID, Distributed Trace) | Policy Check & Distributed Tracing Context PASS |
+| **Sprint 9** | Production Hardening & Certification | Contract Tests Suite, Architecture Tests, Performance Baseline Tracking, Production E2E Hardening | All 5-Layer Tests PASS, 0 Architecture Violations PASS |
 
 ---
 
-## 8. ARCHITECTURE FREEZE COMPLIANCE
+## 7. ARCHITECTURE FREEZE COMPLIANCE
 
 > **Mọi hoạt động thiết kế kiến trúc chính thức kết thúc dứt điểm tại v18.0.** Dự án bắt đầu thi công Sprint 1 ngay lập tức.
