@@ -791,7 +791,6 @@ export default function Dashboard() {
                               onClick={() => {
                                 const awaitingTask = dynamicTasks.find(t => t.status === 'AWAITING_APPROVAL');
                                 if (awaitingTask) {
-                                  const { InternalApiGateway } = require('@/core/execution/execution');
                                   CampaignExecutionManager.approveTaskAndResume(awaitingTask.task_id, InternalApiGateway);
                                 }
                               }}
@@ -804,11 +803,11 @@ export default function Dashboard() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                           {dynamicTasks.map((t: any, idx: number) => {
-                            const isConfigReq = t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('Cần cấu hình') || t.output?.includes('hết hạn') || t.output?.includes('expired') || t.meta?.status === 'PREPARED' || t.meta?.isExpired;
                             const isAwaitingApproval = t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL';
-                            const isPendingApproval = t.status === 'PENDING_APPROVAL' || t.meta?.status === 'WAITING_FOR_MARKETING_APPROVAL';
+                            const isConfigReq = (t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('hết hạn') || t.meta?.status === 'CONFIG_REQUIRED' || t.meta?.isExpired === true) && !isAwaitingApproval;
+                            const isPendingApproval = (t.status === 'PENDING_APPROVAL' || t.meta?.status === 'WAITING_FOR_MARKETING_APPROVAL') && !isConfigReq && !isAwaitingApproval;
                             const isDone = (t.success === true || t.status === 'COMPLETED' || t.isApproved) && !isConfigReq && !isAwaitingApproval;
-                            const isFailed = (t.success === false || t.error) && !isConfigReq && !isAwaitingApproval;
+                            const isFailed = (t.success === false || t.error) && !isConfigReq && !isAwaitingApproval && !isPendingApproval;
 
                             return (
                               <div

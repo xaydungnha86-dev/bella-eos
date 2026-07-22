@@ -1,5 +1,6 @@
 import { CanonicalContextPackage } from '../../types/eom';
 import { EnterpriseBrain } from '../brain';
+import { LearningCenter } from '../brain/learning';
 
 export interface CampaignState {
   isProcessing: boolean;
@@ -421,7 +422,6 @@ class CampaignExecutionManagerClass {
   // CEO rating & feedback handler for continuous learning
   public submitTaskFeedback(taskId: string, rating: number, feedbackText: string) {
     const task = this.state.dynamicTasks.find(t => t.task_id === taskId);
-    const { LearningCenter } = require('../brain/learning');
     const result = LearningCenter.submitFeedback({
       taskId,
       taskName: task?.agent_name || task?.task_type || 'Nhiệm vụ',
