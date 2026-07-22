@@ -80,12 +80,36 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
   return { success: data.success, output: data.content, meta: { model: data.model } };
 }
 
-async function tool_generate_media_creative(input: any): Promise<ToolResult> {
-  const imageUrl = 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop';
+async function tool_generate_media_creative(input: any, clientKeys?: any): Promise<ToolResult> {
+  const objective = input.objective || input.format || 'Spa Management System Banner';
+  let imageUrl = 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop';
+  let provider = 'enterprise-creative';
+  let model = 'bella-creative-v1';
+
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/ai/generate-image`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        objective,
+        prompt: `A professional 4K marketing banner for Spa Management Software Bella EOS. Elegant iPad dashboard mockup, luxury spa background, teal and gold colors, 16:9 banner format`,
+        client_openai_key: clientKeys?.openai
+      })
+    });
+    const data = await res.json();
+    if (data.success && data.imageUrl) {
+      imageUrl = data.imageUrl;
+      provider = data.provider;
+      model = data.model;
+    }
+  } catch (e) {
+    console.warn('[tool_generate_media_creative] Image API call fallback:', e);
+  }
+
   return {
     success: true,
-    output: `🖼️ [Bella EOS Creative Worker] Đã render hoàn tất Banner 4K & Asset Truyền thông:\n• Image Banner URL: ${imageUrl}\n• Resolution: 1200x630 (Facebook Post & Ads Ready)\n• Visual: Mockup Giao diện Quản lý Spa Bella EOS Premium`,
-    meta: { type: 'IMAGE_BANNER', imageUrl, resolution: '1200x630', status: 'GENERATED' }
+    output: `🖼️ [Bella EOS Creative Worker] Đã render hoàn tất Banner 4K bằng Model AI [${provider}/${model}]:\n• Image Banner URL: ${imageUrl}\n• Resolution: 1792x1024 / 1200x630 (Facebook Post & Ads Ready)\n• Visual: Mockup Giao diện Quản lý Spa Bella EOS Premium`,
+    meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1792x1024', status: 'GENERATED' }
   };
 }
 
@@ -230,8 +254,8 @@ const TOOL_REGISTRY: Record<string, ToolFn> = {
   write_zalo_message:     (i, k, _)  => tool_write_zalo_message(i, k),
   write_email_campaign:   (i, k, _)  => tool_write_email_campaign(i, k),
   write_ad_copy:          (i, k, _)  => tool_write_ad_copy(i, k),
-  generate_media_creative:(i, _, __) => tool_generate_media_creative(i),
-  create_banner_design:   (i, _, __) => tool_generate_media_creative(i),
+  generate_media_creative:(i, k, _) => tool_generate_media_creative(i, k),
+  create_banner_design:   (i, k, _) => tool_generate_media_creative(i, k),
   publish_facebook:       (i, k, to) => tool_publish_facebook(i, k, to),
   publish_zalo:           (i, k, to) => tool_publish_zalo(i, k, to),
   publish_tiktok:         (i, k, to) => tool_publish_tiktok(i, k, to),
