@@ -6680,28 +6680,39 @@ async function testGeminiConnection() {
     statusSpan.className = "block mt-1 text-[9px] font-mono text-slate-400 animate-pulse";
     statusSpan.textContent = "⏳ Đang kết nối thử nghiệm đến Google AI Studio...";
     
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: "Hello" }] }]
-            })
-        });
-        
-        const data = await response.json();
-        if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            statusSpan.className = "block mt-1 text-[9px] font-mono text-emerald-400 font-bold";
-            statusSpan.textContent = "✅ Kết nối THÀNH CÔNG! API Key đang hoạt động tốt.";
-        } else {
-            const msg = data.error ? data.error.message : "Unknown error";
-            statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
-            statusSpan.textContent = `❌ Lỗi: ${msg}`;
+    const candidateModels = [
+        'gemini-1.5-flash',
+        'gemini-1.5-pro',
+        'gemini-pro'
+    ];
+    
+    for (const model of candidateModels) {
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${key}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: "Hello" }] }]
+                })
+            });
+            
+            const data = await response.json();
+            if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                statusSpan.className = "block mt-1 text-[9px] font-mono text-emerald-400 font-bold";
+                statusSpan.textContent = `✅ Kết nối THÀNH CÔNG! API Key hoạt động tốt (Model: ${model}).`;
+                return;
+            } else if (data.error && data.error.message && !data.error.message.includes('not found') && !data.error.message.includes('not supported')) {
+                statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+                statusSpan.textContent = `❌ Lỗi: ${data.error.message}`;
+                return;
+            }
+        } catch (err) {
+            // continue fallback
         }
-    } catch (err) {
-        statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
-        statusSpan.textContent = `❌ Lỗi kết nối: ${err.message}`;
     }
+    
+    statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+    statusSpan.textContent = "❌ Lỗi: Không có model nào tương thích hoặc Key không hợp lệ.";
 }
 window.testGeminiConnection = testGeminiConnection;
 
