@@ -291,6 +291,9 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     return { success: false, output: '', error: 'Không có nội dung để đăng. Task này phụ thuộc vào task viết nội dung trước.' };
   }
 
+  // Normalize markdown text for Facebook
+  content = cleanMarkdownForSocialMedia(content);
+
   // ── Route via Hermes Social MCP Server Engine ────────────────────────────────
   const mcpResponse = await HermesMcpServerEngine.handleJsonRpcRequest({
     jsonrpc: '2.0',
@@ -373,28 +376,31 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
 }
 
 async function tool_publish_zalo(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  const content = input.content_from || input.content || input.objective || '';
+  let content = input.content_from || input.content || input.objective || '';
+  content = cleanMarkdownForSocialMedia(content);
   return {
     success: true,
-    output: `📱 [Hermes Zalo Publisher] Đã chuẩn bị tin nhắn truyền thông + Banner. Cần cấu hình Zalo OA Token để gửi thật.`,
+    output: `📱 [Hermes Zalo Publisher] Đã chuẩn bị tin nhắn truyền thông + Banner:\n${content.substring(0, 100)}...\n\n(Cần cấu hình Zalo OA Token để gửi thật)`,
     meta: { platform: 'zalo', status: 'PREPARED' }
   };
 }
 
 async function tool_publish_tiktok(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  const content = input.content_from || input.content || input.objective || '';
+  let content = input.content_from || input.content || input.objective || '';
+  content = cleanMarkdownForSocialMedia(content);
   return {
     success: true,
-    output: `🎵 [TikTok] Script đã chuẩn bị: "${content?.substring(0, 80)}...". Cần TikTok Content Publishing API token.`,
+    output: `🎵 [TikTok] Script video ngắn đã chuẩn bị:\n"${content.substring(0, 120)}..."\n\n(Cần TikTok Content Publishing API token để xuất bản)`,
     meta: { platform: 'tiktok', status: 'PREPARED' }
   };
 }
 
 async function tool_create_facebook_ad(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  const adContent = input.content_from || input.content || input.objective || '';
+  let adContent = input.content_from || input.content || input.objective || '';
+  adContent = cleanMarkdownForSocialMedia(adContent);
   return {
     success: true,
-    output: `📢 [Ares Ads Agent] Campaign framework được tạo:\n• Objective: LEAD_GENERATION / DEMO_RESERVE\n• Ad Copy: "${adContent?.substring(0, 80)}..."\n• Creative Asset: Banner 1200x630 từ EOS Creative Worker\n• Audience: Chủ Spa / Quản lý Thẩm mỹ viện (Age 25-50)\n• Cần Facebook Ads Manager API để kích hoạt thật.`,
+    output: `📢 [Ares Ads Agent] Campaign framework được tạo:\n• Objective: LEAD_GENERATION / DEMO_RESERVE\n• Ad Copy: "${adContent.substring(0, 80)}..."\n• Creative Asset: Banner 1200x630 từ EOS Creative Worker\n• Audience: Chủ Spa / Quản lý Thẩm mỹ viện (Age 25-50)\n• Cần Facebook Ads Manager API để kích hoạt thật.`,
     meta: { platform: 'facebook_ads', status: 'CONFIGURED' }
   };
 }
@@ -596,4 +602,36 @@ function resolveInputReferences(input: Record<string, any>, taskOutputs: Record<
     }
   }
   return resolved;
+}
+
+/**
+ * Normalizes markdown text by stripping bold/italic syntax and clean bullet points
+ * for social media sharing compatibility.
+ */
+function cleanMarkdownForSocialMedia(text: string): string {
+  if (!text) return '';
+
+  let cleaned = text;
+
+  // 1. Remove bold formatting **word** -> word
+  cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
+
+  // 2. Normalize list bullet points from markdown style to clean unicode bullet points
+  const lines = cleaned.split('\n');
+  const normalizedLines = lines.map(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('* ') || trimmed.startsWith('-\t') || trimmed.startsWith('- ')) {
+      return line.replace(/^(\s*)[*\-]\s+/, '$1• ');
+    }
+    return line;
+  });
+  cleaned = normalizedLines.join('\n');
+
+  // 3. Remove single * wrappers *italic* -> italic
+  cleaned = cleaned.replace(/\*(.*?)\*/g, '$1');
+
+  // 4. Remove markdown headers #, ##, ### at the beginning of lines
+  cleaned = cleaned.replace(/^#+\s+/gm, '');
+
+  return cleaned;
 }
