@@ -24,6 +24,61 @@ function getStoredKey(provider: string, key_name: string): string {
   } catch { return ''; }
 }
 
+function getDynamicOkrNodes(objective: string, activeStep: number) {
+  const isCompleted = activeStep >= 1;
+  const status = isCompleted ? 'COMPLETED' : 'PENDING';
+  const lower = objective.toLowerCase();
+  
+  // 1. Marketing OKR
+  let mktOkr = 'Tăng 20% Spa Demo';
+  if (lower.includes('follower') || lower.includes('like') || lower.includes('theo dõi')) {
+    const followMatch = objective.match(/(\d+[\s]*(?:follower|follow|like|lượt theo dõi|người theo dõi))/i);
+    mktOkr = followMatch ? `Tăng ${followMatch[1]}` : 'Tăng lượt theo dõi Fanpage';
+  } else if (lower.includes('doanh thu') || lower.includes('sales')) {
+    mktOkr = 'Tăng trưởng phễu Lead MKT';
+  } else if (lower.includes('khách hàng') || lower.includes('customer')) {
+    mktOkr = 'Thu hút tệp Khách hàng mới';
+  } else if (objective.trim()) {
+    mktOkr = `MKT: ${objective.substring(0, 30)}${objective.length > 30 ? '...' : ''}`;
+  }
+
+  // 2. Sales OKR
+  let salesOkr = 'Tối ưu 42 Lượt Bookings';
+  if (lower.includes('follower') || lower.includes('like') || lower.includes('theo dõi')) {
+    salesOkr = 'Tăng tỷ lệ tương tác & chuyển đổi';
+  } else if (lower.includes('doanh thu') || lower.includes('sales')) {
+    salesOkr = 'Đạt chỉ tiêu doanh số mới';
+  } else if (lower.includes('khách hàng') || lower.includes('customer')) {
+    salesOkr = 'Tối ưu tỷ lệ Retention';
+  }
+
+  // 3. HR & Operations OKR
+  let opsOkr = 'Ràng buộc SOP & Staffing';
+  if (lower.includes('follower') || lower.includes('like') || lower.includes('theo dõi')) {
+    opsOkr = 'Chuẩn hóa quy trình đăng tải';
+  } else if (lower.includes('spa') || lower.includes('dịch vụ')) {
+    opsOkr = 'Điều phối ca KTV & Ràng buộc SOP';
+  }
+
+  // 4. Finance OKR
+  let finOkr = 'Budget limit: 50M VND';
+  const budgetMatch = objective.match(/(\d+[\s]*(?:triệu|tr|M|triệu VND|tr VND))/i);
+  if (budgetMatch) {
+    finOkr = `Budget limit: ${budgetMatch[1].toUpperCase()}`;
+  } else if (lower.includes('ngân sách') || lower.includes('budget')) {
+    finOkr = 'Hạn mức ngân sách đề xuất';
+  } else {
+    finOkr = 'Budget limit: 30M VND'; // standard default limit
+  }
+
+  return [
+    { dept: 'Marketing', okr: mktOkr, status, color: 'border-cyan-400 text-cyan-600' },
+    { dept: 'Sales', okr: salesOkr, status, color: 'border-blue-400 text-blue-600' },
+    { dept: 'HR & Operations', okr: opsOkr, status, color: 'border-teal-400 text-teal-600' },
+    { dept: 'Finance', okr: finOkr, status, color: 'border-purple-400 text-purple-600' }
+  ];
+}
+
 // ─── Safe Storage: sessionStorage (primary, survives back-nav) + localStorage fallback ─
 const SS_LARGE_KEYS = new Set(['bella_eos_dynamic_tasks', 'bella_eos_telemetry_logs', 'bella_eos_verification_report']);
 
@@ -924,12 +979,7 @@ export default function Dashboard() {
                   ) : (
                     /* Fallback department OKR nodes if tasks haven't loaded yet */
                     <div className="grid grid-cols-4 gap-4 w-full">
-                      {[
-                        { dept: 'Marketing', okr: 'Tăng 20% Spa Demo', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-cyan-400 text-cyan-600' },
-                        { dept: 'Sales', okr: 'Tối ưu 42 Lượt Bookings', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-blue-400 text-blue-600' },
-                        { dept: 'HR & Operations', okr: 'Ràng buộc SOP & Staffing', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-teal-400 text-teal-600' },
-                        { dept: 'Finance', okr: 'Budget limit: 50M VND', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-purple-400 text-purple-600' }
-                      ].map((okrNode, i) => (
+                      {getDynamicOkrNodes(objective, activeStep).map((okrNode, i) => (
                         <div 
                           key={i} 
                           className={`glass-panel p-2.5 rounded-xl border text-center transition-all ${okrNode.status === 'COMPLETED' ? okrNode.color : 'border-slate-200 text-slate-400'}`}
