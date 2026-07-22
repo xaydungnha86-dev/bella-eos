@@ -80,10 +80,7 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
 }
 
 async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  // Resolve content: use output from a prior task (e.g., write step) or input directly
-  const content = input.content_from
-    ? taskOutputs[input.content_from]
-    : input.content;
+  const content = input.content_from || input.content || input.objective || '';
 
   if (!content) {
     return { success: false, output: '', error: 'Không có nội dung để đăng. Task này phụ thuộc vào task viết nội dung trước.' };
@@ -109,8 +106,7 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
 }
 
 async function tool_publish_zalo(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  const content = input.content_from ? taskOutputs[input.content_from] : input.content;
-  // Zalo OA broadcast — requires Zalo API integration (placeholder for now)
+  const content = input.content_from || input.content || input.objective || '';
   return {
     success: true,
     output: `📱 [Zalo OA] Đã chuẩn bị tin nhắn (${content?.substring(0, 60)}...). Cần cấu hình Zalo OA Token để gửi thật.`,
@@ -119,7 +115,7 @@ async function tool_publish_zalo(input: any, clientKeys: any, taskOutputs: Recor
 }
 
 async function tool_publish_tiktok(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  const content = input.content_from ? taskOutputs[input.content_from] : input.content;
+  const content = input.content_from || input.content || input.objective || '';
   return {
     success: true,
     output: `🎵 [TikTok] Script đã chuẩn bị: "${content?.substring(0, 80)}...". Cần TikTok Content Publishing API token.`,
@@ -128,7 +124,7 @@ async function tool_publish_tiktok(input: any, clientKeys: any, taskOutputs: Rec
 }
 
 async function tool_create_facebook_ad(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  const adContent = input.content_from ? taskOutputs[input.content_from] : input.content;
+  const adContent = input.content_from || input.content || input.objective || '';
   return {
     success: true,
     output: `📢 [Facebook Ads] Campaign framework được tạo:\n• Objective: AWARENESS\n• Content: "${adContent?.substring(0, 80)}..."\n• Audience: ${input.target_audience || 'Custom'}\n• Cần Facebook Ads Manager API để kích hoạt thật.`,

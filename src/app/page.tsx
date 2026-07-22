@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { 
   Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
-  Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe
+  Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe,
+  X, Copy, Check, Code
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { EnterpriseBrain } from '../core/brain';
@@ -68,6 +69,8 @@ export default function Dashboard() {
   const [orchestratorPlan, setOrchestratorPlan] = useState<{ title: string; reasoning: string; provider: string; model: string } | null>(null);
   const [dynamicTasks, setDynamicTasks] = useState<any[]>([]);
   const [verificationReport, setVerificationReport] = useState<import('../core/orchestration/orchestration').VerificationReport | null>(null);
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+  const [copiedOutput, setCopiedOutput] = useState(false);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
 
@@ -427,14 +430,15 @@ export default function Dashboard() {
                           return (
                             <div
                               key={t.task_id || idx}
-                              className={`glass-panel p-3 rounded-xl border text-left transition-all relative overflow-hidden shadow-sm ${
+                              onClick={() => setSelectedTask(t)}
+                              className={`glass-panel p-3.5 rounded-xl border text-left transition-all relative overflow-hidden shadow-sm cursor-pointer group hover:scale-[1.01] hover:shadow-md ${
                                 isDone
-                                  ? 'border-emerald-200 bg-emerald-50/40'
+                                  ? 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400'
                                   : isConfigReq
-                                  ? 'border-amber-200 bg-amber-50/40'
+                                  ? 'border-amber-200 bg-amber-50/40 hover:border-amber-400'
                                   : isFailed
-                                  ? 'border-red-200 bg-red-50/40'
-                                  : 'border-slate-200 bg-white'
+                                  ? 'border-red-200 bg-red-50/40 hover:border-red-400'
+                                  : 'border-slate-200 bg-white hover:border-indigo-400'
                               }`}
                             >
                               <div className="flex items-start justify-between gap-2">
@@ -442,7 +446,7 @@ export default function Dashboard() {
                                   <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center shrink-0">
                                     #{idx + 1}
                                   </span>
-                                  <h4 className="font-semibold text-xs text-slate-800 truncate">{t.agent_name || t.agent_id}</h4>
+                                  <h4 className="font-semibold text-xs text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{t.agent_name || t.agent_id}</h4>
                                 </div>
 
                                 {/* Status Badge */}
@@ -478,6 +482,13 @@ export default function Dashboard() {
                                   {t.output}
                                 </p>
                               )}
+
+                              <div className="mt-2 pt-2 border-t border-slate-100/80 flex items-center justify-between text-[9px] font-bold text-indigo-600 group-hover:text-indigo-700">
+                                <span className="flex items-center gap-1">
+                                  <Terminal className="w-3 h-3" /> Bấm để xem kết quả chi tiết
+                                </span>
+                                <span className="group-hover:translate-x-0.5 transition-transform">Xem Chi Tiết →</span>
+                              </div>
                             </div>
                           );
                         })}
@@ -916,6 +927,136 @@ export default function Dashboard() {
                 </div>
               )}
 
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TASK EXECUTION DETAIL MODAL (Pop-up) ── */}
+      {selectedTask && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-scale-up">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-md">
+                  {selectedTask.agent_name?.charAt(0) || '🤖'}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display font-bold text-sm text-slate-800">{selectedTask.agent_name || selectedTask.agent_id}</h3>
+                    <span className="text-[10px] font-mono font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-full">
+                      {selectedTask.task_type}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-0.5 font-mono">Task ID: {selectedTask.task_id}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedTask(null)}
+                className="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-5 flex-1 font-sans text-xs">
+              {/* Status Banner */}
+              <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs font-semibold ${
+                selectedTask.success === true && !selectedTask.output?.includes('CONFIG_REQUIRED')
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : selectedTask.output?.includes('CONFIG_REQUIRED')
+                  ? 'bg-amber-50 border-amber-200 text-amber-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>Trạng Thái: {
+                    selectedTask.success === true && !selectedTask.output?.includes('CONFIG_REQUIRED')
+                      ? 'HOÀN THÀNH THÀNH CÔNG (SUCCESS)'
+                      : selectedTask.output?.includes('CONFIG_REQUIRED')
+                      ? 'CẦN CẤU HÌNH TOKEN (CONFIG REQUIRED)'
+                      : 'THẤT BẠI / MẤT KẾT NỐI (FAILED)'
+                  }</span>
+                </div>
+                {selectedTask.meta?.model && (
+                  <span className="text-[10px] font-mono bg-white/80 px-2 py-0.5 rounded border border-slate-200">
+                    Model: {selectedTask.meta.model}
+                  </span>
+                )}
+              </div>
+
+              {/* Task Description */}
+              <div>
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mô Tả Nhiệm Vụ (Task Description)</h4>
+                <p className="text-xs text-slate-700 font-medium bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  {selectedTask.task_description}
+                </p>
+              </div>
+
+              {/* Input Payload */}
+              {selectedTask.input && (
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Dữ Liệu Đầu Vào (Input Payload)</h4>
+                  <pre className="text-[11px] font-mono bg-slate-900 text-slate-200 p-3.5 rounded-xl overflow-x-auto max-h-36 border border-slate-800">
+                    {JSON.stringify(selectedTask.input, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              {/* Output Result */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kết Quả Thực Thi Chi Tiết (Full Output)</h4>
+                  {selectedTask.output && (
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedTask.output);
+                        setCopiedOutput(true);
+                        setTimeout(() => setCopiedOutput(false), 2000);
+                      }}
+                      className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-500 flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedOutput ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                      {copiedOutput ? 'Đã Sao Chép!' : 'Sao Chép Kết Quả'}
+                    </button>
+                  )}
+                </div>
+                <div className="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner max-h-72 overflow-y-auto">
+                  {selectedTask.output || selectedTask.error || 'Chưa có output cho bước này.'}
+                </div>
+              </div>
+
+              {/* Error or Warning remediation if present */}
+              {(selectedTask.error || selectedTask.output?.includes('CONFIG_REQUIRED')) && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs space-y-1.5">
+                  <p className="font-bold text-amber-800 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Hướng Khắc Phục Lỗi / Mất Kết Nối:
+                  </p>
+                  <p className="text-amber-700">Vui lòng truy cập trang Cài đặt Tích hợp để bổ sung API Key / Access Token cho dịch vụ này.</p>
+                  <div className="pt-1">
+                    <Link
+                      href="/settings"
+                      onClick={() => setSelectedTask(null)}
+                      className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                    >
+                      <Key className="w-3 h-3" />
+                      <span>Vào Cài Đặt Tích Hợp →</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end">
+              <button
+                onClick={() => setSelectedTask(null)}
+                className="bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs px-4 py-2 rounded-xl transition-colors cursor-pointer"
+              >
+                Đóng Panel
+              </button>
             </div>
           </div>
         </div>
