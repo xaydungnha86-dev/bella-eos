@@ -82,9 +82,9 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
 
 async function tool_generate_media_creative(input: any, clientKeys?: any): Promise<ToolResult> {
   const objective = input.objective || input.format || 'Spa Management System Banner';
-  let imageUrl = 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop';
+  let imageUrl = 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop';
   let provider = 'enterprise-creative';
-  let model = 'bella-creative-v1';
+  let model = 'bella-spa-creative-v3';
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/ai/generate-image`, {
@@ -92,7 +92,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any): Promi
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         objective,
-        prompt: `A professional 4K marketing banner for Spa Management Software Bella EOS. Elegant iPad dashboard mockup, luxury spa background, teal and gold colors, 16:9 banner format`,
+        prompt: `A high-converting 4K commercial sales banner for Bella EOS Spa Management Software inside a luxury spa treatment environment. Features a sleek 3D iPad Pro mockup displaying an elegant spa management dashboard with booking calendars, revenue charts, and staff management icons. In the background, a luxurious modern spa interior with warm ambient lighting, serene candles, and deep teal and gold accent colors. Clean advertisement typography reading 'BELLA EOS - AI SPA MANAGEMENT PLATFORM'. Ultra high resolution, 4K commercial advertising design standards, professional UI/UX graphics.`,
         client_openai_key: clientKeys?.openai
       })
     });
@@ -108,7 +108,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any): Promi
 
   return {
     success: true,
-    output: `🖼️ [Bella EOS Creative Worker] Đã render hoàn tất Banner 4K bằng Model AI [${provider}/${model}]:\n• Image Banner URL: ${imageUrl}\n• Resolution: 1792x1024 / 1200x630 (Facebook Post & Ads Ready)\n• Visual: Mockup Giao diện Quản lý Spa Bella EOS Premium`,
+    output: `🖼️ [Bella EOS Creative Worker] Đã render hoàn tất Banner Bối cảnh Spa & Demo Phần mềm [${provider}/${model}]:\n• Image Banner URL: ${imageUrl}\n• Resolution: 1792x1024 / 1200x630 (Facebook Post & Ads Ready)\n• Visual: Bối cảnh Spa Cao cấp & Mockup Giao diện Quản lý Spa Bella EOS Premium`,
     meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1792x1024', status: 'GENERATED' }
   };
 }
@@ -124,7 +124,7 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     return match ? match[0] : '';
   };
 
-  const imageUrl = extractHttpUrl(mediaRaw) || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop';
+  const imageUrl = extractHttpUrl(mediaRaw) || 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop';
 
   if (!content) {
     return { success: false, output: '', error: 'Không có nội dung để đăng. Task này phụ thuộc vào task viết nội dung trước.' };

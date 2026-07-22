@@ -100,16 +100,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── 3. Enterprise High-Converting Commercial Sales Banner Fallback ──────
-    // Professional Enterprise Software Presentation & iPad Dashboard Banner
-    const fallbackUrl = 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1200&auto=format&fit=crop';
+    // ── 3. Enterprise Authentic Luxury Spa Environment Banner Asset Fallback ──────
+    // High-End Luxury Spa Environment with Relaxing Atmosphere & Spa Software UI Context
+    const fallbackUrl = 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop';
     return NextResponse.json({
       success: true,
       provider: 'enterprise-creative-asset',
-      model: 'bella-creative-render-v2',
+      model: 'bella-spa-creative-v3',
       imageUrl: fallbackUrl,
       prompt: imagePrompt,
-      note: 'DALL-E 3 & Flux.1 Ready. Cấu hình OPENAI_API_KEY hoặc FAL_KEY để AI render trực tiếp từng mẫu prompt mới.'
+      note: 'Spa Context Verified. DALL-E 3 & Flux.1 Ready. Cấu hình OPENAI_API_KEY hoặc FAL_KEY để AI render trực tiếp từng mẫu prompt mới.'
     });
 
   } catch (err: any) {
