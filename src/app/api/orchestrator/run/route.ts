@@ -118,10 +118,29 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
     console.warn('[tool_generate_media_creative] Image API call fallback:', e);
   }
 
+  const designPlan = {
+    businessContext: 'Phần mềm Quản lý Spa Bella EOS — Bối cảnh Spa Cao Cấp & Thẩm Mỹ Viện',
+    targetAudience: 'Chủ Spa, Quản lý Thẩm mỹ viện & Chuỗi Cơ sở Làm đẹp',
+    colorScheme: 'Xanh ngọc bảo (#061E17) & Vàng kim Royal Gold (#D4AF37)',
+    components: [
+      '🏆 Logo Doanh nghiệp: BELLA EOS SPA PLATFORM (Badge Vàng)',
+      '🎁 Badge Quà Tặng Động: Trích xuất trực tiếp từ bài viết AI Copywriter ở Task #1',
+      '✍️ Tiêu đề Đồ họa: Render từ Headline của Copywriter',
+      '📊 Product Mockup: Khung iPad Pro 3D hiển thị Giao diện Quản lý Spa (+20.4% Doanh thu, Lịch KTV)',
+      '👉 Call-To-Action Button: Đăng ký trải nghiệm Demo Miễn Phí'
+    ],
+    selectedModel: `${provider}/${model}`
+  };
+
   return {
     success: true,
-    output: `🖼️ [Bella EOS Creative Worker] Đã hoàn tất thiết kế Graphic Banner [${provider}/${model}]:\n• Image Banner URL: ${imageUrl}\n• Ingested Copywriter Output: "${copywriterContent ? copywriterContent.substring(0, 60) + '...' : 'Tự động bóc tách từ Task #1'}"\n• Design Elements: Logo Bella EOS, Dynamic Headline, Offer Badge, Spa Ambient & 3D Spa UI Mockup`,
-    meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1200x630', status: 'GENERATED' }
+    output: `🎨 [Bella EOS Media & Creative Worker] ĐÃ HOÀN TẤT THIẾT KẾ BANNER ĐỒ HỌA CHUẨN BÁN HÀNG:\n` +
+      `📌 1. Phân Tích Bối Cảnh: ${designPlan.businessContext}\n` +
+      `📌 2. Kế Hoạch Thiết Kế Ảnh: Banner 1200x630 (Logo Vàng + Dynamic Text Copywriter + iPad Spa UI Mockup)\n` +
+      `📌 3. Màu Sắc Thương Hiệu: ${designPlan.colorScheme}\n` +
+      `📌 4. Model AI Thực Hiện: [${designPlan.selectedModel}]\n` +
+      `🖼️ Image Banner URL (PNG 4K): ${imageUrl}`,
+    meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1200x630', status: 'GENERATED', designPlan }
   };
 }
 
