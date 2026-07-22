@@ -29,25 +29,32 @@ const AGENT_REGISTRY = [
     output_type: 'content'
   },
   {
+    id: 'eos_creative_worker',
+    name: 'Bella EOS Media & Creative Worker',
+    description: 'AI Worker chuyên nghiệp thiết kế Banner hình ảnh tiếp thị, Video Demo, Mockup Giao diện cho chiến dịch truyền thông',
+    tools: ['generate_media_creative', 'create_banner_design'],
+    output_type: 'media'
+  },
+  {
     id: 'hermes_social',
     name: 'Hermes Social Publisher',
-    description: 'Agent kênh truyền thông Hermes chuyên nhận nội dung đã soạn thảo từ Bella EOS Worker và thực thi đăng bài lên các kênh xã hội (Facebook, Zalo, TikTok)',
+    description: 'Agent kênh truyền thông Hermes chuyên nhận nội dung bài viết + hình ảnh/video từ các EOS Worker và thực thi đăng bài hoàn chỉnh lên mạng xã hội (Facebook, Zalo, TikTok)',
     tools: ['publish_facebook', 'publish_zalo', 'publish_tiktok', 'schedule_post'],
     output_type: 'publication'
   },
   {
-    id: 'athena_analytics',
-    name: 'Athena Analytics Agent',
-    description: 'Chuyên phân tích dữ liệu, báo cáo hiệu suất, đo lường KPI, dự báo',
-    tools: ['analyze_campaign_data', 'generate_report', 'forecast_roi', 'segment_audience'],
-    output_type: 'insight'
-  },
-  {
     id: 'ares_ads',
     name: 'Ares Ads Agent',
-    description: 'Chuyên nhận nội dung từ Bella EOS Worker để thiết lập và tối ưu chiến dịch quảng cáo trả phí (Facebook Ads, Google Ads, TikTok Ads)',
+    description: 'Chuyên nhận bài viết + hình ảnh từ Bella EOS Worker để thiết lập và tối ưu chiến dịch quảng cáo trả phí (Facebook Ads, Google Ads, TikTok Ads)',
     tools: ['create_facebook_ad', 'setup_google_campaign', 'optimize_ad_budget', 'create_audience'],
     output_type: 'campaign'
+  },
+  {
+    id: 'athena_analytics',
+    name: 'Athena Analytics Agent',
+    description: 'Chuyên phân tích dữ liệu, báo cáo hiệu suất, đo lường KPI, dự báo ROI',
+    tools: ['analyze_campaign_data', 'generate_report', 'forecast_roi', 'segment_audience'],
+    output_type: 'insight'
   },
   {
     id: 'demeter_crm',
@@ -58,40 +65,34 @@ const AGENT_REGISTRY = [
   }
 ];
 
-const ORCHESTRATOR_SYSTEM_PROMPT = `Bạn là AI Orchestrator (COO AI) của hệ thống Bella EOS Enterprise Brain.
-Nhiệm vụ: Phân tích mục tiêu chiến lược của CEO, sau đó tự động lập kế hoạch thực thi chi tiết.
+const ORCHESTRATOR_SYSTEM_PROMPT = `Bạn là AI COO (Chief Operating Officer) của hệ thống Bella EOS Enterprise Brain.
+Nhiệm vụ: Phân tích chỉ thị chiến lược của CEO, sau đó tự động lập kế hoạch thực thi đa phân hệ (Topology Task Graph).
 
-Bạn CÓ quyền truy cập vào danh sách Agent sau đây:
+Danh sách Agent & Worker có sẵn:
 ${JSON.stringify(AGENT_REGISTRY, null, 2)}
 
-Quy tắc lập kế hoạch:
-1. Đọc mục tiêu của CEO một cách cẩn thận
-2. Xác định TẤT CẢ các công việc cần thực hiện để đạt được mục tiêu đó
-3. Phân định vai trò RÕ RÀNG:
-   - "Bella EOS Content Worker" chịu trách nhiệm SOẠN THẢO NỘI DUNG (task_type: write_facebook_post)
-   - "Hermes Social Publisher" chịu trách nhiệm NHẬN NỘI DUNG VÀ ĐĂNG BÀI (task_type: publish_facebook, depends_on: [task soạn thảo])
-   - "Ares Ads Agent" chịu trách nhiệm NHẬN NỘI DUNG VÀ THIẾT LẬP QUẢNG CÁO (task_type: create_facebook_ad, depends_on: [task soạn thảo])
-4. Mỗi task phải có input rõ ràng và expected_output
-5. Số lượng task: tối thiểu 2, tối đa 8 task cho mỗi kế hoạch
+Quy tắc phân tách nhiệm vụ của AI COO:
+1. Đọc mục tiêu của CEO một cách cẩn thận và xác định TẤT CẢ các tài nguyên cần tạo (Content bài viết, Banner hình ảnh / Video Demo, Đăng bài truyền thông, Thiết lập Quảng cáo, Dự báo KPI).
+2. Phân định vai trò chuẩn xác:
+   - "Bella EOS Content Worker" (t1): Soạn thảo bài viết tiếp thị & Offer dành cho khách hàng
+   - "Bella EOS Media & Creative Worker" (t2): Thiết kế Banner hình ảnh thương hiệu / Video Demo (depends_on: [t1])
+   - "Hermes Social Publisher" (t3): Nhận Bài viết (t1) + Banner (t2) ➔ Thực thi ĐĂNG BÀI HOÀN CHỈNH lên Fanpage Facebook (depends_on: [t1, t2])
+   - "Ares Ads Agent" (t4): Nhận Bài viết + Banner ➔ Cấu hình chiến dịch Facebook Ads (depends_on: [t1, t2])
+   - "Athena Analytics Agent" (t5): Báo cáo dự báo KPI & ROI 30 ngày cho chiến dịch
 
 Trả về JSON THUẦN TÚY (không có markdown, không có backtick), theo schema sau:
 {
   "plan_title": "tên ngắn của kế hoạch",
-  "reasoning": "lý do bạn chọn các agent và task này",
+  "reasoning": "lý do bạn bóc tách các agent và task này",
   "tasks": [
     {
       "task_id": "t1",
       "agent_id": "eos_content_worker",
       "agent_name": "Bella EOS Content Worker",
       "task_type": "write_facebook_post",
-      "task_description": "mô tả công việc soạn thảo bài viết",
-      "input": {
-        "objective": "...",
-        "tone": "...",
-        "target_audience": "...",
-        "platform": "facebook"
-      },
-      "expected_output": "mô tả output mong đợi",
+      "task_description": "Soạn thảo bài viết truyền thông & Offer trải nghiệm Demo cho chiến dịch",
+      "input": { "objective": "...", "tone": "...", "target_audience": "...", "platform": "facebook" },
+      "expected_output": "Bài đăng Facebook hoàn chỉnh từ Bella EOS Worker",
       "depends_on": []
     }
   ]
@@ -218,7 +219,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
       plan: fallbackPlan,
       provider: 'rule-based',
       model: 'fallback-planner',
-      warning: 'Chưa cấu hình AI API Key. Kế hoạch được tạo bởi Rule-Based Planner. Cấu hình OpenAI/Claude/Gemini để Orchestrator AI thật sự tự phân tích.'
+      warning: 'Chưa cấu hình AI API Key. Kế hoạch được tạo bởi AI COO Rule-Based Engine. Cấu hình OpenAI/Claude/Gemini để Orchestrator AI thật sự tự phân tích.'
     });
 
   } catch (err: any) {
@@ -226,7 +227,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
   }
 }
 
-// ─── Rule-Based Fallback Planner ─────────────────────────────────────────────
+// ─── Rule-Based Fallback Planner (AI COO Execution Topology) ────────────────
 function buildFallbackPlan(objective: string, context?: any) {
   const tone = context?.brandDna?.voiceTone || 'Professional & Premium';
   const segment = context?.brandDna?.targetSegment || 'Khách hàng tiềm năng';
@@ -234,61 +235,71 @@ function buildFallbackPlan(objective: string, context?: any) {
   const lowerObj = objective.toLowerCase();
   const tasks = [];
 
-  // Task 1: Bella EOS Content Worker drafts the post
+  // Task 1: Bella EOS Content Worker drafts the marketing copy
   tasks.push({
     task_id: 't1',
     agent_id: 'eos_content_worker',
     agent_name: 'Bella EOS Content Worker',
     task_type: 'write_facebook_post',
-    task_description: `Soạn thảo bài đăng Facebook truyền thông cho chiến dịch: "${objective}"`,
+    task_description: `Soạn thảo bài viết truyền thông & Offer trải nghiệm Demo cho chiến dịch: "${objective}"`,
     input: { objective, tone, target_audience: segment, platform: 'facebook' },
     expected_output: 'Bài đăng Facebook hoàn chỉnh từ Bella EOS Worker, có hook, offer và hashtag',
     depends_on: []
   });
 
-  // Task 2: Hermes Social Publisher receives the post from Bella EOS Worker and publishes it to Facebook
+  // Task 2: Bella EOS Media & Creative Worker generates visual banner / mockup
   tasks.push({
     task_id: 't2',
-    agent_id: 'hermes_social',
-    agent_name: 'Hermes Social Publisher',
-    task_type: 'publish_facebook',
-    task_description: 'Nhận bài viết từ Bella EOS Worker và thực thi đăng lên Fanpage Facebook',
-    input: { content_from: 't1', platform: 'facebook' },
-    expected_output: 'Hermes thực thi đăng bài thành công lên Fanpage Facebook, trả về Post ID',
+    agent_id: 'eos_creative_worker',
+    agent_name: 'Bella EOS Media & Creative Worker',
+    task_type: 'generate_media_creative',
+    task_description: 'Thiết kế Banner hình ảnh thương hiệu & Mockup Giao diện Demo Spa Bella EOS',
+    input: { objective, content_from: 't1', format: '1200x630_banner' },
+    expected_output: 'File Banner hình ảnh thiết kế 4K chất lượng cao phục vụ đăng bài & chạy ads',
     depends_on: ['t1']
   });
 
-  // Task 3: Ares Ads Agent receives the post and sets up ad campaign
+  // Task 3: Hermes Social Publisher receives both Post Content (t1) + Visual Banner (t2) and publishes to Facebook
+  tasks.push({
+    task_id: 't3',
+    agent_id: 'hermes_social',
+    agent_name: 'Hermes Social Publisher',
+    task_type: 'publish_facebook',
+    task_description: 'Nhận Bài viết từ EOS Content Worker & Banner từ EOS Creative Worker để đăng bài hoàn chỉnh lên Fanpage Facebook',
+    input: { content_from: 't1', media_from: 't2', platform: 'facebook' },
+    expected_output: 'Hermes thực thi đăng bài bài viết + hình ảnh thành công lên Fanpage Facebook, trả về Post ID',
+    depends_on: ['t1', 't2']
+  });
+
+  // Task 4: Ares Ads Agent sets up ad campaign with the text + banner
   if (lowerObj.includes('quảng cáo') || lowerObj.includes('ads') || lowerObj.includes('ngân sách') || lowerObj.includes('demo') || lowerObj.includes('spa')) {
     tasks.push({
-      task_id: 't3',
+      task_id: 't4',
       agent_id: 'ares_ads',
       agent_name: 'Ares Ads Agent',
       task_type: 'create_facebook_ad',
-      task_description: 'Nhận nội dung từ Bella EOS Worker và thiết lập chiến dịch quảng cáo Facebook Ads',
-      input: { objective, budget_hint: objective, content_from: 't1' },
-      expected_output: 'Cấu hình chiến dịch quảng cáo Facebook Ads hoàn chỉnh',
-      depends_on: ['t1']
+      task_description: 'Nhận bài viết + Banner thiết kế và cấu hình chiến dịch quảng cáo Facebook Ads',
+      input: { objective, budget_hint: objective, content_from: 't1', media_from: 't2' },
+      expected_output: 'Cấu hình chiến dịch quảng cáo Facebook Ads hoàn chỉnh kèm ngân sách',
+      depends_on: ['t1', 't2']
     });
   }
 
-  // Task 4: Athena Analytics Agent forecasts KPI/ROI
-  if (lowerObj.includes('phân tích') || lowerObj.includes('kpi') || lowerObj.includes('báo cáo') || lowerObj.includes('đo lường') || lowerObj.includes('30 ngày')) {
-    tasks.push({
-      task_id: `t${tasks.length + 1}`,
-      agent_id: 'athena_analytics',
-      agent_name: 'Athena Analytics Agent',
-      task_type: 'generate_report',
-      task_description: 'Phân tích và dự báo hiệu suất KPI cho chiến dịch',
-      input: { objective, metrics: ['reach', 'engagement', 'conversion', 'roi'] },
-      expected_output: 'Báo cáo dự báo KPI và ROI cho chiến dịch',
-      depends_on: []
-    });
-  }
+  // Task 5: Athena Analytics Agent forecasts KPI/ROI
+  tasks.push({
+    task_id: `t${tasks.length + 1}`,
+    agent_id: 'athena_analytics',
+    agent_name: 'Athena Analytics Agent',
+    task_type: 'generate_report',
+    task_description: 'Phân tích và dự báo hiệu suất KPI & ROI 30 ngày cho chiến dịch',
+    input: { objective, metrics: ['reach', 'engagement', 'demo_registrations', 'roi'] },
+    expected_output: 'Báo cáo dự báo KPI và ROI cho chiến dịch',
+    depends_on: []
+  });
 
   return {
-    plan_title: `Kế hoạch: ${objective.substring(0, 60)}...`,
-    reasoning: 'Bella EOS Content Worker soạn thảo bài viết ➔ Hermes Social Agent nhận bài và thực thi đăng ➔ Ares Ads thiết lập chiến dịch ➔ Athena Analytics dự báo KPI.',
+    plan_title: `Kế hoạch AI COO: ${objective.substring(0, 60)}...`,
+    reasoning: 'AI COO bóc tách chỉ thị CEO ➔ Bella EOS Content Worker soạn bài ➔ Bella EOS Creative Worker tạo Banner ➔ Hermes Social Agent tổng hợp đăng bài ➔ Ares Ads chạy QC ➔ Athena Analytics theo dõi KPI.',
     tasks
   };
 }
