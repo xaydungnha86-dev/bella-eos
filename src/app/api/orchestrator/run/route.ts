@@ -136,7 +136,9 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     return match ? match[0] : '';
   };
 
-  const imageUrl = extractHttpUrl(mediaRaw) || 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop';
+  const defaultBannerUrl = `${getBaseUrl()}/api/ai/banner-image`;
+  const extractedUrl = extractHttpUrl(mediaRaw);
+  const imageUrl = (extractedUrl && !extractedUrl.includes('unsplash')) ? extractedUrl : defaultBannerUrl;
 
   if (!content) {
     return { success: false, output: '', error: 'Không có nội dung để đăng. Task này phụ thuộc vào task viết nội dung trước.' };

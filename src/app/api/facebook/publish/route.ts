@@ -89,8 +89,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // High-resolution Spa Demo Marketing Banner fallback if no specific image URL passed
-    const photoUrl = image_url || `${getBaseUrl(request)}/api/ai/banner-image`;
+    // Dynamic PNG Graphic Banner Generator URL (Logo, Headline, Badge, Spa UI Mockup)
+    const defaultBannerUrl = `${getBaseUrl(request)}/api/ai/banner-image`;
+    const photoUrl = (image_url && !image_url.includes('unsplash')) ? image_url : defaultBannerUrl;
 
     // ── Try Facebook Graph API Photo Post Endpoint via FormData Binary Upload ─
     const fbPhotoUrl = `https://graph.facebook.com/v18.0/${pageId}/photos`;
