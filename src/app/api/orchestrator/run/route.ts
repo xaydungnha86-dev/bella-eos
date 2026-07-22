@@ -487,7 +487,9 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const openaiKey = clientKeys?.openai || mmConfig.apiKey || process.env.OPENAI_API_KEY;
   const geminiKey = clientKeys?.gemini || mmConfig.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
-  const memoryContextPrompt = pastPlansMd ? `\n\nLỊCH SỬ KẾ HOẠCH & BÀI HỌC TỪ CÁC CHIẾN DỊCH TRƯỚC (CONTINUOUS LEARNING MEMORY):\n${pastPlansMd}\nHãy rút kinh nghiệm từ lịch sử trên để tối ưu hóa góc truyền thông và mục tiêu chiến dịch mới này!` : '';
+  const { LearningCenter } = await import('@/core/brain/learning');
+  const learnedLessonsPrompt = LearningCenter.getLearnedLessonsPrompt();
+  const memoryContextPrompt = (pastPlansMd ? `\n\nLỊCH SỬ KẾ HOẠCH BÀI HỌC CÁC CHIẾN DỊCH TRƯỚC:\n${pastPlansMd}` : '') + (learnedLessonsPrompt ? `\n${learnedLessonsPrompt}` : '');
 
   const defaultTemplate = `# 🎯 [AI MARKETING MANAGER] BẢN PHÂN TÍCH CHIẾN LƯỢC & KẾ HOẠCH TRIỂN KHAI CHI TIẾT
 

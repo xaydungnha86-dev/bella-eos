@@ -417,6 +417,22 @@ class CampaignExecutionManagerClass {
       this.notify();
     }
   }
+
+  // CEO rating & feedback handler for continuous learning
+  public submitTaskFeedback(taskId: string, rating: number, feedbackText: string) {
+    const task = this.state.dynamicTasks.find(t => t.task_id === taskId);
+    const { LearningCenter } = require('../brain/learning');
+    const result = LearningCenter.submitFeedback({
+      taskId,
+      taskName: task?.agent_name || task?.task_type || 'Nhiệm vụ',
+      rating,
+      feedbackText
+    });
+
+    this.addLog('LEARNING ENGINE', `🧬 Đã tiếp nhận đánh giá ${rating}⭐ từ CEO: "${feedbackText}". Đã đột biến SOP tri thức!`, 'text-pink-400 font-bold');
+    this.notify();
+    return result;
+  }
 }
 
 // Global scope persistent singleton instance

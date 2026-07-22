@@ -242,6 +242,9 @@ export default function Dashboard() {
   const [verificationReport, setVerificationReport] = useState<import('../core/orchestration/orchestration').VerificationReport | null>(null);
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [copiedOutput, setCopiedOutput] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState<number>(5);
+  const [feedbackText, setFeedbackText] = useState<string>('');
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
 
@@ -1556,6 +1559,68 @@ export default function Dashboard() {
                 </div>
                 <div className="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner max-h-72 overflow-y-auto">
                   {selectedTask.output || selectedTask.error || 'Chưa có output cho bước này.'}
+                </div>
+              </div>
+
+              {/* CEO Evaluation & Feedback Section */}
+              <div className="bg-gradient-to-r from-slate-900 to-indigo-950 p-4 rounded-2xl border border-indigo-500/30 text-white space-y-3 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    👑 CEO PHẢN HỒI ĐÁNH GIÁ & TỰ ĐỘNG ĐỘT BIẾN SOP
+                  </h4>
+                  <span className="text-[9px] text-indigo-300 bg-indigo-900/60 px-2 py-0.5 rounded border border-indigo-700/50">
+                    Continuous Learning Loop
+                  </span>
+                </div>
+                
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  Đánh giá chất lượng thực thi để hệ thống AI tự động học tập, cập nhật quy chuẩn và rút kinh nghiệm cho các chiến dịch tiếp theo:
+                </p>
+
+                {/* Star Picker */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-slate-300 mr-1">Đánh giá chất lượng:</span>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFeedbackRating(star)}
+                      className="text-base hover:scale-125 transition-transform cursor-pointer"
+                    >
+                      {star <= feedbackRating ? '⭐' : '☆'}
+                    </button>
+                  ))}
+                  <span className="text-[11px] font-bold text-amber-400 ml-2">{feedbackRating}/5 Sao</span>
+                </div>
+
+                {/* Feedback Text Input */}
+                <textarea
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                  placeholder="Nhập nhận xét của CEO (ví dụ: 'Nội dung W1 cần tăng tính gấp gáp', 'Banner W2 làm màu nền sáng hơn', 'CPL dự báo tốt')..."
+                  className="w-full text-xs bg-slate-950/80 border border-indigo-800/60 rounded-xl p-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/80 min-h-[60px]"
+                />
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] text-emerald-400 font-medium">
+                    {feedbackSubmitted ? '✅ Đã ghi nhận bài học! AI Workforce sẽ tự động áp dụng cho các chiến dịch tiếp theo.' : 'Tri thức sẽ tự động lưu vào bộ nhớ hệ thống'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!feedbackText.trim()) return;
+                      CampaignExecutionManager.submitTaskFeedback(selectedTask.task_id, feedbackRating, feedbackText);
+                      setFeedbackSubmitted(true);
+                      setTimeout(() => setFeedbackSubmitted(false), 4000);
+                      setFeedbackText('');
+                    }}
+                    disabled={!feedbackText.trim()}
+                    className="text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                    <span>Gửi Đánh Giá & Cập Nhật SOP</span>
+                  </button>
                 </div>
               </div>
 
