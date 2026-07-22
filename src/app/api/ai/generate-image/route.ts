@@ -134,28 +134,30 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── 3. Dynamic Graphic Sales Poster SVG Render Engine Fallback ───────────
-    // Truly designs an authentic commercial poster graphic with embedded Spa environment,
-    // Enterprise logo, dynamic Copywriter headline, offer badge, and 3D Spa UI mockup.
-    const dynamicSvgDataUrl = PosterDesignSkill.renderDynamicPosterSvg({
-      headline: dynamicHeadline,
-      offerBadge: dynamicBadge,
-      ctaText: dynamicCta,
-      brandDna
-    });
+    // ── 3. Dynamic Realtime PNG Banner Generator Engine ──────────────────────
+    // Generates a public 4K PNG Banner URL containing Enterprise Logo,
+    // Dynamic Copywriter Headline, Offer Badge, and 3D Spa UI Mockup
+    const baseUrl = getBaseUrl();
+    const dynamicPngBannerUrl = `${baseUrl}/api/ai/banner-image?headline=${encodeURIComponent(dynamicHeadline)}&badge=${encodeURIComponent(dynamicBadge)}&cta=${encodeURIComponent(dynamicCta)}`;
 
     return NextResponse.json({
       success: true,
       provider: 'bella-graphic-design-engine',
-      model: 'poster-design-skill-v2',
-      imageUrl: dynamicSvgDataUrl,
+      model: 'poster-design-skill-v2-png',
+      imageUrl: dynamicPngBannerUrl,
       headline: dynamicHeadline,
       offerBadge: dynamicBadge,
       ctaText: dynamicCta,
-      note: 'Graphic Design Engine Executed. Đã tự động đọc bối cảnh Spa, lấy Logo Bella EOS, trích xuất tiêu đề AI Copywriter ở bước trước để thiết kế Poster hoàn chỉnh.'
+      note: 'Graphic Design Engine Executed. Đã tự động đọc bối cảnh Spa, lấy Logo Bella EOS, trích xuất tiêu đề AI Copywriter từ Task #1 để render Banner PNG hoàn chỉnh.'
     });
 
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
+}
+
+function getBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
 }
