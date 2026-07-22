@@ -336,63 +336,70 @@ export default function Dashboard() {
   const handleFileChange = async (file: File) => {
     if (!file) return;
 
-    let fileSizeStr = '0 KB';
-    if (file.size > 1024 * 1024) {
-      fileSizeStr = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
-    } else {
-      fileSizeStr = `${(file.size / 1024).toFixed(0)} KB`;
-    }
+    const fileSizeStr = file.size > 1024 * 1024
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+      : `${(file.size / 1024).toFixed(0)} KB`;
 
-    addLog('INGESTION', `📥 Nhận tệp: "${file.name}" (${fileSizeStr}) ➔ Bắt đầu phân tích cấu trúc...`, 'text-cyan-600 animate-pulse');
-    
-    let fileContent = '';
-    const textTypes = ['text/plain', 'text/markdown', 'application/json', 'text/csv'];
-    const isText = textTypes.includes(file.type) || file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.json') || file.name.endsWith('.csv');
-    
-    if (isText) {
-      try {
-        fileContent = await file.text();
-      } catch (e) {
-        fileContent = `Tài liệu tự động: ${file.name}`;
-      }
-    } else {
-      // For binary files (PDF/Word), simulate OCR scanning & text extraction
-      await delay(800);
-      addLog('INGESTION', `👁️ Đang chạy trích xuất OCR quét văn bản từ: "${file.name}"...`, 'text-indigo-400 animate-pulse');
-      await delay(700);
-      
-      const lowerName = file.name.toLowerCase();
-      if (lowerName.includes('tuyển') || lowerName.includes('ktv') || lowerName.includes('jd') || lowerName.includes('nhan_su')) {
-        fileContent = 'Quy chuẩn tuyển dụng KTV Spa và JD tuyển dụng nhân viên. Thiết kế: Neo-Brutalist High Contrast.';
-      } else if (lowerName.includes('nội quy') || lowerName.includes('quy chế') || lowerName.includes('phạt') || lowerName.includes('sop') || lowerName.includes('quy_dinh')) {
-        fileContent = 'Quy chế phạt nội bộ và Quy trình SOP vận hành Spa. Thiết kế: Clean Corporate Grid.';
-      } else {
-        fileContent = 'Quy chuẩn nhận diện thương hiệu Bella Spa. Màu sắc: Rose & Gold. Thiết kế: Glassmorphism Fluid. Tông giọng: Professional & Premium.';
-      }
-    }
+    addLog('INGESTION', `📥 Nhận tệp: "${file.name}" (${fileSizeStr}) ➔ Đang tải lên server...`, 'text-cyan-600 animate-pulse');
 
-    const result = EnterpriseBrain.Understanding.understandDocument(file.name, fileContent);
-    
+    // Optimistic UI: show document as PROCESSING immediately
     setDocuments(prev => [{
       name: file.name,
       size: fileSizeStr,
-      status: 'COMPLETED',
-      rule: `Quy chuẩn: Tông giọng ${result.dnaTone}. Style UI: ${result.styleClass}.`
+      status: 'PROCESSING',
+      rule: 'Đang phân tích cấu trúc tài liệu...'
     }, ...prev]);
 
-    setDnaState({
-      tone: result.dnaTone,
-      style: result.styleClass
-    });
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
 
-    CampaignExecutionManager.updateState({
-      dnaState: {
-        tone: result.dnaTone,
-        style: result.styleClass
+      addLog('INGESTION', `🧬 Đang gửi tài liệu lên Bella EOS Knowledge Server...`, 'text-indigo-400 animate-pulse');
+
+      const res = await fetch('/api/ingest', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Server ingest failed');
       }
-    });
 
-    addLog('INGESTION', `✅ Trích xuất tri thức thành công! Cập nhật DNA tone thành: "${result.dnaTone}"`, 'text-emerald-600 font-bold');
+      const { ingested, savedId, persisted } = data;
+
+      // Update document list with real result
+      setDocuments(prev => prev.map((doc, idx) =>
+        idx === 0 && doc.name === file.name
+          ? {
+              name: file.name,
+              size: fileSizeStr,
+              status: 'COMPLETED',
+              rule: `Quy chuẩn: Tông giọng ${ingested.dnaToneUpdated}. Style: ${ingested.styleUpdated}.`
+            }
+          : doc
+      ));
+
+      setDnaState({ tone: ingested.dnaToneUpdated, style: ingested.styleUpdated });
+
+      CampaignExecutionManager.updateState({
+        dnaState: { tone: ingested.dnaToneUpdated, style: ingested.styleUpdated }
+      });
+
+      const persistNote = persisted ? `💾 Đã lưu vào database (ID: ${savedId?.substring(0, 8)}...)` : '⚠️ Đã xử lý nhưng chưa lưu DB (Supabase chưa cấu hình)';
+      addLog('INGESTION', `✅ Nạp tri thức thành công! Phân loại: [${ingested.classification}] — DNA tone: "${ingested.dnaToneUpdated}"`, 'text-emerald-600 font-bold');
+      addLog('INGESTION', persistNote, persisted ? 'text-slate-400' : 'text-amber-500');
+
+    } catch (err: any) {
+      addLog('INGESTION', `❌ Lỗi tải lên: ${err.message}`, 'text-red-500 font-bold');
+      // Mark document as failed
+      setDocuments(prev => prev.map((doc, idx) =>
+        idx === 0 && doc.name === file.name
+          ? { ...doc, status: 'FAILED', rule: `Lỗi: ${err.message}` }
+          : doc
+      ));
+    }
   };
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
