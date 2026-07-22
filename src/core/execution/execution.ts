@@ -1,11 +1,13 @@
 import { CanonicalContextPackage } from '../../types/eom';
 import { BellaKernel } from '../kernel/kernel';
+import { FacebookConnector, SupabaseConnector } from '../../connectors/index';
 
 export class InternalApiGateway {
-  static dispatchCall(executor: any, step: any, contextPackage: CanonicalContextPackage): any {
-    console.log(`[Internal API Gateway] Dispatching task [${step.name}] to Worker [${executor.assignedWorker}]`);
+  static async dispatchCall(executor: any, step: any, contextPackage: CanonicalContextPackage): Promise<any> {
+    const workerId = executor.assignedWorker || executor.workerId || 'hermes';
+    console.log(`[Internal API Gateway] Dispatching task [${step.name}] to Worker [${workerId}]`);
     
-    // CRITICAL SECURITY ENFORCEMENT: 
+    // SECURITY ENFORCEMENT: 
     // We verify that ONLY the Canonical Context Package is sent. No direct database handles or active connection pools are exposed.
     if (!contextPackage || !contextPackage.objective) {
       throw new Error(`[Security Violation] Dispatched call failed - Missing secure Canonical Context Package!`);
@@ -13,15 +15,26 @@ export class InternalApiGateway {
 
     BellaKernel.emitKernelEvent('TaskCreated', {
       taskId: step.id,
-      workerId: executor.assignedWorker,
+      workerId: workerId,
       contextTimestamp: contextPackage.timestamp
     });
+
+    // Save Canonical Context to Supabase DB asynchronously
+    SupabaseConnector.saveCanonicalContext(contextPackage);
+
+    // REAL DISPATCH LOGIC FOR FACEBOOK / HERMES
+    let realExecutionResult: any = null;
+    if (workerId === 'hermes' || step.name.includes('Facebook') || step.name.includes('Setup') || step.name.includes('Social')) {
+      const messageToPublish = `🚀 [BELLA EOS AUTOMATION] ${contextPackage.objective}\n\n✨ Tông giọng: ${contextPackage.brandDna.voiceTone}\n🎯 Phân khúc: VIP Spa Clients\n#BellaEOS #EnterpriseBrain #Automation2026`;
+      realExecutionResult = await FacebookConnector.publishRealPost(messageToPublish);
+    }
 
     return {
       status: 'DISPATCHED',
       payload: {
-        workerId: executor.assignedWorker,
-        canonicalContext: contextPackage
+        workerId: workerId,
+        canonicalContext: contextPackage,
+        realExecution: realExecutionResult
       }
     };
   }
@@ -29,14 +42,10 @@ export class InternalApiGateway {
 
 export class ExecutionEngine {
   static ExecutionCoordinator = {
-    execute(executor: any, step: any, contextPackage: CanonicalContextPackage) {
+    async execute(executor: any, step: any, contextPackage: CanonicalContextPackage) {
       console.log(`[Execution Coordinator] Initializing execution track for task [${step.name}]`);
       
-      const dispatchResult = InternalApiGateway.dispatchCall(executor, step, contextPackage);
-      
-      // Simulating worker execution
-      const latency = executor.latencyMs || 500;
-      console.log(`[Execution Coordinator] Worker [${executor.assignedWorker}] running command with latency ${latency}ms...`);
+      const dispatchResult = await InternalApiGateway.dispatchCall(executor, step, contextPackage);
       
       BellaKernel.emitKernelEvent('TaskCompleted', {
         taskId: step.id,
@@ -46,7 +55,7 @@ export class ExecutionEngine {
       return {
         dispatchStatus: dispatchResult.status,
         executionResult: 'SUCCESS',
-        workerResponse: `Drafted content for ${step.name}`
+        realResult: dispatchResult.payload.realExecution
       };
     }
   };

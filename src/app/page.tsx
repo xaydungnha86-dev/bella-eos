@@ -4,12 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
-  Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight
+  Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { EnterpriseBrain } from '../core/brain';
 import { OrchestrationEngine } from '../core/orchestration/orchestration';
 import { InternalApiGateway } from '../core/execution/execution';
+import { FacebookConnector } from '../connectors/index';
 
 // 11 AI Workforce Matrix static definition
 const AI_WORKFORCE = [
@@ -33,7 +34,13 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'timeline' | 'reasoning'>('timeline');
   const [brainSubTab, setBrainSubTab] = useState<'memory' | 'knowledge' | 'context' | 'reasoning' | 'learning'>('memory');
   const [isBrainModalOpen, setIsBrainModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
+  // Real API tokens state
+  const [fbToken, setFbToken] = useState('');
+  const [fbPageId, setFbPageId] = useState('me');
+  const [lastApiStatus, setLastApiStatus] = useState<string | null>(null);
+
   // Realtime Simulation states
   const [telemetryLogs, setTelemetryLogs] = useState<{ id: string; time: string; source: string; message: string; color: string }[]>([]);
   const [activeStep, setActiveStep] = useState<number>(-1);
@@ -48,9 +55,16 @@ export default function Dashboard() {
 
   const logsEndRef = useRef<HTMLDivElement>(null);
 
+  // Sync token to window for real connector access
+  useEffect(() => {
+    if (typeof window !== 'undefined' && fbToken) {
+      (window as any).FACEBOOK_PAGE_ACCESS_TOKEN = fbToken;
+    }
+  }, [fbToken]);
+
   // Initialize status log
   useEffect(() => {
-    addLog('SYSTEM', 'Lõi điều hành Bella Kernel v13.0 đã sẵn sàng vận hành.', 'text-emerald-500 font-semibold');
+    addLog('SYSTEM', 'Lõi điều hành Bella Kernel v13.0 đã sẵn sàng vận hành.', 'text-emerald-600 font-semibold');
     addLog('BRAIN', '6 Cognitive Brain Centers đã hoạt động và đồng bộ với Supabase.', 'text-indigo-600');
     addLog('CONNECT', 'Cổng kết nối Bella Connect đã được kích hoạt thành công.', 'text-cyan-600');
   }, []);
@@ -73,7 +87,7 @@ export default function Dashboard() {
     }]);
   };
 
-  // 1. Submit CEO Intent
+  // 1. Submit CEO Intent & Run Real Execution Track
   const handleStartCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!objective.trim()) return;
@@ -105,7 +119,7 @@ export default function Dashboard() {
     await delay(1000);
     setActiveStep(3);
     addLog('CONTEXT CENTER', `🔒 Đang lọc bảo mật và biên dịch gói Canonical Context Package...`, 'text-blue-600');
-    const mockStep = { id: 1, name: 'Setup chiến dịch', agent: 'hermes' };
+    const mockStep = { id: 1, name: 'Setup chiến dịch Facebook', agent: 'hermes' };
     const contextPackage = EnterpriseBrain.Context.compileContext(mockStep, objective);
     addLog('CONTEXT CENTER', `✅ Đã xuất Gói ngữ cảnh chuẩn hóa (Tone giọng: ${contextPackage.brandDna.voiceTone} | Thiết kế: ${contextPackage.brandDna.designStyle}).`, 'text-emerald-600');
 
@@ -116,12 +130,25 @@ export default function Dashboard() {
     const recommended = OrchestrationEngine.CapabilityScheduler.scheduleTaskByCapability(mockStep);
     addLog('SCHEDULER', `🎯 Đã phân bổ: Executor '${recommended.assignedWorker}' cho capability '${recommended.requiredCapability}' (Latency: ${recommended.latencyMs}ms).`, 'text-cyan-600 font-bold');
 
-    // Step 6: Dispatch via API Gateway
+    // Step 6: REAL API Dispatch via API Gateway & Facebook Connector
     await delay(1500);
     setActiveStep(5);
-    addLog('GATEWAY', `⚡ Gửi gói Canonical Context Package qua Internal API Gateway đến Worker '${recommended.assignedWorker}'`, 'text-amber-600 font-semibold');
-    const dispatchResult = InternalApiGateway.dispatchCall(recommended, mockStep, contextPackage);
-    addLog('GATEWAY', `📡 Worker trả phản hồi: ${dispatchResult.status} | Trình xuất: Trạng thái hoàn thành chiến dịch Facebook.`, 'text-emerald-600');
+    addLog('GATEWAY', `⚡ Gửi gói Canonical Context Package qua Internal API Gateway đến Worker '${recommended.assignedWorker}' (Khởi tạo kết nối API thật)...`, 'text-amber-600 font-semibold');
+    
+    // Await async API execution
+    const dispatchResult = await InternalApiGateway.dispatchCall(recommended, mockStep, contextPackage);
+
+    if (dispatchResult.payload?.realExecution?.success) {
+      const fbPostId = dispatchResult.payload.realExecution.postId;
+      setLastApiStatus(`✅ ĐÃ ĐĂNG BÀI THẬT THÀNH CÔNG LÊN FACEBOOK! ID: ${fbPostId}`);
+      addLog('FACEBOOK API', `🎉 ĐÃ ĐĂNG BÀI THẬT THÀNH CÔNG LÊN FANPAGE FACEBOOK! Post ID: [${fbPostId}]`, 'text-emerald-600 font-bold');
+    } else if (dispatchResult.payload?.realExecution?.mode === 'CONFIG_REQUIRED') {
+      setLastApiStatus(`⚠️ Chưa nhập Facebook Token: Bài viết đã xuất bản mô phỏng. Bấm "Cài đặt API Key Real" để nhập token thật!`);
+      addLog('FACEBOOK API', `⚠️ Thông báo: ${dispatchResult.payload.realExecution.error}`, 'text-amber-600 font-semibold');
+    } else {
+      setLastApiStatus(`❌ Lỗi API Facebook: ${dispatchResult.payload?.realExecution?.error || 'Không xác định'}`);
+      addLog('FACEBOOK API', `❌ Phản hồi API Facebook: ${dispatchResult.payload?.realExecution?.error}`, 'text-red-600 font-semibold');
+    }
 
     // Step 7: Evidence validation
     await delay(1200);
@@ -138,7 +165,7 @@ export default function Dashboard() {
 
     setIsProcessing(false);
     setActiveStep(8);
-    addLog('SYSTEM', `🏁 Hoàn tất quy trình chạy thử nghiệm cho Strategic Intent của CEO!`, 'text-amber-600 font-bold');
+    addLog('SYSTEM', `🏁 Hoàn tất quy trình chạy cho Strategic Intent của CEO!`, 'text-amber-600 font-bold');
   };
 
   // 2. Ingest document
@@ -178,7 +205,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-display font-bold text-sm tracking-wider text-slate-900">BELLA EOS</h1>
-              <span className="bg-indigo-50 text-indigo-600 border border-indigo-100 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">v1.0 FREEZE</span>
+              <span className="bg-indigo-50 text-indigo-600 border border-indigo-100 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">v1.0 REAL API</span>
             </div>
             <p className="text-[10px] text-slate-500 font-sans hidden sm:block">Enterprise Operating System (Enterprise Brain)</p>
           </div>
@@ -196,14 +223,21 @@ export default function Dashboard() {
           </div>
           <div className="h-3 w-px bg-slate-200"></div>
           <div className="flex items-center gap-1.5 text-indigo-600">
-            <Layers className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="text-slate-500">Arch:</span>
-            <span className="font-semibold">Pure Brain Decoupled</span>
+            <Globe className="w-3.5 h-3.5 text-indigo-500" />
+            <span className="text-slate-500">API Dispatcher:</span>
+            <span className="font-semibold">{fbToken ? 'REAL API READY' : 'CONFIG MODE'}</span>
           </div>
         </div>
 
         {/* Action Triggers */}
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsSettingsModalOpen(true)}
+            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer"
+          >
+            <Key className="w-3.5 h-3.5 text-amber-600" />
+            <span>Cài đặt API Key Real</span>
+          </button>
           <button 
             onClick={() => setIsBrainModalOpen(true)}
             className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 active:scale-95 shadow-sm cursor-pointer"
@@ -309,7 +343,10 @@ export default function Dashboard() {
                         <Zap className="w-4 h-4 text-purple-500 animate-bounce shrink-0" />
                         <div>
                           <p className="text-[9px] text-purple-600 font-bold uppercase tracking-wider">Scheduled AI Workforce Dispatch</p>
-                          <p className="text-[10px] text-slate-700 font-semibold mt-0.5">Hermes Operating Driver ➔ executing Facebook posting tool on port 8888</p>
+                          <p className="text-[10px] text-slate-700 font-semibold mt-0.5">Hermes Operating Driver ➔ Real API Execution Gateway</p>
+                          {lastApiStatus && (
+                            <p className="text-[9px] text-emerald-600 mt-1 font-mono font-bold bg-emerald-50 p-1.5 rounded border border-emerald-100">{lastApiStatus}</p>
+                          )}
                         </div>
                       </div>
                     </>
@@ -454,6 +491,54 @@ export default function Dashboard() {
 
         </aside>
       </div>
+
+      {/* API KEY REAL SETTINGS MODAL */}
+      {isSettingsModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-md flex items-center justify-center z-50 p-6 animate-fade-in">
+          <div className="w-full max-w-lg glass-panel-glow rounded-2xl flex flex-col overflow-hidden shadow-2xl relative bg-white">
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Key className="w-4 h-4 text-amber-600" />
+                <h3 className="font-display font-bold text-xs text-slate-800 uppercase">Cấu hình API Key Thực Tế</h3>
+              </div>
+              <button onClick={() => setIsSettingsModalOpen(false)} className="text-xs text-slate-500 hover:text-slate-800">Đóng</button>
+            </div>
+            <div className="p-5 space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Facebook Page Access Token (Đăng bài thật)</label>
+                <input 
+                  type="password" 
+                  value={fbToken} 
+                  onChange={(e) => setFbToken(e.target.value)} 
+                  placeholder="Dán token EAAG... của Facebook Fanpage vào đây" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 font-mono"
+                />
+                <p className="text-[9px] text-slate-500 mt-1">Hệ thống sẽ tự động dùng token này để đăng bài thật khi Worker Hermes được gọi.</p>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Facebook Page ID</label>
+                <input 
+                  type="text" 
+                  value={fbPageId} 
+                  onChange={(e) => setFbPageId(e.target.value)} 
+                  placeholder="Mặc định: 'me' hoặc ID số của trang" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 font-mono"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-slate-200 flex justify-end gap-2">
+                <button 
+                  onClick={() => setIsSettingsModalOpen(false)} 
+                  className="bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-indigo-500 cursor-pointer"
+                >
+                  Lưu & Áp Dụng
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ENTERPRISE BRAIN CONSOLE MODAL */}
       {isBrainModalOpen && (
