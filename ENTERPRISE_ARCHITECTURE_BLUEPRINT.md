@@ -19,13 +19,13 @@ Enterprise Brain                  Business Applications
         ├─► Bella Workers (Stateless Executors: AI, Human, MCP, API, Script, Robot, External)
         ├─► Bella Connect (Enterprise Connectors & CBV Mapper)
         ├─► Bella SDK (Development Kits)
-        └─► Bella Marketplace (Enterprise Assets: Skills, SOPs, DNA, Prompts, Connectors, Workflows)
+        └─► Bella Marketplace (Enterprise Assets: Skills, SOPs, DNA Packs, Prompt Packs, Connectors, Workflows)
 ```
 
 ### Phân vai và Định vị thành phần:
 
 1. **Bella AI Platform (Thương hiệu tổng)**: Toàn bộ hệ sinh thái công nghệ AI dành cho doanh nghiệp.
-2. **Bella EOS (Enterprise Operating System - Lõi Điều hành)**: Đóng vai trò là **Enterprise Brain** điều hành toàn bộ doanh nghiệp. Chịu trách nhiệm cho 5 Core Domains.
+2. **Bella EOS (Enterprise Operating System - Lõi Điều hành)**: Đóng vai trò là **Enterprise Brain** điều hành toàn bộ doanh nghiệp. Chịu trách nhiệm cho 5 Core Domains & 3 Infrastructure Pillars.
 3. **Bella EIP (Enterprise Integration Platform / Business Suite)**: Gói ứng dụng nghiệp vụ sinh dữ liệu (`CRM`, `Booking`, `POS`, `Inventory`, `Finance`, `Payroll`, `BI Dashboard`). EIP là **System of Record** - nơi ghi nhận sự thật (facts), không tự đưa ra quyết định hay lập kế hoạch.
 4. **Bella Connect**: Lớp kết nối ngoại vi (Google Analytics, Facebook, Zalo, TikTok, MISA, SAP, Odoo, Salesforce...). Chuẩn hóa toàn bộ dữ liệu ngoại vi về **Canonical Business Vocabulary (CBV v1.0)** trước khi chuyển vào EOS.
 5. **Bella Workers**: Lực lượng lao động thực thi **không lưu trạng thái (Stateless Executors)**.
@@ -33,48 +33,52 @@ Enterprise Brain                  Business Applications
 
 ---
 
-## 2. QUẢN LÝ ĐÓNG BĂNG KIẾN TRÚC (FROZEN VS EXTENSIBLE)
+## 2. QUẢN LÝ ĐÓNG BĂNG KIẾN TRÚC (FROZEN CORE VS PLUGGABLE MODULES)
 
-Để duy trì hệ thống 20 năm không phát sinh món nợ kỹ thuật:
+Để giữ hệ thống vừa ổn định trong 20 năm, vừa đủ linh hoạt không bị khóa vào công nghệ của năm 2026:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ ❄️ FROZEN CORE (BẤT BIẾN - KHÔNG THAY ĐỔI TRONG 20 NĂM)          │
+│ ❄️ FROZEN CORE (BẤT BIẾN - HỢP ĐỒNG CỐ ĐỊNH TRONG 20 NĂM)        │
 ├─────────────────────────────────────────────────────────────────┤
-│ • 5 Core Domains Architecture (Kernel, Storage, Brain, Orchestr, Exec) │
-│ • Canonical Business Vocabulary (CBV v1.0)                      │
-│ • Enterprise Object Model (EOM v1.0)                            │
-│ • Canonical Context Package (v1.0)                              │
-│ • Service Contract Specification (v1.0)                         │
+│ • 5 Core Domains & 3 Infrastructure Pillars Architecture        │
+│ • Canonical Business Vocabulary (CBV v1.0) & EOM (v1.0)         │
+│ • Canonical Context Package (v1.0) & Security Isolation         │
+│ • Service Contract Specification (v1.0) & Capability Chain      │
 │ • Worker Lifecycle & Stateless Execution Principle              │
 │ • Storage Abstraction Interfaces (v1.0)                         │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ 🚀 EXTENSIBLE LAYER (LINH HOẠT & THƯƠNG MẠI TRÊN MARKETPLACE)    │
+│ 🧩 PLUGGABLE & CONFIGURABLE MODULES (LẠM THAY ĐỔI & MỞ RỘNG)    │
 ├─────────────────────────────────────────────────────────────────┤
-│ • Business Skills & SOP Extensions                              │
-│ • Prompt Packs & Prompt Version Templates                       │
-│ • Company DNA Packs (Identity, Brand, Business, Operating DNA)  │
-│ • Connector Packs (SAP, MISA, Facebook, Zalo, Odoo, Salesforce)  │
-│ • Workflow Packs & Stage Templates                              │
-│ • Enterprise Policies & Compliance Rules                        │
-│ • AI & Human Worker Implementations                             │
+│ • Prompts & Prompt Templates (Phát triển liên tục theo AI)      │
+│ • Reasoning Solvers (Pluggable: Monte Carlo, Tree Search, RL...)│
+│ • Confidence Threshold (Cấu hình linh hoạt theo Tenant: 70%-95%)│
+│ • Brain Centers (Mở rộng thêm: Vision, Compliance, Forecast...) │
+│ • Company DNA Packs (Mở rộng theo ngành: Brand, Legal, Spa...)  │
+│ • Marketplace Assets (Skills, SOPs, Prompts, Workflows)         │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. VERSIONING CHO HỢP ĐỒNG (CONTRACT VERSIONING)
+## 3. 3 TRỤ CỘT HẠ TẦNG CỐT LÕI (3 INFRASTRUCTURE PILLARS)
 
-Tất cả Frozen Contracts đều gắn nhãn phiên bản cụ thể (SemVer):
-
-1. **Canonical Business Vocabulary**: `CBV v1.0`
-2. **Enterprise Object Model**: `EOM v1.0`
-3. **Canonical Context Package**: `ContextPackage v1.0`
-4. **Service Contract Specification**: `ServiceContract v1.0`
-5. **Internal Event Contract**: `EventContract v1.0`
-6. **Storage Abstraction Interface**: `StorageInterface v1.0`
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ ⚡ ENTERPRISE EVENT BUS                                         │
+│ Quản lý luồng sự kiện bất biến Publish/Subscribe giữa Kernel,   │
+│ Brain, Orchestration và Execution.                              │
+├─────────────────────────────────────────────────────────────────┤
+│ ⏱️ ENTERPRISE SCHEDULER                                         │
+│ Quản lý Cron Jobs, Delayed Jobs, Retries, Priority Queue.       │
+├─────────────────────────────────────────────────────────────────┤
+│ 👁️ OBSERVABILITY & AUDIT DOMAIN                                 │
+│ OpenTelemetry Tracing, Performance Metrics, System Logs,       │
+│ Replay Engine & Dead Letter Queue (DLQ).                        │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -98,7 +102,7 @@ Toàn bộ các quyết định kiến trúc cốt lõi được lưu trữ tạ
 
 ---
 
-## 6. 5 CORE DOMAINS & PRESENTATION LAYER
+## 6. 5 CORE DOMAINS, INFRASTRUCTURE & PRESENTATION LAYER
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -116,13 +120,13 @@ Toàn bộ các quyết định kiến trúc cốt lõi được lưu trữ tạ
 └───────────────────────────┬────────────────────────────┘
                             ▼
 ┌────────────────────────────────────────────────────────┐
-│ Domain 3: Enterprise Brain & Assets                    │
+│ Domain 3: Enterprise Brain & Pluggable Centers         │
 │  • Memory Center (Working, Episodic, Semantic, Business)│
 │  • Knowledge Center (Graph, Provenance, Anti-Hallucin) │
 │  • Context Center (Isolation, Ranking, Token Optimizer)│
-│  • Reasoning Center (Goal, Constraint, Tradeoff, Monte)│
+│  • Reasoning Center (Solvers: Monte Carlo, Tree, RL)   │
 │  • Learning Center (Evidence, Feedback, SOP Evolution) │
-│  • Enterprise Assets & Company DNA Asset (4 Tầng)      │
+│  • Enterprise Assets & Company DNA Packs (Brand, Legal)│
 └───────────────────────────┬────────────────────────────┘
                             ▼
 ┌────────────────────────────────────────────────────────┐
@@ -139,7 +143,10 @@ Toàn bộ các quyết định kiến trúc cốt lõi được lưu trữ tạ
                             ▼
 =================== INFRASTRUCTURE LAYER =================
 ┌────────────────────────────────────────────────────────┐
-│ Secrets Store (Environment Variables / Supabase Vault) │
+│ • Secrets Store (Environment Variables / Supabase Vault│
+│ • Enterprise Event Bus (Pub/Sub Event Delivery)        │
+│ • Enterprise Scheduler (Cron, Queue, Priority, Retries)│
+│ • Observability & Audit Domain (Tracing, Metrics, DLQ) │
 └───────────────────────────┬────────────────────────────┘
                             ▼
 ===================== OUTER ADAPTER LAYER ================
@@ -152,16 +159,23 @@ Toàn bộ các quyết định kiến trúc cốt lõi được lưu trữ tạ
 
 ---
 
-## 7. CÔNG NGHỆ CHUẨN
+## 7. CÔNG NGHỆ CHUẨN (FREE-FIRST STACK)
 
 * **Frontend**: Next.js (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, Lucide Icons.
 * **Backend**: Next.js Server API Routes (`/api/*`), TypeScript.
-* **Storage Domain Interfaces**: PostgreSQL (Metadata), pgvector (Vector), Supabase Storage (Blob), Secrets Store, Redis/KV (Cache).
-* **AI Executors**: OpenAI (GPT-4o), Anthropic (Claude 3.5 Sonnet), Google (Gemini 2.0 Flash / 2.5 Pro).
+* **Database & Vector**: Supabase PostgreSQL + pgvector (Free Tier).
+* **Storage**: Supabase Storage (Free Tier).
+* **Event & Queue**: Internal Event Bus + Local Memory ➔ Redis / BullMQ / Trigger.dev OSS (khi scale).
+* **Observability**: OpenTelemetry + System Logs + DLQ.
 * **Triển khai**: Vercel (Dev/Staging) ➔ VPS Ubuntu + Docker + Nginx (Production).
 
 ---
 
-## 8. ARCHITECTURE FREEZE COMPLIANCE
+## 8. 🎯 LỘ TRÌNH THI CÔNG 6 GIAI ĐOẠN (ROADMAP)
 
-> **Bản kiến trúc v17.2 là bản Architecture Freeze tuyệt đối và cuối cùng cho 20 năm tới.** Mọi trao đổi thảo luận kiến trúc kết thúc tại đây để tập trung 100% nguồn lực hiện thực hóa mã nguồn sản phẩm.
+1. **Phase 1 — Foundation**: Kernel, EOM v1.0, CBV v1.0, Storage Domain Interfaces, Secrets Store, Event Bus.
+2. **Phase 2 — Enterprise Brain**: Memory, Knowledge, Context, Reasoning, Learning, Company DNA Packs.
+3. **Phase 3 — Orchestration**: Intent Engine, Goal Engine, Strategy Engine, Simulation Engine, Planning Engine, Workflow.
+4. **Phase 4 — Execution**: Capability Registry, Service Registry, Service Contracts v1.0, Worker Gateway, Connectors.
+5. **Phase 5 — Presentation**: CEO Console, Manager Portal, Employee Portal, Realtime Dashboard, Observability UI.
+6. **Phase 6 — Marketplace**: Skills, SOPs, Templates, DNA Packs, Connector Packs, Extensions.
