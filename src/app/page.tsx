@@ -1053,10 +1053,13 @@ export default function Dashboard() {
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Operational Memory
                       </h4>
                       <p className="text-[10px] text-slate-500 italic">Nhật ký vận hành các SOPs gần đây:</p>
-                      <ul className="mt-2 space-y-1.5 text-[9px] font-mono text-cyan-600">
-                        <li>[2026-07-22 11:17:05] SOP-MKT-V1.0 initialized</li>
-                        <li>[2026-07-22 11:17:15] Completed Step 1 (Strategy)</li>
-                        <li>[2026-07-22 11:17:35] Mutated SOP: latencySaved = 2500ms</li>
+                      <ul className="mt-2 space-y-1.5 text-[9px] font-mono text-cyan-600 max-h-48 overflow-y-auto">
+                        {telemetryLogs.slice(-5).map((log, idx) => (
+                          <li key={log.id || idx}>[{log.time}] [{log.source}] {log.message}</li>
+                        ))}
+                        {telemetryLogs.length === 0 && (
+                          <li className="text-slate-450 italic">Chưa có nhật ký hoạt động. Hãy bắt đầu chiến dịch để ghi chép bộ nhớ.</li>
+                        )}
                       </ul>
                     </div>
 
@@ -1065,9 +1068,21 @@ export default function Dashboard() {
                         <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Decision Memory
                       </h4>
                       <p className="text-[10px] text-slate-500 italic">Các quyết định điều hành tối ưu hóa:</p>
-                      <ul className="mt-2 space-y-1.5 text-[9px] font-mono text-purple-600">
-                        <li>DEC-001: Run campaign Zalo OA (Confidence: 98%)</li>
-                        <li>DEC-002: Approve SpaPOS Voucher bid (Confidence: 95%)</li>
+                      <ul className="mt-2 space-y-1.5 text-[9px] font-mono text-purple-650">
+                        {objective ? (
+                          <>
+                            <li>DEC-001: Run campaign for "{objective.substring(0, 40)}..." (Confidence: 96%)</li>
+                            <li>DEC-002: Apply brand tone "{dnaState.tone}" to copywriter agents</li>
+                            {objective.toLowerCase().includes('spa') && (
+                              <li>DEC-003: Auto-schedule spa capacity optimization SOP (Confidence: 98%)</li>
+                            )}
+                            {(objective.toLowerCase().includes('căn hộ') || objective.toLowerCase().includes('bất động')) && (
+                              <li>DEC-003: Target real estate premium segment filters (Confidence: 95%)</li>
+                            )}
+                          </>
+                        ) : (
+                          <li className="text-slate-450 italic">Chưa có quyết định. Hãy nhập mục tiêu chiến dịch để kích hoạt quyết định tối ưu.</li>
+                        )}
                       </ul>
                     </div>
                   </div>
@@ -1077,25 +1092,34 @@ export default function Dashboard() {
               {/* SUB TAB: KNOWLEDGE */}
               {brainSubTab === 'knowledge' && (
                 <div className="space-y-4">
-                  <div className="glass-panel p-4 rounded-xl border border-slate-200 flex flex-col items-center justify-center h-64 relative">
-                    <p className="text-[10px] text-indigo-600 absolute top-4 left-4 font-mono">Bản đồ liên kết EOM Nodes</p>
-                    <svg className="w-96 h-48" viewBox="0 0 400 200">
-                      <line x1="80" y1="100" x2="200" y2="50" stroke="#4f46e5" strokeWidth="2" />
-                      <line x1="200" y1="50" x2="320" y2="100" stroke="#06b6d4" strokeWidth="2" />
-                      <line x1="200" y1="150" x2="80" y2="100" stroke="#3b82f6" strokeWidth="2" />
-                      
-                      <circle cx="80" cy="100" r="16" fill="#f8fafc" stroke="#4f46e5" strokeWidth="3" />
-                      <text x="80" y="104" fill="#0f172a" fontSize="8" textAnchor="middle">Customer</text>
-                      
-                      <circle cx="200" cy="50" r="16" fill="#f8fafc" stroke="#3b82f6" strokeWidth="3" />
-                      <text x="200" y="54" fill="#0f172a" fontSize="8" textAnchor="middle">Campaign</text>
-                      
-                      <circle cx="320" cy="100" r="16" fill="#f8fafc" stroke="#06b6d4" strokeWidth="3" />
-                      <text x="320" y="104" fill="#0f172a" fontSize="8" textAnchor="middle">Invoice</text>
-                      
-                      <circle cx="200" cy="150" r="16" fill="#f8fafc" stroke="#14b8a6" strokeWidth="3" />
-                      <text x="200" y="154" fill="#0f172a" fontSize="8" textAnchor="middle">Evidence</text>
-                    </svg>
+                  <div className="glass-panel p-4 rounded-xl border border-slate-200 flex flex-col items-center justify-center min-h-[250px] relative bg-slate-50/50">
+                    <p className="text-[10px] text-indigo-600 absolute top-4 left-4 font-mono">Bản đồ liên kết EOM Nodes & Tasks</p>
+                    {dynamicTasks.length > 0 ? (
+                      <div className="flex flex-col items-center gap-4 w-full">
+                        <div className="flex flex-wrap items-center justify-center gap-6 p-4">
+                          {dynamicTasks.map((t, idx) => (
+                            <div key={t.task_id || idx} className="flex items-center">
+                              <div className="flex flex-col items-center p-2 bg-white rounded-xl border border-indigo-150 shadow-sm min-w-[120px] text-center">
+                                <span className="text-[8px] font-bold text-indigo-500 uppercase tracking-wide">#{idx + 1} {t.agent_id?.replace('_', ' ')}</span>
+                                <span className="text-[10px] font-semibold text-slate-800 mt-0.5 truncate max-w-[100px]">{t.task_type}</span>
+                                <span className="text-[8px] text-slate-400 mt-1 font-mono">{t.task_id}</span>
+                              </div>
+                              {idx < dynamicTasks.length - 1 && (
+                                <div className="text-slate-300 font-bold ml-3 text-lg">→</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-[9px] text-slate-500 text-center max-w-md italic mt-2">
+                          Sơ đồ luồng dữ liệu (Graph Topology) tự động kết xuất dựa trên chỉ thị của CEO. Task sau kế thừa kết quả xử lý của các task trước đó.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-center py-6">
+                        <Network className="w-10 h-10 text-slate-300 mx-auto animate-pulse mb-3" />
+                        <p className="text-slate-500 text-xs">Chưa có bản đồ liên kết. Vui lòng bấm "Phân rã Kế hoạch" để dựng luồng.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1106,23 +1130,29 @@ export default function Dashboard() {
                   <div className="glass-panel p-4 rounded-xl border border-slate-200">
                     <h4 className="font-semibold text-slate-800 mb-2">Selective Context Package Compiler</h4>
                     <p className="text-[10px] text-slate-500 mb-3">Context Center lọc bảo mật dữ liệu thô (raw data) và chỉ gửi thông tin đã được rút gọn ngữ nghĩa đến AI.</p>
-                    <div className="bg-slate-950 p-3 rounded-lg font-mono text-[9px] text-slate-350 max-h-48 overflow-y-auto">
+                    <div className="bg-slate-950 p-3.5 rounded-lg font-mono text-[9px] text-emerald-400 max-h-60 overflow-y-auto">
                       <pre>{`{
-  "taskId": "task_campaign_001",
-  "objective": "${objective}",
+  "taskId": "task_campaign_${Date.now().toString().substring(8)}",
+  "objective": "${objective || 'Chưa nhập mục tiêu'}",
+  "brandDna": {
+    "brandName": "${dnaState.style ? 'BELLA EOS' : 'BELLA'}",
+    "voiceTone": "${dnaState.tone}",
+    "designStyle": "${dnaState.style}",
+    "targetSegment": "${objective.toLowerCase().includes('spa') ? 'Chủ Spa & Thẩm mỹ viện' : 'Khách hàng tiềm năng'}"
+  },
   "erp": {
-    "approvedBudgetVnd": 50000000,
+    "approvedBudgetLimitVnd": ${objective.toLowerCase().includes('50 triệu') ? 50000000 : objective.toLowerCase().includes('100 triệu') ? 100000000 : 30000000},
     "currency": "VND",
-    "cashOnHandVnd": 12400000000
+    "policyStatus": "APPROVED_BY_CEO"
   },
   "crm": {
     "activeCustomers": 1289,
-    "activeBookings": 42,
+    "activeBookings": ${objective.toLowerCase().includes('spa') ? 42 : 12},
     "facebookReach24h": 14500
   },
-  "governance": {
-    "maxAutoSpendVnd": 100000000,
-    "nightPostingAllowed": true
+  "security": {
+    "isDataSanitized": true,
+    "piiRedacted": ["email", "phone_number"]
   }
 }`}</pre>
                     </div>
@@ -1136,19 +1166,45 @@ export default function Dashboard() {
                   <div className="glass-panel p-4 rounded-xl border border-slate-200">
                     <h4 className="font-semibold text-slate-800 mb-2">OKR Goal Tree Decomposition</h4>
                     <p className="text-[10px] text-slate-500 mb-3">Tự động phân rã chỉ thị của CEO thành sơ đồ OKRs phòng ban:</p>
-                    <div className="space-y-2 text-[10px]">
-                      <div className="flex items-center gap-2">
-                        <ChevronRight className="w-3.5 h-3.5 text-indigo-500" />
-                        <span className="font-bold text-slate-800">Marketing OKR</span>: Triển khai chiến dịch Social & SEO SpaPOS. Target: 1000 Leads.
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <ChevronRight className="w-3.5 h-3.5 text-cyan-500" />
-                        <span className="font-bold text-slate-800">Sales OKR</span>: Tối ưu hoá luồng tư vấn tự động để chốt 42 Lượt Bookings.
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <ChevronRight className="w-3.5 h-3.5 text-purple-500" />
-                        <span className="font-bold text-slate-800">Finance OKR</span>: Kiểm duyệt chi tiêu dưới hạn mức 50,000,000 VND.
-                      </div>
+                    <div className="space-y-3.5 text-[10px]">
+                      {goalTree ? (
+                        <>
+                          <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                            <ChevronRight className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-slate-800 block">Marketing Department OKR:</span>
+                              Triển khai chiến dịch truyền thông nhằm tiếp cận phân khúc mục tiêu.
+                              <span className="text-[9px] block text-indigo-650 mt-1 font-semibold">
+                                • Target KPI: {goalTree.subGoals?.marketing?.leads || 1000} leads | CAC tối đa: {(goalTree.subGoals?.marketing?.cac || 1200000).toLocaleString('vi-VN')} VND
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                            <ChevronRight className="w-4 h-4 text-cyan-500 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-slate-800 block">Sales Department OKR:</span>
+                              Tối ưu phễu đặt lịch tự động và hoa hồng nhân sự.
+                              <span className="text-[9px] block text-cyan-650 mt-1 font-semibold">
+                                • Target KPI: Đạt tỷ lệ chuyển đổi chốt bookings ≥ {goalTree.subGoals?.sales?.conversionRate || 2.8}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                            <ChevronRight className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-slate-800 block">Finance Department OKR:</span>
+                              Rà soát chính sách chi tiêu và phân bổ dòng tiền.
+                              <span className="text-[9px] block text-purple-650 mt-1 font-semibold">
+                                • Hạn mức ngân sách tối đa: {objective.toLowerCase().includes('50 triệu') ? '50,000,000' : '100,000,000'} VND | Biên lợi nhuận ròng tối thiểu: {goalTree.subGoals?.finance?.minNetMargin || 20}%
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center py-6 text-slate-450 italic">
+                          Chưa có sơ đồ OKRs phân rã. Hãy nhập mục tiêu chiến dịch để kích hoạt Goal Engine.
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1162,14 +1218,27 @@ export default function Dashboard() {
                     <p className="text-[10px] text-slate-500 mb-3">Khi công việc hoàn tất, bằng chứng thực thi (Evidence) được so sánh với mục tiêu để tự động tối ưu hóa mẫu SOP (đột biến quy trình):</p>
                     <div className="grid grid-cols-2 gap-3 text-[10px]">
                       <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                        <span className="text-[9px] text-slate-400 uppercase block">Trước khi tối ưu (Old SOP)</span>
-                        <span className="font-semibold text-slate-700">Delay: 5000ms | Bidding: Fixed | AI: Default</span>
+                        <span className="text-[9px] text-slate-450 uppercase block">Trước khi tối ưu (Old SOP)</span>
+                        <span className="font-semibold text-slate-700 block mt-1">• Delay: 5000ms</span>
+                        <span className="font-semibold text-slate-700 block">• Bidding: Cố định</span>
+                        <span className="font-semibold text-slate-700 block">• Content Engine: Fallback</span>
                       </div>
                       <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
                         <span className="text-[9px] text-emerald-600 uppercase block">Sau đột biến (Mutated SOP)</span>
-                        <span className="font-semibold text-emerald-700">Delay: 2500ms | Bidding: Dynamic | AI: Scheduled</span>
+                        <span className="font-semibold text-emerald-700 block mt-1">• Delay: 2500ms (Tiết kiệm 50%)</span>
+                        <span className="font-semibold text-emerald-700 block">• Bidding: Tự động (Monte Carlo)</span>
+                        <span className="font-semibold text-emerald-700 block">• Content Engine: {hasOpenAI || hasClaude || hasGemini ? 'AI Live Engine' : 'Internal Engine'}</span>
                       </div>
                     </div>
+                    {verificationReport && (
+                      <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-[10px]">
+                        <span className="font-bold text-indigo-750 block">SOP Mutation Log:</span>
+                        <p className="text-slate-650 mt-1">
+                          Chiến dịch hoàn thành với tỉ lệ **{verificationReport.completionPercentage}%**. 
+                          Quy trình SOP thiết kế banner & soạn thảo nội dung đã được lưu làm quy chuẩn DNA mới cho thương hiệu.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
