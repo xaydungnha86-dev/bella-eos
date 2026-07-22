@@ -135,6 +135,8 @@ export default function Dashboard() {
       setHasClaude(Boolean(getStoredKey('anthropic', 'api_key')));
       setHasGemini(Boolean(getStoredKey('gemini', 'api_key')));
       setHasFacebook(Boolean(getStoredKey('facebook', 'page_access_token')));
+      setFbToken(getStoredKey('facebook', 'page_access_token'));
+      setFbPageId(getStoredKey('facebook', 'page_id') || 'me');
     }
   }, []);
 
