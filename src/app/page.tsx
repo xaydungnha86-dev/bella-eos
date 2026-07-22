@@ -478,6 +478,14 @@ export default function Dashboard() {
       const taskAgentId = t.agent_id?.toLowerCase() || '';
       const taskAgentName = t.agent_name?.toLowerCase() || '';
       const aiId = ai.id.toLowerCase();
+
+      // Direct ID mappings
+      if (taskAgentId === 'eos_content_worker' && aiId === 'seo_copywriter') return true;
+      if (taskAgentId === 'eos_creative_worker' && aiId === 'creative_designer') return true;
+      if (taskAgentId === 'hermes_social' && aiId === 'hermes') return true;
+      if (taskAgentId === 'ares_ads' && aiId === 'ads_optimizer') return true;
+      if (taskAgentId === 'athena_analytics' && aiId === 'multimodal_analyst') return true;
+
       const aiNameNormalized = ai.name.toLowerCase()
         .replace(' worker', '')
         .replace(' ai', '')
