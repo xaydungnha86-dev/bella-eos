@@ -120,7 +120,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
 
   return {
     success: true,
-    output: `🖼️ [Bella EOS Creative Worker] Đã hoàn tất thiết kế Graphic Banner [${provider}/${model}]:\n• Image Banner URL: ${imageUrl.substring(0, 80)}...\n• Ingested Copywriter Output: "${copywriterContent ? copywriterContent.substring(0, 60) + '...' : 'Tự động bóc tách từ Task #1'}"\n• Design Elements: Logo Bella EOS, Dynamic Headline, Offer Badge, Spa Ambient & 3D Spa UI Mockup`,
+    output: `🖼️ [Bella EOS Creative Worker] Đã hoàn tất thiết kế Graphic Banner [${provider}/${model}]:\n• Image Banner URL: ${imageUrl}\n• Ingested Copywriter Output: "${copywriterContent ? copywriterContent.substring(0, 60) + '...' : 'Tự động bóc tách từ Task #1'}"\n• Design Elements: Logo Bella EOS, Dynamic Headline, Offer Badge, Spa Ambient & 3D Spa UI Mockup`,
     meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1200x630', status: 'GENERATED' }
   };
 }

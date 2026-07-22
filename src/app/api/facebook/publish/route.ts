@@ -90,19 +90,44 @@ export async function POST(request: Request) {
     }
 
     // High-resolution Spa Demo Marketing Banner fallback if no specific image URL passed
-    const photoUrl = image_url || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop';
+    const photoUrl = image_url || `${getBaseUrl(request)}/api/ai/banner-image`;
 
-    // ── Try Facebook Graph API Photo Post Endpoint ───────────────────────────
+    // ── Try Facebook Graph API Photo Post Endpoint via FormData Binary Upload ─
     const fbPhotoUrl = `https://graph.facebook.com/v18.0/${pageId}/photos`;
-    let fbResponse = await fetch(fbPhotoUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        caption: message,
-        url: photoUrl,
-        access_token: accessToken
-      })
-    });
+    let fbResponse: Response;
+
+    try {
+      console.log('[API /facebook/publish] Fetching image binary from:', photoUrl);
+      const imgRes = await fetch(photoUrl);
+      if (imgRes.ok) {
+        const arrayBuffer = await imgRes.arrayBuffer();
+        const contentType = imgRes.headers.get('content-type') || 'image/png';
+        const formData = new FormData();
+        formData.append('caption', message);
+        formData.append('access_token', accessToken);
+        formData.append('source', new Blob([arrayBuffer], { type: contentType }), 'banner.png');
+
+        console.log('[API /facebook/publish] Uploading PNG binary via FormData source to Facebook...');
+        fbResponse = await fetch(fbPhotoUrl, {
+          method: 'POST',
+          body: formData
+        });
+      } else {
+        console.warn('[API /facebook/publish] Binary fetch non-ok, falling back to JSON URL...');
+        fbResponse = await fetch(fbPhotoUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ caption: message, url: photoUrl, access_token: accessToken })
+        });
+      }
+    } catch (e) {
+      console.warn('[API /facebook/publish] Binary upload notice, falling back to JSON URL:', e);
+      fbResponse = await fetch(fbPhotoUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ caption: message, url: photoUrl, access_token: accessToken })
+      });
+    }
 
     let fbData = await fbResponse.json();
 
@@ -142,4 +167,12 @@ export async function POST(request: Request) {
     console.error('[API /facebook/publish] Internal error:', err);
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
+}
+
+function getBaseUrl(request: Request): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  const host = request.headers.get('host');
+  if (host) return `http://${host}`;
+  return 'http://localhost:3000';
 }
