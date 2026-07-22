@@ -1051,22 +1051,30 @@
             
             <div class="p-6 overflow-y-auto space-y-4 font-sans text-xs custom-scrollbar">
                 <div>
-                    <label class="block text-slate-300 font-semibold mb-1 text-[11px]">Google Gemini API Key</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-slate-300 font-semibold text-[11px]">Google Gemini API Key</label>
+                        <button type="button" onclick="testGeminiConnection()" class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-950/40 hover:bg-amber-900/60 text-amber-400 border border-amber-800/40 transition">Kiểm tra kết nối</button>
+                    </div>
                     <div class="relative">
                         <input type="password" id="settings-gemini-key" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition pr-10">
                         <button type="button" onclick="const input = document.getElementById('settings-gemini-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition">
                             <i class="fa-solid fa-eye text-xs"></i>
                         </button>
                     </div>
+                    <span id="gemini-test-status" class="block mt-1 text-[9px] font-mono"></span>
                 </div>
                 <div>
-                    <label class="block text-slate-300 font-semibold mb-1 text-[11px]">OpenAI API Key</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-slate-300 font-semibold text-[11px]">OpenAI API Key</label>
+                        <button type="button" onclick="testOpenAiConnection()" class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-950/40 hover:bg-amber-900/60 text-amber-400 border border-amber-800/40 transition">Kiểm tra kết nối</button>
+                    </div>
                     <div class="relative">
                         <input type="password" id="settings-openai-key" placeholder="sk-proj-..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:outline-none focus:border-amber-500 transition pr-10">
                         <button type="button" onclick="const input = document.getElementById('settings-openai-key'); input.type = input.type === 'password' ? 'text' : 'password';" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition">
                             <i class="fa-solid fa-eye text-xs"></i>
                         </button>
                     </div>
+                    <span id="openai-test-status" class="block mt-1 text-[9px] font-mono"></span>
                 </div>
                 <div>
                     <label class="block text-slate-300 font-semibold mb-1 text-[11px]">Anthropic Claude API Key</label>

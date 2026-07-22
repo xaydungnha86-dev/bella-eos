@@ -6667,6 +6667,87 @@ function onMetricTypeChange() {
 }
 window.onMetricTypeChange = onMetricTypeChange;
 
+async function testGeminiConnection() {
+    const key = document.getElementById('settings-gemini-key').value.trim();
+    const statusSpan = document.getElementById('gemini-test-status');
+    
+    if (!key) {
+        statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+        statusSpan.textContent = "❌ Vui lòng nhập API Key trước khi kiểm tra.";
+        return;
+    }
+    
+    statusSpan.className = "block mt-1 text-[9px] font-mono text-slate-400 animate-pulse";
+    statusSpan.textContent = "⏳ Đang kết nối thử nghiệm đến Google AI Studio...";
+    
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: "Hello" }] }]
+            })
+        });
+        
+        const data = await response.json();
+        if (response.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            statusSpan.className = "block mt-1 text-[9px] font-mono text-emerald-400 font-bold";
+            statusSpan.textContent = "✅ Kết nối THÀNH CÔNG! API Key đang hoạt động tốt.";
+        } else {
+            const msg = data.error ? data.error.message : "Unknown error";
+            statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+            statusSpan.textContent = `❌ Lỗi: ${msg}`;
+        }
+    } catch (err) {
+        statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+        statusSpan.textContent = `❌ Lỗi kết nối: ${err.message}`;
+    }
+}
+window.testGeminiConnection = testGeminiConnection;
+
+async function testOpenAiConnection() {
+    const key = document.getElementById('settings-openai-key').value.trim();
+    const statusSpan = document.getElementById('openai-test-status');
+    
+    if (!key) {
+        statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+        statusSpan.textContent = "❌ Vui lòng nhập API Key trước khi kiểm tra.";
+        return;
+    }
+    
+    statusSpan.className = "block mt-1 text-[9px] font-mono text-slate-400 animate-pulse";
+    statusSpan.textContent = "⏳ Đang kết nối thử nghiệm đến OpenAI API...";
+    
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${key}`
+            },
+            body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [{ role: "user", content: "Hello" }],
+                max_tokens: 5
+            })
+        });
+        
+        const data = await response.json();
+        if (response.ok && data.choices?.[0]?.message?.content) {
+            statusSpan.className = "block mt-1 text-[9px] font-mono text-emerald-400 font-bold";
+            statusSpan.textContent = "✅ Kết nối THÀNH CÔNG! API Key đang hoạt động tốt.";
+        } else {
+            const msg = data.error ? data.error.message : "Unknown error";
+            statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+            statusSpan.textContent = `❌ Lỗi: ${msg}`;
+        }
+    } catch (err) {
+        statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+        statusSpan.textContent = `❌ Lỗi kết nối: ${err.message}`;
+    }
+}
+window.testOpenAiConnection = testOpenAiConnection;
+
 // Initialize on script load
 loadFbChannels();
 
