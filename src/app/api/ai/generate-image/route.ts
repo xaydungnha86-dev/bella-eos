@@ -118,11 +118,18 @@ export async function POST(request: Request) {
       const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       if (!geminiKey) return null;
 
-      const modelsToTry = [
-        'imagen-4.0-generate-001',
-        'imagen-4.0-fast-generate-001',
-        'imagen-3.0-generate-002'
+      const modelsToTry: string[] = [];
+      if (model && (model.toLowerCase().includes('imagen') || model.toLowerCase().includes('google-imagen'))) {
+        modelsToTry.push(model);
+      }
+      const defaults = [
+        'imagen-3.0-generate-002',
+        'imagen-3.0-fast-generate-001'
       ];
+      defaults.forEach(d => {
+        if (!modelsToTry.includes(d)) modelsToTry.push(d);
+      });
+
       for (const modelId of modelsToTry) {
         try {
           console.log(`[AI Image Generator] Calling Google Imagen API (${modelId})...`);
@@ -166,11 +173,18 @@ export async function POST(request: Request) {
       const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       if (!geminiKey) return null;
 
-      const modelsToTry = [
+      const modelsToTry: string[] = [];
+      if (model && (model.toLowerCase().includes('gemini') || model.toLowerCase().includes('image')) && !model.toLowerCase().includes('imagen')) {
+        modelsToTry.push(model);
+      }
+      const defaults = [
         'gemini-3.1-flash-image',
         'gemini-3-pro-image',
         'gemini-2.5-flash-image'
       ];
+      defaults.forEach(d => {
+        if (!modelsToTry.includes(d)) modelsToTry.push(d);
+      });
       for (const modelId of modelsToTry) {
         try {
           console.log(`[AI Image Generator] Calling Google Gemini Native Image API (${modelId})...`);
