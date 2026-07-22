@@ -861,23 +861,23 @@
                 <div class="grid grid-cols-4 gap-3">
                     <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                         <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỔNG LEADS DỰ KIẾN</span>
-                        <strong class="text-cyan-400 text-lg font-mono">524 Leads</strong>
-                        <span class="text-[9px] text-emerald-400 block mt-0.5">+104.8% so với OKR</span>
+                        <strong id="report-leads-value" class="text-cyan-400 text-lg font-mono">524 Leads</strong>
+                        <span id="report-leads-okr" class="text-[9px] text-emerald-400 block mt-0.5">+104.8% so với OKR</span>
                     </div>
                     <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                         <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỶ LỆ CHỐT DEMO (CONV)</span>
-                        <strong class="text-emerald-400 text-lg font-mono">24.1%</strong>
-                        <span class="text-[9px] text-slate-400 block mt-0.5">Top Format: Carousel</span>
+                        <strong id="report-conv-value" class="text-emerald-400 text-lg font-mono">24.1%</strong>
+                        <span id="report-conv-top" class="text-[9px] text-slate-400 block mt-0.5">Top Format: Carousel</span>
                     </div>
                     <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                         <span class="text-slate-500 block text-[10px] uppercase font-semibold">CHI PHÍ LEAD (CAC)</span>
-                        <strong class="text-amber-400 text-lg font-mono">1.2M VND</strong>
-                        <span class="text-[9px] text-emerald-400 block mt-0.5">Rẻ hơn 50K/Lead</span>
+                        <strong id="report-cac-value" class="text-amber-400 text-lg font-mono">1.2M VND</strong>
+                        <span id="report-cac-status" class="text-[9px] text-emerald-400 block mt-0.5">Rẻ hơn 50K/Lead</span>
                     </div>
                     <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                         <span class="text-slate-500 block text-[10px] uppercase font-semibold">DỰ BÁO ROI CHIẾN DỊCH</span>
-                        <strong class="text-purple-400 text-lg font-mono">+486%</strong>
-                        <span class="text-[9px] text-purple-300 block mt-0.5">Doanh thu ~2.4B VND</span>
+                        <strong id="report-roi-value" class="text-purple-400 text-lg font-mono">+486%</strong>
+                        <span id="report-roi-revenue" class="text-[9px] text-purple-300 block mt-0.5">Doanh thu ~2.4B VND</span>
                     </div>
                 </div>
 
@@ -897,7 +897,7 @@
                                     <th class="p-3">Hành Động Tối Ưu AI</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-850">
+                            <tbody id="report-table-body" class="divide-y divide-slate-850">
                                 <tr class="hover:bg-slate-900/50">
                                     <td class="p-3 font-bold text-slate-200">Feature Carousel Infographics</td>
                                     <td class="p-3">10 Bài</td>

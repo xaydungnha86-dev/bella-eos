@@ -4573,9 +4573,124 @@ safeAddListener('btn-close-step-modal-confirm', 'click', () => {
 
 function showCampaignExecutiveReport() {
     const modal = document.getElementById('campaign-report-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
+    if (!modal) return;
+
+    // Read values from BCE Visual Inputs
+    const budgetVal = parseInt(document.getElementById('bce-edit-budget').value) || 10000000;
+    const targetInput = document.getElementById('bce-edit-followers');
+    const targetVal = parseInt(targetInput.value) || 1000;
+    const metricKey = targetInput.dataset.metricKey || 'targetFollowers';
+    const brandVoice = document.getElementById('bce-edit-voice').value || 'Professional & Premium';
+    const segment = document.getElementById('bce-edit-segment').value || 'VIP Beauty & Spa Clients';
+
+    // Calculate dynamic expected leads
+    let expectedLeads = 524;
+    let okrText = "+104.8% so với OKR";
+
+    if (metricKey === 'targetFollowers') {
+        expectedLeads = Math.ceil(targetVal * 0.15); // e.g. 15% conversion from followers to leads
+        okrText = `Dự kiến: 15% quy đổi từ mục tiêu ${targetVal} fls`;
+    } else if (metricKey === 'targetRevenueVnd') {
+        expectedLeads = Math.ceil(targetVal / 100000); // 1 lead per 100K VND
+        okrText = `Dự kiến từ mục tiêu doanh số ${formatShortMoney(targetVal)}`;
+    } else if (metricKey === 'targetLeads') {
+        expectedLeads = targetVal;
+        okrText = `Khớp 100% mục tiêu ${targetVal} Leads`;
+    } else if (metricKey === 'targetStaffCount') {
+        expectedLeads = targetVal * 15; // 15 leads generated per staff
+        okrText = `Dự kiến quy đổi từ ${targetVal} nhân sự tuyển dụng`;
     }
+
+    // Tỷ lệ chốt demo (Conv) based on segment & voice
+    let convRate = 24.1;
+    let formatTop = "Carousel";
+    if (brandVoice.includes('Premium') || brandVoice.includes('Sang trọng')) {
+        convRate = 26.4;
+        formatTop = "Infographics";
+    } else if (brandVoice.includes('Friendly') || brandVoice.includes('Thân thiện')) {
+        convRate = 18.5;
+        formatTop = "Short Video Reels";
+    } else {
+        convRate = 15.0;
+        formatTop = "Customer Story";
+    }
+
+    // Chi phí lead (CAC) = budget / expectedLeads
+    const cac = expectedLeads > 0 ? Math.round(budgetVal / expectedLeads) : 0;
+    let cacText = formatShortMoney(cac);
+    let cacStatus = "Tối ưu ngân sách";
+    if (cac < 50000) {
+        cacStatus = "Rất rẻ (Dưới 50K/Lead)";
+    } else if (cac < 150000) {
+        cacStatus = "Trung bình (Dưới 150K/Lead)";
+    } else {
+        cacStatus = "Cao (Cần tối ưu thêm Ads)";
+    }
+
+    // ROI
+    const avgOrderValue = 1500000; // Spa order average is 1.5M VND
+    const estRevenue = expectedLeads * (convRate / 100) * avgOrderValue;
+    const roi = budgetVal > 0 ? Math.round(((estRevenue - budgetVal) / budgetVal) * 100) : 0;
+    
+    // Set UI text
+    document.getElementById('report-leads-value').textContent = `${expectedLeads} Leads`;
+    document.getElementById('report-leads-okr').textContent = okrText;
+    
+    document.getElementById('report-conv-value').textContent = `${convRate}%`;
+    document.getElementById('report-conv-top').textContent = `Top Format: ${formatTop}`;
+    
+    document.getElementById('report-cac-value').textContent = cacText;
+    document.getElementById('report-cac-status').textContent = cacStatus;
+    
+    document.getElementById('report-roi-value').textContent = `${roi >= 0 ? '+' : ''}${roi}%`;
+    document.getElementById('report-roi-revenue').textContent = `Doanh thu ~${formatShortMoney(Math.round(estRevenue))}`;
+
+    // Fill table dynamic rows based on budget
+    const numCarousel = Math.ceil(budgetVal / 1000000) || 5;
+    const numReels = Math.ceil(budgetVal / 800000) || 6;
+    const numCases = Math.ceil(budgetVal / 2000000) || 3;
+
+    const tableBody = document.getElementById('report-table-body');
+    if (tableBody) {
+        tableBody.innerHTML = `
+            <tr class="hover:bg-slate-900/50">
+                <td class="p-3 font-bold text-slate-200">Feature Carousel Infographics</td>
+                <td class="p-3">${numCarousel} Bài</td>
+                <td class="p-3 text-cyan-400">7.5%</td>
+                <td class="p-3 text-emerald-400 font-bold">${convRate}% (TOP)</td>
+                <td class="p-3 text-purple-300">⚡ Dồn 70% Ngân sách Ads</td>
+            </tr>
+            <tr class="hover:bg-slate-900/50">
+                <td class="p-3 font-bold text-slate-200">Pain Point Short Video Reels</td>
+                <td class="p-3">${numReels} Clips</td>
+                <td class="p-3 text-cyan-400 font-bold">10.2% (HIGH)</td>
+                <td class="p-3 text-amber-400">14.5%</td>
+                <td class="p-3 text-amber-300">Sửa lại CTA chốt Sales</td>
+            </tr>
+            <tr class="hover:bg-slate-900/50">
+                <td class="p-3 font-bold text-slate-200">Customer Case Study Stories</td>
+                <td class="p-3">${numCases} Bài</td>
+                <td class="p-3 text-cyan-400">6.8%</td>
+                <td class="p-3 text-slate-300">15.0%</td>
+                <td class="p-3 text-slate-400">Duy trì làm Social Proof</td>
+            </tr>
+        `;
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function formatShortMoney(value) {
+    if (value >= 1000000000) {
+        return (value / 1000000000).toFixed(2) + "B VND";
+    }
+    if (value >= 1000000) {
+        return (value / 1000000).toFixed(1) + "M VND";
+    }
+    if (value >= 1000) {
+        return (value / 1000).toFixed(0) + "K VND";
+    }
+    return value + " VND";
 }
 
 safeAddListener('btn-close-report-modal', 'click', () => {
