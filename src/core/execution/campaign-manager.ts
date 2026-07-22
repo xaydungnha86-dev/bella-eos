@@ -13,6 +13,7 @@ export interface CampaignState {
   activeCustomerCount: number;
   fbReachCount: number;
   objective: string;
+  approvedTasks: string[];
 }
 
 export type Listener = (state: CampaignState) => void;
@@ -30,7 +31,8 @@ class CampaignExecutionManagerClass {
     lastApiStatus: null,
     activeCustomerCount: 1289,
     fbReachCount: 14500,
-    objective: ''
+    objective: '',
+    approvedTasks: []
   };
 
   private listeners = new Set<Listener>();
@@ -125,7 +127,8 @@ class CampaignExecutionManagerClass {
       lastApiStatus: null,
       activeCustomerCount: this.state.activeCustomerCount,
       fbReachCount: this.state.fbReachCount,
-      objective
+      objective,
+      approvedTasks: []
     };
     this.notify();
 
@@ -296,6 +299,62 @@ class CampaignExecutionManagerClass {
 
     } catch (err: any) {
       this.addLog('ORCHESTRATOR ERROR', `❌ Lỗi điều phối: ${err.message}`, 'text-red-400 font-bold');
+      this.state.isProcessing = false;
+      this.notify();
+    }
+  }
+
+  // Human CEO approves a paused task (e.g. Marketing Manager Strategy) and resumes execution for downstream workers
+  public async approveTaskAndResume(taskId: string, InternalApiGateway: any) {
+    if (this.state.approvedTasks.includes(taskId)) return;
+
+    const updatedApproved = [...this.state.approvedTasks, taskId];
+    this.state.approvedTasks = updatedApproved;
+    this.state.isProcessing = true;
+    
+    // Update local task state immediately
+    this.state.dynamicTasks = this.state.dynamicTasks.map(t =>
+      t.task_id === taskId
+        ? { ...t, status: 'COMPLETED', isApproved: true }
+        : t
+    );
+    this.notify();
+
+    this.addLog('HUMAN CEO', `👑 CEO ĐÃ PHÊ DUYỆT BẢN KẾ HOẠCH DỰ THẢO CỦA AI MARKETING MANAGER (Task #${taskId})!`, 'text-emerald-400 font-bold');
+    this.addLog('GATEWAY', `⚡ Kích hoạt chạy tiếp quy trình AI Workforce cho các bước tiếp theo...`, 'text-indigo-400 font-semibold');
+
+    try {
+      const mockStep = { id: 1, name: 'Setup chiến dịch', agent: 'orchestrator' };
+      const contextPackage = {
+        objective: this.state.objective,
+        brandDna: { voiceTone: this.state.dnaState.tone, designStyle: this.state.dnaState.style },
+        timestamp: new Date().toISOString()
+      } as any;
+
+      const dispatchResult = await InternalApiGateway.dispatchCall(
+        { assignedWorker: 'orchestrator' },
+        mockStep,
+        contextPackage,
+        (evt: any) => {
+          if (evt.phase === 'COMPLETED' || evt.phase === 'VERIFIED') {
+            if (evt.tasks) {
+              this.state.dynamicTasks = evt.tasks;
+              this.notify();
+            }
+            if (evt.verificationReport) {
+              this.state.verificationReport = evt.verificationReport;
+              this.notify();
+            }
+          }
+        },
+        updatedApproved
+      );
+
+      this.state.isProcessing = false;
+      this.notify();
+      this.addLog('SYSTEM', `🏁 Đã hoàn tất toàn bộ quy trình AI Workforce sau khi CEO phê duyệt!`, 'text-amber-400 font-bold');
+    } catch (err: any) {
+      this.addLog('ORCHESTRATOR ERROR', `❌ Lỗi tiếp tục thực thi: ${err.message}`, 'text-red-400 font-bold');
       this.state.isProcessing = false;
       this.notify();
     }

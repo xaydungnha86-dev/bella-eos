@@ -768,56 +768,101 @@ export default function Dashboard() {
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-                        {dynamicTasks.map((t: any, idx: number) => {
-                          const isConfigReq = t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('Cần cấu hình') || t.output?.includes('hết hạn') || t.output?.includes('expired') || t.meta?.status === 'PREPARED' || t.meta?.isExpired;
-                          const isDone = t.success === true && !isConfigReq;
-                          const isFailed = (t.success === false || t.error) && !isConfigReq;
-
-                          return (
-                            <div
-                              key={t.task_id || idx}
-                              onClick={() => setSelectedTask(t)}
-                              className={`glass-panel p-3.5 rounded-xl border text-left transition-all relative overflow-hidden shadow-sm cursor-pointer group hover:scale-[1.01] hover:shadow-md ${
-                                isDone
-                                  ? 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400'
-                                  : isConfigReq
-                                  ? 'border-amber-200 bg-amber-50/40 hover:border-amber-400'
-                                  : isFailed
-                                  ? 'border-red-200 bg-red-50/40 hover:border-red-400'
-                                  : 'border-slate-200 bg-white hover:border-indigo-400'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-1.5 min-w-0">
-                                  <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center shrink-0">
-                                    #{idx + 1}
-                                  </span>
-                                  <h4 className="font-semibold text-xs text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{t.agent_name || t.agent_id}</h4>
-                                </div>
-
-                                {/* Status Badge */}
-                                {isDone && (
-                                  <span className="text-[8px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
-                                    <CheckCircle2 className="w-2.5 h-2.5" /> HOÀN THÀNH
-                                  </span>
-                                )}
-                                {isConfigReq && (
-                                  <span className="text-[8px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
-                                    <AlertTriangle className="w-2.5 h-2.5" /> {t.meta?.isExpired || t.output?.includes('hết hạn') ? 'HẾT HẠN TOKEN' : 'THIẾU TOKEN'}
-                                  </span>
-                                )}
-                                {isFailed && !isConfigReq && (
-                                  <span className="text-[8px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
-                                    <AlertTriangle className="w-2.5 h-2.5" /> MẤT KẾT NỐI
-                                  </span>
-                                )}
-                                {!isDone && !isConfigReq && !isFailed && (
-                                  <span className="text-[8px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
-                                    ⏳ ĐANG CHẠY
-                                  </span>
-                                )}
+                      {/* CEO HUMAN APPROVAL BANNER GATE */}
+                        {dynamicTasks.some(t => t.status === 'AWAITING_APPROVAL') && (
+                          <div className="w-full bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-amber-400/60 rounded-2xl p-4 text-left shadow-lg flex items-center justify-between gap-4 animate-fade-in">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white font-bold flex items-center justify-center text-xl shadow-md shrink-0 animate-bounce">
+                                👑
                               </div>
+                              <div>
+                                <h4 className="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                                  <span>THẨM ĐỊNH EXECUTIVE: YÊU CẦU CEO PHÊ DUYỆT BẢN KẾ HOẠCH MARKETING</span>
+                                </h4>
+                                <p className="text-[11px] text-amber-800 font-medium mt-1 leading-relaxed">
+                                  AI Marketing Manager đã phân tích chỉ thị, xác định chân dung khách hàng & lập kế hoạch mục tiêu OKR. Vui lòng xem kết quả và bấm phê duyệt để tiếp tục chuyển qua các bước thực thi.
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                const awaitingTask = dynamicTasks.find(t => t.status === 'AWAITING_APPROVAL');
+                                if (awaitingTask) {
+                                  const { InternalApiGateway } = require('@/core/execution/execution');
+                                  CampaignExecutionManager.approveTaskAndResume(awaitingTask.task_id, InternalApiGateway);
+                                }
+                              }}
+                              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer hover:scale-105 shrink-0"
+                            >
+                              <span>👑 CEO Phê Duyệt Kế Hoạch & Cho Phép Chạy Tiếp →</span>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                          {dynamicTasks.map((t: any, idx: number) => {
+                            const isConfigReq = t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('Cần cấu hình') || t.output?.includes('hết hạn') || t.output?.includes('expired') || t.meta?.status === 'PREPARED' || t.meta?.isExpired;
+                            const isAwaitingApproval = t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL';
+                            const isPendingApproval = t.status === 'PENDING_APPROVAL' || t.meta?.status === 'WAITING_FOR_MARKETING_APPROVAL';
+                            const isDone = (t.success === true || t.status === 'COMPLETED' || t.isApproved) && !isConfigReq && !isAwaitingApproval;
+                            const isFailed = (t.success === false || t.error) && !isConfigReq && !isAwaitingApproval;
+
+                            return (
+                              <div
+                                key={t.task_id || idx}
+                                onClick={() => setSelectedTask(t)}
+                                className={`glass-panel p-3.5 rounded-xl border text-left transition-all relative overflow-hidden shadow-sm cursor-pointer group hover:scale-[1.01] hover:shadow-md ${
+                                  isAwaitingApproval
+                                    ? 'border-amber-400 bg-amber-50/70 shadow-amber-100 ring-2 ring-amber-300'
+                                    : isDone
+                                    ? 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400'
+                                    : isConfigReq
+                                    ? 'border-amber-200 bg-amber-50/40 hover:border-amber-400'
+                                    : isFailed
+                                    ? 'border-red-200 bg-red-50/40 hover:border-red-400'
+                                    : 'border-slate-200 bg-white hover:border-indigo-400'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center shrink-0">
+                                      #{idx + 1}
+                                    </span>
+                                    <h4 className="font-semibold text-xs text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{t.agent_name || t.agent_id}</h4>
+                                  </div>
+
+                                  {/* Status Badge */}
+                                  {isAwaitingApproval && (
+                                    <span className="text-[8px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1 animate-pulse">
+                                      👑 CHỜ CEO PHÊ DUYỆT
+                                    </span>
+                                  )}
+                                  {isPendingApproval && (
+                                    <span className="text-[8px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                                      ⏳ CHỜ MARKETING DUYỆT
+                                    </span>
+                                  )}
+                                  {isDone && !isAwaitingApproval && (
+                                    <span className="text-[8px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                      <CheckCircle2 className="w-2.5 h-2.5" /> HOÀN THÀNH
+                                    </span>
+                                  )}
+                                  {isConfigReq && (
+                                    <span className="text-[8px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                      <AlertTriangle className="w-2.5 h-2.5" /> {t.meta?.isExpired || t.output?.includes('hết hạn') ? 'HẾT HẠN TOKEN' : 'THIẾU TOKEN'}
+                                    </span>
+                                  )}
+                                  {isFailed && !isConfigReq && !isAwaitingApproval && (
+                                    <span className="text-[8px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                      <AlertTriangle className="w-2.5 h-2.5" /> MẤT KẾT NỐI
+                                    </span>
+                                  )}
+                                  {!isDone && !isConfigReq && !isFailed && !isAwaitingApproval && !isPendingApproval && (
+                                    <span className="text-[8px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                                      ⏳ ĐANG CHẠY
+                                    </span>
+                                  )}
+                                </div>
 
                               <p className="text-[10px] text-slate-600 font-medium mt-1.5 line-clamp-2">
                                 {t.task_description}

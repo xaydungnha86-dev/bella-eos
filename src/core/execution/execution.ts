@@ -51,11 +51,12 @@ async function callOrchestrator(contextPackage: CanonicalContextPackage): Promis
 }
 
 // ─── Step 2: Agent Runner Execution ──────────────────────────────────────────
-async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPackage): Promise<{
+async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPackage, approvedTasks?: string[]): Promise<{
   overall_status: string;
   total_tasks: number;
   completed: number;
   results: any[];
+  awaitingApprovalTaskId?: string;
 }> {
   const keys = getClientKeys();
   let agentConfigs = {};
@@ -77,7 +78,8 @@ async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPac
       client_gemini_key:     keys.gemini,
       client_facebook_token: keys.facebook_token,
       client_facebook_page_id: keys.facebook_page_id,
-      agent_configs:         agentConfigs
+      agent_configs:         agentConfigs,
+      approved_tasks:        approvedTasks
     })
   });
   const data = await res.json();
@@ -90,11 +92,12 @@ export class InternalApiGateway {
   /**
    * Dynamic dispatch with Goal Verification Audit & Connection Tracking.
    */
-  static async dispatchCall(
+    static async dispatchCall(
     executor: any,
     step: any,
     contextPackage: CanonicalContextPackage,
-    onProgress?: (event: OrchestratorEvent) => void
+    onProgress?: (event: OrchestratorEvent) => void,
+    approvedTasks?: string[]
   ): Promise<DispatchResult> {
     const workerId = executor.assignedWorker || executor.workerId || 'orchestrator';
     console.log(`[InternalApiGateway] Dispatch → [${step.name}] • Worker: ${workerId}`);
@@ -131,7 +134,7 @@ export class InternalApiGateway {
       message: `📋 Kế hoạch: "${plan.plan_title}" — ${plan.tasks.length} tasks`,
       planTitle: plan.plan_title,
       planReasoning: plan.reasoning,
-      tasks: plan.tasks.map(t => ({ ...t, status: 'PENDING' })),
+      tasks: plan.tasks.map(t => ({ ...t, status: t.status || 'PENDING' })),
       aiProvider: planProvider,
       aiModel: planModel,
       warning: planWarning
@@ -142,7 +145,7 @@ export class InternalApiGateway {
 
     let runnerResult: Awaited<ReturnType<typeof callAgentRunner>>;
     try {
-      runnerResult = await callAgentRunner(plan.tasks, contextPackage);
+      runnerResult = await callAgentRunner(plan.tasks, contextPackage, approvedTasks);
     } catch (err: any) {
       console.warn('[InternalApiGateway] Agent runner failed:', err.message);
       throw err;

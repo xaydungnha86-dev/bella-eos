@@ -670,7 +670,8 @@ export async function POST(request: Request) {
       client_gemini_key,
       client_facebook_token,
       client_facebook_page_id,
-      agent_configs
+      agent_configs,
+      approved_tasks
     } = body as {
       tasks: any[];
       context?: any;
@@ -680,6 +681,7 @@ export async function POST(request: Request) {
       client_facebook_token?: string;
       client_facebook_page_id?: string;
       agent_configs?: Record<string, any>;
+      approved_tasks?: string[];
     };
 
     if (!tasks?.length) {
@@ -702,15 +704,20 @@ export async function POST(request: Request) {
     // Sort by dependency (simple topological sort)
     const ordered = topologicalSort(tasks);
 
+    const approvedSet = new Set<string>(approved_tasks || []);
+    let isPausedForApproval = false;
+    let awaitingTaskId = '';
+
     for (const task of ordered) {
+      const isApproved = approvedSet.has(task.task_id) || task.isApproved === true || task.status === 'APPROVED';
+      const requiresApproval = task.agent_id === 'eos_marketing_manager' || 
+                               task.task_type === 'analyze_marketing_strategy' || 
+                               task.requires_human_approval === true;
+
       // Resolve input: if any field value is a reference to prior task output, inject it
       const resolvedInput = resolveInputReferences(task.input || {}, taskOutputs);
       
-      console.log(`[AgentRunner] Resolving inputs for task ${task.task_id}:`, {
-        rawInput: task.input,
-        resolvedInput,
-        availableOutputs: Object.keys(taskOutputs)
-      });
+      console.log(`[AgentRunner] Task ${task.task_id} [${task.agent_name}]: requiresApproval=${requiresApproval}, isApproved=${isApproved}`);
 
       const toolFn = TOOL_REGISTRY[task.task_type];
       let result: ToolResult;
@@ -718,7 +725,6 @@ export async function POST(request: Request) {
       if (toolFn) {
         console.log(`[AgentRunner] Executing: [${task.agent_name}] → ${task.task_type}`);
         result = await toolFn(resolvedInput, clientKeys, taskOutputs, context);
-        console.log(`[AgentRunner] Result: [${task.agent_name}] → success: ${result.success}, hasOutput: ${Boolean(result.output)}, error: ${result.error || 'none'}`);
       } else {
         console.warn(`[AgentRunner] Unknown tool: ${task.task_type} — using default`);
         result = await tool_default(task);
@@ -727,6 +733,48 @@ export async function POST(request: Request) {
       // Store output for downstream tasks
       if (result.output) taskOutputs[task.task_id] = result.output;
 
+      if (requiresApproval && !isApproved) {
+        // Task completed its AI analysis, but must pause for Human CEO Approval before proceeding
+        isPausedForApproval = true;
+        awaitingTaskId = task.task_id;
+
+        results.push({
+          task_id:      task.task_id,
+          agent_id:     task.agent_id,
+          agent_name:   task.agent_name,
+          task_type:    task.task_type,
+          task_description: task.task_description,
+          success:      true,
+          status:       'AWAITING_APPROVAL',
+          requires_human_approval: true,
+          isApproved:   false,
+          output:       result.output,
+          error:        result.error,
+          meta:         { ...result.meta, requiresHumanApproval: true, status: 'AWAITING_APPROVAL' }
+        });
+
+        // Add remaining tasks as PENDING_APPROVAL
+        const processedIds = new Set(results.map(r => r.task_id));
+        for (const remTask of ordered) {
+          if (!processedIds.has(remTask.task_id)) {
+            results.push({
+              task_id:      remTask.task_id,
+              agent_id:     remTask.agent_id,
+              agent_name:   remTask.agent_name,
+              task_type:    remTask.task_type,
+              task_description: remTask.task_description,
+              success:      false,
+              status:       'PENDING_APPROVAL',
+              output:       '',
+              meta:         { status: 'WAITING_FOR_MARKETING_APPROVAL' }
+            });
+          }
+        }
+
+        break; // Pause execution here until CEO approves!
+      }
+
+      // Task is completed and approved
       results.push({
         task_id:      task.task_id,
         agent_id:     task.agent_id,
@@ -734,18 +782,23 @@ export async function POST(request: Request) {
         task_type:    task.task_type,
         task_description: task.task_description,
         success:      result.success,
+        status:       'COMPLETED',
+        isApproved:   true,
         output:       result.output,
         error:        result.error,
         meta:         result.meta
       });
     }
 
-    const allSuccess = results.every(r => r.success);
+    const allSuccess = results.every(r => r.success || r.status === 'COMPLETED');
+    const overallStatus = isPausedForApproval ? 'AWAITING_APPROVAL' : (allSuccess ? 'COMPLETED' : 'PARTIAL');
+
     return NextResponse.json({
       success: true,
-      overall_status: allSuccess ? 'COMPLETED' : 'PARTIAL',
+      overall_status: overallStatus,
+      awaitingApprovalTaskId: awaitingTaskId,
       total_tasks: tasks.length,
-      completed: results.filter(r => r.success).length,
+      completed: results.filter(r => r.success && r.status === 'COMPLETED').length,
       results
     });
 
