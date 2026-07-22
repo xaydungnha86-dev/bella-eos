@@ -1,5 +1,5 @@
 # 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA OPERATING SYSTEM (BELLA EOS)
-> **STATUS**: `ARCHITECTURE FREEZE (v1.0)` • **SPECIFICATION VERSION**: `v14.0`  
+> **STATUS**: `ENTERPRISE GOLD STANDARD FREEZE (v1.5)` • **SPECIFICATION VERSION**: `v15.0`  
 > **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
 ---
@@ -20,88 +20,161 @@ Enterprise Brain                  Business Applications
         ├─► Bella Workers (AI & Human Workforce)
         ├─► Bella Connect (Enterprise Connectors)
         ├─► Bella SDK (Development Kits)
-        └─► Bella Marketplace (SOP & Extensions)
+        └─► Bella Marketplace (Business Skills & SOP Extensions)
 ```
 
 ### Phân vai và Định vị thành phần:
 
 1. **Bella AI Platform (Thương hiệu tổng)**: Toàn bộ hệ sinh thái công nghệ AI dành cho doanh nghiệp.
-2. **Bella EOS (Enterprise Operating System - Lõi Điều hành)**: Đóng vai trò là **Enterprise Brain** điều hành toàn bộ doanh nghiệp. Chịu trách nhiệm cho các dịch vụ nền tảng: `Kernel`, `EOM`, `Brain Centers`, `Orchestration`, `Internal API Gateway` và `Execution`.
+2. **Bella EOS (Enterprise Operating System - Lõi Điều hành)**: Đóng vai trò là **Enterprise Brain** điều hành toàn bộ doanh nghiệp. Chịu trách nhiệm cho các dịch vụ nền tảng: `Kernel`, `Storage Domain`, `EOM`, `Brain Centers`, `Orchestration`, `Internal API Gateway` và `Execution`.
 3. **Bella EIP (Enterprise Integration Platform / Business Suite)**: Gói ứng dụng nghiệp vụ sinh dữ liệu bao gồm `CRM`, `Booking`, `POS`, `Inventory`, `Finance`, `Payroll` và `BI Dashboard`. EIP là **System of Record** - nơi ghi nhận dữ liệu thực tế, không tự đưa ra quyết định hay lập kế hoạch.
-4. **Bella Workers**: Lực lượng lao động số thực hiện các nhiệm vụ được định tuyến dựa theo **Năng lực (Capabilities)** thay vì chỉ định model AI cứng.
-5. **Bella Connect**: Lớp kết nối ngoại vi (Google Analytics, Facebook, Zalo, TikTok, MISA, SAP...) dịch chuyển về mô hình dữ liệu chuẩn của EOS.
-6. **Bella SDK**: Nền tảng mở cho phép lập trình viên tích hợp các executor và adapter mới.
-7. **Marketplace**: Nơi phân phối các gói SOP chuẩn và extension.
+4. **Bella Connect**: Lớp kết nối ngoại vi (Google Analytics, Facebook, Zalo, TikTok, MISA, SAP, Odoo, Salesforce...). Chuẩn hóa toàn bộ thuật ngữ ngoại vi về **Canonical Business Vocabulary (CBV)** trước khi chuyển vào EOS.
+5. **Bella Workers**: Lực lượng lao động số thực hiện các nhiệm vụ được định tuyến dựa theo **Năng lực (Capabilities)** thay vì chỉ định model AI cứng.
+6. **Bella Marketplace**: Nơi phân phối các **Business Skills** (Kỹ năng doanh nghiệp) và các gói **SOP Extensions** phân cấp chuẩn.
 
 ---
 
-## 2. 4 CORE DOMAINS OF BELLA EOS
+## 2. DỮ LIỆU CHUẨN HÓA: CBV & EOM
 
-Kiến trúc được phân tách thành 4 miền logic (domains) độc lập:
+Để đảm bảo mọi hệ thống ERP/CRM bên ngoài giao tiếp mượt mà với EOS:
 
 ```
+[ ERP / CRM / API Ngoại Vi ] 
+        │ (SAP, MISA, Facebook, Zalo...)
+        ▼
 ┌────────────────────────────────────────────────────────┐
-│ Domain 1: Bella Kernel (Runtime Foundation)            │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
+│ Bella Connect                                          │
+└───────────────────────┬────────────────────────────────┘
+                        ▼
 ┌────────────────────────────────────────────────────────┐
-│ Enterprise Object Model (Common Grammar)               │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
+│ Canonical Business Vocabulary (CBV)                    │
+│ (Revenue, Customer, Booking, Campaign, KPI, ROI,       │
+│  Margin, Lead, Invoice, Approval...)                   │
+└───────────────────────┬────────────────────────────────┘
+                        ▼
 ┌────────────────────────────────────────────────────────┐
-│ Domain 2: Enterprise Brain (6 Cognitive Centers)       │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ Domain 3: Orchestration (Process Control & Scheduling) │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ Internal API Gateway (Unified Adapter Interfaces)      │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ Domain 4: Execution (Executor Coordinator)             │
+│ Enterprise Object Model (EOM - 13 Frozen Entities)     │
+│ (Customer, Employee, Invoice, Campaign, Task, Process, │
+│  Document, Decision, Evidence, Asset, Policy,          │
+│  Capability, Worker)                                   │
 └────────────────────────────────────────────────────────┘
 ```
 
-### Domain 1: Bella Kernel
-* **Trách nhiệm**: Nền tảng runtime hệ thống, quản lý định danh, phân quyền, giao dịch, nhật ký kiểm toán (audit logs) và luồng phân phối sự kiện hệ thống. Kernel hoàn toàn độc lập với các khái niệm kinh doanh hay AI.
+---
 
-### Enterprise Object Model (EOM)
-* **Trách nhiệm**: Ngôn ngữ chung của toàn bộ nền tảng. Tất cả các dữ liệu, tài liệu, kết quả đánh giá, và lệnh điều hành đều được chuẩn hóa thành các thực thể EOM trước khi đưa vào bộ não xử lý.
-* **13 EOM Entities**: `Customer`, `Employee`, `Invoice`, `Campaign`, `Task`, `Process`, `Document`, `Decision`, `Evidence`, `Asset`, `Policy`, `Capability`, `Worker`.
+## 3. THỨ BẬC TRI THỨC DOANH NGHIỆP (ENTERPRISE HIERARCHY)
 
-### Domain 2: Enterprise Brain (6 Cognitive Centers)
-* **Trách nhiệm**: Trái tim thông minh của hệ thống. Hiểu doanh nghiệp hoạt động thế nào, mục tiêu là gì, và cần học hỏi gì tiếp theo.
-* **6 Brain Centers**:
-  1. **🧠 Memory Center**: Bộ nhớ hoạt động (Operational), Bộ nhớ số liệu (Business), Bộ nhớ quyết định (Decision), Bộ nhớ hội thoại (Conversation) và Bộ nhớ tài liệu (Document).
-  2. **🧠 Understanding Center**: Phân tích thông tin thô từ mọi nguồn dữ liệu (Documents, Database, API, CRM, ERP, Meetings, Email, Chat, Audio, Video) thành tri thức cấu trúc.
-  3. **🧬 Knowledge Center**: Bản đồ tri thức (Knowledge Graph), Company DNA, sơ đồ phân loại (Taxonomy, Ontology), và bộ chỉ mục tìm kiếm ngữ nghĩa.
-  4. **📊 Context Center**: Trích xuất dữ liệu, kiểm duyệt bảo mật và biên dịch thành **Canonical Context Packages**. **Context Center không bao giờ để lộ dữ liệu thô (raw database)** cho AI.
-  5. **⚖️ Reasoning Center**: Phân rã mục tiêu (Goal Decompose), lập kế hoạch, kiểm tra tuân thủ chính sách (Policy Check) và chạy mô phỏng dự báo Monte Carlo.
-  6. **🧬 Learning Center**: Phân tích kết quả thực thi (Evidence), cập nhật DNA và tối ưu hóa SOP (SOP Mutation).
+Hệ thống phân cấp tri thức và thực thi từ cao xuống thấp để vận hành toàn bộ doanh nghiệp và phục vụ **Bella Marketplace**:
 
-### Domain 3: Orchestration (AI Orchestrator & Goal Verification)
-* **Trách nhiệm**: Tiếp nhận ý chí của CEO (Intent), dùng LLM (GPT-4o/Claude/Gemini) tự động phân rã thành Task Execution Plan đa agent, kiểm định tiến độ hoàn thành mục tiêu (`GoalVerificationEngine`) và phát hiện mất kết nối.
-* **Thành phần**: Intent Engine, Goal Engine, AI Orchestrator Planner (`/api/orchestrator/plan`), Agent Runner (`/api/orchestrator/run`), Policy Engine, GoalVerificationEngine.
-
-### Internal API Gateway
-* **Trách nhiệm**: Hợp đồng giao tiếp trung gian (Internal API Gateway). Decouple toàn bộ quy trình lập kế hoạch khỏi lớp mô hình thực thi cụ thể. Sử dụng Proxy Routes bảo vệ API keys server-side (`/api/facebook/publish`, `/api/db/audit`).
-
-### Domain 4: Execution (Multi-Agent Workforce Execution)
-* **Trách nhiệm**: Lực lượng lao động số (AI Workers):
-  - ✍️ **Hermes Content Agent**: Viết nội dung sáng tạo, PR, Email.
-  - ⚡ **Apollo Social Agent**: Đăng bài tự động lên Facebook, Zalo, TikTok.
-  - 📈 **Ares Ads Agent**: Thiết lập framework chiến dịch quảng cáo trả phí.
-  - 📊 **Athena Analytics Agent**: Phân tích dữ liệu KPI, ROI và dự báo.
-  - 🎯 **Demeter CRM Agent**: Phân khúc và định tuyến khách hàng.
+```
+ 🏆 Business Skill (Ví dụ: Launch Product, Spa Operation, Lead Generation, Financial Audit, Customer Recovery)
+       │
+       ▼
+ 📜 Standard Operating Procedure (SOP - Gói quy trình chuẩn)
+       │
+       ▼
+ 🔄 Workflow (Luồng công việc điều phối)
+       │
+       ▼
+ 📌 Task (Nhiệm vụ cụ thể)
+       │
+       ▼
+ ⚖️ Capability (Năng lực yêu cầu)
+       │
+       ▼
+ 🤖 Worker (Lực lượng thực thi: AI Agent / Human)
+```
 
 ---
 
-## 3. CLOSED-LOOP FLYWHEEL & INGESTION PIPELINE
+## 4. COMPANY DNA — TÀI SẢN DOANH NGHIỆP ĐỘC LẬP
 
-### 1. Vòng lặp Học hỏi Tự động (Closed-Loop Learning Flywheel)
+Company DNA được tách thành **Tài sản Doanh nghiệp Độc lập (Independent Enterprise Asset)** để cung cấp định hướng cho bộ não và tất cả AI Agents:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      COMPANY DNA ASSET                          │
+├─────────────────────────────────────────────────────────────────┤
+│ • Vision & Mission (Tầm nhìn & Sứ mệnh)                        │
+│ • Brand Tone & Voice (Tông giọng & Phong cách giao tiếp)         │
+│ • Corporate Culture & Values (Văn hóa & Giá trị cốt lõi)        │
+│ • Brand Design Principles (Nguyên tắc thiết kế thương hiệu)     │
+│ • Forbidden Rules & Anti-Patterns (Quy tắc cấm & Hạn chế)       │
+│ • CEO & Board Preferences (Sở thích & Khẩu vị rủi ro của CEO)  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. PIPELINE TIẾP NHẬN DỮ LIỆU: ENTERPRISE INGESTION & UNDERSTANDING
+
+Hoạt động tiếp nhận và xử lý dữ liệu thô (ETL) được tách hoàn toàn ra khỏi Brain Cognitive Core để giữ bộ não thuần túy nhận thức:
+
+```
+[ Documents / Data / APIs / Email / Audio / Video ]
+                        │
+                        ▼
+┌────────────────────────────────────────────────────────┐
+│ Enterprise Ingestion & Understanding Pipeline (ETL)    │
+│  OCR ➔ Parser ➔ Chunking ➔ Embedding ➔ Entity Extract │
+└───────────────────────┬────────────────────────────────┘
+                        ▼
+┌────────────────────────────────────────────────────────┐
+│ Enterprise Brain (Cognitive Centers)                   │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 6. 5 CORE DOMAINS OF BELLA EOS
+
+Architecture Freeze v1.5 quy định 5 miền logic cô lập:
+
+```
+┌────────────────────────────────────────────────────────┐
+│ Domain 1: Bella Kernel (Runtime & Event Store)         │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Domain 2: Enterprise Storage Domain (Abstract Layer)   │
+│  • Metadata Store (PostgreSQL / Relational)            │
+│  • Vector Store (pgvector / Embeddings)                │
+│  • Blob Store (Document & Asset Storage)               │
+│  • Operational Cache (Redis / Key-Value)               │
+│  • Graph Index (Knowledge Graph Index)                 │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Domain 3: Enterprise Brain (Pure Cognitive Core)       │
+│  • Memory Center (Operational, Business, Decision)     │
+│  • Knowledge Center (Graph, Taxonomy, Ontology)        │
+│  • Context Center (Selective Isolation & Packages)     │
+│  • Reasoning Center (Goal Analysis, Logic, Monte Carlo)│
+│  • Learning Center (Feedback, Verification, Mutation)  │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Domain 4: Orchestration (Process Control & Scheduling) │
+│  • Intent Engine, Planning Engine, Scheduler           │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Domain 5: Execution (Multi-Agent Workforce & Gateway)  │
+│  • Internal API Gateway, Agent Runner, Tool Registry   │
+└────────────────────────────────────────────────────────┘
+```
+
+### Chi tiết các Cognitive Centers trong Enterprise Brain:
+1. **🧠 Memory Center**: Quản lý bộ nhớ vận hành, số liệu kinh doanh, quyết định lịch sử và hội thoại.
+2. **🧬 Knowledge Center**: Bản đồ tri thức (Knowledge Graph), sơ đồ phân loại (Taxonomy, Ontology), và bộ chỉ mục tìm kiếm ngữ nghĩa.
+3. **📊 Context Center**: Trích xuất dữ liệu, kiểm duyệt bảo mật và biên dịch thành **Canonical Context Packages**. **Context Center không bao giờ để lộ dữ liệu thô (raw database)** cho AI.
+4. **⚖️ Reasoning Center**: Phân tích mục tiêu (Goal Analysis), lập luận logic, ra quyết định và chạy mô phỏng dự báo Monte Carlo ROI.
+5. **🧬 Learning Center**: Tiếp nhận phản hồi từ **GoalVerificationEngine**, kiểm tra chứng cứ (Evidence), tính toán % hoàn thành mục tiêu, cảnh báo lỗi và tiến hóa SOP (SOP Mutation).
+
+---
+
+## 7. CLOSED-LOOP FLYWHEEL
+
 ```
          CEO Strategic Intent
                   │
@@ -109,7 +182,7 @@ Kiến trúc được phân tách thành 4 miền logic (domains) độc lập:
          AI Orchestrator Planning (LLM-based)
                   │
                   ▼
-         Goal Decompose & Monte Carlo Projections
+         Goal Analysis & Monte Carlo Projections
                   │
                   ▼
          Agent Runner & Tool Registry Dispatch
@@ -118,40 +191,40 @@ Kiến trúc được phân tách thành 4 miền logic (domains) độc lập:
          Worker Multi-Agent Execution
                   │
                   ▼
-         Goal Verification Audit & Disconnection Track
+         Learning Center: Goal Verification Audit & Disconnection Track
                   │
                   ▼
          Interactive Topology & Task Detail Popup
                   │
                   ▼
-         SOP Mutation & Learning Loop
+         SOP Mutation & Learning Feedback Loop
 ```
 
 ---
 
-## 4. 🔒 THE 5 FROZEN CONTRACTS
+## 8. 🔒 THE 6 FROZEN CONTRACTS
 
-1. **Enterprise Object Model (EOM)**: Cấu trúc JSON Schema cố định cho 13 thực thể chính để tất cả các thành phần giao tiếp chung một ngôn ngữ.
-2. **Canonical Context Package**: Chuẩn đóng gói ngữ cảnh duy nhất gửi đến AI Workers (chỉ chứa dữ liệu lọc bảo mật và đã được rút gọn tối ưu token).
-3. **Capability Registry**: Chuẩn mô tả năng lực của Worker (định danh, proficient level, SLA, đơn giá token).
-4. **Internal Event Contract**: Hệ thống sự kiện bất biến giao tiếp giữa các domains (`IntentCreated`, `GoalGenerated`, `PlanGenerated`, `TaskCreated`, `TaskCompleted`, `GoalVerified`, `EvidenceVerified`, `LearningUpdated`).
-5. **Internal API Contract**: Giao diện (Interface) các dịch vụ cốt lõi: Context API, Memory API, Planning API, Execution API, Learning API, Settings Integration API.
+1. **Canonical Business Vocabulary (CBV)**: Chuẩn từ vựng kinh doanh dùng chung cho tất cả Connectors.
+2. **Enterprise Object Model (EOM)**: Cấu trúc JSON Schema cố định cho 13 thực thể chính.
+3. **Canonical Context Package**: Chuẩn đóng gói ngữ cảnh duy nhất gửi đến AI Workers.
+4. **Capability Registry**: Chuẩn mô tả năng lực của Worker (định danh, proficient level, SLA, đơn giá token).
+5. **Internal Event Contract**: Hệ thống sự kiện bất biến giao tiếp giữa các domains (`IntentCreated`, `GoalGenerated`, `PlanGenerated`, `TaskCreated`, `TaskCompleted`, `GoalVerified`, `EvidenceVerified`, `LearningUpdated`).
+6. **Storage Abstraction Interface**: Giao diện lưu trữ chuẩn hóa — Brain Centers gọi qua Storage Interfaces mà không phụ thuộc trực tiếp vào Supabase hay PostgreSQL.
 
 ---
 
-## 5. TECHNOLOGY STACK
+## 9. TECHNOLOGY STACK
 
 * **Frontend**: Next.js (App Router), React 19, TypeScript, CSS Modules, Tailwind CSS, Lucide Icons.
 * **Backend**: Next.js Server API Routes (`/api/*`), TypeScript.
-* **Database & Persistence**: Supabase PostgreSQL + Local Storage Fallback.
-* **Object Storage**: Supabase Storage.
+* **Storage Domain Interfaces**: PostgreSQL (Metadata), pgvector (Vector), Supabase Storage (Blob), Redis/KV (Cache).
 * **Security & Auth**: Server-side proxy API routes reading secrets from environment / encrypted DB, masking keys on client.
 * **AI Executors**: OpenAI (GPT-4o), Anthropic (Claude 3.5 Sonnet), Google (Gemini 2.0 Flash / 2.5 Pro).
 * **Deployment**: Vercel (Development/Staging), VPS Ubuntu + Docker + Nginx (Production).
 
 ---
 
-## 6. PROJECT DIRECTORY STRUCTURE
+## 10. PROJECT DIRECTORY STRUCTURE
 
 ```
 src/
@@ -168,7 +241,7 @@ src/
 │   │   │   └── run/            # Agent Runner & Tool Registry Executor
 │   │   ├── settings/
 │   │   │   └── integrations/   # Integration keys CRUD API
-│   │   ├── ingest/route.ts     # Ingestion & Understanding receiver
+│   │   ├── ingest/route.ts     # Ingestion Pipeline receiver
 │   │   └── intent/route.ts     # Intent parser
 │   ├── settings/
 │   │   └── page.tsx            # Customer Integration Settings UI
@@ -180,39 +253,38 @@ src/
 │
 ├── core/                       # Bella EOS Core (TypeScript)
 │   ├── kernel/                 # Domain 1: Kernel Event Store & transaction log
-│   ├── eom/                    # EOM Schema Validators
-│   ├── brain/                  # Domain 2: 6 Brain Cognitive Centers
+│   ├── storage/                # Domain 2: Storage Domain Abstraction (Metadata, Vector, Blob, Cache)
+│   ├── eom/                    # CBV & EOM Schema Validators
+│   ├── brain/                  # Domain 3: 5 Brain Cognitive Centers & Company DNA Asset
 │   │   ├── memory.ts
-│   │   ├── understanding.ts
 │   │   ├── knowledge.ts
 │   │   ├── context.ts
 │   │   ├── reasoning.ts
-│   │   ├── learning.ts
-│   │   └── index.ts
-│   ├── orchestration/          # Domain 3: Goal trees, Intent, Scheduler & GoalVerificationEngine
-│   └── execution/              # Domain 4: Execution Coordinator & Internal API Gateway
+│   │   ├── learning.ts         # Includes Goal Verification Audit
+│   │   └── dna.ts              # Company DNA Enterprise Asset
+│   ├── pipeline/               # Ingestion & Understanding ETL Pipeline
+│   │   └── ingestion.ts
+│   ├── orchestration/          # Domain 4: Goal trees, Intent, Planning & Scheduler
+│   └── execution/              # Domain 5: Agent Runner, Tool Registry & Internal API Gateway
 │
-├── connectors/                 # Bella Connect (EIP, SAP, MISA, Facebook connectors)
+├── connectors/                 # Bella Connect (EIP, SAP, MISA, Facebook connectors + CBV Mapper)
 │   ├── index.ts
 │
 ├── lib/                        # Supabase client wrapper
 │   └── supabase.ts
 │
-├── types/                      # Shared TS Interfaces
-│   └── eom.ts                  # Frozen EOM typings
-│
-└── supabase/
-    └── migrations/
-        └── 001_integrations.sql # DB schema for customer integration keys & audit logs
+└── types/                      # Shared TS Interfaces
+    └── eom.ts                  # Frozen EOM & CBV typings
 ```
 
 ---
 
-## 7. ARCHITECTURE FREEZE COMPLIANCE RULES
+## 11. ARCHITECTURE FREEZE COMPLIANCE RULES
 
-1. **Bella EIP is External System of Record**: Trực thuộc Bella EIP độc lập bên ngoài, chỉ lưu trữ dữ liệu nghiệp vụ và giao tiếp qua connectors, không nằm trong lõi EOS.
+1. **Bella EIP is External System of Record**: EIP độc lập bên ngoài, chỉ lưu trữ dữ liệu nghiệp vụ và giao tiếp qua connectors + CBV mapper.
 2. **Bella EOS is Enterprise Brain**: Mọi quyết định, lập lịch, kiểm tra chính sách, và tiến hóa của doanh nghiệp đều phải thông qua các Cognitive Centers của EOS.
-3. **No Direct DB Access for AI**: AI Workers luôn giao tiếp qua gói Canonical Context bảo mật của Context Center, tuyệt đối không kết nối trực tiếp vào PostgreSQL của EIP hay ERP bên ngoài.
-4. **Capability-based Routing**: Điều phối công việc tự động dựa trên Năng lực, không gán tĩnh theo tên model AI để dễ dàng nâng cấp mô hình AI trong tương lai.
-5. **Goal Verification & Disconnection Audit**: Mọi kế hoạch điều phối phải chạy qua `GoalVerificationEngine` để đánh giá % hoàn thành mục tiêu và đưa ra cảnh báo khắc phục rủi ro mất kết nối.
-6. **Human-in-the-Loop**: Hỗ trợ ngắt tiến trình bất kỳ lúc nào để chuyển quyền duyệt cho CEO/Con người khi phát hiện cảnh báo rủi ro hoặc kiểm định chất lượng (EQE Gate).
+3. **No Direct DB Access for AI**: AI Workers luôn giao tiếp qua gói Canonical Context bảo mật của Context Center, tuyệt đối không kết nối trực tiếp vào PostgreSQL hay EIP.
+4. **Storage Abstraction Enforcement**: Tất cả các Brain Centers phải giao tiếp qua Storage Interfaces của Storage Domain, không hardcode thư viện Supabase/Postgres trong logic nhận thức.
+5. **Business Skill Hierarchy**: Định tuyến công việc dựa theo thứ bậc: `Business Skill` ➔ `SOP` ➔ `Workflow` ➔ `Task` ➔ `Capability` ➔ `Worker`.
+6. **Goal Verification in Learning Center**: Mọi kết quả thực thi được `Learning Center` kiểm định để đánh giá % hoàn thành mục tiêu, cảnh báo lỗi và kích hoạt đột biến quy trình (SOP Mutation).
+7. **Human-in-the-Loop**: Hỗ trợ ngắt tiến trình bất kỳ lúc nào để chuyển quyền duyệt cho CEO/Con người khi phát hiện cảnh báo rủi ro hoặc kiểm định chất lượng (EQE Gate).
