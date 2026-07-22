@@ -14,7 +14,26 @@ import { HermesMcpServerEngine } from '@/connectors/hermes-mcp-connector';
  */
 
 // ─── Tool implementations ─────────────────────────────────────────────────────
+async function getCopywriterKeys(clientKeys: any) {
+  const config = clientKeys?.agent_configs?.['seo_copywriter'] || clientKeys?.agent_configs?.['eos_content_worker'] || {};
+  const preferredModel = config.model;
+  const customApiKey = config.apiKey;
+
+  let openai = clientKeys.openai;
+  let anthropic = clientKeys.anthropic;
+  let gemini = clientKeys.gemini;
+
+  if (customApiKey) {
+    if (preferredModel?.startsWith('gpt')) openai = customApiKey;
+    if (preferredModel?.startsWith('claude')) anthropic = customApiKey;
+    if (preferredModel?.startsWith('gemini')) gemini = customApiKey;
+  }
+
+  return { openai, anthropic, gemini, model: preferredModel };
+}
+
 async function tool_write_facebook_post(input: any, clientKeys: any): Promise<ToolResult> {
+  const cw = await getCopywriterKeys(clientKeys);
   const res = await fetch(`${getBaseUrl()}/api/ai/write-post`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -24,9 +43,10 @@ async function tool_write_facebook_post(input: any, clientKeys: any): Promise<To
       platform:     'facebook',
       segment:      input.target_audience,
       goal:         input.objective,
-      client_openai_key:    clientKeys.openai,
-      client_anthropic_key: clientKeys.anthropic,
-      client_gemini_key:    clientKeys.gemini
+      client_openai_key:    cw.openai,
+      client_anthropic_key: cw.anthropic,
+      client_gemini_key:    cw.gemini,
+      model:                cw.model
     })
   });
   const data = await res.json();
@@ -38,13 +58,15 @@ async function tool_write_facebook_post(input: any, clientKeys: any): Promise<To
 }
 
 async function tool_write_zalo_message(input: any, clientKeys: any): Promise<ToolResult> {
+  const cw = await getCopywriterKeys(clientKeys);
   const res = await fetch(`${getBaseUrl()}/api/ai/write-post`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       objective: input.objective, voiceTone: input.tone, platform: 'zalo',
       segment: input.target_audience, goal: input.objective,
-      client_openai_key: clientKeys.openai, client_anthropic_key: clientKeys.anthropic, client_gemini_key: clientKeys.gemini
+      client_openai_key: cw.openai, client_anthropic_key: cw.anthropic, client_gemini_key: cw.gemini,
+      model: cw.model
     })
   });
   const data = await res.json();
@@ -52,13 +74,15 @@ async function tool_write_zalo_message(input: any, clientKeys: any): Promise<Too
 }
 
 async function tool_write_email_campaign(input: any, clientKeys: any): Promise<ToolResult> {
+  const cw = await getCopywriterKeys(clientKeys);
   const res = await fetch(`${getBaseUrl()}/api/ai/write-post`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       objective: input.objective, voiceTone: input.tone, platform: 'email',
       segment: input.target_audience, goal: input.objective,
-      client_openai_key: clientKeys.openai, client_anthropic_key: clientKeys.anthropic, client_gemini_key: clientKeys.gemini
+      client_openai_key: cw.openai, client_anthropic_key: cw.anthropic, client_gemini_key: cw.gemini,
+      model: cw.model
     })
   });
   const data = await res.json();
@@ -66,6 +90,7 @@ async function tool_write_email_campaign(input: any, clientKeys: any): Promise<T
 }
 
 async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResult> {
+  const cw = await getCopywriterKeys(clientKeys);
   const res = await fetch(`${getBaseUrl()}/api/ai/write-post`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -73,14 +98,15 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
       objective: `Viết quảng cáo ngắn gọn (dưới 125 ký tự): ${input.objective}`,
       voiceTone: input.tone, platform: 'facebook_ad',
       segment: input.target_audience, goal: input.objective,
-      client_openai_key: clientKeys.openai, client_anthropic_key: clientKeys.anthropic, client_gemini_key: clientKeys.gemini
+      client_openai_key: cw.openai, client_anthropic_key: cw.anthropic, client_gemini_key: cw.gemini,
+      model: cw.model
     })
   });
   const data = await res.json();
   return { success: data.success, output: data.content, meta: { model: data.model } };
 }
 
-async function tool_generate_media_creative(input: any, clientKeys?: any, taskOutputs?: Record<string, string>): Promise<ToolResult> {
+async function tool_generate_media_creative(input: any, clientKeys?: any, taskOutputs?: Record<string, string>, context?: any): Promise<ToolResult> {
   const objective = input.objective || input.format || 'Spa Management System Banner';
   
   // Extract previous Copywriter Worker Output dynamically from Task Graph Execution
@@ -94,6 +120,36 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
     }
   }
 
+  const creativeConfig = clientKeys?.agent_configs?.['creative_designer'] || clientKeys?.agent_configs?.['eos_creative_worker'] || {};
+  const preferredModel = creativeConfig.model;
+  const customApiKey = creativeConfig.apiKey;
+
+  let openaiKey = clientKeys?.openai;
+  let geminiKey = clientKeys?.gemini;
+  let falKey = clientKeys?.fal;
+
+  if (customApiKey) {
+    if (preferredModel?.startsWith('dall-e')) openaiKey = customApiKey;
+    if (preferredModel?.startsWith('google-imagen') || preferredModel?.startsWith('imagen')) geminiKey = customApiKey;
+    if (preferredModel?.startsWith('flux')) falKey = customApiKey;
+  }
+
+  // Construct dynamic Brand DNA Context
+  const brandName = context?.brandDna?.brandName || 'BELLA EOS';
+  const voiceTone = context?.brandDna?.voiceTone || input.tone || 'Professional & Premium';
+  const designStyle = context?.brandDna?.designStyle || input.style || 'Minimalist Glassmorphism';
+  const targetSegment = context?.brandDna?.targetSegment || input.target_audience || 'Khách hàng tiềm năng & Đối tác';
+  const brandDna = {
+    brandName,
+    voiceTone,
+    visualStyle: designStyle,
+    targetSegment,
+    brandColors: {
+      primary: '#061E17',
+      accent: '#D4AF37'
+    }
+  };
+
   let imageUrl = 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop';
   let provider = 'enterprise-graphic-engine';
   let model = 'poster-design-skill-v2';
@@ -105,9 +161,11 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       body: JSON.stringify({
         objective,
         copywriterContent,
-        client_openai_key: clientKeys?.openai,
-        client_gemini_key: clientKeys?.gemini,
-        client_fal_key: clientKeys?.fal
+        client_openai_key: openaiKey,
+        client_gemini_key: geminiKey,
+        client_fal_key: falKey,
+        model: preferredModel,
+        brandDna
       })
     });
     const data = await res.json();
@@ -115,32 +173,38 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       imageUrl = data.imageUrl;
       provider = data.provider;
       model = data.model;
+    } else {
+      const ts = Date.now();
+      imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
     }
   } catch (e) {
     console.warn('[tool_generate_media_creative] Image API call fallback:', e);
+    const ts = Date.now();
+    imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
   }
 
+  // Generate detailed prompt to show to the user
+  const { PosterDesignSkill } = await import('@/core/skills/poster-design-skill');
+  const detailedPrompt = PosterDesignSkill.buildFullDesignSpecPrompt(objective, copywriterContent, brandDna);
+
   const designPlan = {
-    businessContext: 'Phần mềm Quản lý Spa Bella EOS — Bối cảnh Spa Cao Cấp & Thẩm Mỹ Viện',
-    targetAudience: 'Chủ Spa, Quản lý Thẩm mỹ viện & Chuỗi Cơ sở Làm đẹp',
-    colorScheme: 'Xanh ngọc bảo (#061E17) & Vàng kim Royal Gold (#D4AF37)',
+    businessContext: `Chiến dịch cho thương hiệu ${brandName} — ${voiceTone}`,
+    targetAudience: targetSegment,
+    colorScheme: 'Màu thương hiệu mặc định / tùy chỉnh từ DNA',
     components: [
-      '🏆 Logo Doanh nghiệp: BELLA EOS SPA PLATFORM (Badge Vàng)',
+      `🏆 Logo Doanh nghiệp: ${brandName.toUpperCase()} PLATFORM (Royal Accent)`,
       '🎁 Badge Quà Tặng Động: Trích xuất trực tiếp từ bài viết AI Copywriter ở Task #1',
       '✍️ Tiêu đề Đồ họa: Render từ Headline của Copywriter',
-      '📊 Product Mockup: Khung iPad Pro 3D hiển thị Giao diện Quản lý Spa (+20.4% Doanh thu, Lịch KTV)',
-      '👉 Call-To-Action Button: Đăng ký trải nghiệm Demo Miễn Phí'
+      '📊 Product Mockup: Khung 3D hiển thị Giao diện live khớp với chủ đề chiến dịch',
+      '👉 Call-To-Action Button: Đăng ký trải nghiệm / Nhận ưu đãi'
     ],
     selectedModel: `${provider}/${model}`
   };
 
   return {
     success: true,
-    output: `🎨 [Bella EOS Media & Creative Worker] ĐÃ HOÀN TẤT THIẾT KẾ BANNER ĐỒ HỌA CHUẨN BÁN HÀNG:\n` +
-      `📌 1. Phân Tích Bối Cảnh: ${designPlan.businessContext}\n` +
-      `📌 2. Kế Hoạch Thiết Kế Ảnh: Banner 1200x630 (Logo Vàng + Dynamic Text Copywriter + iPad Spa UI Mockup)\n` +
-      `📌 3. Màu Sắc Thương Hiệu: ${designPlan.colorScheme}\n` +
-      `📌 4. Model AI Thực Hiện: [${designPlan.selectedModel}]\n` +
+    output: `🎨 [${brandName} Media & Creative Worker] ĐÃ HOÀN TẤT THIẾT KẾ BANNER ĐỒ HỌA CHUẨN BÁN HÀNG:\n\n` +
+      `📋 QUY TRÌNH THIẾT KẾ & PROMPT YÊU CẦU AI:\n${detailedPrompt}\n\n` +
       `🖼️ Image Banner URL (PNG 4K): ${imageUrl}`,
     meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1200x630', status: 'GENERATED', designPlan }
   };
@@ -150,16 +214,16 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
   const content = input.content_from || input.content || input.objective || '';
   const mediaRaw = input.media_from || input.media || '';
 
-  // Extract HTTP image URL from text output or reference
-  const extractHttpUrl = (str: string): string => {
+  // Extract HTTP or Data image URL from text output or reference
+  const extractUrl = (str: string): string => {
     if (!str) return '';
-    const match = str.match(/https?:\/\/[^\s\n"']+/);
+    const match = str.match(/(https?:\/\/[^\s\n"']+|data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+)/);
     return match ? match[0] : '';
   };
 
-  const defaultBannerUrl = `${getBaseUrl()}/api/ai/banner-image`;
-  const extractedUrl = extractHttpUrl(mediaRaw);
-  const imageUrl = (extractedUrl && !extractedUrl.includes('unsplash')) ? extractedUrl : defaultBannerUrl;
+  const defaultBannerUrl = `${getBaseUrl()}/api/ai/banner-image?t=${Date.now()}`;
+  const extractedUrl = extractUrl(mediaRaw);
+  const imageUrl = extractedUrl || defaultBannerUrl;
 
   if (!content) {
     return { success: false, output: '', error: 'Không có nội dung để đăng. Task này phụ thuộc vào task viết nội dung trước.' };
@@ -281,7 +345,7 @@ async function tool_default(task: any): Promise<ToolResult> {
 }
 
 // ─── Tool Registry — maps task_type → tool function ──────────────────────────
-type ToolFn = (input: any, clientKeys: any, taskOutputs: Record<string, string>) => Promise<ToolResult>;
+type ToolFn = (input: any, clientKeys: any, taskOutputs: Record<string, string>, context?: any) => Promise<ToolResult>;
 type ToolResult = { success: boolean; output: string; error?: string; meta?: any };
 
 const TOOL_REGISTRY: Record<string, ToolFn> = {
@@ -289,8 +353,8 @@ const TOOL_REGISTRY: Record<string, ToolFn> = {
   write_zalo_message:     (i, k, _)  => tool_write_zalo_message(i, k),
   write_email_campaign:   (i, k, _)  => tool_write_email_campaign(i, k),
   write_ad_copy:          (i, k, _)  => tool_write_ad_copy(i, k),
-  generate_media_creative:(i, k, to) => tool_generate_media_creative(i, k, to),
-  create_banner_design:   (i, k, to) => tool_generate_media_creative(i, k, to),
+  generate_media_creative:(i, k, to, c) => tool_generate_media_creative(i, k, to, c),
+  create_banner_design:   (i, k, to, c) => tool_generate_media_creative(i, k, to, c),
   publish_facebook:       (i, k, to) => tool_publish_facebook(i, k, to),
   publish_zalo:           (i, k, to) => tool_publish_zalo(i, k, to),
   publish_tiktok:         (i, k, to) => tool_publish_tiktok(i, k, to),
@@ -327,7 +391,8 @@ export async function POST(request: Request) {
       client_anthropic_key,
       client_gemini_key,
       client_facebook_token,
-      client_facebook_page_id
+      client_facebook_page_id,
+      agent_configs
     } = body as {
       tasks: any[];
       context?: any;
@@ -336,6 +401,7 @@ export async function POST(request: Request) {
       client_gemini_key?: string;
       client_facebook_token?: string;
       client_facebook_page_id?: string;
+      agent_configs?: Record<string, any>;
     };
 
     if (!tasks?.length) {
@@ -347,7 +413,8 @@ export async function POST(request: Request) {
       anthropic:           client_anthropic_key,
       gemini:              client_gemini_key,
       facebook_token:      client_facebook_token,
-      facebook_page_id:    client_facebook_page_id
+      facebook_page_id:    client_facebook_page_id,
+      agent_configs:       agent_configs
     };
 
     // Execute tasks in dependency order, tracking outputs
@@ -366,7 +433,7 @@ export async function POST(request: Request) {
 
       if (toolFn) {
         console.log(`[AgentRunner] Executing: [${task.agent_name}] → ${task.task_type}`);
-        result = await toolFn(resolvedInput, clientKeys, taskOutputs);
+        result = await toolFn(resolvedInput, clientKeys, taskOutputs, context);
       } else {
         console.warn(`[AgentRunner] Unknown tool: ${task.task_type} — using default`);
         result = await tool_default(task);

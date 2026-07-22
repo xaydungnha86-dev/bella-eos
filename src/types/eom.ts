@@ -128,8 +128,10 @@ export interface CanonicalContextPackage {
     targetMetric: string;
   };
   brandDna: {
+    brandName?: string;
     voiceTone: string;
     designStyle: string;
+    targetSegment?: string;
   };
   policies: Array<{ id: string; rule: string }>;
   learningEvidence: Array<{ task: string; tip: string }>;

@@ -24,19 +24,61 @@ function getStoredKey(provider: string, key_name: string): string {
   } catch { return ''; }
 }
 
-// 11 AI Workforce Matrix static definition
+// ─── Safe Storage: sessionStorage (primary, survives back-nav) + localStorage fallback ─
+const SS_LARGE_KEYS = new Set(['bella_eos_dynamic_tasks', 'bella_eos_telemetry_logs', 'bella_eos_verification_report']);
+
+function safeSet(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    // Always write to sessionStorage (persists across back/forward, cleared on tab close)
+    sessionStorage.setItem(key, value);
+  } catch {}
+  // For non-large keys, also write to localStorage for cross-session persistence
+  if (!SS_LARGE_KEYS.has(key)) {
+    try { localStorage.setItem(key, value); } catch {}
+  } else {
+    // Write compact version (truncate per-task output to 500 chars) to localStorage
+    try {
+      const parsed = JSON.parse(value);
+      const compact = Array.isArray(parsed)
+        ? parsed.map((t: any) => ({
+            ...t,
+            output: typeof t.output === 'string' && t.output.length > 500
+              ? t.output.substring(0, 500) + '…[truncated]'
+              : t.output
+          }))
+        : parsed;
+      localStorage.setItem(key, JSON.stringify(compact));
+    } catch {}
+  }
+}
+
+function safeGet(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    // Prefer sessionStorage (has full data)
+    const ss = sessionStorage.getItem(key);
+    if (ss !== null) return ss;
+  } catch {}
+  try {
+    return localStorage.getItem(key);
+  } catch {}
+  return null;
+}
+
+// 11 Process-based AI Agent Workforce Matrix Definition
 const AI_WORKFORCE = [
-  { id: 'coo', name: 'AI COO Orchestrator', type: 'AI', role: 'Operations', avatar: '🤖', capability: 'Process planning & scheduling', status: 'idle', prof: 98, color: 'from-cyan-500 to-blue-500' },
-  { id: 'hermes', name: 'Hermes Operating Driver', type: 'AI', role: 'Execution', avatar: '⚡', capability: 'API Dispatch & Web Execution', status: 'idle', prof: 95, color: 'from-amber-500 to-orange-500' },
-  { id: 'claude', name: 'Claude 3.5 Sonnet', type: 'AI', role: 'Strategy & Coding', avatar: '🧠', capability: 'Complex reasoning & system audit', status: 'idle', prof: 99, color: 'from-purple-500 to-indigo-500' },
-  { id: 'gemini', name: 'Gemini 2.5 Pro', type: 'AI', role: 'Multimodality', avatar: '🧬', capability: 'Video, audio & long-doc parsing', status: 'idle', prof: 96, color: 'from-emerald-500 to-teal-500' },
-  { id: 'gpt4', name: 'GPT-4o Reasoner', type: 'AI', role: 'Function Calling', avatar: '🔮', capability: 'JSON outputs & system connectors', status: 'idle', prof: 97, color: 'from-pink-500 to-rose-500' },
-  { id: 'human_ceo', name: 'CEO / Board Sign-off', type: 'Human', role: 'Executive Authority', avatar: '👑', capability: 'Budget approvals & final gate check', status: 'idle', prof: 100, color: 'from-amber-600 to-yellow-400' },
-  { id: 'seo_agent', name: 'SEO Content Writer', type: 'AI', role: 'Marketing', avatar: '✍️', capability: 'Optimized blog posts & keyword research', status: 'idle', prof: 92, color: 'from-blue-400 to-cyan-400' },
-  { id: 'ads_agent', name: 'Ads Campaign Optimizer', type: 'AI', role: 'Marketing', avatar: '📈', capability: 'Facebook/Google ads bidding control', status: 'idle', prof: 94, color: 'from-indigo-400 to-purple-400' },
-  { id: 'payroll_agent', name: 'Payroll Safe Guard', type: 'AI', role: 'Finance', avatar: '🔒', capability: 'Internal audit & security gate', status: 'idle', prof: 95, color: 'from-red-500 to-rose-500' },
-  { id: 'connector_agent', name: 'Connector Hub Parser', type: 'AI', role: 'Integration', avatar: '🔌', capability: 'SAP/MISA API translation mapping', status: 'idle', prof: 91, color: 'from-sky-500 to-indigo-500' },
-  { id: 'learning_agent', name: 'Learning Mutation Loop', type: 'AI', role: 'Evolution', avatar: '🧬', capability: 'SOP mutations & DNA updates', status: 'idle', prof: 96, color: 'from-teal-400 to-emerald-400' }
+  { id: 'coo', name: 'AI COO Orchestrator', type: 'AI', role: 'Điều Phối Vận Hành', avatar: '🤖', capability: 'Lập kế hoạch & phân bổ quy trình tự động', status: 'idle', prof: 98, color: 'from-cyan-500 to-blue-500' },
+  { id: 'hermes', name: 'Hermes Social Publisher', type: 'AI', role: 'Xuất Bản Mạng Xã Hội', avatar: '⚡', capability: 'Tự động đăng bài & quản lý Fanpage', status: 'idle', prof: 95, color: 'from-amber-500 to-orange-500' },
+  { id: 'creative_designer', name: 'AI Creative Designer Worker', type: 'AI', role: 'Thiết Kế Đồ Họa', avatar: '🎨', capability: 'Thiết kế Poster, Banner PNG & phối cảnh 4K', status: 'idle', prof: 97, color: 'from-pink-500 to-rose-500' },
+  { id: 'seo_copywriter', name: 'AI Marketing Copywriter Worker', type: 'AI', role: 'Sáng Tạo Nội Dung', avatar: '✍️', capability: 'Viết bài bán hàng, headline hook & ưu đãi', status: 'idle', prof: 96, color: 'from-purple-500 to-indigo-500' },
+  { id: 'multimodal_analyst', name: 'AI Multimodal Document Analyst', type: 'AI', role: 'Phân Tích Đa Phương Tiện', avatar: '🧬', capability: 'Đọc OCR tài liệu, video & audio doanh nghiệp', status: 'idle', prof: 96, color: 'from-emerald-500 to-teal-500' },
+  { id: 'human_ceo', name: 'CEO / Lãnh Đạo Phê Duyệt', type: 'Human', role: 'Thẩm Định Executive', avatar: '👑', capability: 'Duyệt ngân sách & phê duyệt bài xuất bản', status: 'idle', prof: 100, color: 'from-amber-600 to-yellow-400' },
+  { id: 'ads_optimizer', name: 'AI Ads Campaign Optimizer', type: 'AI', role: 'Tối Ưu Quảng Cáo', avatar: '📈', capability: 'Điều phối ngân sách Facebook/Google Ads', status: 'idle', prof: 94, color: 'from-indigo-400 to-purple-400' },
+  { id: 'payroll_guard', name: 'AI Payroll & Security Guard', type: 'AI', role: 'Kiểm Soát Tài Chính', avatar: '🔒', capability: 'Kiểm toán nội bộ, lương & bảo mật', status: 'idle', prof: 95, color: 'from-red-500 to-rose-500' },
+  { id: 'connector_agent', name: 'AI ERP Connector Hub', type: 'AI', role: 'Tích Hợp Hệ Thống', avatar: '🔌', capability: 'Kết nối API MISA, SAP, Supabase ERP', status: 'idle', prof: 91, color: 'from-sky-500 to-indigo-500' },
+  { id: 'learning_agent', name: 'AI Learning & Mutation Loop', type: 'AI', role: 'Học Máy & Nâng Cấp', avatar: '🧬', capability: 'Học từ feedback & tự nâng cấp SOP DNA', status: 'idle', prof: 96, color: 'from-teal-400 to-emerald-400' },
+  { id: 'compliance_auditor', name: 'AI QA & Compliance Auditor', type: 'AI', role: 'Thẩm Định Chất Lượng', avatar: '🛡️', capability: 'Kiểm tra tỷ lệ chữ 20% & WCAG AA contrast', status: 'idle', prof: 98, color: 'from-slate-500 to-slate-700' }
 ];
 
 export default function Dashboard() {
@@ -96,6 +138,30 @@ export default function Dashboard() {
     }
   }, []);
 
+  const [geminiModels, setGeminiModels] = useState<string[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+
+  useEffect(() => {
+    const fetchGeminiModels = async () => {
+      const geminiKey = getStoredKey('gemini', 'api_key');
+      if (!geminiKey) return;
+      setLoadingModels(true);
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}`);
+        if (res.ok) {
+          const data = await res.json();
+          const names = data.models?.map((m: any) => m.name.replace('models/', '')) || [];
+          setGeminiModels(names);
+        }
+      } catch (e) {
+        console.warn('Failed to fetch Gemini models:', e);
+      } finally {
+        setLoadingModels(false);
+      }
+    };
+    fetchGeminiModels();
+  }, [hasGemini]);
+
   // Realtime Simulation states
   const [telemetryLogs, setTelemetryLogs] = useState<{ id: string; time: string; source: string; message: string; color: string }[]>([]);
   const [activeStep, setActiveStep] = useState<number>(-1);
@@ -124,8 +190,76 @@ export default function Dashboard() {
     }
   }, [fbToken]);
 
-  // Initialize status log
+  // Restore dashboard state from storage on mount (sessionStorage preferred over localStorage)
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedObj = safeGet('bella_eos_objective');
+        if (savedObj !== null) setObjective(savedObj);
+
+        const savedLogs = safeGet('bella_eos_telemetry_logs');
+        if (savedLogs) setTelemetryLogs(JSON.parse(savedLogs));
+
+        const savedStep = safeGet('bella_eos_active_step');
+        if (savedStep) setActiveStep(parseInt(savedStep, 10));
+
+        const savedTree = safeGet('bella_eos_goal_tree');
+        if (savedTree) setGoalTree(JSON.parse(savedTree));
+
+        const savedDna = safeGet('bella_eos_dna_state');
+        if (savedDna) setDnaState(JSON.parse(savedDna));
+
+        const savedDocs = safeGet('bella_eos_documents');
+        if (savedDocs) setDocuments(JSON.parse(savedDocs));
+
+        const savedPlan = safeGet('bella_eos_orchestrator_plan');
+        if (savedPlan) setOrchestratorPlan(JSON.parse(savedPlan));
+
+        const savedTasks = safeGet('bella_eos_dynamic_tasks');
+        if (savedTasks) setDynamicTasks(JSON.parse(savedTasks));
+
+        const savedReport = safeGet('bella_eos_verification_report');
+        if (savedReport) setVerificationReport(JSON.parse(savedReport));
+
+        const savedStatus = safeGet('bella_eos_last_api_status');
+        if (savedStatus) setLastApiStatus(savedStatus);
+      } catch (e) {
+        console.warn('Failed to restore dashboard state:', e);
+      }
+    }
+  }, []);
+
+  // Persist dashboard state on change (safeSet uses sessionStorage for large data + LS for small)
+  useEffect(() => { safeSet('bella_eos_objective', objective); }, [objective]);
+
+  useEffect(() => {
+    // Limit logs stored to last 200 entries to prevent storage overflow
+    const logsToSave = telemetryLogs.slice(-200);
+    safeSet('bella_eos_telemetry_logs', JSON.stringify(logsToSave));
+  }, [telemetryLogs]);
+
+  useEffect(() => { safeSet('bella_eos_active_step', activeStep.toString()); }, [activeStep]);
+
+  useEffect(() => { safeSet('bella_eos_goal_tree', goalTree ? JSON.stringify(goalTree) : ''); }, [goalTree]);
+
+  useEffect(() => { safeSet('bella_eos_dna_state', JSON.stringify(dnaState)); }, [dnaState]);
+
+  useEffect(() => { safeSet('bella_eos_documents', JSON.stringify(documents)); }, [documents]);
+
+  useEffect(() => { safeSet('bella_eos_orchestrator_plan', orchestratorPlan ? JSON.stringify(orchestratorPlan) : ''); }, [orchestratorPlan]);
+
+  useEffect(() => { safeSet('bella_eos_dynamic_tasks', JSON.stringify(dynamicTasks)); }, [dynamicTasks]);
+
+  useEffect(() => { safeSet('bella_eos_verification_report', verificationReport ? JSON.stringify(verificationReport) : ''); }, [verificationReport]);
+
+  useEffect(() => { safeSet('bella_eos_last_api_status', lastApiStatus || ''); }, [lastApiStatus]);
+
+  // Initialize status log if empty
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedLogs = localStorage.getItem('bella_eos_telemetry_logs');
+      if (savedLogs) return; // skip defaults if we have saved logs
+    }
     addLog('SYSTEM', 'Lõi điều hành Bella Kernel v13.0 đã sẵn sàng vận hành.', 'text-emerald-600 font-semibold');
     addLog('BRAIN', '6 Cognitive Brain Centers đã hoạt động và đồng bộ với Supabase.', 'text-indigo-600');
     addLog('CONNECT', 'Cổng kết nối Bella Connect đã được kích hoạt thành công.', 'text-cyan-600');
@@ -210,7 +344,7 @@ export default function Dashboard() {
               model: evt.aiModel || ''
             });
             setDynamicTasks(evt.tasks || []);
-            addLog('AI ORCHESTRATOR', `📋 Kế hoạch: "${evt.planTitle}" (Mô hình: ${evt.aiProvider}/${evt.aiModel})`, 'text-cyan-600 font-bold');
+            addLog('AI ORCHESTRATOR', `📋 Kế hoạch: "${evt.planTitle}" (AI COO Orchestrator)`, 'text-cyan-600 font-bold');
             if (evt.planReasoning) {
               addLog('ORCHESTRATOR LOGIC', `💡 Lý do phân bổ: ${evt.planReasoning}`, 'text-slate-600 italic');
             }
@@ -447,6 +581,46 @@ export default function Dashboard() {
                     </div>
                   </div>
 
+                  {/* Visual Step-by-Step Execution Tracker */}
+                  <div className="w-full max-w-2xl bg-white/95 border border-slate-200 rounded-xl p-3.5 shadow-sm text-xs space-y-2">
+                    <p className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">Lộ Trình Xử Lý Chiến Dịch (Step-by-Step Telemetry)</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px]">
+                      {[
+                        { step: 0, name: '1. Phân Tích Chỉ Thị' },
+                        { step: 1, name: '2. Phân Rã OKRs' },
+                        { step: 2, name: '3. Mô Phỏng ROI' },
+                        { step: 3, name: '4. Dựng Ngữ Cảnh' },
+                        { step: 4, name: '5. Phân Bổ Agent' },
+                        { step: 5, name: '6. Chạy Real API' },
+                        { step: 6, name: '7. Ký Số Chứng Cứ' },
+                        { step: 7, name: '8. Tối Ưu SOP DNA' }
+                      ].map((s) => {
+                        const isActive = activeStep === s.step;
+                        const isPast = activeStep > s.step;
+                        return (
+                          <div
+                            key={s.step}
+                            className={`p-2 rounded-lg border flex items-center gap-1.5 transition-all duration-300 ${
+                              isActive
+                                ? 'bg-indigo-50/70 border-indigo-400 text-indigo-700 font-bold ring-2 ring-indigo-100 shadow-2xs'
+                                : isPast
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                : 'bg-slate-50 border-slate-200 text-slate-400'
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              isActive ? 'bg-indigo-500 animate-ping' : isPast ? 'bg-emerald-500' : 'bg-slate-300'
+                            }`} />
+                            <span className="truncate">{s.name}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Flow links */}
+                  <div className="w-0.5 h-4 bg-gradient-to-b from-indigo-400 to-cyan-400 shrink-0"></div>
+
                   {/* Goal Completion Audit Bar (when available) */}
                   {verificationReport && (
                     <div className="w-full max-w-lg bg-white border border-slate-200 rounded-xl p-3 shadow-sm">
@@ -480,7 +654,7 @@ export default function Dashboard() {
                         </p>
                         {orchestratorPlan && (
                           <span className="text-[9px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
-                            Model: {orchestratorPlan.provider}/{orchestratorPlan.model}
+                            Agent Điều Phối: AI COO Orchestrator
                           </span>
                         )}
                       </div>
@@ -1046,7 +1220,7 @@ export default function Dashboard() {
                 </div>
                 {selectedTask.meta?.model && (
                   <span className="text-[10px] font-mono bg-white/80 px-2 py-0.5 rounded border border-slate-200">
-                    Model: {selectedTask.meta.model}
+                    Engine: {selectedTask.meta.model}
                   </span>
                 )}
               </div>
@@ -1159,13 +1333,26 @@ export default function Dashboard() {
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                 >
                   <option value="default">✨ Default Dynamic System Routing (Tự động)</option>
-                  <option value="google-imagen-3">🧬 Google Imagen 3 (imagen-3.0-generate-002) — Ảnh 4K Photorealistic</option>
-                  <option value="dall-e-3">🔮 OpenAI DALL-E 3 (1792x1024 Ads Ready)</option>
-                  <option value="flux.1-schnell">⚡ Fal.ai Flux.1 Schnell</option>
-                  <option value="gpt-4o">🔮 OpenAI GPT-4o (Reasoning & Copywriter)</option>
-                  <option value="claude-3-5-sonnet">🧠 Anthropic Claude 3.5 Sonnet</option>
-                  <option value="gemini-2.5-flash">🧬 Google Gemini 2.5 Flash</option>
-                  <option value="bella-graphic-v4">🎨 Bella Dynamic Graphic PNG Engine (v4.0 Structural Layouts)</option>
+                  
+                  <optgroup label="Tất cả mô hình mặc định">
+                    <option value="google-imagen-3">🧬 Google Imagen 3 (imagen-3.0-generate-002) — Ảnh 4K Photorealistic</option>
+                    <option value="dall-e-3">🔮 OpenAI DALL-E 3 (1792x1024 Ads Ready)</option>
+                    <option value="flux.1-schnell">⚡ Fal.ai Flux.1 Schnell</option>
+                    <option value="gpt-4o">🔮 OpenAI GPT-4o (Reasoning & Copywriter)</option>
+                    <option value="claude-3-5-sonnet">🧠 Anthropic Claude 3.5 Sonnet</option>
+                    <option value="gemini-2.5-flash">🧬 Google Gemini 2.5 Flash</option>
+                    <option value="bella-graphic-v4">🎨 Bella Dynamic Graphic PNG Engine (v4.0 Structural Layouts)</option>
+                  </optgroup>
+
+                  {geminiModels.length > 0 && (
+                    <optgroup label="✨ Mô hình tự động nhận diện từ API Key của bạn">
+                      {geminiModels.map(mName => (
+                        <option key={mName} value={mName}>
+                          {mName.includes('image') || mName.includes('imagen') ? '🎨' : '📝'} {mName}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 

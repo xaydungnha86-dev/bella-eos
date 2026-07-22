@@ -58,6 +58,14 @@ async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPac
   results: any[];
 }> {
   const keys = getClientKeys();
+  let agentConfigs = {};
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('bella_eos_agent_configs');
+      if (saved) agentConfigs = JSON.parse(saved);
+    } catch {}
+  }
+
   const res = await fetch(`${getBaseUrl()}/api/orchestrator/run`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -69,6 +77,7 @@ async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPac
       client_gemini_key:     keys.gemini,
       client_facebook_token: keys.facebook_token,
       client_facebook_page_id: keys.facebook_page_id,
+      agent_configs:         agentConfigs
     })
   });
   const data = await res.json();

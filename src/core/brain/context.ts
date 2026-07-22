@@ -37,6 +37,7 @@ export class ContextCenter {
         targetMetric: this.config.targetMetricType
       },
       brandDna: {
+        brandName: KnowledgeCenter.CompanyDNA.brandName || 'BELLA EOS',
         voiceTone: KnowledgeCenter.CompanyDNA.voiceTone,
         designStyle: KnowledgeCenter.CompanyDNA.style
       },

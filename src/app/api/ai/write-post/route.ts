@@ -20,7 +20,8 @@ export async function POST(request: Request) {
       goal,
       client_openai_key,
       client_anthropic_key,
-      client_gemini_key
+      client_gemini_key,
+      model
     } = body as {
       objective: string;
       voiceTone?: string;
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       client_openai_key?: string;
       client_anthropic_key?: string;
       client_gemini_key?: string;
+      model?: string;
     };
 
     if (!objective) {
@@ -68,9 +70,9 @@ Chỉ trả về nội dung bài đăng Facebook hoàn chỉnh, không kèm lờ
 
 Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàng mục tiêu để đạt mục tiêu trên.`;
 
-    // ── Try OpenAI GPT-4o ───────────────────────────────────────────────────
-    const openaiKey = client_openai_key || process.env.OPENAI_API_KEY;
-    if (openaiKey) {
+    const tryOpenAI = async () => {
+      const openaiKey = client_openai_key || process.env.OPENAI_API_KEY;
+      if (!openaiKey) return null;
       try {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -90,20 +92,21 @@ Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàn
         });
         const data = await res.json();
         if (res.ok && data.choices?.[0]?.message?.content) {
-          return NextResponse.json({
+          return {
             success: true,
             content: data.choices[0].message.content.trim(),
             model: 'gpt-4o',
             provider: 'openai'
-          });
+          };
         }
         console.warn('[ai/write-post] OpenAI error:', data.error?.message);
       } catch (e) { console.warn('[ai/write-post] OpenAI unavailable:', e); }
-    }
+      return null;
+    };
 
-    // ── Try Anthropic Claude ────────────────────────────────────────────────
-    const anthropicKey = client_anthropic_key || process.env.ANTHROPIC_API_KEY;
-    if (anthropicKey) {
+    const tryAnthropic = async () => {
+      const anthropicKey = client_anthropic_key || process.env.ANTHROPIC_API_KEY;
+      if (!anthropicKey) return null;
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
@@ -121,42 +124,62 @@ Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàn
         });
         const data = await res.json();
         if (res.ok && data.content?.[0]?.text) {
-          return NextResponse.json({
+          return {
             success: true,
             content: data.content[0].text.trim(),
             model: 'claude-3-5-sonnet',
             provider: 'anthropic'
-          });
+          };
         }
         console.warn('[ai/write-post] Anthropic error:', data.error?.message);
       } catch (e) { console.warn('[ai/write-post] Anthropic unavailable:', e); }
-    }
+      return null;
+    };
 
-    // ── Try Google Gemini ───────────────────────────────────────────────────
-    const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
-    if (geminiKey) {
+    const tryGemini = async () => {
+      const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+      if (!geminiKey) return null;
       try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+        const selectedModel = model || 'gemini-2.5-flash';
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${geminiKey}`;
         const res = await fetch(geminiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: `${systemPrompt}\n\n${userMessage}` }] }],
-            generationConfig: { temperature: 0.75, maxOutputTokens: 600 }
+            generationConfig: { temperature: 0.75, maxOutputTokens: 4096 }
           })
         });
         const data = await res.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (res.ok && text) {
-          return NextResponse.json({
+          return {
             success: true,
             content: text.trim(),
-            model: 'gemini-2.0-flash',
+            model: selectedModel,
             provider: 'gemini'
-          });
+          };
         }
         console.warn('[ai/write-post] Gemini error:', data.error?.message);
       } catch (e) { console.warn('[ai/write-post] Gemini unavailable:', e); }
+      return null;
+    };
+
+    // Determine engine order
+    const order: (() => Promise<any | null>)[] = [];
+    if (model === 'gpt-4o') {
+      order.push(tryOpenAI, tryAnthropic, tryGemini);
+    } else if (model === 'claude-3-5-sonnet') {
+      order.push(tryAnthropic, tryOpenAI, tryGemini);
+    } else if (model === 'gemini-2.5-flash') {
+      order.push(tryGemini, tryOpenAI, tryAnthropic);
+    } else {
+      order.push(tryOpenAI, tryAnthropic, tryGemini);
+    }
+
+    for (const fn of order) {
+      const result = await fn();
+      if (result) return NextResponse.json(result);
     }
 
     // ── Built-in Fallback Writer (no AI key needed) ─────────────────────────

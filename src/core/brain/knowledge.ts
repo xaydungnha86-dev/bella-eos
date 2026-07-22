@@ -25,6 +25,7 @@ export class KnowledgeCenter {
 
   // Company DNA specifications
   static CompanyDNA = {
+    brandName: 'BELLA EOS',
     voiceTone: 'Professional & Premium',
     style: 'Minimalist Glassmorphism',
     philosophy: 'Fact-Based Decisions'

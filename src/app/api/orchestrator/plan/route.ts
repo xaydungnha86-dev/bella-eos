@@ -229,7 +229,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
     const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
     if (geminiKey) {
       try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
         const res = await fetch(geminiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -237,7 +237,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
             contents: [{ parts: [{ text: ORCHESTRATOR_SYSTEM_PROMPT + '\n\n' + userMessage }] }],
             generationConfig: {
               temperature: 0.3,
-              maxOutputTokens: 2000,
+              maxOutputTokens: 4000,
               responseMimeType: 'application/json'
             }
           })
@@ -247,7 +247,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
         if (res.ok && text) {
           const raw = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
           const plan = JSON.parse(raw);
-          return NextResponse.json({ success: true, plan, provider: 'gemini', model: 'gemini-2.0-flash' });
+          return NextResponse.json({ success: true, plan, provider: 'gemini', model: 'gemini-2.5-flash' });
         }
         console.warn('[orchestrator/plan] Gemini error:', data.error?.message);
       } catch (e) { console.warn('[orchestrator/plan] Gemini unavailable:', e); }
