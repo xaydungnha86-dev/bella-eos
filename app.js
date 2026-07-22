@@ -838,7 +838,7 @@ const CapabilityRegistry = {
             tokenQuotaRemaining: 480000
         },
         {
-            executorId: 'gemini-1-5',
+            executorId: 'gemini-3',
             workerType: 'AI',
             adapterKey: 'openhands',
             activeCapabilities: [
@@ -1518,8 +1518,8 @@ const ExecutionEngineAdapterManager = {
                 
                 if (geminiKey && !geminiKey.includes('MOCK') && geminiKey.length > 10) {
                     try {
-                        appendLog('GEMINI DRIVER', `🧠 [Gemini 1.5 Pro] Gửi yêu cầu sinh nội dung/kịch bản video đến Google AI Studio...`, 'text-cyan-300 font-semibold');
-                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiKey}`, {
+                        appendLog('GEMINI DRIVER', `🧠 [Gemini 3.1 Pro] Gửi yêu cầu sinh nội dung/kịch bản video đến Google AI Studio...`, 'text-cyan-300 font-semibold');
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-3.1-pro:generateContent?key=${geminiKey}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -1585,24 +1585,24 @@ const AIRuntimeOS = {
     
     // Model Cost Matrix per 1k Tokens (USD)
     modelRates: {
-        'gemini-1.5-flash': { input: 0.00001875, output: 0.000075, tier: 'economy' },
-        'gemini-1.5-pro':   { input: 0.00125,   output: 0.005,    tier: 'pro' },
+        'gemini-3.6-flash': { input: 0.00001875, output: 0.000075, tier: 'economy' },
+        'gemini-3.1-pro':   { input: 0.00125,   output: 0.005,    tier: 'pro' },
         'claude-3-5-sonnet':{ input: 0.003,     output: 0.015,    tier: 'enterprise' },
         'gpt-4o':           { input: 0.005,     output: 0.015,    tier: 'enterprise' }
     },
 
     // 1. Smart Model Router & Cost Optimizer
     selectOptimalModel(taskComplexity = 'low', maxBudgetUsd = 0.05) {
-        if (taskComplexity === 'low') return 'gemini-1.5-flash';
-        if (taskComplexity === 'medium') return 'gemini-1.5-pro';
-        return maxBudgetUsd >= 0.02 ? 'claude-3-5-sonnet' : 'gemini-1.5-pro';
+        if (taskComplexity === 'low') return 'gemini-3.6-flash';
+        if (taskComplexity === 'medium') return 'gemini-3.1-pro';
+        return maxBudgetUsd >= 0.02 ? 'claude-3-5-sonnet' : 'gemini-3.1-pro';
     },
 
     // 2. AI Execution Engine with Retry & Fallback Circuit Breaker
     async executeTask(prompt, taskConfig = {}) {
         const complexity = taskConfig.complexity || 'low';
         const primaryModel = taskConfig.modelId || this.selectOptimalModel(complexity);
-        const fallbackModel = 'gemini-1.5-flash';
+        const fallbackModel = 'gemini-3.6-flash';
         
         const executionId = `exec_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
         const startTime = Date.now();
@@ -1630,7 +1630,7 @@ const AIRuntimeOS = {
         const estTokensInput = Math.ceil(prompt.length / 4);
         const estTokensOutput = Math.ceil((response ? response.length : 100) / 4);
 
-        const rate = this.modelRates[modelUsed] || this.modelRates['gemini-1.5-flash'];
+        const rate = this.modelRates[modelUsed] || this.modelRates['gemini-3.6-flash'];
         const estimatedCostUsd = (estTokensInput / 1000 * rate.input) + (estTokensOutput / 1000 * rate.output);
 
         const logRecord = {
@@ -2154,8 +2154,8 @@ ProviderRegistry.register(new StandardProviderAdapter('openai', 'OpenAI', {
 }));
 
 ProviderRegistry.register(new StandardProviderAdapter('google', 'Google Gemini', {
-    'gemini-1-5-pro': { name: 'Gemini 1.5 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005, contextLimit: 2000000 },
-    'gemini-1-5-flash': { name: 'Gemini 1.5 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003, contextLimit: 1000000 }
+    'gemini-3-1-pro': { name: 'Gemini 3.1 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005, contextLimit: 2000000 },
+    'gemini-3-6-flash': { name: 'Gemini 3.6 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003, contextLimit: 1000000 }
 }));
 
 ProviderRegistry.register(new StandardProviderAdapter('meta', 'Meta OpenSource', {
@@ -2164,7 +2164,7 @@ ProviderRegistry.register(new StandardProviderAdapter('meta', 'Meta OpenSource',
 
 // Real Gemini / LLM Execution Service
 const LLMExecutionService = {
-    async generateContent(prompt, apiKey = '', modelId = 'gemini-1.5-flash') {
+    async generateContent(prompt, apiKey = '', modelId = 'gemini-3.6-flash') {
         const key = apiKey || window.GEMINI_API_KEY || localStorage.getItem('bella_gemini_api_key') || '';
         if (!key) {
             console.warn('[LLM Service] Không tìm thấy Gemini API Key. Đang sử dụng chế độ AI Simulation.');
@@ -2172,8 +2172,11 @@ const LLMExecutionService = {
         }
 
         try {
-            const cleanModel = modelId.includes('pro') ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${key}`;
+            let cleanModel = 'gemini-3.6-flash';
+            if (modelId.includes('pro') || modelId.includes('3.1-pro') || modelId.includes('1.5-pro')) {
+                cleanModel = 'gemini-3.1-pro';
+            }
+            const url = `https://generativelanguage.googleapis.com/v1/models/${cleanModel}:generateContent?key=${key}`;
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -2217,8 +2220,8 @@ const PROVIDERS_CATALOG = {
     google: {
         name: 'Google Gemini',
         models: {
-            'gemini-1-5-pro': { name: 'Gemini 1.5 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005, contextLimit: 2000000 },
-            'gemini-1-5-flash': { name: 'Gemini 1.5 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003, contextLimit: 1000000 }
+            'gemini-3-1-pro': { name: 'Gemini 3.1 Pro', costPer1kInput: 0.00125, costPer1kOutput: 0.005, contextLimit: 2000000 },
+            'gemini-3-6-flash': { name: 'Gemini 3.6 Flash', costPer1kInput: 0.000075, costPer1kOutput: 0.0003, contextLimit: 1000000 }
         }
     },
     meta: {
@@ -2296,7 +2299,7 @@ const DEFAULT_AGENT_CONFIGS = {
     ceo: {
         promptVersion: '1.0',
         provider: 'google',
-        modelId: 'gemini-1-5-pro',
+        modelId: 'gemini-3-1-pro',
         fallbackModelId: 'claude-3-5-sonnet',
         temperature: 0.4,
         maxTokens: 4096,
@@ -2310,13 +2313,13 @@ const DEFAULT_AGENT_CONFIGS = {
             goal: 'Đưa ra các quyết định chiến lược, duyệt ngân sách dự án và bảo vệ chất lượng sản phẩm.',
             constraints: 'Không duyệt các bản build chưa qua QA test (PASS). Không phát ngôn trái với định hướng doanh nghiệp.',
             workflow: '1. Tiếp nhận đề xuất -> 2. Đánh giá ROI & Rủi ro -> 3. Phê duyệt hoặc Yêu cầu sửa đổi.',
-            outputFormat: 'Quyết định rõ ràng kèm lý do và chỉ đạo hành động tiếp theo cho các bộ phận.'
+            outputFormat: 'Quyết định rõ ràng kèm lýom và chỉ đạo hành động tiếp theo cho các bộ phận.'
         }
     },
     ast: {
         promptVersion: '1.0',
         provider: 'google',
-        modelId: 'gemini-1-5-flash',
+        modelId: 'gemini-3-6-flash',
         fallbackModelId: 'gpt-4o-mini',
         temperature: 0.2,
         maxTokens: 1024,
@@ -2357,7 +2360,7 @@ const DEFAULT_AGENT_CONFIGS = {
         promptVersion: '1.0',
         provider: 'anthropic',
         modelId: 'claude-3-5-sonnet',
-        fallbackModelId: 'gemini-1-5-pro',
+        fallbackModelId: 'gemini-3-1-pro',
         temperature: 0.2,
         maxTokens: 4096,
         memoryStrategy: 'rag',
@@ -2396,7 +2399,7 @@ const DEFAULT_AGENT_CONFIGS = {
     qa: {
         promptVersion: '1.0',
         provider: 'google',
-        modelId: 'gemini-1-5-pro',
+        modelId: 'gemini-3-1-pro',
         fallbackModelId: 'claude-3-haiku',
         temperature: 0.1,
         maxTokens: 4096,
@@ -2437,7 +2440,7 @@ const DEFAULT_AGENT_CONFIGS = {
         promptVersion: '1.0',
         provider: 'meta',
         modelId: 'llama-3-1-70b',
-        fallbackModelId: 'gemini-1-5-flash',
+        fallbackModelId: 'gemini-3-6-flash',
         temperature: 0.2,
         maxTokens: 2048,
         memoryStrategy: 'session',
@@ -2457,7 +2460,7 @@ const DEFAULT_AGENT_CONFIGS = {
         promptVersion: '1.0',
         provider: 'openai',
         modelId: 'gpt-4o',
-        fallbackModelId: 'gemini-1-5-pro',
+        fallbackModelId: 'gemini-3-1-pro',
         temperature: 0.7,
         maxTokens: 2048,
         memoryStrategy: 'session',
@@ -2475,7 +2478,7 @@ const DEFAULT_AGENT_CONFIGS = {
     },
     sales: {
         provider: 'google',
-        modelId: 'gemini-1-5-flash',
+        modelId: 'gemini-3-6-flash',
         temperature: 0.4,
         maxTokens: 2048,
         structuredPrompt: {
@@ -2488,7 +2491,7 @@ const DEFAULT_AGENT_CONFIGS = {
     },
     fin: {
         provider: 'google',
-        modelId: 'gemini-1-5-pro',
+        modelId: 'gemini-3-1-pro',
         temperature: 0.0,
         maxTokens: 4096,
         structuredPrompt: {
@@ -3007,8 +3010,8 @@ Object.assign(EnterpriseMemoryService, {
 // MILESTONE 3.5: EXECUTION GUARDRAILS & MODEL FALLBACK ENGINE
 const ModelFallbackEngine = {
     fallbackChain: {
-        'claude-3-5-sonnet': 'gemini-1-5-pro',
-        'gemini-1-5-pro': 'gpt-4o',
+        'claude-3-5-sonnet': 'gemini-3-1-pro',
+        'gemini-3-1-pro': 'gpt-4o',
         'gpt-4o': 'claude-3-haiku',
         'claude-3-haiku': 'gpt-4o-mini'
     },
@@ -3106,7 +3109,7 @@ const MultiAgentTopologyEngine = {
 
                 const prompt = PromptBuilder.buildFinalPrompt(currentAgentId);
                 const config = AGENT_CONFIGS[currentAgentId] || {};
-                const res = await ModelFallbackEngine.executeWithFallback(currentAgentId, config.modelId || 'gemini-1-5-pro', prompt);
+                const res = await ModelFallbackEngine.executeWithFallback(currentAgentId, config.modelId || 'gemini-3-1-pro', prompt);
 
                 lastOutput = res.responseContent;
 
@@ -3127,7 +3130,7 @@ const MultiAgentTopologyEngine = {
             const promises = agentIds.map(async (agentId) => {
                 const prompt = PromptBuilder.buildFinalPrompt(agentId);
                 const config = AGENT_CONFIGS[agentId] || {};
-                return ModelFallbackEngine.executeWithFallback(agentId, config.modelId || 'gemini-1-5-pro', prompt);
+                return ModelFallbackEngine.executeWithFallback(agentId, config.modelId || 'gemini-3-1-pro', prompt);
             });
 
             const results = await Promise.all(promises);
@@ -3140,7 +3143,7 @@ const MultiAgentTopologyEngine = {
             for (const agentId of agentIds) {
                 const prompt = PromptBuilder.buildFinalPrompt(agentId);
                 const config = AGENT_CONFIGS[agentId] || {};
-                const res = await ModelFallbackEngine.executeWithFallback(agentId, config.modelId || 'gemini-1-5-pro', prompt);
+                const res = await ModelFallbackEngine.executeWithFallback(agentId, config.modelId || 'gemini-3-1-pro', prompt);
                 votes.push({ agentId, response: res.responseContent });
             }
 
@@ -4239,8 +4242,8 @@ document.getElementById('btn-reset-cam').addEventListener('click', () => {
 
 function formatModelName(modelId) {
     if (!modelId) return 'GEMINI PRO';
-    if (modelId === 'gemini-1-5-pro') return 'GEMINI 1.5 PRO';
-    if (modelId === 'gemini-1-5-flash') return 'GEMINI 1.5 FLASH';
+    if (modelId === 'gemini-3-1-pro' || modelId === 'gemini-1-5-pro') return 'GEMINI 3.1 PRO';
+    if (modelId === 'gemini-3-6-flash' || modelId === 'gemini-1-5-flash') return 'GEMINI 3.6 FLASH';
     if (modelId === 'claude-3-5-sonnet') return 'CLAUDE 3.5';
     if (modelId === 'claude-3-haiku') return 'CLAUDE HAIKU';
     if (modelId === 'gpt-4o') return 'GPT-4O';
@@ -5709,7 +5712,7 @@ safeAddListener('btn-submit-create-task', 'click', async () => {
 
 function formatModelName(modelId) {
     if (!modelId) return 'GEMINI';
-    return modelId.replace('gemini-1-5-', 'GEMINI ').replace('claude-3-5-', 'CLAUDE ').replace('gpt-4o-', 'GPT-4O ').replace('llama-3-1-', 'LLAMA ').toUpperCase();
+    return modelId.replace('gemini-1-5-', 'GEMINI ').replace('gemini-3-1-', 'GEMINI 3.1 ').replace('gemini-3-6-', 'GEMINI 3.6 ').replace('claude-3-5-', 'CLAUDE ').replace('gpt-4o-', 'GPT-4O ').replace('llama-3-1-', 'LLAMA ').toUpperCase();
 }
 
 // Render 11 Dynamic AI Agent Cards in Left Sidebar Matrix
@@ -5721,7 +5724,7 @@ function renderAgentCards() {
     AI_AGENTS.forEach(agent => {
         try {
             const config = AGENT_CONFIGS[agent.id] || {};
-            const modelDisplay = formatModelName(config.modelId || 'gemini-1-5-flash');
+            const modelDisplay = formatModelName(config.modelId || 'gemini-3-6-flash');
             const role = (typeof RoleSkillCenter !== 'undefined' && RoleSkillCenter.getRoleById) ? RoleSkillCenter.getRoleById(agent.roleId || `role_${agent.id}`) : null;
             const roleTitle = role ? role.title : (agent.role || 'AI Employee');
 
@@ -6685,6 +6688,9 @@ async function testGeminiConnection() {
     statusSpan.textContent = "⏳ Đang kết nối thử nghiệm đến Google AI Studio...";
     
     const candidateModels = [
+        'gemini-3.6-flash',
+        'gemini-3.1-pro',
+        'gemini-3.5-flash-lite',
         'gemini-1.5-flash',
         'gemini-1.5-pro',
         'gemini-pro'
@@ -7065,7 +7071,7 @@ function renderDossierMatrixContent(agent) {
     if (!container) return;
 
     const config = (typeof getAgentConfig === 'function') ? getAgentConfig(agent.id) : {};
-    const modelDisplay = config.modelId || 'gemini-1-5-flash';
+    const modelDisplay = config.modelId || 'gemini-3-6-flash';
     const adapterKey = agent.id === 'dev' ? 'codex' : (agent.id === 'qa' || agent.id === 'cto' ? 'claudecode' : (agent.id === 'devops' || agent.id === 'des' ? 'openhands' : 'hermes'));
 
     container.innerHTML = `
