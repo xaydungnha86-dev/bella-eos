@@ -1,6 +1,6 @@
 /**
  * 🎨 POSTER & BANNER DESIGN SKILL — BELLA EOS CREATIVE WORKER ENGINE
- * Specification: Enterprise Agent Skill v2.0
+ * Specification: Enterprise Agent Skill v3.0
  * Role: Dynamic Commercial Sales Poster Generator with Business Context & Multi-Task Copy Ingestion
  */
 
@@ -28,7 +28,46 @@ export interface PosterDesignSpec {
 
 export class PosterDesignSkill {
   public static readonly SKILL_NAME = 'poster_design_creative';
-  public static readonly SKILL_VERSION = '2.0.0';
+  public static readonly SKILL_VERSION = '3.0.0';
+
+  /**
+   * Generates a Master AI Design Prompt Specification for AI Agent & Image Generator Models
+   */
+  public static buildFullDesignSpecPrompt(objective: string, headline?: string, brandDna?: BrandDnaContext): string {
+    const brandName = brandDna?.brandName || 'BELLA EOS';
+    const primaryColor = brandDna?.brandColors?.primary || '#061E17';
+    const accentColor = brandDna?.brandColors?.accent || '#D4AF37';
+    const headlineText = headline || 'BELLA EOS GIẢI QUYẾT TRIỆT ĐỂ BÀI TOÁN SPA';
+
+    return `🎨 MASTER AI DESIGN PROMPT SPECIFICATION (BELLA EOS CREATIVE WORKER)
+===================================================================
+1. BRAND & BUSINESS CONTEXT:
+   - Enterprise Brand: ${brandName}
+   - Product Domain: Phần mềm Quản lý Spa & Thẩm mỹ viện AI-Native
+   - Target Audience: Chủ Spa, Quản lý Thẩm mỹ viện & Chuỗi Cơ sở Làm đẹp
+   - Voice & Tone: Cao cấp, Sang trọng, Nhẹ nhàng, Tinh tế & Uy tín
+
+2. VISUAL COMPOSITION & LAYOUT SPECIFICATION:
+   - Format & Resolution: 1200x630px Commercial Sales Banner (Aspect Ratio 16:9)
+   - Left Column (60%): Enterprise Logo + Offer Badge + Dynamic Headline Hook + Bullet Benefits + CTA Button
+   - Right Column (40%): 3D Glassmorphism iPad Pro Mockup displaying live Spa Management System UI
+
+3. DYNAMIC ELEMENTS & HOOK TYPOGRAPHY:
+   - Logo Badge: 🏆 BELLA EOS SPA PLATFORM (Royal Gold Accent)
+   - Offer Badge: 🎁 DEMO 1-1 MIỄN PHÍ CÙNG CHUYÊN GIA (Emerald Green)
+   - Headline Hook: "${headlineText}" (High-contrast 4K Sans-Serif)
+   - Key Metric Highlights: +25.8% Revenue Growth | 92.4% Automated Scheduling | 100% SOP Audit
+   - Call-To-Action: 👉 ĐĂNG KÝ TRẢI NGHIỆM NGAY →
+
+4. COLOR PALETTE & LIGHTING AMBIENCE:
+   - Primary Base: Deep Emerald Teal (${primaryColor})
+   - Royal Accent: Gold (${accentColor}) & Clean White Typography
+   - Background Perspective: Authentic Luxury Spa Interior with ambient soothing lighting and subtle bokeh.
+
+5. AI EXECUTION MODEL:
+   - Selected Engine: DALL-E 3 / Flux.1 Dev / Bella Dynamic PNG Graphic Engine
+===================================================================`;
+  }
 
   /**
    * Builds an AI Image Generation Prompt incorporating dynamic Copywriter headline & Spa context
