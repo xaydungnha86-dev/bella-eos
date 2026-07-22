@@ -157,7 +157,7 @@ export async function POST(request: Request) {
             return {
               success: true,
               provider: 'google-gemini',
-              model: modelId,
+              model: model || modelId,
               imageUrl: dataUrl,
               prompt: imagePrompt
             };
@@ -206,7 +206,7 @@ export async function POST(request: Request) {
             return {
               success: true,
               provider: 'google-gemini-native',
-              model: modelId,
+              model: model || modelId,
               imageUrl: dataUrl,
               prompt: imagePrompt
             };
@@ -246,7 +246,7 @@ export async function POST(request: Request) {
           return {
             success: true,
             provider: 'openai',
-            model: 'dall-e-3',
+            model: model || 'dall-e-3',
             imageUrl: generatedUrl,
             prompt: imagePrompt
           };
@@ -283,7 +283,7 @@ export async function POST(request: Request) {
           return {
             success: true,
             provider: 'fal.ai',
-            model: 'flux.1-schnell',
+            model: model || 'flux.1-schnell',
             imageUrl: generatedUrl,
             prompt: imagePrompt
           };
