@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     const {
       objective,
       voiceTone,
+      brandDna,
       platform = 'facebook',
       segment,
       goal,
@@ -23,6 +24,11 @@ export async function POST(request: Request) {
     } = body as {
       objective: string;
       voiceTone?: string;
+      brandDna?: {
+        voiceTone?: string;
+        targetSegment?: string;
+        coreKeywords?: string[];
+      };
       platform?: string;
       segment?: string;
       goal?: string;
@@ -35,20 +41,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'objective is required' }, { status: 400 });
     }
 
+    const effectiveTone = voiceTone || brandDna?.voiceTone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
+    const effectiveSegment = segment || brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
+
     const systemPrompt = `Bạn là AI Copywriter chuyên nghiệp cho giải pháp Bella Enterprise (Bella EOS & Bella EIP) tại Việt Nam.
-Nhiệm vụ: Chuyển đổi Mục tiêu Kinh doanh nội bộ của CEO thành 1 bài đăng ${platform === 'facebook' ? 'Facebook' : platform} hấp dẫn DÀNH CHO KHÁCH HÀNG MỤC TIÊU.
+
+CONTEXT DOANH NGHIỆP & BRAND DNA (INPUT BẮT BUỘC):
+- Tông giọng thương hiệu (Voice Tone): ${effectiveTone}
+- Phân khúc khách hàng mục tiêu: ${effectiveSegment}
+- Yêu cầu phong cách: Soạn bài chuẩn xác theo Tông Giọng Thương Hiệu ("${effectiveTone}"), từ ngữ tinh tế, thể hiện đẳng cấp doanh nghiệp.
 
 Quy tắc BẮT BUỘC:
 1. "Mục tiêu kinh doanh" truyền vào là chỉ thị NỘI BỘ của CEO (Ví dụ: "Tăng 20% Spa demo... với ngân sách 50M").
 2. TUYỆT ĐỐI KHÔNG in lại ngân sách nội bộ (50 triệu, budget,...) hay các chỉ tiêu quản trị nội bộ vào bài viết tiếp thị công khai.
-3. Chuyển đổi chỉ thị thành OFFER DÀNH CHO KHÁCH HÀNG:
-   - Nếu mục tiêu liên quan đến "Spa demo" / "Spa": Đối tượng là Chủ Spa / Quản lý Thẩm mỹ viện. Offer là Đăng ký trải nghiệm Demo miễn phí phần mềm quản lý Spa thông minh Bella EOS.
-   - Nếu liên quan đến sản phẩm khác: Viết nội dung quảng bá lợi ích cho khách hàng.
-4. Tông giọng: ${voiceTone || 'Professional & Premium'}
-5. Bắt đầu bằng hook thu hút chủ Spa / khách hàng mục tiêu (câu hỏi, giải pháp vấn đề)
-6. Thân bài nêu rõ lợi ích giải pháp: tối ưu vận hành, tự động đặt lịch, quản lý doanh thu
-7. Kết thúc bằng Kêu gọi hành động (CTA) đăng ký Demo rõ ràng
-8. Thêm 3-5 hashtag chuẩn (#BellaEOS #QuanLySpa #DemoMiễnPhí #SpaManagement)
+3. Soạn bài viết tiếp thị tuân thủ RÕ RÀNG TÔNG GIỌNG THƯƠNG HIỆU ("${effectiveTone}").
+4. Chuyển đổi chỉ thị thành OFFER DÀNH CHO KHÁCH HÀNG (Đăng ký trải nghiệm Demo miễn phí phần mềm quản lý Spa thông minh Bella EOS).
+5. Bắt đầu bằng hook thu hút đúng đối tượng khách hàng mục tiêu (${effectiveSegment}).
+6. Thân bài nêu rõ lợi ích giải pháp: tối ưu vận hành, tự động đặt lịch, quản lý doanh thu.
+7. Kết thúc bằng Kêu gọi hành động (CTA) đăng ký Demo rõ ràng.
+8. Thêm 3-5 hashtag chuẩn (#BellaEOS #QuanLySpa #DemoMiễnPhí #SpaManagement).
 9. Độ dài: 150-250 từ.
 
 Chỉ trả về nội dung bài đăng Facebook hoàn chỉnh, không kèm lời giải thích.`;
