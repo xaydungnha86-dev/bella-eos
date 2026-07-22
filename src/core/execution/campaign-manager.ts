@@ -303,7 +303,23 @@ class CampaignExecutionManagerClass {
       this.notify();
 
       // Extract execution results
-      const taskResults = dispatchResult.payload.execution.results || [];
+      const taskResults = dispatchResult?.payload?.execution?.results || [];
+      if (taskResults.length > 0) {
+        this.state.dynamicTasks = taskResults;
+      }
+
+      const isPaused = dispatchResult?.payload?.execution?.overall_status === 'PAUSED_FOR_APPROVAL' ||
+                       this.state.dynamicTasks.some(t => t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL');
+
+      if (isPaused) {
+        this.state.isProcessing = false;
+        this.state.activeStep = 4;
+        this.state.lastApiStatus = '👑 AI Marketing Manager đã hoàn tất lập chiến lược! Đang chờ CEO Phê Duyệt Kế Hoạch.';
+        this.notify();
+        this.addLog('SYSTEM', '👑 Đã tạm dừng quy trình — Chờ CEO Phê Duyệt Kế Hoạch Marketing để chạy tiếp các bước!', 'text-amber-400 font-bold');
+        return;
+      }
+
       const fbResult = taskResults.find((r: any) => r.task_type === 'publish_facebook' || r.task_type === 'schedule_post');
 
       if (fbResult) {
