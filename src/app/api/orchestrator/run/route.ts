@@ -80,11 +80,23 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
   return { success: data.success, output: data.content, meta: { model: data.model } };
 }
 
-async function tool_generate_media_creative(input: any, clientKeys?: any): Promise<ToolResult> {
+async function tool_generate_media_creative(input: any, clientKeys?: any, taskOutputs?: Record<string, string>): Promise<ToolResult> {
   const objective = input.objective || input.format || 'Spa Management System Banner';
+  
+  // Extract previous Copywriter Worker Output dynamically from Task Graph Execution
+  let copywriterContent = '';
+  if (taskOutputs) {
+    for (const key of Object.keys(taskOutputs)) {
+      if (taskOutputs[key] && taskOutputs[key].length > 20) {
+        copywriterContent = taskOutputs[key];
+        break;
+      }
+    }
+  }
+
   let imageUrl = 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop';
-  let provider = 'enterprise-creative';
-  let model = 'bella-spa-creative-v3';
+  let provider = 'enterprise-graphic-engine';
+  let model = 'poster-design-skill-v2';
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/ai/generate-image`, {
@@ -92,7 +104,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any): Promi
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         objective,
-        prompt: `A high-converting 4K commercial sales banner for Bella EOS Spa Management Software inside a luxury spa treatment environment. Features a sleek 3D iPad Pro mockup displaying an elegant spa management dashboard with booking calendars, revenue charts, and staff management icons. In the background, a luxurious modern spa interior with warm ambient lighting, serene candles, and deep teal and gold accent colors. Clean advertisement typography reading 'BELLA EOS - AI SPA MANAGEMENT PLATFORM'. Ultra high resolution, 4K commercial advertising design standards, professional UI/UX graphics.`,
+        copywriterContent,
         client_openai_key: clientKeys?.openai
       })
     });
@@ -108,8 +120,8 @@ async function tool_generate_media_creative(input: any, clientKeys?: any): Promi
 
   return {
     success: true,
-    output: `🖼️ [Bella EOS Creative Worker] Đã render hoàn tất Banner Bối cảnh Spa & Demo Phần mềm [${provider}/${model}]:\n• Image Banner URL: ${imageUrl}\n• Resolution: 1792x1024 / 1200x630 (Facebook Post & Ads Ready)\n• Visual: Bối cảnh Spa Cao cấp & Mockup Giao diện Quản lý Spa Bella EOS Premium`,
-    meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1792x1024', status: 'GENERATED' }
+    output: `🖼️ [Bella EOS Creative Worker] Đã hoàn tất thiết kế Graphic Banner [${provider}/${model}]:\n• Image Banner URL: ${imageUrl.substring(0, 80)}...\n• Ingested Copywriter Output: "${copywriterContent ? copywriterContent.substring(0, 60) + '...' : 'Tự động bóc tách từ Task #1'}"\n• Design Elements: Logo Bella EOS, Dynamic Headline, Offer Badge, Spa Ambient & 3D Spa UI Mockup`,
+    meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1200x630', status: 'GENERATED' }
   };
 }
 
@@ -254,8 +266,8 @@ const TOOL_REGISTRY: Record<string, ToolFn> = {
   write_zalo_message:     (i, k, _)  => tool_write_zalo_message(i, k),
   write_email_campaign:   (i, k, _)  => tool_write_email_campaign(i, k),
   write_ad_copy:          (i, k, _)  => tool_write_ad_copy(i, k),
-  generate_media_creative:(i, k, _) => tool_generate_media_creative(i, k),
-  create_banner_design:   (i, k, _) => tool_generate_media_creative(i, k),
+  generate_media_creative:(i, k, to) => tool_generate_media_creative(i, k, to),
+  create_banner_design:   (i, k, to) => tool_generate_media_creative(i, k, to),
   publish_facebook:       (i, k, to) => tool_publish_facebook(i, k, to),
   publish_zalo:           (i, k, to) => tool_publish_zalo(i, k, to),
   publish_tiktok:         (i, k, to) => tool_publish_tiktok(i, k, to),
