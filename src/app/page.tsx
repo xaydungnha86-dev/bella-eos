@@ -53,6 +53,21 @@ export default function Dashboard() {
   const [fbPageId, setFbPageId] = useState('me');
   const [lastApiStatus, setLastApiStatus] = useState<string | null>(null);
 
+  // Dynamic API Key readiness states
+  const [hasOpenAI, setHasOpenAI] = useState(false);
+  const [hasClaude, setHasClaude] = useState(false);
+  const [hasGemini, setHasGemini] = useState(false);
+  const [hasFacebook, setHasFacebook] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setHasOpenAI(Boolean(getStoredKey('openai', 'api_key')));
+      setHasClaude(Boolean(getStoredKey('anthropic', 'api_key')));
+      setHasGemini(Boolean(getStoredKey('gemini', 'api_key')));
+      setHasFacebook(Boolean(getStoredKey('facebook', 'page_access_token')));
+    }
+  }, []);
+
   // Realtime Simulation states
   const [telemetryLogs, setTelemetryLogs] = useState<{ id: string; time: string; source: string; message: string; color: string }[]>([]);
   const [activeStep, setActiveStep] = useState<number>(-1);
@@ -327,34 +342,46 @@ export default function Dashboard() {
               <Cpu className="w-4 h-4 text-indigo-500" />
               <h2 className="font-display font-semibold text-xs text-slate-700 uppercase tracking-wider">AI Workforce Matrix</h2>
             </div>
-            <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 font-bold">11 Online</span>
+            <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">11 Agents Ready</span>
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {AI_WORKFORCE.map(ai => (
-              <div 
-                key={ai.id} 
-                className="glass-panel p-2.5 rounded-xl border border-slate-100 hover:border-indigo-400 hover:bg-slate-50/50 transition-all group flex items-start gap-3 shadow-sm"
-              >
-                <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
-                  {ai.avatar}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
-                    <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{ai.type}</span>
+            {AI_WORKFORCE.map(ai => {
+              const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
+              const statusLabel = ai.id === 'human_ceo' 
+                ? 'Human Authority' 
+                : ai.id === 'coo' 
+                ? 'EOS Kernel Active' 
+                : isRealApi 
+                ? 'Real API Online' 
+                : 'Rule Engine Ready';
+
+              return (
+                <div 
+                  key={ai.id} 
+                  className="glass-panel p-2.5 rounded-xl border border-slate-100 hover:border-indigo-400 hover:bg-slate-50/50 transition-all group flex items-start gap-3 shadow-sm"
+                >
+                  <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                    {ai.avatar}
                   </div>
-                  <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
-                  <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
-                  <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 text-[8px] text-slate-400">
-                    <span className="flex items-center gap-1 text-slate-500">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Available
-                    </span>
-                    <span className="font-mono text-slate-500">Proficiency: {ai.prof}%</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
+                      <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{ai.type}</span>
+                    </div>
+                    <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
+                    <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
+                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 text-[8px]">
+                      <span className="flex items-center gap-1 font-bold">
+                        <span className={`w-1.5 h-1.5 rounded-full ${isRealApi || ai.id === 'coo' || ai.id === 'human_ceo' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span> 
+                        <span className={isRealApi || ai.id === 'coo' ? 'text-emerald-700 font-semibold' : 'text-slate-600'}>{statusLabel}</span>
+                      </span>
+                      <span className="font-mono text-slate-500">Prof: {ai.prof}%</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </aside>
 
