@@ -1,6 +1,6 @@
 # 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA OPERATING SYSTEM (BELLA EOS)
-> **STATUS**: `FINAL ARCHITECTURE FREEZE (v17.2 ULTIMATE ENTERPRISE GOLD MASTER)`  
-> **SPECIFICATION VERSION**: `v17.2`  
+> **STATUS**: `FINAL ARCHITECTURE FREEZE (v17.3 ULTIMATE CONTRACT MASTER)`  
+> **SPECIFICATION VERSION**: `v17.3`  
 > **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
 ---
@@ -16,7 +16,7 @@
 Enterprise Brain                  Business Applications
 (System of Orchestration)          (System of Record)
         ▲
-        │ (Install Asset)
+        │ (Install & Manage via Asset Manifest & Plugin Lifecycle)
  Bella Marketplace ──► Enterprise Assets (Skills, SOPs, DNA Packs, Prompts, Connectors)
         │
         ├─► Bella Workers (Stateless Executors: AI, Human, MCP, API, Script, Robot, External)
@@ -26,35 +26,103 @@ Enterprise Brain                  Business Applications
 
 ---
 
-## 2. QUẢN LÝ ĐÓNG BĂNG KIẾN TRÚC (CLEAN ARCHITECTURE FREEZE)
+## 2. BẢNG PHÂN ĐỊNH KHÓA CỨNG (FROZEN CONTRACTS VS EXTENSIBLE)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ ❄️ FROZEN CORE (BẤT BIẾN - HỢP ĐỒNG CỐ ĐỊNH TRONG 20 NĂM)        │
+│ ❄️ FROZEN CONTRACTS (KHÓA CỨNG BẤT BIẾN 20 NĂM)                  │
 ├─────────────────────────────────────────────────────────────────┤
-│ • 5 Core Domains (Kernel, Storage, Brain, Orchestr, Exec Domain)│
-│ • Canonical Business Vocabulary (CBV v1.0) & EOM (v1.0)         │
-│ • Canonical Context Package (v1.0) & Security Isolation         │
-│ • Service Contract Specification (v1.0) & Capability Chain      │
-│ • Worker Lifecycle & Stateless Execution Principle              │
-│ • Storage Abstraction Interfaces (v1.0)                         │
+│ 1. 5 Core Domains Boundaries (Kernel, Storage, Brain, Orch, Exec)│
+│ 2. Canonical Business Vocabulary (CBV v1.0)                      │
+│ 3. Enterprise Object Model (EOM v1.0)                           │
+│ 4. Enterprise Message Contract (EnterpriseEvent<T> v1.0)         │
+│ 5. Cognitive Memory API Interface (MemoryAPI v1.0)             │
+│ 6. Service Contract Specification (IService v1.0)              │
+│ 7. Worker Contract & Stateless Execution Principle              │
+│ 8. Asset Manifest Specification (AssetManifest v1.0)            │
+│ 9. Marketplace Plugin Lifecycle Specification                    │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│ 🧩 PLUGGABLE & CONFIGURABLE MODULES (LẠM THAY ĐỔI & MỞ RỘNG)    │
+│ 🚀 EXTENSIBLE LAYER (MỞ RỘNG & THƯƠNG MẠI TRÊN MARKETPLACE)    │
 ├─────────────────────────────────────────────────────────────────┤
-│ • Prompts & Prompt Templates (Phát triển liên tục theo AI)      │
-│ • Reasoning Solvers (Pluggable: Monte Carlo, Tree Search, RL...)│
-│ • Confidence Threshold (Cấu hình linh hoạt theo Tenant: 70%-95%)│
-│ • Brain Centers (Mở rộng thêm: Vision, Compliance, Forecast...) │
-│ • Company DNA Packs (Versioned v1.0, v1.1, v2.0 có Rollback)    │
-│ • Marketplace Assets (Skills, SOPs, Prompts, Workflows)         │
+│ • Business Skills & SOP Extensions                              │
+│ • Prompt Packs & Prompt Version Templates                       │
+│ • Company DNA Packs (Versioned v1.0, v1.1, v2.0)                │
+│ • Connector Packs (SAP, MISA, Facebook, Zalo, Odoo, Salesforce)  │
+│ • Workflow Packs & Stage Templates                              │
+│ • Enterprise Strategies & Pluggable Solvers                     │
+│ • Presentation Consoles, Dashboards & Portals                   │
+│ • AI & Human Worker Implementations                             │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. CLEAN ARCHITECTURE: 5 CORE DOMAINS & OUTER ADAPTERS
+## 3. 🔒 CHI TIẾT 5 HỢP ĐỒNG KHÓA CỨNG (FROZEN CONTRACT SPECIFICATIONS)
+
+### 1. Enterprise Message Contract (`EnterpriseEvent<T>`)
+```typescript
+interface EnterpriseEvent<T> {
+  id: string;
+  type: string;
+  source: string;
+  tenantId: string;
+  timestamp: Date;
+  correlationId: string;
+  causationId: string;
+  payload: T;
+  metadata: Record<string, any>;
+}
+```
+
+### 2. Service Contract Interface (`IService`)
+```typescript
+interface IService {
+  execute(input: any): Promise<any>;
+  validate(input: any): Promise<boolean>;
+  rollback(executionId: string): Promise<boolean>;
+  health(): Promise<{ status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' }>;
+  metadata(): { id: string; version: string; capability: string };
+}
+```
+
+### 3. Cognitive Memory API (`MemoryAPI`)
+```typescript
+interface MemoryAPI {
+  store(memory: BusinessMemory): Promise<string>;
+  retrieve(id: string): Promise<BusinessMemory | null>;
+  search(query: MemorySearchQuery): Promise<BusinessMemory[]>;
+  forget(id: string): Promise<boolean>;
+  link(sourceId: string, targetId: string, relation: string): Promise<boolean>;
+  version(id: string): Promise<MemoryVersionHistory>;
+}
+```
+
+### 4. Asset Manifest Specification (`AssetManifest`)
+```typescript
+interface AssetManifest {
+  id: string;
+  name: string;
+  version: string;
+  type: 'SKILL' | 'SOP' | 'DNA_PACK' | 'CONNECTOR' | 'PROMPT_PACK' | 'WORKFLOW';
+  author: string;
+  dependencies: Record<string, string>;
+  compatibility: { eosVersion: string };
+  license: string;
+  signature: string;
+  checksum: string;
+}
+```
+
+### 5. Marketplace Plugin Lifecycle Specification
+```
+Install ➔ Validate ➔ Activate ➔ Execute ➔ Suspend ➔ Upgrade ➔ Rollback ➔ Remove
+```
+
+---
+
+## 4. CLEAN ARCHITECTURE: 5 CORE DOMAINS & OUTER ADAPTERS
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -73,7 +141,7 @@ Enterprise Brain                  Business Applications
                             ▼
 ┌────────────────────────────────────────────────────────┐
 │ Domain 3: Enterprise Brain & Pluggable Centers         │
-│  • Memory Center (Working, Episodic, Semantic, Business)│
+│  • Memory Center (Communicates via MemoryAPI v1.0)     │
 │  • Knowledge Center (Graph, Provenance, Anti-Hallucin) │
 │  • Context Center (Isolation, Ranking, Token Optimizer)│
 │  • Reasoning Center (Solvers: Monte Carlo, Tree, RL)   │
@@ -88,7 +156,7 @@ Enterprise Brain                  Business Applications
                             ▼
 ┌────────────────────────────────────────────────────────┐
 │ Domain 5: Execution Domain (Stateless Workforce Engine)│
-│  • Service Contracts & Service Registry                │
+│  • Service Contracts (IService v1.0 Interface)         │
 │  • Stateless Workers: AI, Human, MCP, API, Robot...    │
 │  • Internal API Gateway                                │
 └───────────────────────────┬────────────────────────────┘
@@ -103,26 +171,21 @@ Enterprise Brain                  Business Applications
 
 ---
 
-## 4. AN TOÀN TIẾN HÓA QUY TRÌNH (HUMAN APPROVAL LEARNING LOOP)
+## 5. CÔNG NGHỆ CHUẨN (FREE-FIRST STACK)
 
-```
-[ Worker Execution ] ➔ Evidence ➔ Learning Center ➔ Suggestion ➔ CEO/Human Approval ➔ SOP Update
-```
-*Giúp ngăn chặn AI tự động làm hỏng hoặc biến đổi SOP sai lệch.*
-
----
-
-## 5. QUY TRÌNH ADR GOVERNANCE
-
-Mọi quyết định điều chỉnh trong 20 năm tới chỉ được thực hiện thông qua tài liệu ADR tại [`docs/architecture/adr/`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/):
-- [`ADR-0001-domain-isolation.md`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/ADR-0001-domain-isolation.md)
-- [`ADR-0002-stateless-workers.md`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/ADR-0002-stateless-workers.md)
-- [`ADR-0003-storage-abstraction.md`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/ADR-0003-storage-abstraction.md)
-- [`ADR-0004-context-security.md`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/ADR-0004-context-security.md)
-- [`ADR-0005-company-dna.md`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/ADR-0005-company-dna.md)
+* **Frontend**: Next.js (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, Lucide Icons.
+* **Backend**: Next.js Server API Routes (`/api/*`), TypeScript.
+* **Database & Vector**: Supabase PostgreSQL + pgvector (Free Tier).
+* **Storage**: Supabase Storage (Free Tier).
+* **Deploy**: Vercel (Dev/Staging) ➔ VPS Ubuntu + Docker + Nginx (Production).
 
 ---
 
-## 6. 🎯 CHÍNH THỨC DỪNG THAY ĐỔI KIẾN TRÚC & ĐI VÀO THI CÔNG
+## 6. 🎯 LỘ TRÌNH THI CÔNG 6 PHASE CHUẨN
 
-> **ĐÂY LÀ MỐC ĐÓNG BẰNG TUYỆT ĐỐI.** Dừng hoàn toàn việc bổ sung hay điều chỉnh sơ đồ kiến trúc. Toàn bộ trọng tâm chuyển 100% sang thi công 6 Phase mã nguồn sản phẩm.
+1. **Phase 1 — Infrastructure Contracts**: CBV v1.0, EOM v1.0, EnterpriseEvent<T>, Storage Interfaces, Secrets Store, MemoryAPI.
+2. **Phase 2 — Brain Runtime**: Memory, Knowledge, Context, Reasoning, Learning, DNA Packs.
+3. **Phase 3 — Business Runtime**: Intent, Goal, Strategy, Simulation, Planning, Workflow.
+4. **Phase 4 — Execution Runtime**: Capability Registry, Service Contracts (IService), Worker Gateway, Connectors.
+5. **Phase 5 — Experience Layer**: CEO Console, Manager Portal, Employee Portal, Dashboard, Monitoring.
+6. **Phase 6 — Marketplace**: Assets, Versioning (AssetManifest), Distribution, Plugin Lifecycle.
