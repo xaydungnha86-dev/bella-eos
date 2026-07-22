@@ -83,7 +83,7 @@ const AI_WORKFORCE = [
 
 export default function Dashboard() {
   // Application State
-  const [objective, setObjective] = useState('Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu');
+  const [objective, setObjective] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState<'timeline' | 'reasoning'>('timeline');
   const [brainSubTab, setBrainSubTab] = useState<'memory' | 'knowledge' | 'context' | 'reasoning' | 'learning'>('memory');
@@ -197,7 +197,14 @@ export default function Dashboard() {
     if (typeof window !== 'undefined') {
       try {
         const savedObj = safeGet('bella_eos_objective');
-        if (savedObj !== null) setObjective(savedObj);
+        if (savedObj !== null) {
+          if (savedObj === 'Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu') {
+            setObjective('');
+            safeSet('bella_eos_objective', '');
+          } else {
+            setObjective(savedObj);
+          }
+        }
 
         const savedLogs = safeGet('bella_eos_telemetry_logs');
         if (savedLogs) setTelemetryLogs(JSON.parse(savedLogs));
@@ -825,7 +832,7 @@ export default function Dashboard() {
                   value={objective}
                   onChange={(e) => setObjective(e.target.value)}
                   disabled={isProcessing}
-                  placeholder="Nhập mệnh lệnh chiến lược của CEO..."
+                  placeholder="Ví dụ: Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu..."
                   className="w-full h-12 bg-slate-50 border border-slate-200 hover:border-indigo-400 focus:border-indigo-500 focus:outline-none rounded-xl pl-11 pr-4 text-xs font-sans text-slate-800 placeholder-slate-400 shadow-inner transition-colors disabled:opacity-50"
                 />
                 <Sparkles className="w-4 h-4 text-indigo-500 absolute left-4 top-4" />
