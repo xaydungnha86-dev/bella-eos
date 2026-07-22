@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { PosterDesignSkill } from '@/core/skills/poster-design-skill';
 
 export const dynamic = 'force-dynamic';
 
@@ -6,11 +7,7 @@ export const dynamic = 'force-dynamic';
  * POST /api/ai/generate-image
  *
  * AI IMAGE GENERATION ENGINE (Bella EOS Creative Worker Gateway)
- * Supported AI Models:
- *  1. OpenAI DALL-E 3 (model: 'dall-e-3', 1792x1024 landscape banner)
- *  2. Fal.ai Flux.1 Dev / Schnell ('fal-ai/flux/schnell')
- *  3. Google Imagen 3 ('imagen-3.0-generate-002')
- *  4. Curated Enterprise High-Res Render Fallback
+ * Equipped with Poster & Banner Design Skill (PosterDesignSkill v1.0)
  */
 export async function POST(request: Request) {
   try {
@@ -27,7 +24,8 @@ export async function POST(request: Request) {
       client_fal_key?: string;
     };
 
-    const imagePrompt = prompt || `A professional, elegant 4K marketing banner for Bella EOS Spa Management System. Modern iPad mockup displaying spa analytics, appointment booking schedules, relaxing luxury spa background with soft lighting, teal and gold colors, 16:9 banner format, high resolution.`;
+    // Build structured 4K Commercial Sales Poster Prompt via PosterDesignSkill
+    const imagePrompt = prompt || PosterDesignSkill.buildSalesPosterPrompt(objective);
 
     // ── 1. Try OpenAI DALL-E 3 API ───────────────────────────────────────────
     const openaiKey = client_openai_key || process.env.OPENAI_API_KEY;
@@ -102,12 +100,13 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── 3. Enterprise Curated Spa Banner Asset Fallback ─────────────────────
-    const fallbackUrl = 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop';
+    // ── 3. Enterprise High-Converting Commercial Sales Banner Fallback ──────
+    // Professional Enterprise Software Presentation & iPad Dashboard Banner
+    const fallbackUrl = 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1200&auto=format&fit=crop';
     return NextResponse.json({
       success: true,
       provider: 'enterprise-creative-asset',
-      model: 'bella-creative-render-v1',
+      model: 'bella-creative-render-v2',
       imageUrl: fallbackUrl,
       prompt: imagePrompt,
       note: 'DALL-E 3 & Flux.1 Ready. Cấu hình OPENAI_API_KEY hoặc FAL_KEY để AI render trực tiếp từng mẫu prompt mới.'
