@@ -21,7 +21,9 @@ export async function POST(request: Request) {
       client_openai_key,
       client_anthropic_key,
       client_gemini_key,
-      model
+      model,
+      systemPrompt,
+      temperature
     } = body as {
       objective: string;
       voiceTone?: string;
@@ -37,6 +39,8 @@ export async function POST(request: Request) {
       client_anthropic_key?: string;
       client_gemini_key?: string;
       model?: string;
+      systemPrompt?: string;
+      temperature?: number;
     };
 
     if (!objective) {
@@ -46,7 +50,7 @@ export async function POST(request: Request) {
     const effectiveTone = voiceTone || brandDna?.voiceTone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
     const effectiveSegment = segment || brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
 
-    const systemPrompt = `Bạn là AI Copywriter chuyên nghiệp cho giải pháp Bella Enterprise (Bella EOS & Bella EIP) tại Việt Nam.
+    const defaultSystemPrompt = `Bạn là AI Copywriter chuyên nghiệp cho giải pháp Bella Enterprise (Bella EOS & Bella EIP) tại Việt Nam.
 
 CONTEXT DOANH NGHIỆP & BRAND DNA (INPUT BẮT BUỘC):
 - Tông giọng thương hiệu (Voice Tone): ${effectiveTone}
@@ -66,6 +70,9 @@ Quy tắc BẮT BUỘC:
 
 Chỉ trả về nội dung bài đăng Facebook hoàn chỉnh, không kèm lời giải thích.`;
 
+    const effectiveSystemPrompt = systemPrompt ? systemPrompt : defaultSystemPrompt;
+    const effectiveTemperature = temperature !== undefined && temperature !== null ? parseFloat(temperature as any) : 0.75;
+
     const userMessage = `Mục tiêu chỉ thị của CEO: "${objective}"
 
 Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàng mục tiêu để đạt mục tiêu trên.`;
@@ -83,10 +90,10 @@ Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàn
           body: JSON.stringify({
             model: 'gpt-4o',
             messages: [
-              { role: 'system', content: systemPrompt },
+              { role: 'system', content: effectiveSystemPrompt },
               { role: 'user', content: userMessage }
             ],
-            temperature: 0.75,
+            temperature: effectiveTemperature,
             max_tokens: 600
           })
         });
@@ -118,8 +125,9 @@ Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàn
           body: JSON.stringify({
             model: 'claude-3-5-sonnet-20241022',
             max_tokens: 600,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: userMessage }]
+            system: effectiveSystemPrompt,
+            messages: [{ role: 'user', content: userMessage }],
+            temperature: effectiveTemperature
           })
         });
         const data = await res.json();
@@ -146,8 +154,8 @@ Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàn
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `${systemPrompt}\n\n${userMessage}` }] }],
-            generationConfig: { temperature: 0.75, maxOutputTokens: 4096 }
+            contents: [{ parts: [{ text: `${effectiveSystemPrompt}\n\n${userMessage}` }] }],
+            generationConfig: { temperature: effectiveTemperature, maxOutputTokens: 4096 }
           })
         });
         const data = await res.json();

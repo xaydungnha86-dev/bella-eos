@@ -18,18 +18,30 @@ async function getCopywriterKeys(clientKeys: any) {
   const config = clientKeys?.agent_configs?.['seo_copywriter'] || clientKeys?.agent_configs?.['eos_content_worker'] || {};
   const preferredModel = config.model;
   const customApiKey = config.apiKey;
+  const systemPrompt = config.systemPrompt;
+  const temperature = config.temperature;
 
   let openai = clientKeys.openai;
   let anthropic = clientKeys.anthropic;
   let gemini = clientKeys.gemini;
 
   if (customApiKey) {
-    if (preferredModel?.startsWith('gpt')) openai = customApiKey;
-    if (preferredModel?.startsWith('claude')) anthropic = customApiKey;
-    if (preferredModel?.startsWith('gemini')) gemini = customApiKey;
+    if (preferredModel && preferredModel !== 'default') {
+      if (preferredModel.startsWith('gpt')) openai = customApiKey;
+      if (preferredModel.startsWith('claude')) anthropic = customApiKey;
+      if (preferredModel.startsWith('gemini')) gemini = customApiKey;
+    } else {
+      if (customApiKey.startsWith('sk-ant-')) {
+        anthropic = customApiKey;
+      } else if (customApiKey.startsWith('AIzaSy')) {
+        gemini = customApiKey;
+      } else if (customApiKey.startsWith('sk-') || customApiKey.startsWith('sk-proj-')) {
+        openai = customApiKey;
+      }
+    }
   }
 
-  return { openai, anthropic, gemini, model: preferredModel };
+  return { openai, anthropic, gemini, model: preferredModel, systemPrompt, temperature };
 }
 
 async function tool_write_facebook_post(input: any, clientKeys: any): Promise<ToolResult> {
@@ -46,7 +58,9 @@ async function tool_write_facebook_post(input: any, clientKeys: any): Promise<To
       client_openai_key:    cw.openai,
       client_anthropic_key: cw.anthropic,
       client_gemini_key:    cw.gemini,
-      model:                cw.model
+      model:                cw.model,
+      systemPrompt:         cw.systemPrompt,
+      temperature:          cw.temperature
     })
   });
   const data = await res.json();
@@ -66,7 +80,9 @@ async function tool_write_zalo_message(input: any, clientKeys: any): Promise<Too
       objective: input.objective, voiceTone: input.tone, platform: 'zalo',
       segment: input.target_audience, goal: input.objective,
       client_openai_key: cw.openai, client_anthropic_key: cw.anthropic, client_gemini_key: cw.gemini,
-      model: cw.model
+      model: cw.model,
+      systemPrompt: cw.systemPrompt,
+      temperature: cw.temperature
     })
   });
   const data = await res.json();
@@ -82,7 +98,9 @@ async function tool_write_email_campaign(input: any, clientKeys: any): Promise<T
       objective: input.objective, voiceTone: input.tone, platform: 'email',
       segment: input.target_audience, goal: input.objective,
       client_openai_key: cw.openai, client_anthropic_key: cw.anthropic, client_gemini_key: cw.gemini,
-      model: cw.model
+      model: cw.model,
+      systemPrompt: cw.systemPrompt,
+      temperature: cw.temperature
     })
   });
   const data = await res.json();
@@ -99,7 +117,9 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
       voiceTone: input.tone, platform: 'facebook_ad',
       segment: input.target_audience, goal: input.objective,
       client_openai_key: cw.openai, client_anthropic_key: cw.anthropic, client_gemini_key: cw.gemini,
-      model: cw.model
+      model: cw.model,
+      systemPrompt: cw.systemPrompt,
+      temperature: cw.temperature
     })
   });
   const data = await res.json();
