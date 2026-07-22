@@ -68,12 +68,13 @@ function safeGet(key: string): string | null {
 
 // 11 Process-based AI Agent Workforce Matrix Definition
 const AI_WORKFORCE = [
+  { id: 'human_ceo', name: 'CEO / Lãnh Đạo Tối Cao', type: 'Human', role: 'Thẩm Định Executive', avatar: '👑', capability: 'Duyệt ngân sách & phê duyệt bài xuất bản', status: 'idle', prof: 100, color: 'from-amber-600 to-yellow-400' },
   { id: 'coo', name: 'AI COO Orchestrator', type: 'AI', role: 'Điều Phối Vận Hành', avatar: '🤖', capability: 'Lập kế hoạch & phân bổ quy trình tự động', status: 'idle', prof: 98, color: 'from-cyan-500 to-blue-500' },
+  { id: 'assistant', name: 'AI Assistant', type: 'AI', role: 'Trợ Lý Cấp Cao', avatar: '🙋‍♂️', capability: 'Hỗ trợ tổng hợp dữ liệu & báo cáo vận hành', status: 'idle', prof: 96, color: 'from-indigo-400 to-blue-400' },
   { id: 'hermes', name: 'Hermes Social Publisher', type: 'AI', role: 'Xuất Bản Mạng Xã Hội', avatar: '⚡', capability: 'Tự động đăng bài & quản lý Fanpage', status: 'idle', prof: 95, color: 'from-amber-500 to-orange-500' },
   { id: 'creative_designer', name: 'AI Creative Designer Worker', type: 'AI', role: 'Thiết Kế Đồ Họa', avatar: '🎨', capability: 'Thiết kế Poster, Banner PNG & phối cảnh 4K', status: 'idle', prof: 97, color: 'from-pink-500 to-rose-500' },
   { id: 'seo_copywriter', name: 'AI Marketing Copywriter Worker', type: 'AI', role: 'Sáng Tạo Nội Dung', avatar: '✍️', capability: 'Viết bài bán hàng, headline hook & ưu đãi', status: 'idle', prof: 96, color: 'from-purple-500 to-indigo-500' },
   { id: 'multimodal_analyst', name: 'AI Multimodal Document Analyst', type: 'AI', role: 'Phân Tích Đa Phương Tiện', avatar: '🧬', capability: 'Đọc OCR tài liệu, video & audio doanh nghiệp', status: 'idle', prof: 96, color: 'from-emerald-500 to-teal-500' },
-  { id: 'human_ceo', name: 'CEO / Lãnh Đạo Phê Duyệt', type: 'Human', role: 'Thẩm Định Executive', avatar: '👑', capability: 'Duyệt ngân sách & phê duyệt bài xuất bản', status: 'idle', prof: 100, color: 'from-amber-600 to-yellow-400' },
   { id: 'ads_optimizer', name: 'AI Ads Campaign Optimizer', type: 'AI', role: 'Tối Ưu Quảng Cáo', avatar: '📈', capability: 'Điều phối ngân sách Facebook/Google Ads', status: 'idle', prof: 94, color: 'from-indigo-400 to-purple-400' },
   { id: 'payroll_guard', name: 'AI Payroll & Security Guard', type: 'AI', role: 'Kiểm Soát Tài Chính', avatar: '🔒', capability: 'Kiểm toán nội bộ, lương & bảo mật', status: 'idle', prof: 95, color: 'from-red-500 to-rose-500' },
   { id: 'connector_agent', name: 'AI ERP Connector Hub', type: 'AI', role: 'Tích Hợp Hệ Thống', avatar: '🔌', capability: 'Kết nối API MISA, SAP, Supabase ERP', status: 'idle', prof: 91, color: 'from-sky-500 to-indigo-500' },
@@ -305,17 +306,37 @@ export default function Dashboard() {
     setOrchestratorPlan(null);
     addLog('CEO INTENT', `🎯 Ý chí chiến lược nhận được: "${objective}"`, 'text-amber-600 font-bold');
 
+    // Step 0: COO Starts Holistic Analysis
+    await delay(700);
+    addLog('AI COO', `🤖 Nhận nhiệm vụ từ CEO. Bắt đầu phân tích tổng thể hệ thống...`, 'text-indigo-600 font-bold');
+    
+    await delay(700);
+    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: 1,289 | Reach 24h: 14.5k. Khởi tạo Context Package.`, 'text-slate-600 font-semibold');
+
+    await delay(700);
+    addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-750 font-semibold');
+    addLog('SOP PROTOCOL', `⚙️ Đã load SOP-MKT-V1.8 (Soạn thảo nội dung) và SOP-DSN-V2.1 (Thiết kế đồ họa).`, 'text-cyan-600');
+
+    await delay(700);
+    addLog('BRAND DNA', `🧬 Đang kiểm duyệt Nhận diện Thương hiệu (Brand DNA)...`, 'text-pink-600 font-semibold');
+    addLog('BRAND DNA', `🧬 Đã nhận đặc đặc tính: Tone giọng [${dnaState.tone}] & Phong cách UI [${dnaState.style}].`, 'text-pink-650');
+
+    await delay(700);
+    addLog('FINANCIAL AUDIT', `💰 Kiểm tra Tình hình Tài chính & Chính sách chi tiêu...`, 'text-purple-650 font-semibold');
+    const budgetLimit = objective.toLowerCase().includes('50 triệu') ? '50,000,000' : '100,000,000';
+    addLog('FINANCIAL AUDIT', `💰 Ngân sách dự kiến: ${budgetLimit} VND. Trạng thái chính sách: ĐẠT YÊU CẦU (POL-GOV-001).`, 'text-purple-600');
+
     // Step 1: Parse Intent
-    await delay(800);
+    await delay(700);
     const parsedIntent = OrchestrationEngine.IntentEngine.parseIntent(objective);
-    addLog('INTENT ENGINE', `🔍 Phân tích ngữ nghĩa hoàn tất. Hạn mức tự động: 100M VND. Hợp quy luật: ĐẠT.`, 'text-cyan-600');
+    addLog('INTENT ENGINE', `🔍 Phân tích mục tiêu chiến lược hoàn tất.`, 'text-cyan-600');
 
     // Step 2: Goal Decompose
-    await delay(900);
+    await delay(800);
     setActiveStep(1);
     const goals = OrchestrationEngine.GoalEngine.decomposeGoal(objective);
     setGoalTree(goals);
-    addLog('GOAL ENGINE', `📊 Đã phân rã mục tiêu thành OKRs của các phòng ban (Mkt, Sales, Finance, HR).`, 'text-indigo-600 font-bold');
+    addLog('GOAL ENGINE', `📊 Phân rã chỉ thị của CEO thành sơ đồ OKRs phòng ban (Mkt, Sales, Finance).`, 'text-indigo-600 font-bold');
 
     // Step 3: Run Monte Carlo Simulation
     await delay(1000);
@@ -450,6 +471,31 @@ export default function Dashboard() {
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
+  const coreAgents = AI_WORKFORCE.filter(ai => ['human_ceo', 'coo', 'assistant'].includes(ai.id));
+  const operationalAgents = AI_WORKFORCE.filter(ai => !['human_ceo', 'coo', 'assistant'].includes(ai.id));
+  const activeAgents = operationalAgents.filter(ai => {
+    return dynamicTasks.some(t => {
+      const taskAgentId = t.agent_id?.toLowerCase() || '';
+      const taskAgentName = t.agent_name?.toLowerCase() || '';
+      const aiId = ai.id.toLowerCase();
+      const aiNameNormalized = ai.name.toLowerCase()
+        .replace(' worker', '')
+        .replace(' ai', '')
+        .replace(' publisher', '')
+        .replace(' campaign', '')
+        .replace(' optimizer', '')
+        .replace(' & security guard', '')
+        .replace(' connector hub', '')
+        .replace(' learning & mutation loop', '')
+        .replace(' qa & compliance auditor', '')
+        .trim();
+      
+      return taskAgentId.includes(aiId) || 
+             aiId.includes(taskAgentId) || 
+             taskAgentName.includes(aiNameNormalized);
+    });
+  });
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50 text-slate-800">
       {/* HEADER STATUS BAR */}
@@ -506,62 +552,172 @@ export default function Dashboard() {
 
       {/* DASHBOARD BODY */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* LEFT COLUMN: 11 AI WORKFORCE MATRIX */}
+        {/* LEFT COLUMN: 12 AI WORKFORCE MATRIX */}
         <aside className="w-80 border-r border-slate-200 bg-white/60 backdrop-blur-md flex flex-col shrink-0">
           <div className="p-4 border-b border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Cpu className="w-4 h-4 text-indigo-500" />
               <h2 className="font-display font-semibold text-xs text-slate-700 uppercase tracking-wider">AI Workforce Matrix</h2>
             </div>
-            <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">11 Agents Ready</span>
+            <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">{AI_WORKFORCE.length} Agents Ready</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {AI_WORKFORCE.map(ai => {
-              const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
-              const statusLabel = ai.id === 'human_ceo' 
-                ? 'Human Authority' 
-                : ai.id === 'coo' 
-                ? 'EOS Kernel Active' 
-                : isRealApi 
-                ? 'Real API Online' 
-                : 'Rule Engine Ready';
+          <div className="flex-1 overflow-y-auto p-3 space-y-4">
+            {/* SECTION 1: CORE EXECUTIVE TEAM */}
+            <div className="space-y-2">
+              <h3 className="font-display font-semibold text-[10px] text-slate-400 uppercase tracking-wider px-1">
+                Ban Điều Hành Trung Ương
+              </h3>
+              {coreAgents.map(ai => {
+                const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
+                const statusLabel = ai.id === 'human_ceo' 
+                  ? 'Human Authority' 
+                  : ai.id === 'coo' 
+                  ? 'EOS Kernel Active' 
+                  : ai.id === 'assistant'
+                  ? (isProcessing ? 'Synthesizing Reports' : 'Ready for CEO')
+                  : isRealApi 
+                  ? 'Real API Online' 
+                  : 'Rule Engine Ready';
 
-              return (
-                <div 
-                  key={ai.id} 
-                  className="glass-panel p-2.5 rounded-xl border border-slate-100 hover:border-indigo-400 hover:bg-slate-50/50 transition-all group flex items-start gap-3 shadow-sm"
-                >
-                  <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
-                    {ai.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
-                      <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{ai.type}</span>
+                return (
+                  <div 
+                    key={ai.id} 
+                    className="glass-panel p-2.5 rounded-xl border border-slate-150 bg-white hover:border-indigo-400 hover:bg-slate-50/50 transition-all group flex items-start gap-3 shadow-sm"
+                  >
+                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                      {ai.avatar}
                     </div>
-                    <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
-                    <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
-                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 text-[8px]">
-                      <span className="flex items-center gap-1 font-bold">
-                        <span className={`w-1.5 h-1.5 rounded-full ${isRealApi || ai.id === 'coo' || ai.id === 'human_ceo' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span> 
-                        <span className={isRealApi || ai.id === 'coo' ? 'text-emerald-700 font-semibold' : 'text-slate-600'}>{statusLabel}</span>
-                      </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedAgentForConfig(ai);
-                          setIsAgentConfigModalOpen(true);
-                        }}
-                        className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1 cursor-pointer border border-indigo-100 shadow-2xs"
-                      >
-                        <Settings className="w-2.5 h-2.5" /> Cấu hình
-                      </button>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
+                        <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{ai.type}</span>
+                      </div>
+                      <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
+                      <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
+                      <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-105 text-[8px]">
+                        <span className="flex items-center gap-1 font-bold">
+                          <span className={`w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse`}></span> 
+                          <span className="text-emerald-700 font-semibold">{statusLabel}</span>
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedAgentForConfig(ai);
+                            setIsAgentConfigModalOpen(true);
+                          }}
+                          className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1 cursor-pointer border border-indigo-100 shadow-2xs"
+                        >
+                          <Settings className="w-2.5 h-2.5" /> Cấu hình
+                        </button>
+                      </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+
+            {/* SECTION 2: DYNAMIC ALLOCATED WORKERS */}
+            <div className="pt-2 border-t border-slate-100 space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <h3 className="font-display font-semibold text-[10px] text-slate-400 uppercase tracking-wider">
+                  Lực Lượng Vận Hành Phân Bổ
+                </h3>
+                {activeAgents.length > 0 && (
+                  <span className="text-[8.5px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">
+                    {activeAgents.length} Active
+                  </span>
+                )}
+              </div>
+
+              {!isProcessing && activeStep === -1 ? (
+                /* Idle State */
+                <div className="border border-dashed border-slate-200 rounded-xl p-3.5 text-center bg-slate-50/50 space-y-2">
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                    <Cpu className="w-4 h-4" />
+                  </div>
+                  <p className="text-[11px] font-semibold text-slate-700">Đợi Phân Bổ Nhân Sự</p>
+                  <p className="text-[10px] text-slate-500 leading-normal">
+                    AI COO sẽ phân tích bối cảnh, SOP nội bộ, DNA và phân tách công việc để gán các Agent vận hành chuyên trách vào đây.
+                  </p>
                 </div>
-              );
-            })}
+              ) : isProcessing && activeAgents.length === 0 ? (
+                /* Planning State */
+                <div className="border border-dashed border-indigo-200 rounded-xl p-3.5 text-center bg-indigo-50/20 space-y-2 animate-pulse">
+                  <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center mx-auto text-indigo-400">
+                    <Brain className="w-4 h-4 animate-spin" style={{ animationDuration: '3s' }} />
+                  </div>
+                  <p className="text-[11px] font-semibold text-indigo-700 font-display">COO Đang Hoạch Định...</p>
+                  <p className="text-[10px] text-slate-500 leading-normal">
+                    Đang phân tích Business Context, kiểm duyệt chính sách tài chính & quy trình SOP để phân phối Agent...
+                  </p>
+                </div>
+              ) : (
+                /* Active Allocated Workers */
+                <div className="space-y-2">
+                  {activeAgents.map(ai => {
+                    const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
+                    const statusLabel = isRealApi ? 'Real API Online' : 'Rule Engine Ready';
+
+                    return (
+                      <div 
+                        key={ai.id} 
+                        className="glass-panel p-2.5 rounded-xl border border-indigo-200 bg-indigo-50/5 hover:border-indigo-400 transition-all group flex items-start gap-3 shadow-xs ring-2 ring-indigo-500/5"
+                      >
+                        <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                          {ai.avatar}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
+                            <span className="text-[8px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">ALLOCATED</span>
+                          </div>
+                          <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
+                          <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
+                          <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 text-[8px]">
+                            <span className="flex items-center gap-1 font-bold">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 
+                              <span className="text-emerald-700 font-semibold">{statusLabel}</span>
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedAgentForConfig(ai);
+                                setIsAgentConfigModalOpen(true);
+                              }}
+                              className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1 cursor-pointer border border-indigo-100 shadow-2xs"
+                            >
+                              <Settings className="w-2.5 h-2.5" /> Cấu hình
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* SECTION 3: REGISTRY POOL (AVAILABLE AGENTS) */}
+            <div className="pt-2 border-t border-slate-100">
+              <details className="group border border-slate-150 rounded-xl bg-slate-50/50 overflow-hidden">
+                <summary className="flex items-center justify-between p-2.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider cursor-pointer list-none select-none hover:text-slate-600 hover:bg-slate-50 transition-colors">
+                  <span>Registry Pool ({operationalAgents.length - activeAgents.length} Idle)</span>
+                  <span className="transition-transform group-open:rotate-180 text-[7px]">▼</span>
+                </summary>
+                <div className="p-2 border-t border-slate-100 space-y-1.5 bg-white max-h-48 overflow-y-auto">
+                  {operationalAgents.filter(ai => !activeAgents.includes(ai)).map(ai => (
+                    <div key={ai.id} className="flex items-center justify-between p-1.5 rounded bg-slate-50/70 border border-slate-100 text-[9px] hover:bg-slate-50 hover:border-slate-200 transition-all">
+                      <span className="flex items-center gap-1.5 text-slate-600">
+                        <span>{ai.avatar}</span>
+                        <span className="font-semibold truncate max-w-[130px]">{ai.name}</span>
+                      </span>
+                      <span className="text-[7px] bg-slate-100 px-1 py-0.5 rounded text-slate-400 font-bold uppercase">IDLE</span>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            </div>
           </div>
         </aside>
 
