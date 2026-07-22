@@ -1,5 +1,5 @@
 # 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA OPERATING SYSTEM (BELLA EOS)
-> **STATUS**: `FINAL ARCHITECTURE FREEZE (v17.3 ULTIMATE CONTRACT MASTER - FEATURE COMPLETE)`  
+> **STATUS**: `FINAL ARCHITECTURE FREEZE (v17.3 PLATFORM SPECIFICATION & CONSTITUTION)`  
 > **SPECIFICATION VERSION**: `v17.3`  
 > **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
@@ -28,52 +28,75 @@ Enterprise Brain                  Business Applications
 
 ---
 
-## 2. QUẢN LÝ KIẾN TRÚC & PHÂN LOẠI TÀI LIỆU (SPEC VS ADR)
+## 2. HIỂN PHÁP KIẾN TRÚC & MA TRẬN PHỤ THUỘC (ARCHITECTURE CONSTITUTION)
 
-Để duy trì hệ thống trong 20 năm mà không gây xáo trộn tài liệu master:
+Để bảo vệ kiến trúc sạch không bị xói mòn trong 20 năm phát triển:
 
-1. **Architecture Specification (Đông cứng tuyệt đối)**: Quy định 5 Domains, 9 Core Platform Contracts, Dependency Rules, Package Rules.
-2. **Architecture Decision Records (ADRs)**: Quản lý các quyết định lựa chọn công nghệ (PostgreSQL, pgvector, Redis, Event Bus...). Khi thay thế công nghệ chỉ cần bổ sung hoặc cập nhật ADR.
+```
+Presentation Layer (Outer Adapter)
+    │
+    ▼
+Application API Layer
+    │
+    ▼
+Domain 4: Orchestration & Strategy
+    │
+    ▼
+Domain 3: Enterprise Brain (Brain APIs)
+    │
+    ▼
+Domain 2: Storage Interfaces (v1.0)
+    │
+    ▼
+Domain 1 & Infrastructure Layer (Kernel, Events, Secrets)
+```
+
+### 🚫 Bảng Quy Tắc Phụ Thuộc Cấm (Forbidden Dependency Rules):
+
+| Module | Được phép phụ thuộc vào | KHÔNG ĐƯỢC BÉP phụ thuộc vào |
+| :--- | :--- | :--- |
+| **Infrastructure** | Không phụ thuộc vào Business logic | Brain, Orchestration, Presentation UI |
+| **Storage Domain** | Storage Interfaces v1.0, Secrets Store | Presentation UI, Brain internals |
+| **Enterprise Brain** | Infrastructure Contracts, Storage Interfaces | Presentation UI, Raw Database SDKs |
+| **Orchestration** | Brain APIs, Policy Engine, Solvers | Presentation UI, Raw Storage trực tiếp |
+| **Execution** | Service Contracts, Orchestration APIs | Brain internals, Raw Database SDKs |
+| **Presentation** | Public APIs, Experience Domain APIs | Brain internals, Storage trực tiếp |
+| **Marketplace** | Asset Manifest v1.0, Marketplace Suite | Runtime internals |
 
 ---
 
-## 3. BẢNG PHÂN ĐỊNH KHÓA CỨNG (FROZEN CONTRACTS VS EXTENSIBLE)
+## 3. CHÍNH SÁCH PHIÊN BẢN HỢP ĐỒNG (CONTRACT VERSIONING POLICY)
+
+Tất cả Frozen Platform Contracts tuân thủ nghiêm ngặt Semantic Versioning (SemVer):
+
+- **Major Version (`v1.0` ➔ `v2.0`)**: Chứa breaking changes. Yêu cầu tạo adapter tương thích ngược.
+- **Minor Version (`v1.0` ➔ `v1.1`)**: Chỉ được phép bổ sung thuộc tính optional. Tuyệt đối không xóa thuộc tính hiện có.
+- **Patch Version (`v1.1.0` ➔ `v1.1.1`)**: Sửa lỗi bug mà không đổi schema.
+
+---
+
+## 4. MA TRẬN TƯƠNG THÍCH HỢP ĐỒNG (CONTRACT COMPATIBILITY MATRIX)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│ ❄️ FROZEN PLATFORM CONTRACTS (KHÓA CỨNG BẤT BIẾN 20 NĂM)         │
-├─────────────────────────────────────────────────────────────────┤
-│ 1. 5 Core Domains Boundaries (Kernel, Storage, Brain, Orch, Exec)│
-│ 2. Canonical Business Vocabulary (CBV v1.0)                      │
-│ 3. Enterprise Object Model (EOM v1.0)                           │
-│ 4. Enterprise Message Contract (EnterpriseEvent<T> v1.0)         │
-│ 5. Cognitive Memory API Interface (MemoryAPI v1.0)             │
-│ 6. Service Contract Specification (IService v1.0)              │
-│ 7. Worker Contract Interface (IWorker v1.0)                     │
-│ 8. Connector Contract Interface (IConnector v1.0)               │
-│ 9. Enterprise Policy Contract (IPolicy v1.0)                    │
-│ 10. Planner Engine Contract (IPlanner v1.0)                    │
-│ 11. Asset Manifest Specification (AssetManifest v1.0)           │
-│ 12. Marketplace Plugin Lifecycle Specification                   │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│ 🚀 EXTENSIBLE LAYER (MỞ RỘNG & THƯƠNG MẠI TRÊN MARKETPLACE)    │
-├─────────────────────────────────────────────────────────────────┤
-│ • Business Skills & SOP Extensions                              │
-│ • Prompt Packs & Prompt Version Templates                       │
-│ • Company DNA Packs (Versioned v1.0, v1.1, v2.0)                │
-│ • Connector Implementations (SAP, MISA, Facebook, Zalo, Odoo)   │
-│ • Workflow Packs & Stage Templates                              │
-│ • Enterprise Strategies & Pluggable Solvers                     │
-│ • Presentation Consoles, Dashboards & Portals                   │
-│ • AI & Human Worker Implementations                             │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────┬─────────────────────────────────────────┐
+│ Frozen Platform Contract│ Consumer Components                     │
+├─────────────────────────┼─────────────────────────────────────────┤
+│ CBV v1.0                │ Connectors, EOM Converter               │
+│ EOM v1.0                │ Enterprise Brain, Orchestration         │
+│ EnterpriseEvent v1.0    │ Enterprise Event Bus, Audit Logger      │
+│ MemoryAPI v1.0          │ Cognitive Memory Centers                │
+│ IPlanner v1.0           │ Planning Engine, Simulation Engine      │
+│ IPolicy v1.0            │ Policy Engine, Learning Center          │
+│ IService v1.0           │ Execution Domain, Service Registry      │
+│ IWorker v1.0            │ Worker Gateway, Stateless Executors     │
+│ IConnector v1.0         │ Connector Framework, Bella Connect      │
+│ AssetManifest v1.0      │ Marketplace Suite                       │
+└─────────────────────────┴─────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. 🔒 CHI TIẾT BỘ HỢP ĐỒNG PLATFORM CONTRACTS (v1.0)
+## 5. 🔒 BỘ 9 HỢP ĐỒNG KHÓA CỨNG (FROZEN PLATFORM CONTRACTS)
 
 ### 1. Enterprise Message Contract (`EnterpriseEvent<T>`)
 ```typescript
@@ -175,89 +198,30 @@ interface AssetManifest {
 
 ---
 
-## 5. MARKETPLACE SUITE SPECIFICATION
+## 6. DANH MỤC AD RS GOVERNANCE INDEX
 
-Bộ quản lý phân phối tài sản tự động:
-```
-Marketplace Suite
-├── Registry (Danh mục Assets)
-├── Manifest (Xác thực Manifest v1.0)
-├── Versioning (Quản lý phiên bản)
-├── Dependency Resolver (Giải quyết phụ thuộc)
-├── Installer (Cài đặt Asset)
-├── Upgrade Manager (Nâng cấp phiên bản)
-├── Rollback Manager (Khôi phục phiên bản)
-└── Publisher (Đóng gói & Phát hành Asset)
-```
+Hệ thống tài liệu quản trị kiến trúc chi tiết tại [`docs/architecture/adr/`](file:///d:/Antigravity/Projects/DN%20WORKFLOW/docs/architecture/adr/):
 
----
-
-## 6. CLEAN ARCHITECTURE: 5 CORE DOMAINS & OUTER ADAPTERS
-
-```
-┌────────────────────────────────────────────────────────┐
-│ Domain 1: Bella Kernel (Runtime & Event Store)         │
-│  • Strictly ZERO business logic, ZERO AI, ZERO workflow│
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ Domain 2: Enterprise Storage Domain (Abstract Layer)   │
-│  • Metadata Store (PostgreSQL / Relational)            │
-│  • Vector Store (pgvector / Embeddings)                │
-│  • Blob Store (Document & Media Assets)                │
-│  • Graph Store (Knowledge Graph Index)                 │
-│  • Operational Cache (Local Memory / Redis)            │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ Domain 3: Enterprise Brain & Pluggable Centers         │
-│  • Memory Center (Communicates via MemoryAPI v1.0)     │
-│  • Knowledge Center (Graph, Provenance, Anti-Hallucin) │
-│  • Context Center (Isolation, Ranking, Token Optimizer)│
-│  • Reasoning Center (Solvers: Monte Carlo, Tree, RL)   │
-│  • Learning Center (Evidence ➔ Suggest ➔ Human Approve)│
-│  • Enterprise Assets & Versioned DNA Packs (v1.0, v2.0)│
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ Domain 4: Orchestration & Strategy (Process Control)   │
-│  Intent ➔ Goal ➔ Strategy ➔ Simulation ➔ Planning      │
-│  • Driven by IPlanner Contract v1.0                    │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ Domain 5: Execution Domain (Stateless Workforce Engine)│
-│  • Service Contracts (IService v1.0 Interface)         │
-│  • Stateless Workers (IWorker v1.0 Interface)          │
-│  • Connectors (IConnector v1.0 Interface)              │
-│  • Internal API Gateway                                │
-└───────────────────────────┬────────────────────────────┘
-                            ▼
-===================== OUTER ADAPTER LAYER ================
-┌────────────────────────────────────────────────────────┐
-│ Presentation Layer (Adapters & Portals)                │
-│  • CEO Console, Manager Portal, Employee Portal,       │
-│    Customer Portal, Realtime Dashboard, Mobile, Voice  │
-└────────────────────────────────────────────────────────┘
-```
+- `ADR-001 Platform Vision & Core Philosophy`
+- `ADR-002 Canonical Business Vocabulary (CBV)`
+- `ADR-003 Enterprise Object Model (EOM)`
+- `ADR-004 Enterprise Event Message Contract`
+- `ADR-005 Cognitive Memory API Interface`
+- `ADR-006 Storage Domain Abstraction`
+- `ADR-007 Worker Contract & Stateless Execution`
+- `ADR-008 Marketplace Suite & Asset Manifest`
+- `ADR-009 Context Isolation & Security Optimizer`
+- `ADR-010 Plugin Lifecycle Governance`
 
 ---
 
-## 7. CÔNG NGHỆ CHUẨN (FREE-FIRST STACK)
+## 7. 🎯 SPRINT EXECUTION ROADMAP
 
-* **Frontend**: Next.js (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, Lucide Icons.
-* **Backend**: Next.js Server API Routes (`/api/*`), TypeScript.
-* **Database & Vector**: Supabase PostgreSQL + pgvector (Free Tier).
-* **Storage**: Supabase Storage (Free Tier).
-* **Deploy**: Vercel (Dev/Staging) ➔ VPS Ubuntu + Docker + Nginx (Production).
-
----
-
-## 8. 🎯 LỘ TRÌNH THI CÔNG 6 PHASE CHUẨN
-
-1. **Phase 1 — Infrastructure Contracts**: CBV v1.0, EOM v1.0, EnterpriseEvent<T>, Storage Interfaces, Secrets Store, MemoryAPI v1.0.
-2. **Phase 2 — Brain Runtime**: Memory, Knowledge, Context, Reasoning, Learning, DNA Packs.
-3. **Phase 3 — Business Runtime**: Intent, Goal, Strategy, Simulation, Planning (IPlanner), Workflow.
-4. **Phase 4 — Execution Runtime**: Capability Registry, Service Contracts (IService), Workers (IWorker), Connectors (IConnector).
-5. **Phase 5 — Experience Layer**: CEO Console, Manager Portal, Employee Portal, Dashboard, Monitoring.
-6. **Phase 6 — Marketplace**: Suite (Registry, Manifest, Versioning, Dependency Resolver, Installer, Upgrade, Rollback, Publisher).
+```
+Sprint 1: Infrastructure Contracts ➔ Event Bus, Storage Interfaces, Secrets, CBV/EOM
+Sprint 2: Brain Runtime ➔ Memory API, Knowledge Center, Context Optimizer, DNA Packs
+Sprint 3: Business Runtime ➔ Intent Engine, Goal Engine, Strategy Engine, Simulation
+Sprint 4: Execution Runtime ➔ Capability Registry, Service Contracts, Worker Gateway
+Sprint 5: Presentation ➔ CEO Console, Manager Portal, Realtime Dashboard
+Sprint 6: Marketplace ➔ Registry, Resolver, Installer, Upgrade & Publisher Suite
+```
