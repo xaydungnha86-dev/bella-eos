@@ -857,69 +857,29 @@
 
             <!-- Modal Content -->
             <div class="p-6 overflow-y-auto custom-scrollbar space-y-6 text-xs text-slate-300">
-                <!-- Overview Cards -->
-                <div class="grid grid-cols-4 gap-3">
-                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                        <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỔNG LEADS DỰ KIẾN</span>
-                        <strong id="report-leads-value" class="text-cyan-400 text-lg font-mono">524 Leads</strong>
-                        <span id="report-leads-okr" class="text-[9px] text-emerald-400 block mt-0.5">+104.8% so với OKR</span>
-                    </div>
-                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                        <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỶ LỆ CHỐT DEMO (CONV)</span>
-                        <strong id="report-conv-value" class="text-emerald-400 text-lg font-mono">24.1%</strong>
-                        <span id="report-conv-top" class="text-[9px] text-slate-400 block mt-0.5">Top Format: Carousel</span>
-                    </div>
-                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                        <span class="text-slate-500 block text-[10px] uppercase font-semibold">CHI PHÍ LEAD (CAC)</span>
-                        <strong id="report-cac-value" class="text-amber-400 text-lg font-mono">1.2M VND</strong>
-                        <span id="report-cac-status" class="text-[9px] text-emerald-400 block mt-0.5">Rẻ hơn 50K/Lead</span>
-                    </div>
-                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                        <span class="text-slate-500 block text-[10px] uppercase font-semibold">DỰ BÁO ROI CHIẾN DỊCH</span>
-                        <strong id="report-roi-value" class="text-purple-400 text-lg font-mono">+486%</strong>
-                        <span id="report-roi-revenue" class="text-[9px] text-purple-300 block mt-0.5">Doanh thu ~2.4B VND</span>
-                    </div>
+                <!-- Overview Cards Container -->
+                <div id="report-overview-cards-container" class="grid grid-cols-4 gap-3">
+                    <!-- Populated dynamically via JS -->
                 </div>
 
                 <!-- AI Content Plan Matrix Table -->
                 <div class="space-y-2">
-                    <h4 class="font-bold text-slate-200 text-xs uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check"></i> KẾ HOẠCH NỘI DUNG CONTENT & PHÂN BỔ CHIẾN DỊCH (AI MARKETING & DESIGN)
+                    <h4 id="report-table-title" class="font-bold text-slate-200 text-xs uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                        <!-- Populated dynamically via JS -->
                     </h4>
                     <div class="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden">
                         <table class="w-full text-left text-[11px] font-mono">
                             <thead class="bg-slate-900 text-slate-400 uppercase text-[9px] border-b border-slate-800">
-                                <tr>
-                                    <th class="p-3">Dạng Content</th>
-                                    <th class="p-3">Số Lượng</th>
-                                    <th class="p-3">Tỷ Lệ CTR</th>
-                                    <th class="p-3">Sales Conv Rate</th>
-                                    <th class="p-3">Hành Động Tối Ưu AI</th>
+                                <tr id="report-table-header-row">
+                                    <!-- Populated dynamically via JS -->
                                 </tr>
                             </thead>
                             <tbody id="report-table-body" class="divide-y divide-slate-850">
-                                <tr class="hover:bg-slate-900/50">
-                                    <td class="p-3 font-bold text-slate-200">Feature Carousel Infographics</td>
-                                    <td class="p-3">10 Bài</td>
-                                    <td class="p-3 text-cyan-400">7.5%</td>
-                                    <td class="p-3 text-emerald-400 font-bold">24.1% (TOP)</td>
-                                    <td class="p-3 text-purple-300">⚡ Dồn 70% Ngân sách Ads</td>
-                                </tr>
-                                <tr class="hover:bg-slate-900/50">
-                                    <td class="p-3 font-bold text-slate-200">Pain Point Short Video Reels</td>
-                                    <td class="p-3">12 Clips</td>
-                                    <td class="p-3 text-cyan-400 font-bold">10.2% (HIGH)</td>
-                                    <td class="p-3 text-amber-400">14.5%</td>
-                                    <td class="p-3 text-amber-300">Sửa lại CTA chốt Sales</td>
-                                </tr>
-                                <tr class="hover:bg-slate-900/50">
-                                    <td class="p-3 font-bold text-slate-200">Customer Case Study Stories</td>
-                                    <td class="p-3">5 Bài</td>
-                                    <td class="p-3 text-cyan-400">6.8%</td>
-                                    <td class="p-3 text-slate-300">15.0%</td>
-                                    <td class="p-3 text-slate-400">Duy trì làm Social Proof</td>
-                                </tr>
+                                <!-- Populated dynamically via JS -->
                             </tbody>
+                        </table>
+                    </div>
+                </div>
                         </table>
                     </div>
                 </div>

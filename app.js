@@ -4583,98 +4583,327 @@ function showCampaignExecutiveReport() {
     const brandVoice = document.getElementById('bce-edit-voice').value || 'Professional & Premium';
     const segment = document.getElementById('bce-edit-segment').value || 'VIP Beauty & Spa Clients';
 
-    // Calculate dynamic expected leads
-    let expectedLeads = 524;
-    let okrText = "+104.8% so với OKR";
+    const cardsContainer = document.getElementById('report-overview-cards-container');
+    const tableTitle = document.getElementById('report-table-title');
+    const tableHeaderRow = document.getElementById('report-table-header-row');
+    const tableBody = document.getElementById('report-table-body');
 
     if (metricKey === 'targetFollowers') {
-        expectedLeads = Math.ceil(targetVal * 0.15); // e.g. 15% conversion from followers to leads
-        okrText = `Dự kiến: 15% quy đổi từ mục tiêu ${targetVal} fls`;
+        // CASE: Social Posting / Followers Goal
+        const totalPosts = Math.ceil(budgetVal / 400000) || 25;
+        const finishedPosts = Math.ceil(totalPosts * 0.6) || 15;
+        const ctr = 8.2;
+
+        if (cardsContainer) {
+            cardsContainer.innerHTML = `
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỔNG BÀI ĐĂNG (PLAN)</span>
+                    <strong class="text-cyan-400 text-lg font-mono">${totalPosts} Bài viết</strong>
+                    <span class="text-[9px] text-slate-400 block mt-0.5">Kế hoạch chiến dịch</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">ĐÃ HOÀN THÀNH (PUBLISHED)</span>
+                    <strong class="text-emerald-400 text-lg font-mono">${finishedPosts} Bài</strong>
+                    <span class="text-[9px] text-emerald-400 block mt-0.5">Đã lên Fanpage</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỔNG SỐ LƯỢT TIẾP CẬN (EST)</span>
+                    <strong class="text-amber-400 text-lg font-mono">${formatShortMoney(targetVal * 12)}</strong>
+                    <span class="text-[9px] text-amber-300 block mt-0.5">Mục tiêu: ${targetVal} Followers</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỶ LỆ CTR TRUNG BÌNH</span>
+                    <strong class="text-purple-400 text-lg font-mono">${ctr}%</strong>
+                    <span class="text-[9px] text-purple-300 block mt-0.5">Tương tác cao (HIGH)</span>
+                </div>
+            `;
+        }
+
+        if (tableTitle) {
+            tableTitle.innerHTML = `<i class="fa-solid fa-list-check"></i> DANH SÁCH BÀI ĐĂNG & TIẾN ĐỘ THỰC THI (FANPAGE PUBLISHING)`;
+        }
+
+        if (tableHeaderRow) {
+            tableHeaderRow.innerHTML = `
+                <th class="p-3">Dạng Nội Dung</th>
+                <th class="p-3">Số Lượng Đăng (Plan)</th>
+                <th class="p-3">Đã Hoàn Thành</th>
+                <th class="p-3">Kênh Đăng</th>
+                <th class="p-3">Trạng Thái Thực Thi (AI)</th>
+            `;
+        }
+
+        const numCarousel = Math.ceil(totalPosts * 0.4) || 10;
+        const numReels = Math.ceil(totalPosts * 0.4) || 10;
+        const numCases = totalPosts - numCarousel - numReels;
+
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Feature Carousel Infographics</td>
+                    <td class="p-3">${numCarousel} Bài</td>
+                    <td class="p-3 text-emerald-400">${Math.ceil(numCarousel * 0.6)} Bài</td>
+                    <td class="p-3 text-cyan-400">Facebook Page</td>
+                    <td class="p-3 text-purple-300">⚡ Đã gửi qua Hermes MCP</td>
+                </tr>
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Pain Point Short Video Reels</td>
+                    <td class="p-3">${numReels} Clips</td>
+                    <td class="p-3 text-emerald-400">${Math.ceil(numReels * 0.5)} Clips</td>
+                    <td class="p-3 text-cyan-400">TikTok / Reels</td>
+                    <td class="p-3 text-amber-300">Đang render video prompt</td>
+                </tr>
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Customer Case Study Stories</td>
+                    <td class="p-3">${numCases} Bài</td>
+                    <td class="p-3 text-emerald-400">${Math.ceil(numCases * 0.8)} Bài</td>
+                    <td class="p-3 text-cyan-400">Zalo OA / Web</td>
+                    <td class="p-3 text-slate-400">Lưu kho dữ liệu EOM</td>
+                </tr>
+            `;
+        }
     } else if (metricKey === 'targetRevenueVnd') {
-        expectedLeads = Math.ceil(targetVal / 100000); // 1 lead per 100K VND
-        okrText = `Dự kiến từ mục tiêu doanh số ${formatShortMoney(targetVal)}`;
-    } else if (metricKey === 'targetLeads') {
-        expectedLeads = targetVal;
-        okrText = `Khớp 100% mục tiêu ${targetVal} Leads`;
+        // CASE: Revenue Goal
+        const avgOrderValue = 1500000;
+        const expectedOrders = Math.ceil(targetVal / avgOrderValue) || 30;
+        const estRevenue = expectedOrders * avgOrderValue;
+        const roi = budgetVal > 0 ? Math.round(((estRevenue - budgetVal) / budgetVal) * 100) : 0;
+
+        if (cardsContainer) {
+            cardsContainer.innerHTML = `
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">MỤC TIÊU DOANH THU</span>
+                    <strong class="text-cyan-400 text-lg font-mono">${formatShortMoney(targetVal)}</strong>
+                    <span class="text-[9px] text-slate-400 block mt-0.5">Mục tiêu chiến dịch</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">DOANH THU DỰ BÁO (EST)</span>
+                    <strong class="text-emerald-400 text-lg font-mono">${formatShortMoney(estRevenue)}</strong>
+                    <span class="text-[9px] text-emerald-400 block mt-0.5">Tỷ lệ khả thi cao</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">SỐ ĐƠN HÀNG DỰ KIẾN</span>
+                    <strong class="text-amber-400 text-lg font-mono">${expectedOrders} Đơn</strong>
+                    <span class="text-[9px] text-amber-300 block mt-0.5">AOV trung bình: ${formatShortMoney(avgOrderValue)}</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">DỰ BÁO ROI CHIẾN DỊCH</span>
+                    <strong class="text-purple-400 text-lg font-mono">${roi >= 0 ? '+' : ''}${roi}%</strong>
+                    <span class="text-[9px] text-purple-300 block mt-0.5">Hiệu quả ngân sách</span>
+                </div>
+            `;
+        }
+
+        if (tableTitle) {
+            tableTitle.innerHTML = `<i class="fa-solid fa-list-check"></i> DOANH THU DỰ BÁO CHI TIẾT THEO CÁC PHÂN BỔ DẠNG TIN`;
+        }
+
+        if (tableHeaderRow) {
+            tableHeaderRow.innerHTML = `
+                <th class="p-3">Chiến Dịch Content</th>
+                <th class="p-3">Số Lượng</th>
+                <th class="p-3">Tỷ lệ Chuyển Đổi</th>
+                <th class="p-3">Doanh Thu Dự Kiến</th>
+                <th class="p-3">Hành Động Tối Ưu AI</th>
+            `;
+        }
+
+        const numCarousel = Math.ceil(budgetVal / 1500000) || 5;
+        const numReels = Math.ceil(budgetVal / 1000000) || 8;
+        const numCases = Math.ceil(budgetVal / 2500000) || 3;
+
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Giới thiệu dịch vụ Premium</td>
+                    <td class="p-3">${numCarousel} Bài</td>
+                    <td class="p-3 text-cyan-400">4.5%</td>
+                    <td class="p-3 text-emerald-400 font-bold">${formatShortMoney(Math.round(estRevenue * 0.5))}</td>
+                    <td class="p-3 text-purple-300">⚡ Chạy quảng cáo Facebook Ads</td>
+                </tr>
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Reels Ưu đãi Liệu trình</td>
+                    <td class="p-3">${numReels} Clips</td>
+                    <td class="p-3 text-cyan-400 font-bold">6.2%</td>
+                    <td class="p-3 text-emerald-400 font-bold">${formatShortMoney(Math.round(estRevenue * 0.35))}</td>
+                    <td class="p-3 text-amber-300">Đăng TikTok, dẫn link về CRM</td>
+                </tr>
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Case Study Khách hàng</td>
+                    <td class="p-3">${numCases} Bài</td>
+                    <td class="p-3 text-cyan-400">3.8%</td>
+                    <td class="p-3 text-emerald-400 font-bold">${formatShortMoney(Math.round(estRevenue * 0.15))}</td>
+                    <td class="p-3 text-slate-400">Dùng tiếp thị lại (Retargeting)</td>
+                </tr>
+            `;
+        }
     } else if (metricKey === 'targetStaffCount') {
-        expectedLeads = targetVal * 15; // 15 leads generated per staff
-        okrText = `Dự kiến quy đổi từ ${targetVal} nhân sự tuyển dụng`;
-    }
+        // CASE: Staffing / Recruitment Goal
+        const totalCVs = targetVal * 15;
+        const interviewCandidates = Math.ceil(totalCVs * 0.3);
+        const costPerHire = Math.round(budgetVal / targetVal);
 
-    // Tỷ lệ chốt demo (Conv) based on segment & voice
-    let convRate = 24.1;
-    let formatTop = "Carousel";
-    if (brandVoice.includes('Premium') || brandVoice.includes('Sang trọng')) {
-        convRate = 26.4;
-        formatTop = "Infographics";
-    } else if (brandVoice.includes('Friendly') || brandVoice.includes('Thân thiện')) {
-        convRate = 18.5;
-        formatTop = "Short Video Reels";
+        if (cardsContainer) {
+            cardsContainer.innerHTML = `
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">MỤC TIÊU TUYỂN DỤNG</span>
+                    <strong class="text-cyan-400 text-lg font-mono">${targetVal} Nhân sự</strong>
+                    <span class="text-[9px] text-slate-400 block mt-0.5">Vị trí Kỹ thuật viên & Tư vấn</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">HỒ SƠ (CV) TIẾP NHẬN DỰ KIẾN</span>
+                    <strong class="text-emerald-400 text-lg font-mono">${totalCVs} CVs</strong>
+                    <span class="text-[9px] text-emerald-400 block mt-0.5">Tỷ lệ tiếp cận ứng viên cao</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">ƯNG VIÊN VÀO PHỎNG VẤN</span>
+                    <strong class="text-amber-400 text-lg font-mono">${interviewCandidates} Ứng viên</strong>
+                    <span class="text-[9px] text-amber-300 block mt-0.5">Tỷ lệ lọc hồ sơ: 30%</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">CHI PHÍ TRÊN MỖI LƯỢT TUYỂN (CPH)</span>
+                    <strong class="text-purple-400 text-lg font-mono">${formatShortMoney(costPerHire)}</strong>
+                    <span class="text-[9px] text-purple-300 block mt-0.5">Tổng ngân sách: ${formatShortMoney(budgetVal)}</span>
+                </div>
+            `;
+        }
+
+        if (tableTitle) {
+            tableTitle.innerHTML = `<i class="fa-solid fa-list-check"></i> KẾ HOẠCH TUYỂN DỤNG NHÂN SỰ & KÊNH TIẾP CẬN`;
+        }
+
+        if (tableHeaderRow) {
+            tableHeaderRow.innerHTML = `
+                <th class="p-3">Vị trí cần tuyển</th>
+                <th class="p-3">Số Lượng Target</th>
+                <th class="p-3">Số CVs dự kiến</th>
+                <th class="p-3">Kênh Tuyển Dụng</th>
+                <th class="p-3">Khuyến Nghị của AI</th>
+            `;
+        }
+
+        const numTech = Math.ceil(targetVal * 0.6) || 3;
+        const numConsultant = targetVal - numTech || 2;
+
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Kỹ thuật viên Spa</td>
+                    <td class="p-3">${numTech} Người</td>
+                    <td class="p-3 text-cyan-400">${numTech * 12} CVs</td>
+                    <td class="p-3 text-emerald-400 font-bold">Facebook Group / Chợ Tốt</td>
+                    <td class="p-3 text-purple-300">⚡ Chạy quảng cáo tin nhắn tuyển dụng</td>
+                </tr>
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Tư vấn viên (Sales)</td>
+                    <td class="p-3">${numConsultant} Người</td>
+                    <td class="p-3 text-cyan-400">${numConsultant * 18} CVs</td>
+                    <td class="p-3 text-emerald-400 font-bold">LinkedIn / TopCV</td>
+                    <td class="p-3 text-amber-300">Lọc hồ sơ kinh nghiệm Spa</td>
+                </tr>
+            `;
+        }
     } else {
-        convRate = 15.0;
-        formatTop = "Customer Story";
-    }
+        // DEFAULT/LEADS Goal
+        let expectedLeads = targetVal;
+        let okrText = `Khớp 100% mục tiêu ${targetVal} Leads`;
+        
+        let convRate = 24.1;
+        let formatTop = "Carousel";
+        if (brandVoice.includes('Premium') || brandVoice.includes('Sang trọng')) {
+            convRate = 26.4;
+            formatTop = "Infographics";
+        } else if (brandVoice.includes('Friendly') || brandVoice.includes('Thân thiện')) {
+            convRate = 18.5;
+            formatTop = "Short Video Reels";
+        } else {
+            convRate = 15.0;
+            formatTop = "Customer Story";
+        }
 
-    // Chi phí lead (CAC) = budget / expectedLeads
-    const cac = expectedLeads > 0 ? Math.round(budgetVal / expectedLeads) : 0;
-    let cacText = formatShortMoney(cac);
-    let cacStatus = "Tối ưu ngân sách";
-    if (cac < 50000) {
-        cacStatus = "Rất rẻ (Dưới 50K/Lead)";
-    } else if (cac < 150000) {
-        cacStatus = "Trung bình (Dưới 150K/Lead)";
-    } else {
-        cacStatus = "Cao (Cần tối ưu thêm Ads)";
-    }
+        const cac = expectedLeads > 0 ? Math.round(budgetVal / expectedLeads) : 0;
+        let cacText = formatShortMoney(cac);
+        let cacStatus = "Tối ưu ngân sách";
+        if (cac < 50000) {
+            cacStatus = "Rất rẻ (Dưới 50K/Lead)";
+        } else if (cac < 150000) {
+            cacStatus = "Trung bình (Dưới 150K/Lead)";
+        } else {
+            cacStatus = "Cao (Cần tối ưu thêm Ads)";
+        }
 
-    // ROI
-    const avgOrderValue = 1500000; // Spa order average is 1.5M VND
-    const estRevenue = expectedLeads * (convRate / 100) * avgOrderValue;
-    const roi = budgetVal > 0 ? Math.round(((estRevenue - budgetVal) / budgetVal) * 100) : 0;
-    
-    // Set UI text
-    document.getElementById('report-leads-value').textContent = `${expectedLeads} Leads`;
-    document.getElementById('report-leads-okr').textContent = okrText;
-    
-    document.getElementById('report-conv-value').textContent = `${convRate}%`;
-    document.getElementById('report-conv-top').textContent = `Top Format: ${formatTop}`;
-    
-    document.getElementById('report-cac-value').textContent = cacText;
-    document.getElementById('report-cac-status').textContent = cacStatus;
-    
-    document.getElementById('report-roi-value').textContent = `${roi >= 0 ? '+' : ''}${roi}%`;
-    document.getElementById('report-roi-revenue').textContent = `Doanh thu ~${formatShortMoney(Math.round(estRevenue))}`;
+        const avgOrderValue = 1500000;
+        const estRevenue = expectedLeads * (convRate / 100) * avgOrderValue;
+        const roi = budgetVal > 0 ? Math.round(((estRevenue - budgetVal) / budgetVal) * 100) : 0;
 
-    // Fill table dynamic rows based on budget
-    const numCarousel = Math.ceil(budgetVal / 1000000) || 5;
-    const numReels = Math.ceil(budgetVal / 800000) || 6;
-    const numCases = Math.ceil(budgetVal / 2000000) || 3;
+        if (cardsContainer) {
+            cardsContainer.innerHTML = `
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỔNG LEADS DỰ KIẾN</span>
+                    <strong class="text-cyan-400 text-lg font-mono">${expectedLeads} Leads</strong>
+                    <span class="text-[9px] text-emerald-400 block mt-0.5">${okrText}</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">TỶ LỆ CHỐT DEMO (CONV)</span>
+                    <strong class="text-emerald-400 text-lg font-mono">${convRate}%</strong>
+                    <span class="text-[9px] text-slate-400 block mt-0.5">Top Format: ${formatTop}</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">CHI PHÍ LEAD (CAC)</span>
+                    <strong class="text-amber-400 text-lg font-mono">${cacText}</strong>
+                    <span class="text-[9px] text-emerald-400 block mt-0.5">${cacStatus}</span>
+                </div>
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-slate-500 block text-[10px] uppercase font-semibold">DỰ BÁO ROI CHIẾN DỊCH</span>
+                    <strong class="text-purple-400 text-lg font-mono">${roi >= 0 ? '+' : ''}${roi}%</strong>
+                    <span class="text-[9px] text-purple-300 block mt-0.5">Doanh thu ~${formatShortMoney(Math.round(estRevenue))}</span>
+                </div>
+            `;
+        }
 
-    const tableBody = document.getElementById('report-table-body');
-    if (tableBody) {
-        tableBody.innerHTML = `
-            <tr class="hover:bg-slate-900/50">
-                <td class="p-3 font-bold text-slate-200">Feature Carousel Infographics</td>
-                <td class="p-3">${numCarousel} Bài</td>
-                <td class="p-3 text-cyan-400">7.5%</td>
-                <td class="p-3 text-emerald-400 font-bold">${convRate}% (TOP)</td>
-                <td class="p-3 text-purple-300">⚡ Dồn 70% Ngân sách Ads</td>
-            </tr>
-            <tr class="hover:bg-slate-900/50">
-                <td class="p-3 font-bold text-slate-200">Pain Point Short Video Reels</td>
-                <td class="p-3">${numReels} Clips</td>
-                <td class="p-3 text-cyan-400 font-bold">10.2% (HIGH)</td>
-                <td class="p-3 text-amber-400">14.5%</td>
-                <td class="p-3 text-amber-300">Sửa lại CTA chốt Sales</td>
-            </tr>
-            <tr class="hover:bg-slate-900/50">
-                <td class="p-3 font-bold text-slate-200">Customer Case Study Stories</td>
-                <td class="p-3">${numCases} Bài</td>
-                <td class="p-3 text-cyan-400">6.8%</td>
-                <td class="p-3 text-slate-300">15.0%</td>
-                <td class="p-3 text-slate-400">Duy trì làm Social Proof</td>
-            </tr>
-        `;
+        if (tableTitle) {
+            tableTitle.innerHTML = `<i class="fa-solid fa-list-check"></i> KẾ HOẠCH NỘI DUNG CONTENT & PHÂN BỔ CHIẾN DỊCH (AI MARKETING & DESIGN)`;
+        }
+
+        if (tableHeaderRow) {
+            tableHeaderRow.innerHTML = `
+                <th class="p-3">Dạng Content</th>
+                <th class="p-3">Số Lượng</th>
+                <th class="p-3">Tỷ Lệ CTR</th>
+                <th class="p-3">Sales Conv Rate</th>
+                <th class="p-3">Hành Động Tối Ưu AI</th>
+            `;
+        }
+
+        const numCarousel = Math.ceil(budgetVal / 1000000) || 5;
+        const numReels = Math.ceil(budgetVal / 800000) || 6;
+        const numCases = Math.ceil(budgetVal / 2000000) || 3;
+
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Feature Carousel Infographics</td>
+                    <td class="p-3">${numCarousel} Bài</td>
+                    <td class="p-3 text-cyan-400">7.5%</td>
+                    <td class="p-3 text-emerald-400 font-bold">${convRate}% (TOP)</td>
+                    <td class="p-3 text-purple-300">⚡ Dồn 70% Ngân sách Ads</td>
+                </tr>
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Pain Point Short Video Reels</td>
+                    <td class="p-3">${numReels} Clips</td>
+                    <td class="p-3 text-cyan-400 font-bold">10.2% (HIGH)</td>
+                    <td class="p-3 text-amber-400">14.5%</td>
+                    <td class="p-3 text-amber-300">Sửa lại CTA chốt Sales</td>
+                </tr>
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-bold text-slate-200">Customer Case Study Stories</td>
+                    <td class="p-3">${numCases} Bài</td>
+                    <td class="p-3 text-cyan-400">6.8%</td>
+                    <td class="p-3 text-slate-300">15.0%</td>
+                    <td class="p-3 text-slate-400">Duy trì làm Social Proof</td>
+                </tr>
+            `;
+        }
     }
 
     modal.classList.remove('hidden');
