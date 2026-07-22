@@ -118,6 +118,7 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: content,
+        image_url: media || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop',
         client_token: clientKeys.facebook_token,
         client_page_id: clientKeys.facebook_page_id
       })

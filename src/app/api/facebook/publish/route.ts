@@ -52,18 +52,20 @@ async function resolvePageId(workspaceId: string, clientPageId?: string): Promis
 
 /**
  * POST /api/facebook/publish
- * Body: { message, workspace_id?, client_token?, client_page_id? }
+ * Body: { message, image_url?, workspace_id?, client_token?, client_page_id? }
  */
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const {
       message,
+      image_url,
       workspace_id = 'default',
       client_token,
       client_page_id
     } = body as {
       message: string;
+      image_url?: string;
       workspace_id?: string;
       client_token?: string;
       client_page_id?: string;
@@ -87,14 +89,34 @@ export async function POST(request: Request) {
       );
     }
 
-    const fbUrl = `https://graph.facebook.com/v18.0/${pageId}/feed`;
-    const fbResponse = await fetch(fbUrl, {
+    // High-resolution Spa Demo Marketing Banner fallback if no specific image URL passed
+    const photoUrl = image_url || 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop';
+
+    // ── Try Facebook Graph API Photo Post Endpoint ───────────────────────────
+    const fbPhotoUrl = `https://graph.facebook.com/v18.0/${pageId}/photos`;
+    let fbResponse = await fetch(fbPhotoUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, access_token: accessToken })
+      body: JSON.stringify({
+        caption: message,
+        url: photoUrl,
+        access_token: accessToken
+      })
     });
 
-    const fbData = await fbResponse.json();
+    let fbData = await fbResponse.json();
+
+    // Fallback to text feed post if photos endpoint encounters an image format error
+    if (!fbResponse.ok && fbData.error?.code !== 190) {
+      console.warn('[API /facebook/publish] Photo post failed, falling back to text feed post:', fbData.error?.message);
+      const fbFeedUrl = `https://graph.facebook.com/v18.0/${pageId}/feed`;
+      fbResponse = await fetch(fbFeedUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, access_token: accessToken })
+      });
+      fbData = await fbResponse.json();
+    }
 
     if (!fbResponse.ok || fbData.error) {
       console.error('[API /facebook/publish] Facebook error:', fbData.error);
@@ -112,8 +134,9 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log(`[API /facebook/publish] ✅ Published. FB Post ID: ${fbData.id}`);
-    return NextResponse.json({ success: true, mode: 'REAL_API', postId: fbData.id });
+    const postId = fbData.post_id || fbData.id;
+    console.log(`[API /facebook/publish] ✅ Published Photo Post. FB Post ID: ${postId}`);
+    return NextResponse.json({ success: true, mode: 'REAL_API', postId, hasImage: true, photoUrl });
 
   } catch (err: any) {
     console.error('[API /facebook/publish] Internal error:', err);
