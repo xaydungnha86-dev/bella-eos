@@ -1002,7 +1002,19 @@ export default function Dashboard() {
                   <span>Nạp Tri Thức Vào Bộ Não</span>
                 </h3>
                 
-                <label className="border border-dashed border-slate-200 hover:border-cyan-400 bg-slate-50/50 hover:bg-cyan-50/10 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all group relative">
+                <label 
+                  className="border border-dashed border-slate-200 hover:border-cyan-400 bg-slate-50/50 hover:bg-cyan-50/10 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all group relative"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleFileChange(file);
+                  }}
+                >
                   <input 
                     type="file" 
                     className="hidden" 
@@ -1027,9 +1039,22 @@ export default function Dashboard() {
                       <span className="text-[8px] bg-slate-100 px-1 rounded text-slate-500">{doc.size}</span>
                     </div>
                     <p className="text-slate-500 mt-1 italic text-[9px] line-clamp-2">{doc.rule}</p>
-                    <span className="text-[8px] text-emerald-600 flex items-center gap-1 mt-2">
-                      <span className="w-1 h-1 rounded-full bg-emerald-500"></span> Index Completed
-                    </span>
+                    
+                    {doc.status === 'PROCESSING' && (
+                      <span className="text-[8px] text-cyan-600 flex items-center gap-1 mt-2 animate-pulse font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-ping"></span> Đang nạp tri thức...
+                      </span>
+                    )}
+                    {doc.status === 'FAILED' && (
+                      <span className="text-[8px] text-red-600 flex items-center gap-1 mt-2 font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Nạp thất bại
+                      </span>
+                    )}
+                    {(!doc.status || doc.status === 'COMPLETED') && (
+                      <span className="text-[8px] text-emerald-600 flex items-center gap-1 mt-2 font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Index Completed
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
