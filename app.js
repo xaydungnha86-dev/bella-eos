@@ -5317,7 +5317,7 @@ function stepForward() {
 
     // Compile EIL Context dynamically for this active step
     const objInput = document.getElementById('ceo-command-input');
-    const objectiveText = objInput && objInput.value ? objInput.value : 'Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày';
+    const objectiveText = window.activeObjectiveText || (objInput && objInput.value) || 'Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày';
     const activeEilContext = EnterpriseIntelligenceLayer.compileContext(currentStep, objectiveText);
     
     // Update compiled context in the modal dashboard
@@ -5774,26 +5774,96 @@ const AICOOEngine = {
             });
         }
 
-        // Dynamic Workflow Steps Graph generated from Enterprise OS Hierarchy
-        const rawSteps = [
-            { id: 1, name: '1. Khởi tạo Project & Thiết lập OKRs', agent: 'coo', adapterKey: 'hermes', text: `AI COO khởi tạo Project Hub cho mục tiêu "${objectiveText.substring(0, 40)}..." (Budget: ${(budgetVND / 1000000).toFixed(0)}M VND)` },
-            { id: 2, name: '2. Phân rã Topic & Risk Assessment', agent: 'pm', adapterKey: 'hermes', text: 'AI PM phân tích rủi ro & lập Content/Feature Matrix từ Tri thức cũ' },
-            { id: 3, name: '3. Sáng tạo Copywriting & Architecture Spec', agent: 'mkt', adapterKey: 'claudecode', text: 'AI Marketing & AI CTO thiết kế Kiến trúc & Nội dung thực thi' },
-            { id: 4, name: '4. Kiểm tra Resource & Phân bổ Task', agent: 'des', adapterKey: 'openhands', text: 'AI Designer & AI Dev tiếp nhận Task theo năng lực Workload Realtime' },
-            { id: 5, name: '5. CRM Flow & Service Script Ready', agent: 'sales', adapterKey: 'codex', text: 'AI Sales & AI CRM thiết lập Kịch bản tự động hóa tương tác' },
-            { id: 6, name: '6. Quality Gate & Security Barrier Audit', agent: 'qa', adapterKey: 'claudecode', text: 'AI QA kiểm duyệt Brand Voice, Security Risk & Tiêu chuẩn DoD' },
-            { 
-                id: 7, 
-                name: policyResult.requireHumanApproval ? '7. Gate Phê duyệt CEO (Ngân sách Vượt Ngưỡng)' : '7. Gate Kiểm duyệt Tự động (Auto Approval Gate)', 
-                agent: 'ceo', 
-                adapterKey: 'hermes',
-                text: policyResult.requireHumanApproval ? `⚠️ Ngân sách ${(budgetVND / 1000000).toFixed(0)}M > 100M VND limit. CEO cần ký duyệt trực tiếp!` : `✅ Ngân sách ${(budgetVND / 1000000).toFixed(0)}M VND nằm trong hạn mức tự chủ. Hệ thống phê duyệt tự động.`, 
-                isApprovalGate: policyResult.requireHumanApproval
-            },
-            { id: 8, name: '8. Launch Multi-Channel Campaign & Deploy', agent: 'devops', adapterKey: 'openhands', text: 'AI DevOps kết nối API & Kích hoạt Telemetry Stream Monitor' },
-            { id: 9, name: '9. Whole-Enterprise Learning Engine', agent: 'mkt', adapterKey: 'hermes', text: 'Hệ thống học tự động phân tích tương quan & tự tối ưu phân bổ nguồn lực' },
-            { id: 10, name: '10. Báo cáo Sức Khỏe Doanh Nghiệp CEO', agent: 'fin', adapterKey: 'hermes', text: 'CEO Executive Dashboard: Tổng hợp ROI, CAC & Sức khỏe Doanh nghiệp' }
-        ];
+        const targetInput = document.getElementById('bce-edit-followers') || document.getElementById('main-followers');
+        const metricKey = (targetInput && targetInput.dataset.metricKey) || 'targetFollowers';
+
+        let rawSteps = [];
+
+        if (metricKey === 'targetFollowers') {
+            // CASE 1: Social Posting / Followers Goal
+            rawSteps = [
+                { id: 1, name: '1. Thiết lập Mục tiêu Truyền thông', agent: 'coo', adapterKey: 'hermes', text: `AI COO khởi tạo kế hoạch đăng bài truyền thông cho Spa (Ngân sách: ${(budgetVND / 1000000).toFixed(0)}M VND)` },
+                { id: 2, name: '2. Nghiên cứu Thị hiếu & Topic', agent: 'pm', adapterKey: 'hermes', text: 'AI PM nghiên cứu hành vi khách hàng Spa & lập Content Matrix' },
+                { id: 3, name: '3. Soạn thảo Bài viết & Kịch bản', agent: 'mkt', adapterKey: 'claudecode', text: 'AI Marketing soạn các nội dung bài viết chuẩn SEO & Brand Voice' },
+                { id: 4, name: '4. Thiết kế Layout & Hình ảnh', agent: 'des', adapterKey: 'openhands', text: 'AI Designer thiết kế Infographics & Banner cho bài đăng Carousel' },
+                { id: 5, name: '5. Tối ưu Kịch bản Đăng tải', agent: 'sales', adapterKey: 'codex', text: 'AI Sales thiết lập mẫu CTA dẫn link đăng ký liệu trình Spa' },
+                { id: 6, name: '6. Kiểm duyệt Quy chuẩn Thương hiệu', agent: 'qa', adapterKey: 'claudecode', text: 'AI QA rà soát lỗi chính tả, logo & kiểm tra tính chính xác của thông điệp' },
+                { 
+                    id: 7, 
+                    name: '7. Gate Phê duyệt Nội dung của CEO', 
+                    agent: 'ceo', 
+                    adapterKey: 'hermes',
+                    text: 'CEO phê duyệt bản thảo thiết kế & nội dung trước khi bấm đăng', 
+                    isApprovalGate: true
+                },
+                { id: 8, name: '8. Đăng bài tự động lên Fanpage', agent: 'hermes', adapterKey: 'hermes', text: 'Hermes Operator gọi Facebook Graph API để đăng bài viết trực tiếp lên trang' },
+                { id: 9, name: '9. Kiểm tra Tương tác & Hiển thị', agent: 'qa', adapterKey: 'openhands', text: 'AI QA xác minh bài viết hiển thị công khai & theo dõi tỷ lệ reach ban đầu' },
+                { id: 10, name: '10. Báo cáo Thống kê & Đo lường CTR', agent: 'fin', adapterKey: 'hermes', text: 'AI Finance báo cáo lượng bài hoàn thành, tương tác và đề xuất chiến dịch tiếp theo' }
+            ];
+        } else if (metricKey === 'targetRevenueVnd') {
+            // CASE 2: Revenue / Sales Goal
+            rawSteps = [
+                { id: 1, name: '1. Hoạch định Chỉ tiêu Doanh số', agent: 'coo', adapterKey: 'hermes', text: `AI COO hoạch định kế hoạch doanh thu Spa (Mục tiêu: ${formatShortMoney(budgetVND * 4)})` },
+                { id: 2, name: '2. Nghiên cứu Gói Dịch vụ Hot', agent: 'pm', adapterKey: 'hermes', text: 'AI PM khảo sát nhu cầu thị trường để lựa chọn gói dịch vụ thu hút' },
+                { id: 3, name: '3. Thiết kế Chương trình Khuyến mãi', agent: 'mkt', adapterKey: 'claudecode', text: 'AI Marketing soạn thảo chương trình ưu đãi & kịch bản tiếp thị' },
+                { id: 4, name: '4. Thiết kế Banner Ưu đãi', agent: 'des', adapterKey: 'openhands', text: 'AI Designer thiết kế ảnh quảng cáo Voucher cực đẹp mắt' },
+                { id: 5, name: '5. Thiết lập Kịch bản Chốt Sales (CRM)', agent: 'sales', adapterKey: 'codex', text: 'AI Sales đồng bộ kịch bản tư vấn tự động hóa trên CRM' },
+                { id: 6, name: '6. Thẩm định Chất lượng & Chiết khấu', agent: 'qa', adapterKey: 'claudecode', text: 'AI QA thẩm định chính sách giảm giá & rủi ro ngân sách' },
+                { 
+                    id: 7, 
+                    name: '7. CEO Phê duyệt Bảng Giá Release', 
+                    agent: 'ceo', 
+                    adapterKey: 'hermes',
+                    text: 'CEO phê duyệt bảng giá chiết khấu đặc biệt cho chiến dịch', 
+                    isApprovalGate: true
+                },
+                { id: 8, name: '8. Kích hoạt Kênh Quảng cáo & Đăng tải', agent: 'devops', adapterKey: 'openhands', text: 'AI DevOps kết nối API quảng cáo & nạp ngân sách Ads chiến dịch' },
+                { id: 9, name: '9. Theo dõi Doanh số & Leads mới', agent: 'mkt', adapterKey: 'hermes', text: 'AI Marketing giám sát số lượng khách hàng đặt lịch & tương tác realtime' },
+                { id: 10, name: '10. Báo cáo Tài chính & Lợi nhuận', agent: 'fin', adapterKey: 'hermes', text: 'AI Finance tổng hợp doanh số thực tế, chi phí quảng cáo & tính toán ROI' }
+            ];
+        } else if (metricKey === 'targetStaffCount') {
+            // CASE 3: Recruitment Goal
+            rawSteps = [
+                { id: 1, name: '1. Hoạch định Nhu cầu Nhân sự', agent: 'coo', adapterKey: 'hermes', text: 'AI COO lập kế hoạch tuyển dụng nhân sự Spa phục vụ mùa cao điểm' },
+                { id: 2, name: '2. Soạn thảo Bản mô tả công việc JD', agent: 'pm', adapterKey: 'hermes', text: 'AI PM viết bản mô tả công việc (JD) chi tiết cho vị trí Kỹ thuật viên' },
+                { id: 3, name: '3. Thiết kế Banner Tuyển dụng', agent: 'des', adapterKey: 'openhands', text: 'AI Designer thiết kế ảnh tuyển dụng trực quan thu hút ứng viên' },
+                { id: 4, name: '4. Đăng tuyển lên Fanpage & Group', agent: 'hermes', adapterKey: 'hermes', text: 'Hermes Operator tự động chia sẻ tin tuyển dụng lên các hội nhóm Spa' },
+                { id: 5, name: '5. Kiểm duyệt Pháp lý & Hợp đồng', agent: 'qa', adapterKey: 'claudecode', text: 'AI QA thẩm định điều khoản hợp đồng thử việc & chính sách lương thưởng' },
+                { 
+                    id: 6, 
+                    name: '6. Phê duyệt Ngân sách Tuyển dụng', 
+                    agent: 'ceo', 
+                    adapterKey: 'hermes',
+                    text: 'CEO ký duyệt ngân sách chi phí tuyển dụng & phúc lợi nhân sự mới', 
+                    isApprovalGate: true
+                },
+                { id: 7, name: '7. Thu thập & Lọc hồ sơ ứng viên (CV)', agent: 'pm', adapterKey: 'codex', text: 'AI PM thu thập CV từ các kênh & lọc ứng viên đạt yêu cầu ban đầu' },
+                { id: 8, name: '8. Chấm điểm & Đánh giá Hồ sơ', agent: 'qa', adapterKey: 'claudecode', text: 'AI QA đối chiếu kỹ năng ứng viên với tiêu chí tuyển dụng của Spa' },
+                { id: 9, name: '9. Lên lịch phỏng vấn Tự động', agent: 'coo', adapterKey: 'openhands', text: 'AI COO kích hoạt bot gửi thư mời phỏng vấn & đặt lịch hẹn' },
+                { id: 10, name: '10. Báo cáo Chi phí Tuyển dụng & CPH', agent: 'fin', adapterKey: 'hermes', text: 'AI Finance báo cáo tổng hợp chi phí trên mỗi lượt tuyển dụng (CPH)' }
+            ];
+        } else {
+            // CASE 4: Default/Leads Campaign
+            rawSteps = [
+                { id: 1, name: '1. Thiết lập Chiến dịch Thu hút Leads', agent: 'coo', adapterKey: 'hermes', text: `AI COO khởi tạo dự án Marketing tìm kiếm khách hàng mới (Ngân sách: ${(budgetVND / 1000000).toFixed(0)}M VND)` },
+                { id: 2, name: '2. Phân tích Rủi ro & Tệp Đối Tượng', agent: 'pm', adapterKey: 'hermes', text: 'AI PM phân rã đối tượng mục tiêu & đề xuất chương trình trải nghiệm thử' },
+                { id: 3, name: '3. Thiết lập Content Landing Page', agent: 'mkt', adapterKey: 'claudecode', text: 'AI Marketing soạn thảo nội dung thuyết phục đăng ký trải nghiệm Spa' },
+                { id: 4, name: '4. Thiết kế Giao diện Đăng ký', agent: 'des', adapterKey: 'openhands', text: 'AI Designer thiết kế form đăng ký & banner khuyến mãi' },
+                { id: 5, name: '5. Thiết lập Kịch bản Chăm sóc Tự động', agent: 'sales', adapterKey: 'codex', text: 'AI Sales cấu hình phễu tự động hóa tin nhắn trên CRM' },
+                { id: 6, name: '6. Kiểm duyệt Chất lượng Form & GDPR', agent: 'qa', adapterKey: 'claudecode', text: 'AI QA rà soát điều khoản bảo mật thông tin khách hàng & DoD check' },
+                { 
+                    id: 7, 
+                    name: '7. Gate Phê duyệt Chiến dịch của CEO', 
+                    agent: 'ceo', 
+                    adapterKey: 'hermes',
+                    text: 'CEO duyệt tổng thể nội dung & hình ảnh chiến dịch thu hút Leads', 
+                    isApprovalGate: true
+                },
+                { id: 8, name: '8. Triển khai Quảng cáo Đa kênh', agent: 'devops', adapterKey: 'openhands', text: 'AI DevOps kết nối các cổng API quảng cáo & khởi chạy chiến dịch' },
+                { id: 9, name: '9. Đo lường Hiệu quả Thu lead', agent: 'mkt', adapterKey: 'hermes', text: 'AI Marketing theo dõi số lượt đăng ký & tính toán chi phí thực tế CPL' },
+                { id: 10, name: '10. Báo cáo ROI & Doanh số Dự kiến', agent: 'fin', adapterKey: 'hermes', text: 'AI Finance báo cáo tỷ lệ chốt sales từ Leads & dự kiến doanh thu Spa' }
+            ];
+        }
 
         // Compile Enterprise Intelligence Layer (EIL) Package for each dynamic step
         const dynamicSteps = rawSteps.map(step => {
@@ -5901,6 +5971,8 @@ async function sendCeoCommand() {
     const val = input.value.trim();
     if (!val) return;
 
+    window.activeObjectiveText = val; // Store globally
+
     appendLog('CEO (OBJECTIVE)', `🎯 MỤC TIÊU CHIẾN LƯỢC MỚI TỪ CEO: "${val}"`, 'text-amber-400 font-bold');
     
     // Parse and decompose the CEO's directive immediately to update the BCE Context Inputs
@@ -5908,8 +5980,6 @@ async function sendCeoCommand() {
         GoalEngine.decomposeGoal(val);
     }
     
-    input.value = '';
-
     appendLog('AI COO', '🤖 AI COO đang phân tích và tự lập trình Quy trình SOP qua LLM Engine...', 'text-cyan-400 font-semibold animate-pulse');
 
     // Attempt Real LLM Gemini Call
@@ -6973,7 +7043,7 @@ function updateLiveCompiledContext() {
         : { id: 1, name: "1. Khởi tạo Project & Thiết lập OKRs" };
         
     const objInput = document.getElementById('ceo-command-input');
-    const objectiveText = objInput && objInput.value ? objInput.value : 'Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày';
+    const objectiveText = window.activeObjectiveText || (objInput && objInput.value) || 'Tối ưu hóa chiến dịch Marketing SpaPOS 30 ngày';
     
     if (typeof EnterpriseContextLayer !== 'undefined' && typeof EnterpriseContextLayer.compileContext === 'function') {
         const activeEilContext = EnterpriseContextLayer.compileContext(currentStep, objectiveText);
@@ -8097,6 +8167,11 @@ function selectSpaPreset(type) {
     // Trigger updates
     onMainMetricTypeChange();
     syncMainToBce();
+    
+    // Auto trigger CEO command processing to mutate the workflow pipeline instantly
+    if (typeof sendCeoCommand === 'function') {
+        sendCeoCommand();
+    }
 }
 
 function onMainMetricTypeChange() {
