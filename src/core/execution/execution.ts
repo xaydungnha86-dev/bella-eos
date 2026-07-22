@@ -119,7 +119,7 @@ export class InternalApiGateway {
     try {
       orchestratorResult = await callOrchestrator(contextPackage);
     } catch (err: any) {
-      console.error('[InternalApiGateway] Orchestrator failed:', err.message);
+      console.warn('[InternalApiGateway] Orchestrator failed:', err.message);
       throw err;
     }
 
@@ -144,7 +144,7 @@ export class InternalApiGateway {
     try {
       runnerResult = await callAgentRunner(plan.tasks, contextPackage);
     } catch (err: any) {
-      console.error('[InternalApiGateway] Agent runner failed:', err.message);
+      console.warn('[InternalApiGateway] Agent runner failed:', err.message);
       throw err;
     }
 
