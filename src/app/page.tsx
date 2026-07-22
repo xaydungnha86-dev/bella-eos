@@ -772,7 +772,7 @@ export default function Dashboard() {
                       </div>
 
                       {/* CEO HUMAN APPROVAL BANNER GATE */}
-                        {dynamicTasks.some(t => t.status === 'AWAITING_APPROVAL') && (
+                        {dynamicTasks.some(t => t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL' || (t.agent_id === 'eos_marketing_manager' && !t.isApproved && t.status !== 'COMPLETED')) && (
                           <div className="w-full bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-amber-400/60 rounded-2xl p-4 text-left shadow-lg flex items-center justify-between gap-4 animate-fade-in">
                             <div className="flex items-start gap-3">
                               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white font-bold flex items-center justify-center text-xl shadow-md shrink-0 animate-bounce">
@@ -891,6 +891,24 @@ export default function Dashboard() {
                                 <p className="text-[9px] text-slate-500 mt-2 font-mono bg-white/80 p-1.5 rounded border border-slate-100 line-clamp-2">
                                   {t.output}
                                 </p>
+                              )}
+
+                              {isAwaitingApproval && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const taskId = t.task_id || 't1';
+                                    setDynamicTasks(prev => prev.map(item =>
+                                      (item.task_id === taskId || item.agent_id === 'eos_marketing_manager' || item.status === 'AWAITING_APPROVAL')
+                                        ? { ...item, status: 'COMPLETED', isApproved: true, success: true }
+                                        : item
+                                    ));
+                                    CampaignExecutionManager.approveTaskAndResume(taskId, InternalApiGateway);
+                                  }}
+                                  className="mt-2.5 w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-[10px] py-1.5 px-3 rounded-lg shadow-sm flex items-center justify-center gap-1 cursor-pointer transition-all hover:scale-[1.02] z-10"
+                                >
+                                  <span>👑 CEO Phê Duyệt Ngay & Chạy Tiếp →</span>
+                                </button>
                               )}
 
                               <div className="mt-2 pt-2 border-t border-slate-100/80 flex items-center justify-between text-[9px] font-bold text-indigo-600 group-hover:text-indigo-700">
@@ -1463,6 +1481,39 @@ export default function Dashboard() {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-5 flex-1 font-sans text-xs">
+              {/* Approval Banner inside modal */}
+              {(selectedTask.status === 'AWAITING_APPROVAL' || selectedTask.meta?.status === 'AWAITING_APPROVAL' || (selectedTask.agent_id === 'eos_marketing_manager' && !selectedTask.isApproved && selectedTask.status !== 'COMPLETED')) && (
+                <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-amber-400/60 rounded-2xl p-4 text-left shadow-lg flex items-center justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500 text-white font-bold flex items-center justify-center text-lg shadow-md shrink-0">
+                      👑
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-amber-900 uppercase tracking-wider">
+                        THẨM ĐỊNH EXECUTIVE: YÊU CẦU CEO PHÊ DUYỆT BẢN KẾ HOẠCH MARKETING
+                      </h4>
+                      <p className="text-[11px] text-amber-800 font-medium mt-0.5">
+                        Bấm phê duyệt để cho phép các AI Agent chạy tiếp các bước soạn bài, thiết kế banner và xuất bản.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const taskId = selectedTask.task_id || 't1';
+                      setDynamicTasks(prev => prev.map(t =>
+                        (t.task_id === taskId || t.agent_id === 'eos_marketing_manager' || t.status === 'AWAITING_APPROVAL')
+                          ? { ...t, status: 'COMPLETED', isApproved: true, success: true }
+                          : t
+                      ));
+                      setSelectedTask((prev: any) => prev ? { ...prev, status: 'COMPLETED', isApproved: true, success: true } : null);
+                      CampaignExecutionManager.approveTaskAndResume(taskId, InternalApiGateway);
+                    }}
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer hover:scale-105 shrink-0"
+                  >
+                    <span>👑 CEO Phê Duyệt Ngay & Chạy Tiếp →</span>
+                  </button>
+                </div>
+              )}
               {/* Status Banner */}
               <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs font-semibold ${
                 selectedTask.success === true && !selectedTask.output?.includes('CONFIG_REQUIRED')
