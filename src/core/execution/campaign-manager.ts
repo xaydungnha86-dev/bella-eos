@@ -1,4 +1,5 @@
 import { CanonicalContextPackage } from '../../types/eom';
+import { EnterpriseBrain } from '../brain';
 
 export interface CampaignState {
   isProcessing: boolean;
@@ -359,11 +360,23 @@ class CampaignExecutionManagerClass {
 
     try {
       const mockStep = { id: 1, name: 'Setup chiến dịch', agent: 'orchestrator' };
-      const contextPackage = {
-        objective: this.state.objective,
-        brandDna: { voiceTone: this.state.dnaState.tone, designStyle: this.state.dnaState.style },
-        timestamp: new Date().toISOString()
-      } as any;
+      const contextPackage = EnterpriseBrain.Context.compileContext(mockStep, this.state.objective);
+      
+      let pastPlansMd = '';
+      if (typeof window !== 'undefined') {
+        try {
+          const history = JSON.parse(localStorage.getItem('bella_eos_marketing_history') || '[]');
+          if (history.length > 0) {
+            pastPlansMd = history.slice(0, 3).map((h: any, i: number) => `--- Lịch sử Kế hoạch #${i+1} [Mục tiêu: ${h.objective}] ---\n${h.markdownContent.substring(0, 400)}...`).join('\n\n');
+          }
+        } catch (e) {}
+      }
+
+      (contextPackage as any).activeCustomerCount = this.state.activeCustomerCount;
+      (contextPackage as any).fbReachCount = this.state.fbReachCount;
+      (contextPackage as any).past_plans_md = pastPlansMd;
+
+      const currentTasks = [...this.state.dynamicTasks];
 
       const dispatchResult = await InternalApiGateway.dispatchCall(
         { assignedWorker: 'orchestrator' },
@@ -381,10 +394,21 @@ class CampaignExecutionManagerClass {
             }
           }
         },
-        updatedApproved
+        updatedApproved,
+        currentTasks
       );
 
+      const taskResults = dispatchResult?.summary?.results || dispatchResult?.payload?.execution?.results || [];
+      const fbResult = taskResults.find((r: any) => r.task_type === 'publish_facebook' || r.task_type === 'schedule_post');
+
+      if (fbResult) {
+        this.state.lastApiStatus = fbResult.success ? fbResult.output : `⚠️ ${fbResult.error || fbResult.output}`;
+      } else {
+        this.state.lastApiStatus = `✅ CEO đã duyệt! Đã hoàn tất thực thi ${taskResults.length} nhiệm vụ AI Agent!`;
+      }
+
       this.state.isProcessing = false;
+      this.state.activeStep = 8;
       this.notify();
       this.addLog('SYSTEM', `🏁 Đã hoàn tất toàn bộ quy trình AI Workforce sau khi CEO phê duyệt!`, 'text-amber-400 font-bold');
     } catch (err: any) {

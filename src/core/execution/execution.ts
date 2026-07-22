@@ -97,7 +97,8 @@ export class InternalApiGateway {
     step: any,
     contextPackage: CanonicalContextPackage,
     onProgress?: (event: OrchestratorEvent) => void,
-    approvedTasks?: string[]
+    approvedTasks?: string[],
+    existingTasks?: any[]
   ): Promise<DispatchResult> {
     const workerId = executor.assignedWorker || executor.workerId || 'orchestrator';
     console.log(`[InternalApiGateway] Dispatch → [${step.name}] • Worker: ${workerId}`);
@@ -115,37 +116,53 @@ export class InternalApiGateway {
     // Persist context asynchronously
     SupabaseConnector.saveCanonicalContext(contextPackage);
 
-    // ── PHASE 1: AI Orchestrator plans execution ──────────────────────────
-    onProgress?.({ phase: 'PLANNING', message: '🧠 AI Orchestrator đang phân tích intent và lập kế hoạch...', tasks: [] });
+    let planTasks = existingTasks;
+    let planTitle = 'Kế hoạch đã phân bổ';
+    let planReasoning = 'Thực thi lại các tác vụ sau khi CEO phê duyệt';
+    let planProvider = 'bella-eos-kernel';
+    let planModel = 'orchestrator-v1';
+    let planWarning: string | undefined = undefined;
 
-    let orchestratorResult: Awaited<ReturnType<typeof callOrchestrator>>;
-    try {
-      orchestratorResult = await callOrchestrator(contextPackage);
-    } catch (err: any) {
-      console.warn('[InternalApiGateway] Orchestrator failed:', err.message);
-      throw err;
+    if (!planTasks || planTasks.length === 0) {
+      // ── PHASE 1: AI Orchestrator plans execution ──────────────────────────
+      onProgress?.({ phase: 'PLANNING', message: '🧠 AI Orchestrator đang phân tích intent và lập kế hoạch...', tasks: [] });
+
+      let orchestratorResult: Awaited<ReturnType<typeof callOrchestrator>>;
+      try {
+        orchestratorResult = await callOrchestrator(contextPackage);
+      } catch (err: any) {
+        console.warn('[InternalApiGateway] Orchestrator failed:', err.message);
+        throw err;
+      }
+
+      const { plan, provider, model, warning } = orchestratorResult;
+      planTasks = plan.tasks;
+      planTitle = plan.plan_title;
+      planReasoning = plan.reasoning;
+      planProvider = provider;
+      planModel = model;
+      planWarning = warning;
+
+      console.log(`[InternalApiGateway] Plan generated (${planProvider}/${planModel}): ${planTasks.length} tasks`);
+
+      onProgress?.({
+        phase: 'PLAN_READY',
+        message: `📋 Kế hoạch: "${planTitle}" — ${planTasks.length} tasks`,
+        planTitle,
+        planReasoning,
+        tasks: planTasks.map(t => ({ ...t, status: t.status || 'PENDING' })),
+        aiProvider: planProvider,
+        aiModel: planModel,
+        warning: planWarning
+      });
     }
 
-    const { plan, provider: planProvider, model: planModel, warning: planWarning } = orchestratorResult;
-    console.log(`[InternalApiGateway] Plan generated (${planProvider}/${planModel}): ${plan.tasks.length} tasks`);
-
-    onProgress?.({
-      phase: 'PLAN_READY',
-      message: `📋 Kế hoạch: "${plan.plan_title}" — ${plan.tasks.length} tasks`,
-      planTitle: plan.plan_title,
-      planReasoning: plan.reasoning,
-      tasks: plan.tasks.map(t => ({ ...t, status: t.status || 'PENDING' })),
-      aiProvider: planProvider,
-      aiModel: planModel,
-      warning: planWarning
-    });
-
     // ── PHASE 2: Agent Runner executes each task ──────────────────────────
-    onProgress?.({ phase: 'EXECUTING', message: '⚡ Các AI Agent đang thực thi nhiệm vụ...', tasks: plan.tasks });
+    onProgress?.({ phase: 'EXECUTING', message: '⚡ Các AI Agent đang thực thi nhiệm vụ...', tasks: planTasks });
 
     let runnerResult: Awaited<ReturnType<typeof callAgentRunner>>;
     try {
-      runnerResult = await callAgentRunner(plan.tasks, contextPackage, approvedTasks);
+      runnerResult = await callAgentRunner(planTasks, contextPackage, approvedTasks);
     } catch (err: any) {
       console.warn('[InternalApiGateway] Agent runner failed:', err.message);
       throw err;
@@ -185,8 +202,8 @@ export class InternalApiGateway {
         workerId,
         canonicalContext: contextPackage,
         plan: {
-          title: plan.plan_title,
-          reasoning: plan.reasoning,
+          title: planTitle,
+          reasoning: planReasoning,
           provider: planProvider,
           model: planModel
         },
