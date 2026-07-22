@@ -480,11 +480,153 @@ async function tool_default(task: any): Promise<ToolResult> {
   };
 }
 
+async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, context?: any): Promise<ToolResult> {
+  const objective = input.objective || context?.objective || 'Chiến dịch Marketing Bella EOS';
+  const tone = input.tone || context?.brandDna?.voiceTone || 'Professional & Premium';
+  const segment = input.target_audience || context?.brandDna?.targetSegment || 'Khách hàng tiềm năng & Đối tác';
+  const brandName = context?.brandDna?.brandName || 'BELLA EOS';
+
+  const mmConfig = clientKeys?.agent_configs?.['marketing_manager'] || clientKeys?.agent_configs?.['eos_marketing_manager'] || {};
+  const openaiKey = clientKeys?.openai || mmConfig.apiKey || process.env.OPENAI_API_KEY;
+  const geminiKey = clientKeys?.gemini || mmConfig.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+
+  const systemPrompt = mmConfig.systemPrompt || `Bạn là AI Marketing Manager chiến lược cấp cao của thương hiệu ${brandName}.
+Nhiệm vụ: Phân tích chỉ thị của CEO, xác định mục tiêu kinh doanh, chân dung khách hàng, ma trận góc truyền thông (angles), thiết lập mục tiêu OKR/KPI đo lường và lập kế hoạch phối hợp cho đội ngũ AI Workforce.
+
+BẮT BUỘC TRẢ VỀ CẤU TRÚC BẢN PHÂN TÍCH MARKETING CHUYÊN NGHIỆP:
+1. 🎯 PHÂN TÍCH CHỈ THỊ CEO & ĐÁNH GIÁ MỤC TIÊU:
+   - Mục tiêu cốt lõi: [Phân tích mục tiêu ngắn hạn & dài hạn]
+   - Mức độ khả thi & Thách thức thị trường: [Đánh giá tính khả thi]
+
+2. 👥 CHÂN DUNG ĐỐI TƯỢNG MỤC TIÊU (TARGET AUDIENCE PERSONA):
+   - Phân khúc ưu tiên: ${segment}
+   - Nỗi đau khách hàng (Pain Points): [3-4 điểm nhói nhất]
+   - Động lực mua hàng (Buying Triggers): [Yếu tố thúc đẩy ra quyết định]
+
+3. 🧭 MA TRẬN GÓC TRUYỀN THÔNG (MARKETING ANGLES MATRIX):
+   - Angle 1 (Giải pháp đột phá): [Thông điệp chính]
+   - Angle 2 (Chứng minh xã hội / Social Proof): [Số liệu & Uy tín]
+   - Angle 3 (Ưu đãi độc quyền / Urgency Offer): [Quà tặng & Thời gian]
+
+4. 📊 MỤC TIÊU OKR / KPI ĐO LƯỜNG CHI TIẾT:
+   - KPI Tiếp cận (Reach/Impression): [Con số mục tiêu]
+   - KPI Tương tác (Engagement Rate): [Mục tiêu %]
+   - KPI Chuyển đổi (Leads/Demo Registrations): [Số lượng bản Demo/Lead]
+   - Dự báo ROI/CPL: [Chi phí ước tính / Lead]
+
+5. 🗺️ LỘ TRÌNH THỰC THI CHO AI WORKFORCE:
+   - AI Copywriter Worker: Tập trung viết bài bán hàng đánh vào [Angle chính] với tông giọng ${tone}.
+   - AI Creative Designer Worker: Thiết kế Banner 4K phối màu thương hiệu tôn vinh [Offer chính].
+   - Hermes Social Publisher: Phân phối đa kênh Facebook/Zalo đúng khung giờ vàng.
+   - Ares Ads Agent: Cấu hình tệp đối tượng retargeting & lookalike.
+`;
+
+  const userMessage = `Yêu cầu chỉ thị từ CEO: "${objective}"
+Thương hiệu: ${brandName} | Tông giọng: ${tone} | Đối tượng: ${segment}
+
+Hãy xây dựng bản phân tích chiến lược Marketing chi tiết theo đúng cấu trúc chuẩn.`;
+
+  let content = '';
+  let usedModel = mmConfig.model || 'gemini-2.5-flash';
+  let provider = 'google-gemini';
+
+  if (geminiKey) {
+    try {
+      const modelName = usedModel.includes('gemini') ? usedModel : 'gemini-2.5-flash';
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `${systemPrompt}\n\n${userMessage}` }] }]
+        })
+      });
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (res.ok && text) {
+        content = text;
+        usedModel = modelName;
+        provider = 'google-gemini';
+      }
+    } catch (e) {
+      console.warn('[tool_analyze_marketing_strategy] Gemini failed:', e);
+    }
+  }
+
+  if (!content && openaiKey) {
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userMessage }
+          ]
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.choices?.[0]?.message?.content) {
+        content = data.choices[0].message.content;
+        usedModel = 'gpt-4o';
+        provider = 'openai';
+      }
+    } catch (e) {
+      console.warn('[tool_analyze_marketing_strategy] OpenAI failed:', e);
+    }
+  }
+
+  if (!content) {
+    content = `🎯 [AI MARKETING MANAGER] BẢN PHÂN TÍCH CHIẾN LƯỢC & MỤC TIÊU CHIẾN DỊCH:
+
+1. 🎯 PHÂN TÍCH CHỈ THỊ CEO & ĐÁNH GIÁ MỤC TIÊU:
+   • Mục tiêu chỉ thị: "${objective}"
+   • Đánh giá khả thi: Mức độ ưu tiên cao. Yêu cầu phối hợp chặt chẽ giữa Nội dung truyền thông, Banner thiết kế 4K và Kênh xuất bản.
+   • Định hướng cốt lõi: Tập trung truyền tải giá trị cốt lõi giải pháp ${brandName}, kích thích hành động đăng ký trải nghiệm Demo trực tiếp.
+
+2. 👥 CHÂN DUNG ĐỐI TƯỢNG MỤC TIÊU & GÓC TRUYỀN THÔNG:
+   • Phân khúc ưu tiên: ${segment}
+   • Nỗi đau chính: Tốn chi phí quản lý thủ công, thiếu tính minh bạch dữ liệu, tỷ lệ thất thoát doanh thu cao.
+   • Angle truyền thông chính: "Tự động hóa vận hành 100% — Tăng trưởng doanh thu vượt trội cùng ${brandName}".
+
+3. 📊 MỤC TIÊU OKR / KPI ĐO LƯỜNG DỰ KIẾN:
+   • Target Reach: 15,000 - 35,000 người dùng tiếp cận
+   • Target Engagement: 1,200+ tương tác bài viết (Like, Share, Comment)
+   • Target Conversion: 50 - 150 Lượt đăng ký trải nghiệm Demo
+   • Chi phí mục tiêu (CPL): Tối ưu dưới 120,000 VNĐ / Lead đăng ký
+
+4. 🗺️ PHÂN BỔ KẾ HOẠCH THỰC THI CHO AI WORKFORCE:
+   • Task #1 (AI Copywriter Worker): Soạn thảo bài đăng bán hàng Facebook với Headline giật gân, nhắm đúng đối tượng ${segment}.
+   • Task #2 (AI Creative Worker): Render Banner 4K phối cảnh thương hiệu với màu nền Ảo diệu (#061E17 / #D4AF37).
+   • Task #3 (Hermes Social Publisher): Đăng xuất bản tự động bài viết + hình ảnh lên Fanpage chính thức.
+   • Task #4 (Athena Analytics Agent): Giám sát telemetry và tổng hợp báo cáo hiệu suất KPI 30 ngày.`;
+    usedModel = 'rule-based-marketing-manager';
+    provider = 'bella-eos-kernel';
+  }
+
+  return {
+    success: true,
+    output: content,
+    meta: {
+      type: 'MARKETING_STRATEGY',
+      model: usedModel,
+      provider,
+      targetSegment: segment,
+      brandName
+    }
+  };
+}
+
 // ─── Tool Registry — maps task_type → tool function ──────────────────────────
 type ToolFn = (input: any, clientKeys: any, taskOutputs: Record<string, string>, context?: any) => Promise<ToolResult>;
 type ToolResult = { success: boolean; output: string; error?: string; meta?: any };
 
 const TOOL_REGISTRY: Record<string, ToolFn> = {
+  analyze_marketing_strategy: (i, k, _, c) => tool_analyze_marketing_strategy(i, k, c),
+  plan_campaign_roadmap:      (i, k, _, c) => tool_analyze_marketing_strategy(i, k, c),
   write_facebook_post:    (i, k, _)  => tool_write_facebook_post(i, k),
   write_zalo_message:     (i, k, _)  => tool_write_zalo_message(i, k),
   write_email_campaign:   (i, k, _)  => tool_write_email_campaign(i, k),

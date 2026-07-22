@@ -126,6 +126,7 @@ function safeGet(key: string): string | null {
 const AI_WORKFORCE = [
   { id: 'human_ceo', name: 'CEO / Lãnh Đạo Tối Cao', type: 'Human', role: 'Thẩm Định Executive', avatar: '👑', capability: 'Duyệt ngân sách & phê duyệt bài xuất bản', status: 'idle', prof: 100, color: 'from-amber-600 to-yellow-400' },
   { id: 'coo', name: 'AI COO Orchestrator', type: 'AI', role: 'Điều Phối Vận Hành', avatar: '🤖', capability: 'Lập kế hoạch & phân bổ quy trình tự động', status: 'idle', prof: 98, color: 'from-cyan-500 to-blue-500' },
+  { id: 'marketing_manager', name: 'AI Marketing Manager', type: 'AI', role: 'Quản Lý Marketing & Chiến Lược', avatar: '🎯', capability: 'Phân tích yêu cầu CEO, lập kế hoạch mục tiêu OKR & hoạch định quy trình', status: 'idle', prof: 99, color: 'from-indigo-600 to-violet-500' },
   { id: 'assistant', name: 'AI Assistant', type: 'AI', role: 'Trợ Lý Cấp Cao', avatar: '🙋‍♂️', capability: 'Hỗ trợ tổng hợp dữ liệu & báo cáo vận hành', status: 'idle', prof: 96, color: 'from-indigo-400 to-blue-400' },
   { id: 'hermes', name: 'Hermes Social Publisher', type: 'AI', role: 'Xuất Bản Mạng Xã Hội', avatar: '⚡', capability: 'Tự động đăng bài & quản lý Fanpage', status: 'idle', prof: 95, color: 'from-amber-500 to-orange-500' },
   { id: 'creative_designer', name: 'AI Creative Designer Worker', type: 'AI', role: 'Thiết Kế Đồ Họa', avatar: '🎨', capability: 'Thiết kế Poster, Banner PNG & phối cảnh 4K', status: 'idle', prof: 97, color: 'from-pink-500 to-rose-500' },
@@ -404,8 +405,8 @@ export default function Dashboard() {
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-  const coreAgents = AI_WORKFORCE.filter(ai => ['human_ceo', 'coo', 'assistant'].includes(ai.id));
-  const operationalAgents = AI_WORKFORCE.filter(ai => !['human_ceo', 'coo', 'assistant'].includes(ai.id));
+  const coreAgents = AI_WORKFORCE.filter(ai => ['human_ceo', 'coo', 'marketing_manager', 'assistant'].includes(ai.id));
+  const operationalAgents = AI_WORKFORCE.filter(ai => !['human_ceo', 'coo', 'marketing_manager', 'assistant'].includes(ai.id));
   const activeAgents = operationalAgents.filter(ai => {
     return dynamicTasks.some(t => {
       const taskAgentId = t.agent_id?.toLowerCase() || '';
@@ -515,6 +516,8 @@ export default function Dashboard() {
                   ? 'Human Authority' 
                   : ai.id === 'coo' 
                   ? 'EOS Kernel Active' 
+                  : ai.id === 'marketing_manager'
+                  ? 'Strategy Active'
                   : ai.id === 'assistant'
                   ? (isProcessing ? 'Synthesizing Reports' : 'Ready for CEO')
                   : isRealApi 

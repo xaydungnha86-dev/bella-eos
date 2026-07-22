@@ -19,8 +19,15 @@ import { NextResponse } from 'next/server';
  * and produces a structured JSON execution plan.
  */
 
-// ─── Agent Registry — 8 Enterprise Domain AI Agent Matrix ─────────────────
+// ─── Agent Registry — 9 Enterprise Domain AI Agent Matrix ─────────────────
 const AGENT_REGISTRY = [
+  {
+    id: 'eos_marketing_manager',
+    name: 'AI Marketing Manager',
+    description: 'AI Marketing Manager chiến lược chuyên phân tích yêu cầu CEO, lập kế hoạch mục tiêu OKR/KPI, phân tích chân dung đối tượng & hoạch định quy trình thực thi chi tiết cho các Worker',
+    tools: ['analyze_marketing_strategy', 'plan_campaign_roadmap'],
+    output_type: 'marketing_strategy'
+  },
   {
     id: 'eos_content_worker',
     name: 'Bella EOS Content Worker',
@@ -277,6 +284,18 @@ function buildFallbackPlan(objective: string, context?: any) {
   const lowerObj = objective.toLowerCase();
   const tasks = [];
 
+  // Task 0: AI Marketing Manager analyzes CEO requirements & plans OKR/roadmap
+  tasks.push({
+    task_id: 't0',
+    agent_id: 'eos_marketing_manager',
+    agent_name: 'AI Marketing Manager',
+    task_type: 'analyze_marketing_strategy',
+    task_description: `Phân tích yêu cầu CEO, lập kế hoạch mục tiêu OKR/KPI & hoạch định quy trình cho chiến dịch: "${objective}"`,
+    input: { objective, tone, target_audience: segment },
+    expected_output: 'Bản phân tích chiến lược marketing chi tiết, mục tiêu OKR/KPI & lộ trình phân bổ công việc cho AI Workforce',
+    depends_on: []
+  });
+
   // Task 1: Bella EOS Content Worker drafts the marketing copy
   tasks.push({
     task_id: 't1',
@@ -284,9 +303,9 @@ function buildFallbackPlan(objective: string, context?: any) {
     agent_name: 'Bella EOS Content Worker',
     task_type: 'write_facebook_post',
     task_description: `Soạn thảo bài viết truyền thông & Offer trải nghiệm Demo cho chiến dịch: "${objective}"`,
-    input: { objective, tone, target_audience: segment, platform: 'facebook' },
+    input: { objective, tone, target_audience: segment, platform: 'facebook', strategy_from: 't0' },
     expected_output: 'Bài đăng Facebook hoàn chỉnh từ Bella EOS Worker, có hook, offer và hashtag',
-    depends_on: []
+    depends_on: ['t0']
   });
 
   // Task 2: Bella EOS Media & Creative Worker generates visual banner / mockup
@@ -340,8 +359,8 @@ function buildFallbackPlan(objective: string, context?: any) {
   });
 
   return {
-    plan_title: `Kế hoạch AI COO: ${objective.substring(0, 60)}...`,
-    reasoning: 'AI COO bóc tách chỉ thị CEO ➔ Bella EOS Content Worker soạn bài ➔ Bella EOS Creative Worker tạo Banner ➔ Hermes Social Agent tổng hợp đăng bài ➔ Ares Ads chạy QC ➔ Athena Analytics theo dõi KPI.',
+    plan_title: `Kế hoạch AI COO & Marketing Manager: ${objective.substring(0, 60)}...`,
+    reasoning: 'AI Marketing Manager phân tích chiến lược & mục tiêu OKR ➔ Bella EOS Content Worker soạn bài ➔ Bella EOS Creative Worker tạo Banner ➔ Hermes Social Agent xuất bản ➔ Ares Ads chạy QC ➔ Athena Analytics đo lường KPI.',
     tasks
   };
 }
