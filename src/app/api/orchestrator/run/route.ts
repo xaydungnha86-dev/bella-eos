@@ -290,31 +290,36 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
   }
 
   // ── Extra Robust Media/Image Extraction ──
-  // 1. Try common input media key mappings
   let mediaRaw = input.media_from || input.media || input.image_url || input.banner_url || input.media_url || '';
-  
-  // 2. Search all input values for any URL or base64 image
-  if (!mediaRaw && typeof input === 'object') {
+  let extractedUrl = extractUrl(mediaRaw);
+
+  // If the directly mapped value didn't yield a valid URL (e.g. it was an unresolved placeholder string), try searching all input values
+  if (!extractedUrl && typeof input === 'object') {
     for (const val of Object.values(input)) {
-      if (typeof val === 'string' && (val.startsWith('http') || val.startsWith('data:image'))) {
-        mediaRaw = val;
-        break;
+      if (typeof val === 'string') {
+        const url = extractUrl(val);
+        if (url) {
+          extractedUrl = url;
+          break;
+        }
       }
     }
   }
 
-  // 3. Search taskOutputs directly for any output that contains a URL/base64 image
-  if (!mediaRaw && taskOutputs) {
+  // If still no URL, search taskOutputs directly for any output that contains a URL/base64 image
+  if (!extractedUrl && taskOutputs) {
     for (const [taskId, output] of Object.entries(taskOutputs)) {
-      if (output && (output.includes('http') || output.includes('data:image'))) {
-        mediaRaw = extractUrl(output);
-        if (mediaRaw) break;
+      if (output) {
+        const url = extractUrl(output);
+        if (url) {
+          extractedUrl = url;
+          break;
+        }
       }
     }
   }
 
   const defaultBannerUrl = `${getBaseUrl()}/api/ai/banner-image?t=${Date.now()}`;
-  const extractedUrl = extractUrl(mediaRaw);
   const imageUrl = extractedUrl || defaultBannerUrl;
 
   if (!content) {
@@ -626,9 +631,35 @@ function topologicalSort(tasks: any[]): any[] {
 function resolveInputReferences(input: Record<string, any>, taskOutputs: Record<string, string>): Record<string, any> {
   const resolved: Record<string, any> = {};
   for (const [key, val] of Object.entries(input)) {
-    // If value is a task reference like "t1", inject that task's output
-    if (typeof val === 'string' && taskOutputs[val]) {
-      resolved[key] = taskOutputs[val];
+    if (typeof val === 'string') {
+      // 1. Exact match priority
+      if (taskOutputs[val]) {
+        resolved[key] = taskOutputs[val];
+        continue;
+      }
+
+      // 2. Substring or token match (e.g. "Bài viết từ task_id t1" or "t1")
+      const match = val.match(/\b(t\d+)\b/);
+      if (match && taskOutputs[match[1]]) {
+        const taskId = match[1];
+        const outputVal = taskOutputs[taskId];
+        
+        // If the key is specifically meant to fetch the source content or media, replace the whole thing with the raw output
+        const isDataCarrierKey = [
+          'content_from', 'media_from', 'content', 'media', 
+          'image_url', 'banner_url', 'media_url', 'ad_content', 
+          'ad_creative', 'content_reference', 'ad_campaign_reference'
+        ].includes(key.toLowerCase());
+
+        if (isDataCarrierKey) {
+          resolved[key] = outputVal;
+        } else {
+          // Replace only the task ID token in the text
+          resolved[key] = val.replace(match[0], outputVal);
+        }
+      } else {
+        resolved[key] = val;
+      }
     } else {
       resolved[key] = val;
     }
