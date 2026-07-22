@@ -332,17 +332,50 @@ export default function Dashboard() {
     );
   };
 
-  // 2. Ingest document
-  const handleUploadDoc = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFileName.trim()) return;
+  // 2. Ingest document via Drag & Drop or File selector
+  const handleFileChange = async (file: File) => {
+    if (!file) return;
 
-    addLog('INGESTION', `📥 Nhận tệp: "${newFileName}" (${newFileSize}) ➔ Đang chạy OCR...`, 'text-cyan-600 animate-pulse');
-    const result = EnterpriseBrain.Understanding.understandDocument(newFileName, 'Content placeholder');
+    let fileSizeStr = '0 KB';
+    if (file.size > 1024 * 1024) {
+      fileSizeStr = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+    } else {
+      fileSizeStr = `${(file.size / 1024).toFixed(0)} KB`;
+    }
+
+    addLog('INGESTION', `📥 Nhận tệp: "${file.name}" (${fileSizeStr}) ➔ Bắt đầu phân tích cấu trúc...`, 'text-cyan-600 animate-pulse');
+    
+    let fileContent = '';
+    const textTypes = ['text/plain', 'text/markdown', 'application/json', 'text/csv'];
+    const isText = textTypes.includes(file.type) || file.name.endsWith('.txt') || file.name.endsWith('.md') || file.name.endsWith('.json') || file.name.endsWith('.csv');
+    
+    if (isText) {
+      try {
+        fileContent = await file.text();
+      } catch (e) {
+        fileContent = `Tài liệu tự động: ${file.name}`;
+      }
+    } else {
+      // For binary files (PDF/Word), simulate OCR scanning & text extraction
+      await delay(800);
+      addLog('INGESTION', `👁️ Đang chạy trích xuất OCR quét văn bản từ: "${file.name}"...`, 'text-indigo-400 animate-pulse');
+      await delay(700);
+      
+      const lowerName = file.name.toLowerCase();
+      if (lowerName.includes('tuyển') || lowerName.includes('ktv') || lowerName.includes('jd') || lowerName.includes('nhan_su')) {
+        fileContent = 'Quy chuẩn tuyển dụng KTV Spa và JD tuyển dụng nhân viên. Thiết kế: Neo-Brutalist High Contrast.';
+      } else if (lowerName.includes('nội quy') || lowerName.includes('quy chế') || lowerName.includes('phạt') || lowerName.includes('sop') || lowerName.includes('quy_dinh')) {
+        fileContent = 'Quy chế phạt nội bộ và Quy trình SOP vận hành Spa. Thiết kế: Clean Corporate Grid.';
+      } else {
+        fileContent = 'Quy chuẩn nhận diện thương hiệu Bella Spa. Màu sắc: Rose & Gold. Thiết kế: Glassmorphism Fluid. Tông giọng: Professional & Premium.';
+      }
+    }
+
+    const result = EnterpriseBrain.Understanding.understandDocument(file.name, fileContent);
     
     setDocuments(prev => [{
-      name: newFileName,
-      size: newFileSize,
+      name: file.name,
+      size: fileSizeStr,
       status: 'COMPLETED',
       rule: `Quy chuẩn: Tông giọng ${result.dnaTone}. Style UI: ${result.styleClass}.`
     }, ...prev]);
@@ -352,8 +385,14 @@ export default function Dashboard() {
       style: result.styleClass
     });
 
+    CampaignExecutionManager.updateState({
+      dnaState: {
+        tone: result.dnaTone,
+        style: result.styleClass
+      }
+    });
+
     addLog('INGESTION', `✅ Trích xuất tri thức thành công! Cập nhật DNA tone thành: "${result.dnaTone}"`, 'text-emerald-600 font-bold');
-    setNewFileName('');
   };
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -939,27 +978,26 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* UPLOAD FORM */}
+              {/* UPLOAD ZONE */}
               <div className="glass-panel p-3.5 rounded-xl border border-slate-200">
-                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-1.5 mb-3">
                   <UploadCloud className="w-3.5 h-3.5 text-cyan-500" />
-                  <span>Ingest Knowledge Document</span>
+                  <span>Nạp Tri Thức Vào Bộ Nao</span>
                 </h3>
-                <form onSubmit={handleUploadDoc} className="mt-3 space-y-2.5">
+                
+                <label className="border border-dashed border-slate-200 hover:border-cyan-400 bg-slate-50/50 hover:bg-cyan-50/10 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all group relative">
                   <input 
-                    type="text" 
-                    value={newFileName}
-                    onChange={(e) => setNewFileName(e.target.value)}
-                    placeholder="Tên file (vd: Huong_dan_branding.pdf)..."
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-cyan-500 focus:outline-none rounded-lg p-2 text-[10px] text-slate-700"
+                    type="file" 
+                    className="hidden" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileChange(file);
+                    }}
                   />
-                  <button 
-                    type="submit"
-                    className="w-full bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 text-cyan-700 font-semibold text-[10px] py-2 rounded-lg transition active:scale-95 cursor-pointer"
-                  >
-                    Nạp Vào Bộ Não
-                  </button>
-                </form>
+                  <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-cyan-500 group-hover:scale-105 transition-all mb-2" />
+                  <span className="text-[10px] font-semibold text-slate-700 text-center">Kéo & thả file hoặc click để tải lên</span>
+                  <span className="text-[8px] text-slate-400 mt-1">Hỗ trợ PDF, Word, TXT, CSV, MD</span>
+                </label>
               </div>
 
               {/* INGESTED DOCUMENTS */}
