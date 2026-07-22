@@ -123,10 +123,19 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
       })
     });
     const data = await res.json();
+
+    if (data.mode === 'CONFIG_REQUIRED' || data.isExpired) {
+      return {
+        success: true,
+        output: `⚠️ [Hermes Social MCP Server] Facebook Access Token đã hết hạn session. Bài viết & Banner 4K đã chuẩn bị sẵn sàng. Vui lòng vào Cài Đặt Tích Hợp để cập nhật Token mới.`,
+        meta: { status: 'CONFIG_REQUIRED', isExpired: true, error: data.error, mcp: mcpResponse.result }
+      };
+    }
+
     return {
       success: data.success,
       output: data.success
-        ? `✅ [Hermes Social MCP Server] Đã đăng bài viết + Banner hình ảnh hoàn chỉnh lên Fanpage Facebook. Post ID: ${data.postId}`
+        ? `✅ [Hermes Social MCP Server] Đã thực thi đăng bài viết + Banner 4K hoàn chỉnh lên Fanpage Facebook. Post ID: ${data.postId}`
         : `⚠️ [Hermes Social MCP Server] ${data.error || 'Lỗi đăng bài'}`,
       meta: { postId: data.postId, mode: data.mode, error: data.error, mcp: mcpResponse.result }
     };

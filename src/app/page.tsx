@@ -423,9 +423,9 @@ export default function Dashboard() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                         {dynamicTasks.map((t: any, idx: number) => {
-                          const isDone = t.success === true && !t.output?.includes('CONFIG_REQUIRED') && t.meta?.status !== 'PREPARED';
-                          const isConfigReq = t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('Cần cấu hình') || t.meta?.status === 'PREPARED';
-                          const isFailed = t.success === false || t.error;
+                          const isConfigReq = t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('Cần cấu hình') || t.output?.includes('hết hạn') || t.output?.includes('expired') || t.meta?.status === 'PREPARED' || t.meta?.isExpired;
+                          const isDone = t.success === true && !isConfigReq;
+                          const isFailed = (t.success === false || t.error) && !isConfigReq;
 
                           return (
                             <div
@@ -457,7 +457,7 @@ export default function Dashboard() {
                                 )}
                                 {isConfigReq && (
                                   <span className="text-[8px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
-                                    <AlertTriangle className="w-2.5 h-2.5" /> THIẾU TOKEN
+                                    <AlertTriangle className="w-2.5 h-2.5" /> {t.meta?.isExpired || t.output?.includes('hết hạn') ? 'HẾT HẠN TOKEN' : 'THIẾU TOKEN'}
                                   </span>
                                 )}
                                 {isFailed && !isConfigReq && (

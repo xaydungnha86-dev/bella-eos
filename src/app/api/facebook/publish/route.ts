@@ -98,9 +98,17 @@ export async function POST(request: Request) {
 
     if (!fbResponse.ok || fbData.error) {
       console.error('[API /facebook/publish] Facebook error:', fbData.error);
+      const isExpired = fbData.error?.message?.includes('expired') || fbData.error?.code === 190 || fbData.error?.type === 'OAuthException';
       return NextResponse.json(
-        { success: false, mode: 'REAL_API', error: fbData.error?.message || 'Facebook API error' },
-        { status: 502 }
+        {
+          success: false,
+          mode: isExpired ? 'CONFIG_REQUIRED' : 'REAL_API',
+          isExpired,
+          error: isExpired
+            ? 'Facebook Page Access Token đã hết hạn session. Vui lòng vào Cài đặt Tích hợp → Facebook Fanpage để cập nhật Token mới.'
+            : (fbData.error?.message || 'Facebook API error')
+        },
+        { status: isExpired ? 503 : 502 }
       );
     }
 
