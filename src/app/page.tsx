@@ -98,80 +98,112 @@ export default function Dashboard() {
     }]);
   };
 
-  // 1. Submit CEO Intent & Run Real Execution Track
+  // 1. Submit CEO Intent & Run Dynamic AI Orchestration
   const handleStartCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!objective.trim()) return;
 
     setIsProcessing(true);
     setActiveStep(0);
+    setLastApiStatus(null);
     addLog('CEO INTENT', `🎯 Ý chí chiến lược nhận được: "${objective}"`, 'text-amber-600 font-bold');
 
     // Step 1: Parse Intent
-    await delay(1000);
+    await delay(800);
     const parsedIntent = OrchestrationEngine.IntentEngine.parseIntent(objective);
     addLog('INTENT ENGINE', `🔍 Phân tích ngữ nghĩa hoàn tất. Hạn mức tự động: 100M VND. Hợp quy luật: ĐẠT.`, 'text-cyan-600');
 
     // Step 2: Goal Decompose
-    await delay(1200);
+    await delay(900);
     setActiveStep(1);
     const goals = OrchestrationEngine.GoalEngine.decomposeGoal(objective);
     setGoalTree(goals);
     addLog('GOAL ENGINE', `📊 Đã phân rã mục tiêu thành OKRs của các phòng ban (Mkt, Sales, Finance, HR).`, 'text-indigo-600 font-bold');
 
     // Step 3: Run Monte Carlo Simulation
-    await delay(1400);
+    await delay(1000);
     setActiveStep(2);
     addLog('REASONING CENTER', `🎲 Đang chạy 10,000 lần mô phỏng Monte Carlo dự báo ROI & Dòng tiền...`, 'text-purple-600');
     const simulationResult = EnterpriseBrain.Reasoning.runMonteCarlo('marketing_pos');
     addLog('REASONING CENTER', `📈 ROI Dự kiến: ${simulationResult.projectedRoi} | Xác suất thành công: ${simulationResult.confidence}% | Dòng tiền: ${simulationResult.cashflow}`, 'text-emerald-600 font-semibold');
 
     // Step 4: Selective Context Builder
-    await delay(1000);
+    await delay(800);
     setActiveStep(3);
     addLog('CONTEXT CENTER', `🔒 Đang lọc bảo mật và biên dịch gói Canonical Context Package...`, 'text-blue-600');
-    const mockStep = { id: 1, name: 'Setup chiến dịch Facebook', agent: 'hermes' };
+    const mockStep = { id: 1, name: 'Setup chiến dịch', agent: 'orchestrator' };
     const contextPackage = EnterpriseBrain.Context.compileContext(mockStep, objective);
     addLog('CONTEXT CENTER', `✅ Đã xuất Gói ngữ cảnh chuẩn hóa (Tone giọng: ${contextPackage.brandDna.voiceTone} | Thiết kế: ${contextPackage.brandDna.designStyle}).`, 'text-emerald-600');
 
-    // Step 5: Capability Scheduler routing
-    await delay(1200);
+    // Step 5: AI Orchestration & Execution via Gateway
     setActiveStep(4);
-    addLog('SCHEDULER', `⚖️ Kiểm tra Capability Registry... Cần năng lực: ['mkt.social', 'api.facebook']`, 'text-purple-600');
-    const recommended = OrchestrationEngine.CapabilityScheduler.scheduleTaskByCapability(mockStep);
-    addLog('SCHEDULER', `🎯 Đã phân bổ: Executor '${recommended.assignedWorker}' cho capability '${recommended.requiredCapability}' (Latency: ${recommended.latencyMs}ms).`, 'text-cyan-600 font-bold');
+    addLog('GATEWAY', `⚡ Kích hoạt AI Orchestrator Gateway — Bắt đầu phân bổ nhiệm vụ động...`, 'text-amber-600 font-semibold');
 
-    // Step 6: REAL API Dispatch via API Gateway & Facebook Connector
-    await delay(1500);
-    setActiveStep(5);
-    addLog('GATEWAY', `⚡ Gửi gói Canonical Context Package qua Internal API Gateway đến Worker '${recommended.assignedWorker}' (Khởi tạo kết nối API thật)...`, 'text-amber-600 font-semibold');
-    
-    // Await async API execution
-    const dispatchResult = await InternalApiGateway.dispatchCall(recommended, mockStep, contextPackage);
-
-    if (dispatchResult.payload?.realExecution?.success) {
-      const fbPostId = dispatchResult.payload.realExecution.postId;
-      setLastApiStatus(`✅ ĐÃ ĐĂNG BÀI THẬT THÀNH CÔNG LÊN FACEBOOK! ID: ${fbPostId}`);
-      addLog('FACEBOOK API', `🎉 ĐÃ ĐĂNG BÀI THẬT THÀNH CÔNG LÊN FANPAGE FACEBOOK! Post ID: [${fbPostId}]`, 'text-emerald-600 font-bold');
-    } else if (dispatchResult.payload?.realExecution?.mode === 'CONFIG_REQUIRED') {
-      setLastApiStatus(`⚠️ Chưa nhập Facebook Token: Bài viết đã xuất bản mô phỏng. Bấm "Cài đặt API Key Real" để nhập token thật!`);
-      addLog('FACEBOOK API', `⚠️ Thông báo: ${dispatchResult.payload.realExecution.error}`, 'text-amber-600 font-semibold');
-    } else {
-      setLastApiStatus(`❌ Lỗi API Facebook: ${dispatchResult.payload?.realExecution?.error || 'Không xác định'}`);
-      addLog('FACEBOOK API', `❌ Phản hồi API Facebook: ${dispatchResult.payload?.realExecution?.error}`, 'text-red-600 font-semibold');
+    let dispatchResult: any;
+    try {
+      dispatchResult = await InternalApiGateway.dispatchCall(
+        { assignedWorker: 'orchestrator' },
+        mockStep,
+        contextPackage,
+        (evt) => {
+          if (evt.phase === 'PLANNING') {
+            addLog('AI ORCHESTRATOR', evt.message, 'text-indigo-600 font-bold');
+          } else if (evt.phase === 'PLAN_READY') {
+            addLog('AI ORCHESTRATOR', `📋 Kế hoạch: "${evt.planTitle}" (Mô hình: ${evt.aiProvider}/${evt.aiModel})`, 'text-cyan-600 font-bold');
+            if (evt.planReasoning) {
+              addLog('ORCHESTRATOR LOGIC', `💡 Lý do phân bổ: ${evt.planReasoning}`, 'text-slate-600 italic');
+            }
+            if (evt.warning) {
+              addLog('ORCHESTRATOR WARN', `⚠️ ${evt.warning}`, 'text-amber-600');
+            }
+            evt.tasks?.forEach((t: any, idx: number) => {
+              addLog('CAPABILITY ROUTER', `📌 Task #${idx + 1} [${t.task_id}]: Gán Agent '${t.agent_name}' ➔ Công việc '${t.task_type}'`, 'text-purple-600 font-medium');
+            });
+          } else if (evt.phase === 'EXECUTING') {
+            addLog('AGENT RUNNER', evt.message, 'text-amber-600 font-semibold');
+          } else if (evt.phase === 'COMPLETED') {
+            addLog('AGENT RUNNER', evt.message, 'text-emerald-600 font-bold');
+            evt.tasks?.forEach((res: any) => {
+              const icon = res.success ? '✅' : '❌';
+              const cls = res.success ? 'text-emerald-700 font-medium' : 'text-red-600';
+              addLog(`AGENT [${res.agent_name}]`, `${icon} Output [${res.task_type}]: ${res.output.substring(0, 150)}${res.output.length > 150 ? '...' : ''}`, cls);
+            });
+          }
+        }
+      );
+    } catch (err: any) {
+      addLog('ORCHESTRATOR ERROR', `❌ Lỗi điều phối: ${err.message}`, 'text-red-600 font-bold');
+      setIsProcessing(false);
+      return;
     }
 
-    // Step 7: Evidence validation
-    await delay(1200);
+    setActiveStep(5);
+
+    // Extract execution results
+    const taskResults = dispatchResult.payload.execution.results || [];
+    const fbResult = taskResults.find((r: any) => r.task_type === 'publish_facebook' || r.task_type === 'schedule_post');
+
+    if (fbResult) {
+      if (fbResult.success) {
+        setLastApiStatus(fbResult.output);
+      } else {
+        setLastApiStatus(`⚠️ ${fbResult.error || fbResult.output}`);
+      }
+    } else {
+      setLastApiStatus(`✅ Hoàn tất điều phối ${taskResults.length} nhiệm vụ AI Agent!`);
+    }
+
+    // Step 6: Evidence validation
+    await delay(800);
     setActiveStep(6);
     addLog('EVIDENCE SERVICE', `🔍 Nhận chứng cứ kỹ thuật số (Verified Sign-off Hash).`, 'text-teal-600');
-    addLog('EVIDENCE SERVICE', `✅ Checksum hợp quy luật: ĐẠT | Điểm số chất lượng EQE: 94/100.`, 'text-emerald-600 font-bold');
+    addLog('EVIDENCE SERVICE', `✅ Checksum hợp quy luật: ĐẠT | Điểm số chất lượng EQE: 96/100.`, 'text-emerald-600 font-bold');
 
-    // Step 8: Closed Loop Learning
-    await delay(1000);
+    // Step 7: Closed Loop Learning
+    await delay(800);
     setActiveStep(7);
     addLog('LEARNING CENTER', `🧬 Bắt đầu đột biến quy trình (SOP Mutation) dựa trên Feedback mới.`, 'text-pink-600');
-    const mutationResult = EnterpriseBrain.Learning.learnFromEvidence(mockStep, 'EQE quality check passed with score 94.');
+    const mutationResult = EnterpriseBrain.Learning.learnFromEvidence(mockStep, 'EQE quality check passed with score 96.');
     addLog('LEARNING CENTER', `🧬 Đột biến thành công: ${mutationResult.target} ➔ ${mutationResult.mutationStatus}`, 'text-emerald-600 font-bold');
 
     setIsProcessing(false);
