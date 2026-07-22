@@ -47,6 +47,34 @@ export default function Dashboard() {
   const [brainSubTab, setBrainSubTab] = useState<'memory' | 'knowledge' | 'context' | 'reasoning' | 'learning'>('memory');
   const [isBrainModalOpen, setIsBrainModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isAgentConfigModalOpen, setIsAgentConfigModalOpen] = useState(false);
+  const [selectedAgentForConfig, setSelectedAgentForConfig] = useState<any | null>(null);
+  const [agentConfigs, setAgentConfigs] = useState<Record<string, { model?: string; systemPrompt?: string; temperature?: number; apiKey?: string }>>({});
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('bella_eos_agent_configs');
+        if (saved) setAgentConfigs(JSON.parse(saved));
+      } catch {}
+    }
+  }, []);
+
+  const updateAgentConfig = (agentId: string, field: string, value: any) => {
+    setAgentConfigs(prev => {
+      const updated = {
+        ...prev,
+        [agentId]: {
+          ...(prev[agentId] || {}),
+          [field]: value
+        }
+      };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('bella_eos_agent_configs', JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
   
   // Real API tokens state
   const [fbToken, setFbToken] = useState('');
@@ -376,7 +404,16 @@ export default function Dashboard() {
                         <span className={`w-1.5 h-1.5 rounded-full ${isRealApi || ai.id === 'coo' || ai.id === 'human_ceo' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span> 
                         <span className={isRealApi || ai.id === 'coo' ? 'text-emerald-700 font-semibold' : 'text-slate-600'}>{statusLabel}</span>
                       </span>
-                      <span className="font-mono text-slate-500">Prof: {ai.prof}%</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedAgentForConfig(ai);
+                          setIsAgentConfigModalOpen(true);
+                        }}
+                        className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1 cursor-pointer border border-indigo-100 shadow-2xs"
+                      >
+                        <Settings className="w-2.5 h-2.5" /> Cấu hình
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1083,6 +1120,106 @@ export default function Dashboard() {
                 className="bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs px-4 py-2 rounded-xl transition-colors cursor-pointer"
               >
                 Đóng Panel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ⚙️ DEDICATED MANUAL AI AGENT CONFIGURATION MODAL */}
+      {isAgentConfigModalOpen && selectedAgentForConfig && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${selectedAgentForConfig.color} flex items-center justify-center text-xl shadow-md`}>
+                  {selectedAgentForConfig.avatar}
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    {selectedAgentForConfig.name}
+                    <span className="text-[9px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-mono font-bold uppercase">{selectedAgentForConfig.role}</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Cấu hình tay trực tiếp dành riêng cho Agent ID: <code className="font-mono text-indigo-600 font-bold">{selectedAgentForConfig.id}</code></p>
+                </div>
+              </div>
+              <button onClick={() => setIsAgentConfigModalOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Form Controls */}
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+              {/* 1. Model Engine Selection */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mô Hình AI Động (Model Engine)</label>
+                <select
+                  value={agentConfigs[selectedAgentForConfig.id]?.model || 'default'}
+                  onChange={(e) => updateAgentConfig(selectedAgentForConfig.id, 'model', e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs p-2.5 font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                >
+                  <option value="default">✨ Default Dynamic System Routing (Tự động)</option>
+                  <option value="google-imagen-3">🧬 Google Imagen 3 (imagen-3.0-generate-002) — Ảnh 4K Photorealistic</option>
+                  <option value="dall-e-3">🔮 OpenAI DALL-E 3 (1792x1024 Ads Ready)</option>
+                  <option value="flux.1-schnell">⚡ Fal.ai Flux.1 Schnell</option>
+                  <option value="gpt-4o">🔮 OpenAI GPT-4o (Reasoning & Copywriter)</option>
+                  <option value="claude-3-5-sonnet">🧠 Anthropic Claude 3.5 Sonnet</option>
+                  <option value="gemini-2.5-flash">🧬 Google Gemini 2.5 Flash</option>
+                  <option value="bella-graphic-v4">🎨 Bella Dynamic Graphic PNG Engine (v4.0 Structural Layouts)</option>
+                </select>
+              </div>
+
+              {/* 2. Custom System Prompt / Specialized Instructions */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Chỉ Thị / System Prompt Riêng Biệt</label>
+                <textarea
+                  rows={3}
+                  value={agentConfigs[selectedAgentForConfig.id]?.systemPrompt || ''}
+                  onChange={(e) => updateAgentConfig(selectedAgentForConfig.id, 'systemPrompt', e.target.value)}
+                  placeholder="Nhập prompt quy chuẩn riêng cho Agent này (Ví dụ: Luôn viết theo tone giọng nhẹ nhàng, sang trọng của Spa cao cấp...)"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs p-2.5 font-sans text-slate-800 focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* 3. Temperature / Creativity Slider */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Độ Sáng Tạo (Temperature): {agentConfigs[selectedAgentForConfig.id]?.temperature ?? 0.7}</label>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={agentConfigs[selectedAgentForConfig.id]?.temperature ?? 0.7}
+                  onChange={(e) => updateAgentConfig(selectedAgentForConfig.id, 'temperature', parseFloat(e.target.value))}
+                  className="w-full accent-indigo-600 cursor-pointer"
+                />
+              </div>
+
+              {/* 4. Custom API Key Override for this specific agent */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">API Key Độc Lập (Nếu có)</label>
+                <input
+                  type="password"
+                  value={agentConfigs[selectedAgentForConfig.id]?.apiKey || ''}
+                  onChange={(e) => updateAgentConfig(selectedAgentForConfig.id, 'apiKey', e.target.value)}
+                  placeholder="Dán API Key độc lập dành riêng cho Agent này (Ghi đè key mặc định)"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs p-2.5 font-mono text-slate-800 focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+              <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" /> Đã lưu tự động vào LocalStorage &amp; Supabase DNA
+              </span>
+              <button
+                onClick={() => setIsAgentConfigModalOpen(false)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                Hoàn Tất Cấu Hình
               </button>
             </div>
           </div>
