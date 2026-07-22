@@ -122,7 +122,13 @@ export class PosterDesignSkill {
    * Generates a Master AI Design Prompt Specification dynamically
    * — truly mutates every run based on objective + copywriter content
    */
-  public static buildFullDesignSpecPrompt(objective: string, copywriterSnippet?: string, brandDna?: BrandDnaContext): string {
+  public static buildFullDesignSpecPrompt(
+    objective: string,
+    copywriterSnippet?: string,
+    brandDna?: BrandDnaContext,
+    actualModel?: string,
+    actualPrompt?: string
+  ): string {
     const brandName = brandDna?.brandName || 'BELLA EOS';
     const primaryColor = brandDna?.brandColors?.primary || '#061E17';
     const accentColor = brandDna?.brandColors?.accent || '#D4AF37';
@@ -135,6 +141,9 @@ export class PosterDesignSkill {
     // Timestamp to prove dynamic generation
     const now = new Date();
     const runStamp = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+    const modelDisplay = actualModel || 'Bella Dynamic PNG Graphic Engine (Local Fallback)';
+    const promptDisplay = actualPrompt || this.buildSalesPosterPrompt(objective, headlineText, brandDna);
 
     return `🎨 MASTER AI DESIGN PROMPT SPECIFICATION (${brandName.toUpperCase()} CREATIVE WORKER)
 ===================================================================
@@ -164,7 +173,8 @@ export class PosterDesignSkill {
    - Background Perspective: ${dyn.bgPerspective}
 
 5. AI EXECUTION MODEL:
-   - Selected Engine: DALL-E 3 / Flux.1 Dev / Bella Dynamic PNG Graphic Engine
+   - Selected Engine: ${modelDisplay}
+   - Exact API Prompt Sent: "${promptDisplay}"
 ===================================================================`;
   }
 

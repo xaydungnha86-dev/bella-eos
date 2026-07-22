@@ -107,7 +107,7 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
 }
 
 async function tool_generate_media_creative(input: any, clientKeys?: any, taskOutputs?: Record<string, string>, context?: any): Promise<ToolResult> {
-  const objective = input.objective || input.format || 'Spa Management System Banner';
+  const objective = input.objective || context?.objective || input.format || 'Spa Management System Banner';
   
   // Extract previous Copywriter Worker Output dynamically from Task Graph Execution
   let copywriterContent = '';
@@ -159,6 +159,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   let imageUrl = 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=1200&auto=format&fit=crop';
   let provider = 'enterprise-graphic-engine';
   let model = 'poster-design-skill-v2';
+  let actualPrompt = '';
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/ai/generate-image`, {
@@ -179,6 +180,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       imageUrl = data.imageUrl;
       provider = data.provider;
       model = data.model;
+      actualPrompt = data.prompt || '';
     } else {
       const ts = Date.now();
       imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
@@ -191,7 +193,15 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
 
   // Generate detailed prompt to show to the user
   const { PosterDesignSkill } = await import('@/core/skills/poster-design-skill');
-  const detailedPrompt = PosterDesignSkill.buildFullDesignSpecPrompt(objective, copywriterContent, brandDna);
+  
+  if (!actualPrompt) {
+    const lines = copywriterContent.split('\n').map(l => l.trim()).filter(Boolean);
+    const headlineText = lines.length > 0 ? lines[0].replace(/^[#*🎯⚡👉🔥\s]+/, '').substring(0, 48) : `GIẢI PHÁP TỐI ƯU CÙNG ${brandName}`;
+    actualPrompt = PosterDesignSkill.buildSalesPosterPrompt(objective, headlineText, brandDna);
+  }
+
+  const actualModelName = `${provider}/${model}`;
+  const detailedPrompt = PosterDesignSkill.buildFullDesignSpecPrompt(objective, copywriterContent, brandDna, actualModelName, actualPrompt);
 
   const designPlan = {
     businessContext: `Chiến dịch cho thương hiệu ${brandName} — ${voiceTone}`,
@@ -204,7 +214,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       '📊 Product Mockup: Khung 3D hiển thị Giao diện live khớp với chủ đề chiến dịch',
       '👉 Call-To-Action Button: Đăng ký trải nghiệm / Nhận ưu đãi'
     ],
-    selectedModel: `${provider}/${model}`
+    selectedModel: actualModelName
   };
 
   return {
@@ -405,15 +415,16 @@ async function tool_create_facebook_ad(input: any, clientKeys: any, taskOutputs:
   };
 }
 
-async function tool_analyze_campaign_data(input: any): Promise<ToolResult> {
+async function tool_analyze_campaign_data(input: any, clientKeys: any, taskOutputs: Record<string, string>, context?: any): Promise<ToolResult> {
+  const objective = input.objective || context?.objective || 'Chiến dịch tiếp thị';
   return {
     success: true,
-    output: `📊 [Athena Analytics] Phân tích chiến dịch "${input.objective?.substring(0, 50)}":\n• Projected Reach: 15,000–25,000 tài khoản\n• Est. Engagement Rate: 4–6%\n• ROI Forecast: 180–220%\n• Khuyến nghị: Tập trung vào nội dung video ngắn + Story`,
+    output: `📊 [Athena Analytics] Phân tích chiến dịch "${objective.substring(0, 50)}":\n• Projected Reach: 15,000–25,000 tài khoản\n• Est. Engagement Rate: 4–6%\n• ROI Forecast: 180–220%\n• Khuyến nghị: Tập trung vào nội dung video ngắn + Story`,
     meta: { type: 'projection', confidence: 0.78 }
   };
 }
 
-async function tool_generate_report(input: any): Promise<ToolResult> {
+async function tool_generate_report(input: any, clientKeys: any, taskOutputs: Record<string, string>, context?: any): Promise<ToolResult> {
   const metrics = (input.metrics || ['reach', 'engagement']).join(', ');
   return {
     success: true,
@@ -422,10 +433,11 @@ async function tool_generate_report(input: any): Promise<ToolResult> {
   };
 }
 
-async function tool_segment_audience(input: any): Promise<ToolResult> {
+async function tool_segment_audience(input: any, clientKeys: any, taskOutputs: Record<string, string>, context?: any): Promise<ToolResult> {
+  const target = input.target_audience || context?.brandDna?.targetSegment || 'Khách hàng tiềm năng';
   return {
     success: true,
-    output: `🎯 [Demeter CRM] Phân khúc khách hàng cho "${input.target_audience || 'General'}":\n• Segment A: Khách hàng VIP (đã mua >3 lần)\n• Segment B: Khách hàng tiềm năng (đã xem nhưng chưa mua)\n• Segment C: Khách hàng mới (chưa tương tác)\n• Đề xuất: Ưu tiên Segment A với offer độc quyền.`,
+    output: `🎯 [Demeter CRM] Phân khúc khách hàng cho "${target}":\n• Segment A: Khách hàng VIP (đã mua >3 lần)\n• Segment B: Khách hàng tiềm năng (đã xem nhưng chưa mua)\n• Segment C: Khách hàng mới (chưa tương tác)\n• Đề xuất: Ưu tiên Segment A với offer độc quyền.`,
     meta: { segments: 3 }
   };
 }
@@ -457,13 +469,13 @@ const TOOL_REGISTRY: Record<string, ToolFn> = {
   create_facebook_ad:   (i, k, to) => tool_create_facebook_ad(i, k, to),
   setup_google_campaign:(i, k, _)  => tool_default({ agent_name: 'Ares Ads', task_type: 'setup_google_campaign', task_description: `Setup Google Campaign: ${i.objective}` }),
   optimize_ad_budget:   (i, k, _)  => tool_default({ agent_name: 'Ares Ads', task_type: 'optimize_ad_budget', task_description: i.objective }),
-  create_audience:      (i, _, __)  => tool_segment_audience(i),
-  analyze_campaign_data:(i, _, __) => tool_analyze_campaign_data(i),
-  generate_report:      (i, _, __) => tool_generate_report(i),
-  forecast_roi:         (i, _, __) => tool_analyze_campaign_data(i),
-  segment_audience:     (i, _, __) => tool_segment_audience(i),
+  create_audience:      (i, k, to, c) => tool_segment_audience(i, k, to, c),
+  analyze_campaign_data:(i, k, to, c) => tool_analyze_campaign_data(i, k, to, c),
+  generate_report:      (i, k, to, c) => tool_generate_report(i, k, to, c),
+  forecast_roi:         (i, k, to, c) => tool_analyze_campaign_data(i, k, to, c),
+  segment_audience:     (i, k, to, c) => tool_segment_audience(i, k, to, c),
   update_crm:           (i, _, __) => tool_default({ agent_name: 'Demeter CRM', task_type: 'update_crm', task_description: i.objective }),
-  segment_customers:    (i, _, __) => tool_segment_audience(i),
+  segment_customers:    (i, k, to, c) => tool_segment_audience(i, k, to, c),
   send_personalized_message: (i, k, to) => tool_publish_zalo(i, k, to),
   create_loyalty_offer: (i, _, __) => tool_default({ agent_name: 'Demeter CRM', task_type: 'create_loyalty_offer', task_description: i.objective }),
 };
