@@ -64,6 +64,11 @@ export default function Dashboard() {
   const [newFileName, setNewFileName] = useState('');
   const [newFileSize, setNewFileSize] = useState('1.5 MB');
 
+  // Dynamic Orchestrator & Audit Verification States
+  const [orchestratorPlan, setOrchestratorPlan] = useState<{ title: string; reasoning: string; provider: string; model: string } | null>(null);
+  const [dynamicTasks, setDynamicTasks] = useState<any[]>([]);
+  const [verificationReport, setVerificationReport] = useState<import('../core/orchestration/orchestration').VerificationReport | null>(null);
+
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // Sync token to window for real connector access
@@ -106,6 +111,9 @@ export default function Dashboard() {
     setIsProcessing(true);
     setActiveStep(0);
     setLastApiStatus(null);
+    setVerificationReport(null);
+    setDynamicTasks([]);
+    setOrchestratorPlan(null);
     addLog('CEO INTENT', `🎯 Ý chí chiến lược nhận được: "${objective}"`, 'text-amber-600 font-bold');
 
     // Step 1: Parse Intent
@@ -149,6 +157,13 @@ export default function Dashboard() {
           if (evt.phase === 'PLANNING') {
             addLog('AI ORCHESTRATOR', evt.message, 'text-indigo-600 font-bold');
           } else if (evt.phase === 'PLAN_READY') {
+            setOrchestratorPlan({
+              title: evt.planTitle || '',
+              reasoning: evt.planReasoning || '',
+              provider: evt.aiProvider || '',
+              model: evt.aiModel || ''
+            });
+            setDynamicTasks(evt.tasks || []);
             addLog('AI ORCHESTRATOR', `📋 Kế hoạch: "${evt.planTitle}" (Mô hình: ${evt.aiProvider}/${evt.aiModel})`, 'text-cyan-600 font-bold');
             if (evt.planReasoning) {
               addLog('ORCHESTRATOR LOGIC', `💡 Lý do phân bổ: ${evt.planReasoning}`, 'text-slate-600 italic');
@@ -161,13 +176,22 @@ export default function Dashboard() {
             });
           } else if (evt.phase === 'EXECUTING') {
             addLog('AGENT RUNNER', evt.message, 'text-amber-600 font-semibold');
-          } else if (evt.phase === 'COMPLETED') {
-            addLog('AGENT RUNNER', evt.message, 'text-emerald-600 font-bold');
-            evt.tasks?.forEach((res: any) => {
-              const icon = res.success ? '✅' : '❌';
-              const cls = res.success ? 'text-emerald-700 font-medium' : 'text-red-600';
-              addLog(`AGENT [${res.agent_name}]`, `${icon} Output [${res.task_type}]: ${res.output.substring(0, 150)}${res.output.length > 150 ? '...' : ''}`, cls);
-            });
+          } else if (evt.phase === 'COMPLETED' || evt.phase === 'VERIFIED') {
+            if (evt.tasks) setDynamicTasks(evt.tasks);
+            if (evt.verificationReport) setVerificationReport(evt.verificationReport);
+
+            if (evt.phase === 'VERIFIED') {
+              const icon = evt.verificationReport?.isCompleted ? '🎉' : '⚠️';
+              const colorCls = evt.verificationReport?.isCompleted ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold';
+              addLog('GOAL AUDIT SERVICE', `${icon} ${evt.verificationReport?.verificationSummary}`, colorCls);
+            } else {
+              addLog('AGENT RUNNER', evt.message, 'text-emerald-600 font-bold');
+              evt.tasks?.forEach((res: any) => {
+                const icon = res.success ? '✅' : '❌';
+                const cls = res.success ? 'text-emerald-700 font-medium' : 'text-red-600';
+                addLog(`AGENT [${res.agent_name}]`, `${icon} Output [${res.task_type}]: ${res.output.substring(0, 150)}${res.output.length > 150 ? '...' : ''}`, cls);
+              });
+            }
           }
         }
       );
@@ -347,52 +371,186 @@ export default function Dashboard() {
               
               {/* Dynamic node link tree display */}
               {isProcessing || activeStep >= 0 ? (
-                <div className="flex flex-col items-center justify-center gap-8 w-full max-w-xl z-10 transition-all duration-500">
+                <div className="flex flex-col items-center justify-center gap-6 w-full max-w-2xl z-10 transition-all duration-500 overflow-y-auto max-h-[520px] pr-1">
                   {/* Root Objective Node */}
-                  <div className="flex flex-col items-center">
-                    <div className="glass-panel-glow px-4 py-2 rounded-xl text-center border-indigo-400 text-xs font-semibold max-w-sm">
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="glass-panel-glow px-4 py-2.5 rounded-xl text-center border-indigo-400 text-xs font-semibold max-w-md shadow-sm">
                       <p className="text-[9px] text-indigo-600 uppercase tracking-widest font-bold">Root Intent (CEO)</p>
                       <p className="text-slate-800 mt-1">{objective}</p>
                     </div>
                   </div>
 
-                  {/* Flow links */}
-                  <div className="w-0.5 h-6 bg-gradient-to-b from-indigo-400 to-cyan-400"></div>
-
-                  {/* Department OKRs level */}
-                  <div className="grid grid-cols-4 gap-4 w-full">
-                    {[
-                      { dept: 'Marketing', okr: 'Tăng 20% Spa Demo', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-cyan-400 text-cyan-600' },
-                      { dept: 'Sales', okr: 'Tối ưu 42 Lượt Bookings', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-blue-400 text-blue-600' },
-                      { dept: 'HR & Operations', okr: 'Ràng buộc SOP & Staffing', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-teal-400 text-teal-600' },
-                      { dept: 'Finance', okr: 'Budget limit: 50M VND', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-purple-400 text-purple-600' }
-                    ].map((okrNode, i) => (
-                      <div 
-                        key={i} 
-                        className={`glass-panel p-2.5 rounded-xl border text-center transition-all ${okrNode.status === 'COMPLETED' ? okrNode.color : 'border-slate-200 text-slate-400'}`}
-                      >
-                        <p className="text-[8px] uppercase tracking-wider font-bold opacity-80">{okrNode.dept}</p>
-                        <p className="text-[10px] font-semibold mt-1 truncate">{okrNode.okr}</p>
-                        <span className="text-[7px] block mt-1.5 font-bold">{okrNode.status}</span>
+                  {/* Goal Completion Audit Bar (when available) */}
+                  {verificationReport && (
+                    <div className="w-full max-w-lg bg-white border border-slate-200 rounded-xl p-3 shadow-sm">
+                      <div className="flex items-center justify-between text-[11px] font-bold mb-1.5">
+                        <span className="flex items-center gap-1.5 text-slate-700">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          Tiến Độ Mục Tiêu
+                        </span>
+                        <span className={`font-mono ${verificationReport.isCompleted ? 'text-emerald-600' : 'text-amber-600'}`}>
+                          {verificationReport.completionPercentage}% HOÀN THÀNH ({verificationReport.completedTasks}/{verificationReport.totalTasks} Tasks)
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-700 ${verificationReport.isCompleted ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                          style={{ width: `${verificationReport.completionPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Flow links */}
+                  <div className="w-0.5 h-5 bg-gradient-to-b from-indigo-400 to-cyan-400 shrink-0"></div>
+
+                  {/* DYNAMIC AI AGENT TASK NODES (Real-time Orchestrated Tasks) */}
+                  {dynamicTasks.length > 0 ? (
+                    <div className="w-full space-y-3">
+                      <div className="flex items-center justify-between px-1">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                          Nhiệm Vụ Được Phân Bổ Tự Động ({dynamicTasks.length} Tasks)
+                        </p>
+                        {orchestratorPlan && (
+                          <span className="text-[9px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                            Model: {orchestratorPlan.provider}/{orchestratorPlan.model}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                        {dynamicTasks.map((t: any, idx: number) => {
+                          const isDone = t.success === true && !t.output?.includes('CONFIG_REQUIRED') && t.meta?.status !== 'PREPARED';
+                          const isConfigReq = t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('Cần cấu hình') || t.meta?.status === 'PREPARED';
+                          const isFailed = t.success === false || t.error;
+
+                          return (
+                            <div
+                              key={t.task_id || idx}
+                              className={`glass-panel p-3 rounded-xl border text-left transition-all relative overflow-hidden shadow-sm ${
+                                isDone
+                                  ? 'border-emerald-200 bg-emerald-50/40'
+                                  : isConfigReq
+                                  ? 'border-amber-200 bg-amber-50/40'
+                                  : isFailed
+                                  ? 'border-red-200 bg-red-50/40'
+                                  : 'border-slate-200 bg-white'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center shrink-0">
+                                    #{idx + 1}
+                                  </span>
+                                  <h4 className="font-semibold text-xs text-slate-800 truncate">{t.agent_name || t.agent_id}</h4>
+                                </div>
+
+                                {/* Status Badge */}
+                                {isDone && (
+                                  <span className="text-[8px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                    <CheckCircle2 className="w-2.5 h-2.5" /> HOÀN THÀNH
+                                  </span>
+                                )}
+                                {isConfigReq && (
+                                  <span className="text-[8px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                    <AlertTriangle className="w-2.5 h-2.5" /> THIẾU TOKEN
+                                  </span>
+                                )}
+                                {isFailed && !isConfigReq && (
+                                  <span className="text-[8px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                                    <AlertTriangle className="w-2.5 h-2.5" /> MẤT KẾT NỐI
+                                  </span>
+                                )}
+                                {!isDone && !isConfigReq && !isFailed && (
+                                  <span className="text-[8px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                                    ⏳ ĐANG CHẠY
+                                  </span>
+                                )}
+                              </div>
+
+                              <p className="text-[10px] text-slate-600 font-medium mt-1.5 line-clamp-2">
+                                {t.task_description}
+                              </p>
+
+                              {/* Output snippet */}
+                              {t.output && (
+                                <p className="text-[9px] text-slate-500 mt-2 font-mono bg-white/80 p-1.5 rounded border border-slate-100 line-clamp-2">
+                                  {t.output}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Fallback department OKR nodes if tasks haven't loaded yet */
+                    <div className="grid grid-cols-4 gap-4 w-full">
+                      {[
+                        { dept: 'Marketing', okr: 'Tăng 20% Spa Demo', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-cyan-400 text-cyan-600' },
+                        { dept: 'Sales', okr: 'Tối ưu 42 Lượt Bookings', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-blue-400 text-blue-600' },
+                        { dept: 'HR & Operations', okr: 'Ràng buộc SOP & Staffing', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-teal-400 text-teal-600' },
+                        { dept: 'Finance', okr: 'Budget limit: 50M VND', status: activeStep >= 1 ? 'COMPLETED' : 'PENDING', color: 'border-purple-400 text-purple-600' }
+                      ].map((okrNode, i) => (
+                        <div 
+                          key={i} 
+                          className={`glass-panel p-2.5 rounded-xl border text-center transition-all ${okrNode.status === 'COMPLETED' ? okrNode.color : 'border-slate-200 text-slate-400'}`}
+                        >
+                          <p className="text-[8px] uppercase tracking-wider font-bold opacity-80">{okrNode.dept}</p>
+                          <p className="text-[10px] font-semibold mt-1 truncate">{okrNode.okr}</p>
+                          <span className="text-[7px] block mt-1.5 font-bold">{okrNode.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* WARNING / DISCONNECTION ALERT CARD */}
+                  {verificationReport && verificationReport.failedSteps.length > 0 && (
+                    <div className="w-full bg-amber-50/90 border border-amber-200 rounded-2xl p-4 text-left shadow-sm space-y-2.5 shrink-0">
+                      <div className="flex items-center gap-2 text-amber-800 font-bold text-xs">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>CẢNH BÁO: PHÁT HIỆN BƯỚC CHƯA HOÀN THÀNH HOẶC MẤT KẾT NỐI ({verificationReport.failedSteps.length} Nhiệm vụ)</span>
+                      </div>
+
+                      <div className="space-y-2">
+                        {verificationReport.failedSteps.map((fs, idx) => (
+                          <div key={idx} className="bg-white border border-amber-200/80 rounded-xl p-3 text-xs space-y-1">
+                            <div className="flex items-center justify-between font-semibold text-slate-800">
+                              <span className="text-amber-700">📌 [{fs.agentName}] — {fs.description}</span>
+                              <span className="text-[9px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full uppercase">
+                                {fs.issueType}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-600"><strong className="text-slate-700">Nguyên nhân:</strong> {fs.error}</p>
+                            <p className="text-[11px] text-indigo-700 font-medium"><strong className="text-slate-700">Hướng khắc phục:</strong> {fs.fixSuggestion}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="pt-1 flex items-center justify-between">
+                        <span className="text-[10px] text-amber-700 font-medium">Bấm bên phải để truy cập trang cấu hình API Token</span>
+                        <Link
+                          href="/settings"
+                          className="bg-amber-600 hover:bg-amber-500 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm shrink-0"
+                        >
+                          <Key className="w-3 h-3" />
+                          <span>Vào Cài Đặt Tích Hợp →</span>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Bottom Actions flow status */}
-                  {activeStep >= 4 && (
-                    <>
-                      <div className="w-0.5 h-6 bg-gradient-to-b from-cyan-400 to-purple-500"></div>
-                      <div className="glass-panel p-3 rounded-xl border border-purple-300 flex items-center gap-3 text-left max-w-md">
-                        <Zap className="w-4 h-4 text-purple-500 animate-bounce shrink-0" />
-                        <div>
-                          <p className="text-[9px] text-purple-600 font-bold uppercase tracking-wider">Scheduled AI Workforce Dispatch</p>
-                          <p className="text-[10px] text-slate-700 font-semibold mt-0.5">Hermes Operating Driver ➔ Real API Execution Gateway</p>
-                          {lastApiStatus && (
-                            <p className="text-[9px] text-emerald-600 mt-1 font-mono font-bold bg-emerald-50 p-1.5 rounded border border-emerald-100">{lastApiStatus}</p>
-                          )}
-                        </div>
+                  {activeStep >= 4 && lastApiStatus && (
+                    <div className="glass-panel p-3 rounded-xl border border-indigo-200 flex items-center gap-3 text-left max-w-md shrink-0">
+                      <Zap className="w-4 h-4 text-indigo-500 animate-bounce shrink-0" />
+                      <div>
+                        <p className="text-[9px] text-indigo-600 font-bold uppercase tracking-wider">AI Execution Gateway Output</p>
+                        <p className="text-[9px] text-emerald-600 mt-1 font-mono font-bold bg-emerald-50 p-1.5 rounded border border-emerald-100">
+                          {lastApiStatus}
+                        </p>
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
               ) : (

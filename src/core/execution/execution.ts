@@ -1,6 +1,7 @@
 import { CanonicalContextPackage } from '../../types/eom';
 import { BellaKernel } from '../kernel/kernel';
 import { SupabaseConnector } from '../../connectors/index';
+import { GoalVerificationEngine, VerificationReport } from '../orchestration/orchestration';
 
 // ─── Read API keys from localStorage (browser-side) ─────────────────────────
 function getStoredKey(provider: string, key_name: string): string {
@@ -78,12 +79,7 @@ async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPac
 // ─── Internal API Gateway ─────────────────────────────────────────────────────
 export class InternalApiGateway {
   /**
-   * Dynamic dispatch — NO hardcoded agent/tool logic.
-   *
-   * Flow:
-   *   1. AI Orchestrator analyzes CEO intent → generates task plan
-   *   2. Agent Runner executes each task in order
-   *   3. Results returned to dashboard
+   * Dynamic dispatch with Goal Verification Audit & Connection Tracking.
    */
   static async dispatchCall(
     executor: any,
@@ -120,7 +116,6 @@ export class InternalApiGateway {
 
     const { plan, provider: planProvider, model: planModel, warning: planWarning } = orchestratorResult;
     console.log(`[InternalApiGateway] Plan generated (${planProvider}/${planModel}): ${plan.tasks.length} tasks`);
-    console.log(`[InternalApiGateway] Reasoning: ${plan.reasoning}`);
 
     onProgress?.({
       phase: 'PLAN_READY',
@@ -144,16 +139,32 @@ export class InternalApiGateway {
       throw err;
     }
 
+    // ── PHASE 3: Goal Verification & Connection Audit ──────────────────────
+    const verificationReport = GoalVerificationEngine.auditExecutionResults(
+      contextPackage.objective,
+      runnerResult.results
+    );
+
     BellaKernel.emitKernelEvent('TaskCompleted', {
       taskId: step.id,
-      status: runnerResult.overall_status
+      status: runnerResult.overall_status,
+      verification: verificationReport.status
     });
 
     onProgress?.({
       phase: 'COMPLETED',
-      message: `✅ Hoàn tất: ${runnerResult.completed}/${runnerResult.total_tasks} tasks thành công`,
+      message: `✅ Thực thi xong: ${runnerResult.completed}/${runnerResult.total_tasks} tasks hoàn thành.`,
       tasks: runnerResult.results,
-      summary: runnerResult
+      summary: runnerResult,
+      verificationReport
+    });
+
+    onProgress?.({
+      phase: 'VERIFIED',
+      message: verificationReport.verificationSummary,
+      tasks: runnerResult.results,
+      summary: runnerResult,
+      verificationReport
     });
 
     return {
@@ -167,7 +178,8 @@ export class InternalApiGateway {
           provider: planProvider,
           model: planModel
         },
-        execution: runnerResult
+        execution: runnerResult,
+        verificationReport
       }
     };
   }
@@ -189,7 +201,8 @@ export class ExecutionEngine {
         dispatchStatus: result.status,
         executionResult: result.payload.execution.overall_status,
         plan: result.payload.plan,
-        tasks: result.payload.execution.results
+        tasks: result.payload.execution.results,
+        verificationReport: result.payload.verificationReport
       };
     }
   };
@@ -197,7 +210,7 @@ export class ExecutionEngine {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type OrchestratorEvent = {
-  phase: 'PLANNING' | 'PLAN_READY' | 'EXECUTING' | 'COMPLETED' | 'ERROR';
+  phase: 'PLANNING' | 'PLAN_READY' | 'EXECUTING' | 'COMPLETED' | 'VERIFIED' | 'ERROR';
   message: string;
   planTitle?: string;
   planReasoning?: string;
@@ -206,6 +219,7 @@ export type OrchestratorEvent = {
   aiProvider?: string;
   aiModel?: string;
   warning?: string;
+  verificationReport?: VerificationReport;
 };
 
 type DispatchResult = {
@@ -215,5 +229,6 @@ type DispatchResult = {
     canonicalContext: CanonicalContextPackage;
     plan: { title: string; reasoning: string; provider: string; model: string };
     execution: { overall_status: string; total_tasks: number; completed: number; results: any[] };
+    verificationReport: VerificationReport;
   };
 };
