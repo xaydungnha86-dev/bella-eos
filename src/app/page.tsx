@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { EnterpriseBrain } from '../core/brain';
 import { OrchestrationEngine } from '../core/orchestration/orchestration';
 import { InternalApiGateway } from '../core/execution/execution';
+import { CampaignExecutionManager } from '../core/execution/campaign-manager';
 import { FacebookConnector, EipConnector } from '../connectors/index';
 
 // ─── Helper: read API keys from localStorage (set by /settings page) ─────────
@@ -250,76 +251,41 @@ export default function Dashboard() {
     }
   }, [fbToken]);
 
-  // Restore dashboard state from storage on mount (sessionStorage preferred over localStorage)
+  // Restore non-manager state on mount (documents)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const savedObj = safeGet('bella_eos_objective');
-        if (savedObj !== null) {
-          if (savedObj === 'Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu') {
-            setObjective('');
-            safeSet('bella_eos_objective', '');
-          } else {
-            setObjective(savedObj);
-          }
-        }
-
-        const savedLogs = safeGet('bella_eos_telemetry_logs');
-        if (savedLogs) setTelemetryLogs(JSON.parse(savedLogs));
-
-        const savedStep = safeGet('bella_eos_active_step');
-        if (savedStep) setActiveStep(parseInt(savedStep, 10));
-
-        const savedTree = safeGet('bella_eos_goal_tree');
-        if (savedTree) setGoalTree(JSON.parse(savedTree));
-
-        const savedDna = safeGet('bella_eos_dna_state');
-        if (savedDna) setDnaState(JSON.parse(savedDna));
-
         const savedDocs = safeGet('bella_eos_documents');
         if (savedDocs) setDocuments(JSON.parse(savedDocs));
-
-        const savedPlan = safeGet('bella_eos_orchestrator_plan');
-        if (savedPlan) setOrchestratorPlan(JSON.parse(savedPlan));
-
-        const savedTasks = safeGet('bella_eos_dynamic_tasks');
-        if (savedTasks) setDynamicTasks(JSON.parse(savedTasks));
-
-        const savedReport = safeGet('bella_eos_verification_report');
-        if (savedReport) setVerificationReport(JSON.parse(savedReport));
-
-        const savedStatus = safeGet('bella_eos_last_api_status');
-        if (savedStatus) setLastApiStatus(savedStatus);
       } catch (e) {
-        console.warn('Failed to restore dashboard state:', e);
+        console.warn('Failed to restore documents state:', e);
       }
     }
   }, []);
 
-  // Persist dashboard state on change (safeSet uses sessionStorage for large data + LS for small)
-  useEffect(() => { safeSet('bella_eos_objective', objective); }, [objective]);
-
+  // Synchronize state with global CampaignExecutionManager to support background execution and tab preservation
   useEffect(() => {
-    // Limit logs stored to last 200 entries to prevent storage overflow
-    const logsToSave = telemetryLogs.slice(-200);
-    safeSet('bella_eos_telemetry_logs', JSON.stringify(logsToSave));
-  }, [telemetryLogs]);
+    const unsubscribe = CampaignExecutionManager.subscribe((state) => {
+      setIsProcessing(state.isProcessing);
+      setActiveStep(state.activeStep);
+      setTelemetryLogs(state.telemetryLogs);
+      setGoalTree(state.goalTree);
+      setOrchestratorPlan(state.orchestratorPlan);
+      setDynamicTasks(state.dynamicTasks);
+      setVerificationReport(state.verificationReport);
+      setLastApiStatus(state.lastApiStatus);
+      setActiveCustomerCount(state.activeCustomerCount);
+      setFbReachCount(state.fbReachCount);
+      setDnaState(state.dnaState);
+      if (state.objective) {
+        setObjective(state.objective);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
-  useEffect(() => { safeSet('bella_eos_active_step', activeStep.toString()); }, [activeStep]);
-
-  useEffect(() => { safeSet('bella_eos_goal_tree', goalTree ? JSON.stringify(goalTree) : ''); }, [goalTree]);
-
-  useEffect(() => { safeSet('bella_eos_dna_state', JSON.stringify(dnaState)); }, [dnaState]);
-
+  // Persist non-manager state changes
   useEffect(() => { safeSet('bella_eos_documents', JSON.stringify(documents)); }, [documents]);
-
-  useEffect(() => { safeSet('bella_eos_orchestrator_plan', orchestratorPlan ? JSON.stringify(orchestratorPlan) : ''); }, [orchestratorPlan]);
-
-  useEffect(() => { safeSet('bella_eos_dynamic_tasks', JSON.stringify(dynamicTasks)); }, [dynamicTasks]);
-
-  useEffect(() => { safeSet('bella_eos_verification_report', verificationReport ? JSON.stringify(verificationReport) : ''); }, [verificationReport]);
-
-  useEffect(() => { safeSet('bella_eos_last_api_status', lastApiStatus || ''); }, [lastApiStatus]);
 
   // Initialize status log if empty
   useEffect(() => {
@@ -355,165 +321,15 @@ export default function Dashboard() {
     e.preventDefault();
     if (!objective.trim()) return;
 
-    setIsProcessing(true);
-    setActiveStep(0);
-    setLastApiStatus(null);
-    setVerificationReport(null);
-    setDynamicTasks([]);
-    setOrchestratorPlan(null);
-    addLog('CEO INTENT', `🎯 Ý chí chiến lược nhận được: "${objective}"`, 'text-amber-400 font-bold');
-
-    // Step 0: COO Starts Holistic Analysis
-    await delay(700);
-    addLog('AI COO', `🤖 Nhận nhiệm vụ từ CEO. Bắt đầu phân tích tổng thể hệ thống...`, 'text-indigo-400 font-bold');
-
-    await delay(600);
-    addLog('EipConnector', `Fetching active customer records from external EIP CRM`, 'text-slate-300');
-    const activeCustomers = await EipConnector.getActiveCustomers();
-    const finalCustCount = activeCustomers.length + 1287;
-    setActiveCustomerCount(finalCustCount);
-
-    await delay(500);
-    addLog('Understanding Center', `Digesting API / EIP payload from: EIP CRM API`, 'text-slate-300');
-    EnterpriseBrain.Understanding.understandApiFact('EIP CRM API', { activeCustomersCount: activeCustomers.length });
-    
-    // Query Facebook Metrics
-    const fbMetrics = await FacebookConnector.getReachMetrics();
-    setFbReachCount(fbMetrics.postReach24h);
-    
-    await delay(700);
-    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: ${finalCustCount} | Reach 24h: ${fbMetrics.postReach24h.toLocaleString()} (Nguồn: ${fbMetrics.source}). Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
-
-    await delay(700);
-    addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-400 font-semibold');
-    addLog('SOP PROTOCOL', `⚙️ Đã load SOP-MKT-V1.8 (Soạn thảo nội dung) và SOP-DSN-V2.1 (Thiết kế đồ họa).`, 'text-cyan-300');
-
-    await delay(700);
-    addLog('BRAND DNA', `🧬 Đang kiểm duyệt Nhận diện Thương hiệu (Brand DNA)...`, 'text-pink-400 font-semibold');
-    addLog('BRAND DNA', `🧬 Đã nhận đặc đặc tính: Tone giọng [${dnaState.tone}] & Phong cách UI [${dnaState.style}].`, 'text-pink-300');
-
-    await delay(700);
-    addLog('FINANCIAL AUDIT', `💰 Kiểm tra Tình hình Tài chính & Chính sách chi tiêu...`, 'text-purple-400 font-semibold');
-    const budgetLimit = objective.toLowerCase().includes('50 triệu') ? '50,000,000' : '100,000,000';
-    addLog('FINANCIAL AUDIT', `💰 Ngân sách dự kiến: ${budgetLimit} VND. Trạng thái chính sách: ĐẠT YÊU CẦU (POL-GOV-001).`, 'text-purple-300');
-
-    // Step 1: Parse Intent
-    await delay(700);
-    const parsedIntent = OrchestrationEngine.IntentEngine.parseIntent(objective);
-    addLog('INTENT ENGINE', `🔍 Phân tích mục tiêu chiến lược hoàn tất.`, 'text-cyan-300');
-
-    // Step 2: Goal Decompose
-    await delay(800);
-    setActiveStep(1);
-    const goals = OrchestrationEngine.GoalEngine.decomposeGoal(objective);
-    setGoalTree(goals);
-    addLog('GOAL ENGINE', `📊 Phân rã chỉ thị của CEO thành sơ đồ OKRs phòng ban (Mkt, Sales, Finance).`, 'text-indigo-400 font-bold');
-
-    // Step 3: Run Monte Carlo Simulation
-    await delay(1000);
-    setActiveStep(2);
-    addLog('REASONING CENTER', `🎲 Đang chạy 10,000 lần mô phỏng Monte Carlo dự báo ROI & Dòng tiền...`, 'text-purple-300');
-    const simulationResult = EnterpriseBrain.Reasoning.runMonteCarlo('marketing_pos');
-    addLog('REASONING CENTER', `📈 ROI Dự kiến: ${simulationResult.projectedRoi} | Xác suất thành công: ${simulationResult.confidence}% | Dòng tiền: ${simulationResult.cashflow}`, 'text-emerald-400 font-semibold');
-
-    // Step 4: Selective Context Builder
-    await delay(800);
-    setActiveStep(3);
-    addLog('CONTEXT CENTER', `🔒 Đang lọc bảo mật và biên dịch gói Canonical Context Package...`, 'text-blue-400');
-    const mockStep = { id: 1, name: 'Setup chiến dịch', agent: 'orchestrator' };
-    const contextPackage = EnterpriseBrain.Context.compileContext(mockStep, objective);
-    addLog('CONTEXT CENTER', `✅ Đã xuất Gói ngữ cảnh chuẩn hóa (Tone giọng: ${contextPackage.brandDna.voiceTone} | Thiết kế: ${contextPackage.brandDna.designStyle}).`, 'text-emerald-400');
-
-    // Step 5: AI Orchestration & Execution via Gateway
-    setActiveStep(4);
-    addLog('GATEWAY', `⚡ Kích hoạt AI Orchestrator Gateway — Bắt đầu phân bổ nhiệm vụ động...`, 'text-amber-400 font-semibold');
-
-    let dispatchResult: any;
-    try {
-      dispatchResult = await InternalApiGateway.dispatchCall(
-        { assignedWorker: 'orchestrator' },
-        mockStep,
-        contextPackage,
-        (evt) => {
-          if (evt.phase === 'PLANNING') {
-            addLog('AI ORCHESTRATOR', evt.message, 'text-indigo-400 font-bold');
-          } else if (evt.phase === 'PLAN_READY') {
-            setOrchestratorPlan({
-              title: evt.planTitle || '',
-              reasoning: evt.planReasoning || '',
-              provider: evt.aiProvider || '',
-              model: evt.aiModel || ''
-            });
-            setDynamicTasks(evt.tasks || []);
-            addLog('AI ORCHESTRATOR', `📋 Kế hoạch: "${evt.planTitle}" (AI COO Orchestrator)`, 'text-cyan-400 font-bold');
-            if (evt.planReasoning) {
-              addLog('ORCHESTRATOR LOGIC', `💡 Lý do phân bổ: ${evt.planReasoning}`, 'text-slate-400 italic');
-            }
-            if (evt.warning) {
-              addLog('ORCHESTRATOR WARN', `⚠️ ${evt.warning}`, 'text-amber-400');
-            }
-            evt.tasks?.forEach((t: any, idx: number) => {
-              addLog('CAPABILITY ROUTER', `📌 Task #${idx + 1} [${t.task_id}]: Gán Agent '${t.agent_name}' ➔ Công việc '${t.task_type}'`, 'text-purple-400 font-medium');
-            });
-          } else if (evt.phase === 'EXECUTING') {
-            addLog('AGENT RUNNER', evt.message, 'text-amber-400 font-semibold');
-          } else if (evt.phase === 'COMPLETED' || evt.phase === 'VERIFIED') {
-            if (evt.tasks) setDynamicTasks(evt.tasks);
-            if (evt.verificationReport) setVerificationReport(evt.verificationReport);
-
-            if (evt.phase === 'VERIFIED') {
-              const icon = evt.verificationReport?.isCompleted ? '🎉' : '⚠️';
-              const colorCls = evt.verificationReport?.isCompleted ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold';
-              addLog('GOAL AUDIT SERVICE', `${icon} ${evt.verificationReport?.verificationSummary}`, colorCls);
-            } else {
-              addLog('AGENT RUNNER', evt.message, 'text-emerald-400 font-bold');
-              evt.tasks?.forEach((res: any) => {
-                const icon = res.success ? '✅' : '❌';
-                const cls = res.success ? 'text-emerald-300 font-medium' : 'text-red-400';
-                addLog(`AGENT [${res.agent_name}]`, `${icon} Output [${res.task_type}]: ${res.output.substring(0, 150)}${res.output.length > 150 ? '...' : ''}`, cls);
-              });
-            }
-          }
-        }
-      );
-    } catch (err: any) {
-      addLog('ORCHESTRATOR ERROR', `❌ Lỗi điều phối: ${err.message}`, 'text-red-400 font-bold');
-      setIsProcessing(false);
-      return;
-    }
-
-    setActiveStep(5);
-
-    // Extract execution results
-    const taskResults = dispatchResult.payload.execution.results || [];
-    const fbResult = taskResults.find((r: any) => r.task_type === 'publish_facebook' || r.task_type === 'schedule_post');
-
-    if (fbResult) {
-      if (fbResult.success) {
-        setLastApiStatus(fbResult.output);
-      } else {
-        setLastApiStatus(`⚠️ ${fbResult.error || fbResult.output}`);
-      }
-    } else {
-      setLastApiStatus(`✅ Hoàn tất điều phối ${taskResults.length} nhiệm vụ AI Agent!`);
-    }
-
-    // Step 6: Evidence validation
-    await delay(800);
-    setActiveStep(6);
-    addLog('EVIDENCE SERVICE', `🔍 Nhận chứng cứ kỹ thuật số (Verified Sign-off Hash).`, 'text-teal-400');
-    addLog('EVIDENCE SERVICE', `✅ Checksum hợp quy luật: ĐẠT | Điểm số chất lượng EQE: 96/100.`, 'text-emerald-400 font-bold');
-
-    // Step 7: Closed Loop Learning
-    await delay(800);
-    setActiveStep(7);
-    addLog('LEARNING CENTER', `🧬 Bắt đầu đột biến quy trình (SOP Mutation) dựa trên Feedback mới.`, 'text-pink-400');
-    const mutationResult = EnterpriseBrain.Learning.learnFromEvidence(mockStep, 'EQE quality check passed with score 96.');
-    addLog('LEARNING CENTER', `🧬 Đột biến thành công: ${mutationResult.target} ➔ ${mutationResult.mutationStatus}`, 'text-emerald-400 font-bold');
-
-    setIsProcessing(false);
-    setActiveStep(8);
-    addLog('SYSTEM', `🏁 Hoàn tất quy trình chạy cho Strategic Intent của CEO!`, 'text-amber-400 font-bold');
+    CampaignExecutionManager.startCampaign(
+      objective,
+      dnaState,
+      EipConnector,
+      FacebookConnector,
+      OrchestrationEngine,
+      EnterpriseBrain,
+      InternalApiGateway
+    );
   };
 
   // 2. Ingest document
@@ -1060,7 +876,10 @@ export default function Dashboard() {
                 <input 
                   type="text" 
                   value={objective}
-                  onChange={(e) => setObjective(e.target.value)}
+                  onChange={(e) => {
+                    setObjective(e.target.value);
+                    CampaignExecutionManager.updateState({ objective: e.target.value });
+                  }}
                   disabled={isProcessing}
                   placeholder="Ví dụ: Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu..."
                   className="w-full h-12 bg-slate-50 border border-slate-200 hover:border-indigo-400 focus:border-indigo-500 focus:outline-none rounded-xl pl-11 pr-4 text-xs font-sans text-slate-800 placeholder-slate-400 shadow-inner transition-colors disabled:opacity-50"
