@@ -26,6 +26,19 @@ function lsDelete(storeKey: string) {
 // ─── Integration Catalogue ────────────────────────────────────────────────────
 const INTEGRATION_CATALOGUE = [
   {
+    provider: 'bella_eip',
+    category: 'ERP / Kế toán',
+    icon: '🏛️',
+    name: 'Bella EIP Link',
+    color: 'from-indigo-600 to-violet-600',
+    description: 'Kết nối đồng bộ thông tin khách hàng, báo cáo tài chính và chỉ thị chiến lược từ Bella EIP.',
+    docsUrl: 'https://docs.bella.vn/eip-integration',
+    fields: [
+      { key_name: 'api_url', label: 'EIP Endpoint URL', placeholder: 'https://eip.bella.vn/api/v1', type: 'text' as const, help: 'Đường dẫn API của phân hệ Bella EIP doanh nghiệp của bạn' },
+      { key_name: 'api_key', label: 'EIP API Key', placeholder: 'eip_key_...', type: 'password' as const, help: 'API Key được sinh từ Console quản trị của Bella EIP' },
+    ]
+  },
+  {
     provider: 'facebook',
     category: 'Mạng Xã Hội',
     icon: '📘',
