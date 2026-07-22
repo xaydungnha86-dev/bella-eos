@@ -992,7 +992,7 @@ export default function Dashboard() {
               <div className="glass-panel p-3.5 rounded-xl border border-slate-200">
                 <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-1.5 mb-3">
                   <UploadCloud className="w-3.5 h-3.5 text-cyan-500" />
-                  <span>Nạp Tri Thức Vào Bộ Nao</span>
+                  <span>Nạp Tri Thức Vào Bộ Não</span>
                 </h3>
                 
                 <label className="border border-dashed border-slate-200 hover:border-cyan-400 bg-slate-50/50 hover:bg-cyan-50/10 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all group relative">
