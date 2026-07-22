@@ -7,11 +7,11 @@ export const dynamic = 'force-dynamic';
  * POST /api/ai/generate-image
  *
  * DYNAMIC ENTERPRISE GRAPHIC BANNER DESIGN ENGINE (Bella EOS Creative Worker Gateway)
- * Ingests:
- *  - Business Context (Brand DNA, Logo, Colors, Voice Tone)
- *  - Copywriter Worker Output from previous step (Dynamic Headline, Offer Badge, CTA)
- * Returns:
- *  - Dynamic SVG Commercial Poster Banner (data URL) OR DALL-E 3 / Flux.1 AI Image URL
+ * Priority Pipeline:
+ *  1. Google Gemini Imagen 3 API (Highest 4K Photorealistic AI Image Model)
+ *  2. OpenAI DALL-E 3 API
+ *  3. Fal.ai Flux.1 Schnell
+ *  4. Bella Dynamic Graphic PNG Engine (/api/ai/banner-image)
  */
 export async function POST(request: Request) {
   try {
@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       copywriterContent,
       brandDna,
       client_openai_key,
+      client_gemini_key,
       client_fal_key
     } = body as {
       prompt?: string;
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       copywriterContent?: string;
       brandDna?: BrandDnaContext;
       client_openai_key?: string;
+      client_gemini_key?: string;
       client_fal_key?: string;
     };
 
@@ -61,7 +63,47 @@ export async function POST(request: Request) {
     // Build structured 4K Commercial Sales Poster Prompt via PosterDesignSkill
     const imagePrompt = prompt || PosterDesignSkill.buildSalesPosterPrompt(objective, dynamicHeadline, brandDna);
 
-    // ── 1. Try OpenAI DALL-E 3 API ───────────────────────────────────────────
+    // ── 1. Google Gemini / Imagen 3 API (Top Priority Image Model) ───────────
+    const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (geminiKey) {
+      try {
+        console.log('[AI Image Generator] Calling Google Imagen 3 API...');
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${geminiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            instances: [
+              { prompt: imagePrompt }
+            ],
+            parameters: {
+              sampleCount: 1,
+              aspectRatio: '16:9',
+              outputMimeType: 'image/jpeg'
+            }
+          })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.predictions?.[0]?.bytesBase64Encoded) {
+          const mimeType = data.predictions[0].mimeType || 'image/jpeg';
+          const base64Data = data.predictions[0].bytesBase64Encoded;
+          const dataUrl = `data:${mimeType};base64,${base64Data}`;
+          console.log('[AI Image Generator] ✅ Google Imagen 3 Image Rendered Successfully!');
+          return NextResponse.json({
+            success: true,
+            provider: 'google-gemini',
+            model: 'imagen-3.0-generate-002',
+            imageUrl: dataUrl,
+            prompt: imagePrompt
+          });
+        }
+        console.warn('[AI Image Generator] Google Imagen 3 notice:', data.error?.message || data);
+      } catch (e) {
+        console.warn('[AI Image Generator] Google Imagen 3 error:', e);
+      }
+    }
+
+    // ── 2. Try OpenAI DALL-E 3 API ───────────────────────────────────────────
     const openaiKey = client_openai_key || process.env.OPENAI_API_KEY;
     if (openaiKey) {
       try {
@@ -99,7 +141,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── 2. Try Fal.ai Flux.1 API ─────────────────────────────────────────────
+    // ── 3. Try Fal.ai Flux.1 API ─────────────────────────────────────────────
     const falKey = client_fal_key || process.env.FAL_KEY;
     if (falKey) {
       try {
@@ -134,16 +176,14 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── 3. Dynamic Realtime PNG Banner Generator Engine ──────────────────────
-    // Generates a public 4K PNG Banner URL containing Enterprise Logo,
-    // Dynamic Copywriter Headline, Offer Badge, and 3D Spa UI Mockup
+    // ── 4. Dynamic Realtime PNG Banner Generator Engine ──────────────────────
     const baseUrl = getBaseUrl();
     const dynamicPngBannerUrl = `${baseUrl}/api/ai/banner-image?headline=${encodeURIComponent(dynamicHeadline)}&badge=${encodeURIComponent(dynamicBadge)}&cta=${encodeURIComponent(dynamicCta)}`;
 
     return NextResponse.json({
       success: true,
       provider: 'bella-graphic-design-engine',
-      model: 'poster-design-skill-v2-png',
+      model: 'poster-design-skill-v4-structural-mutation',
       imageUrl: dynamicPngBannerUrl,
       headline: dynamicHeadline,
       offerBadge: dynamicBadge,

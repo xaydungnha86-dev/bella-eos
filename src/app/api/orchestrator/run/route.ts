@@ -105,7 +105,9 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       body: JSON.stringify({
         objective,
         copywriterContent,
-        client_openai_key: clientKeys?.openai
+        client_openai_key: clientKeys?.openai,
+        client_gemini_key: clientKeys?.gemini,
+        client_fal_key: clientKeys?.fal
       })
     });
     const data = await res.json();
