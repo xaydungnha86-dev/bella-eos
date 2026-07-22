@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { 
   Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
@@ -231,13 +232,13 @@ export default function Dashboard() {
 
         {/* Action Triggers */}
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsSettingsModalOpen(true)}
-            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer"
+          <Link
+            href="/settings"
+            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
           >
             <Key className="w-3.5 h-3.5 text-amber-600" />
-            <span>Cài đặt API Key Real</span>
-          </button>
+            <span>Cài đặt Tích hợp</span>
+          </Link>
           <button 
             onClick={() => setIsBrainModalOpen(true)}
             className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 active:scale-95 shadow-sm cursor-pointer"
