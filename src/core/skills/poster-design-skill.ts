@@ -178,6 +178,14 @@ export class PosterDesignSkill {
 ===================================================================`;
   }
 
+  private static removeVietnameseAccents(str: string): string {
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
+  }
+
   /**
    * Builds an AI Image Generation Prompt dynamically
    */
@@ -218,13 +226,15 @@ export class PosterDesignSkill {
       domainDesc = `${brandName} - ${cleanObj}`;
     }
 
+    const cleanHeadline = this.removeVietnameseAccents(headlineText);
+
     return [
       `A high-converting 4K commercial sales poster graphic for ${domainDesc}.`,
       `BACKGROUND CONTEXT: ${bgDesc}.`,
       `CENTER GRAPHIC: ${centerDesc}.`,
-      `TYPOGRAPHY LAYOUT: High-contrast header reading '${headlineText}', prominent offer badge '${offerDesc}', clean CTA button '${ctaDesc}'.`,
+      `TYPOGRAPHY LAYOUT: High-contrast sans-serif header reading '${cleanHeadline}' with no accents, prominent offer badge '${offerDesc}', clean CTA button '${ctaDesc}'.`,
       `COLOR PALETTE: Primary brand color (${primaryColor}) and accent color (${accentColor}) details, with high-contrast text layout.`,
-      `QUALITY: 4K advertisement standards, high contrast, 16:9 aspect ratio, Meta/Facebook Ads ready.`
+      `QUALITY: 4K advertisement standards, high contrast, 16:9 aspect ratio, Meta/Facebook Ads ready, no spelling mistakes, no garbled text, only plain English or unaccented text.`
     ].join(' ');
   }
 
