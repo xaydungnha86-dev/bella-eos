@@ -113,8 +113,14 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   let copywriterContent = '';
   if (taskOutputs) {
     for (const key of Object.keys(taskOutputs)) {
-      if (taskOutputs[key] && taskOutputs[key].length > 20) {
-        copywriterContent = taskOutputs[key];
+      const val = taskOutputs[key];
+      if (val && val.length > 20 && 
+          !val.startsWith('http') && 
+          !val.startsWith('data:image') && 
+          !val.includes('MASTER AI DESIGN') && 
+          !val.includes('Báo cáo') &&
+          !val.includes('Athena Analytics')) {
+        copywriterContent = val;
         break;
       }
     }
@@ -211,8 +217,6 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
 }
 
 async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-  const content = input.content_from || input.content || input.objective || '';
-  const mediaRaw = input.media_from || input.media || '';
 
   // Extract HTTP or Data image URL from text output or reference
   const extractUrl = (str: string): string => {
@@ -220,6 +224,64 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     const match = str.match(/(https?:\/\/[^\s\n"']+|data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+)/);
     return match ? match[0] : '';
   };
+
+  // ── Extra Robust Content Extraction ──
+  // 1. Try common input key mappings
+  let content = input.content_from || input.content || input.message || input.post_content || input.text || '';
+  
+  // 2. If it's a short string or empty (meaning it could be an unresolved task ID or placeholder), check all values of the input object
+  if ((!content || content.length < 20) && typeof input === 'object') {
+    for (const val of Object.values(input)) {
+      if (typeof val === 'string' && val.length > 20 && !val.startsWith('http') && !val.startsWith('data:image')) {
+        content = val;
+        break;
+      }
+    }
+  }
+
+  // 3. Fallback: search taskOutputs directly for any copywriting text output
+  if ((!content || content.length < 20) && taskOutputs) {
+    for (const [taskId, output] of Object.entries(taskOutputs)) {
+      if (output && output.length > 30 && 
+          !output.startsWith('http') && 
+          !output.startsWith('data:image') && 
+          !output.includes('MASTER AI DESIGN') &&
+          !output.includes('Báo cáo') &&
+          !output.includes('Athena Analytics')) {
+        content = output;
+        break;
+      }
+    }
+  }
+
+  // 4. Ultimate fallback to objective
+  if (!content) {
+    content = input.objective || '';
+  }
+
+  // ── Extra Robust Media/Image Extraction ──
+  // 1. Try common input media key mappings
+  let mediaRaw = input.media_from || input.media || input.image_url || input.banner_url || input.media_url || '';
+  
+  // 2. Search all input values for any URL or base64 image
+  if (!mediaRaw && typeof input === 'object') {
+    for (const val of Object.values(input)) {
+      if (typeof val === 'string' && (val.startsWith('http') || val.startsWith('data:image'))) {
+        mediaRaw = val;
+        break;
+      }
+    }
+  }
+
+  // 3. Search taskOutputs directly for any output that contains a URL/base64 image
+  if (!mediaRaw && taskOutputs) {
+    for (const [taskId, output] of Object.entries(taskOutputs)) {
+      if (output && (output.includes('http') || output.includes('data:image'))) {
+        mediaRaw = extractUrl(output);
+        if (mediaRaw) break;
+      }
+    }
+  }
 
   const defaultBannerUrl = `${getBaseUrl()}/api/ai/banner-image?t=${Date.now()}`;
   const extractedUrl = extractUrl(mediaRaw);
@@ -454,6 +516,12 @@ export async function POST(request: Request) {
     for (const task of ordered) {
       // Resolve input: if any field value is a reference to prior task output, inject it
       const resolvedInput = resolveInputReferences(task.input || {}, taskOutputs);
+      
+      console.log(`[AgentRunner] Resolving inputs for task ${task.task_id}:`, {
+        rawInput: task.input,
+        resolvedInput,
+        availableOutputs: Object.keys(taskOutputs)
+      });
 
       const toolFn = TOOL_REGISTRY[task.task_type];
       let result: ToolResult;
