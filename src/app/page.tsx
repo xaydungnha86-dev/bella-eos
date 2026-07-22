@@ -6,7 +6,7 @@ import {
   Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
   Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe,
-  X, Copy, Check, Code, Download
+  X, Copy, Check, Code, Download, RotateCcw
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { EnterpriseBrain } from '../core/brain';
@@ -478,6 +478,18 @@ export default function Dashboard() {
 
         {/* Action Triggers */}
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              if (confirm('Bạn có chắc chắn muốn reset toàn bộ trạng thái về 0% (Nạp mới hoàn toàn)?')) {
+                CampaignExecutionManager.hardReset();
+              }
+            }}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer"
+            title="Xóa toàn bộ dữ liệu tạm & nạp mới 100%"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-slate-600" />
+            <span>Reset (Nạp Mới 100%)</span>
+          </button>
           <Link
             href="/settings"
             className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"

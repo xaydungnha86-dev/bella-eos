@@ -40,17 +40,48 @@ class CampaignExecutionManagerClass {
   private listeners = new Set<Listener>();
 
   constructor() {
-    // Rehydrate state from localStorage/sessionStorage if possible
+    // Rehydrate state from localStorage/sessionStorage if possible, ALWAYS forcing isProcessing to false
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('bella_eos_campaign_manager_state');
         if (saved) {
-          this.state = { ...this.state, ...JSON.parse(saved) };
+          this.state = { ...this.state, ...JSON.parse(saved), isProcessing: false };
         }
       } catch (e) {
         console.warn('Failed to load CampaignExecutionManager state:', e);
       }
     }
+  }
+
+  public hardReset() {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('bella_eos_campaign_manager_state');
+        localStorage.removeItem('bella_eos_telemetry_logs');
+        localStorage.removeItem('bella_eos_active_step');
+        localStorage.removeItem('bella_eos_goal_tree');
+        localStorage.removeItem('bella_eos_dynamic_tasks');
+        localStorage.removeItem('bella_eos_last_api_status');
+        localStorage.removeItem('bella_eos_objective');
+        localStorage.removeItem('bella_eos_verification_report');
+      } catch (e) {}
+    }
+    this.state = {
+      isProcessing: false,
+      activeStep: -1,
+      telemetryLogs: [],
+      goalTree: null,
+      dnaState: { tone: 'Professional & Premium', style: 'Minimalist & Glassmorphism' },
+      orchestratorPlan: null,
+      dynamicTasks: [],
+      verificationReport: null,
+      lastApiStatus: null,
+      activeCustomerCount: 1289,
+      fbReachCount: 14500,
+      objective: '',
+      approvedTasks: []
+    };
+    this.notify();
   }
 
   public subscribe(listener: Listener): () => void {
@@ -115,8 +146,6 @@ class CampaignExecutionManagerClass {
     EnterpriseBrain: any,
     InternalApiGateway: any
   ) {
-    if (this.state.isProcessing) return;
-
     this.state = {
       isProcessing: true,
       activeStep: 0,
