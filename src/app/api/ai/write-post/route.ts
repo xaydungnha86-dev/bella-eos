@@ -35,25 +35,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'objective is required' }, { status: 400 });
     }
 
-    const systemPrompt = `Bạn là AI Copywriter chuyên nghiệp cho thương hiệu dịch vụ cao cấp tại Việt Nam.
-Nhiệm vụ: Viết 1 bài đăng ${platform === 'facebook' ? 'Facebook' : platform} hoàn chỉnh, sẵn sàng đăng ngay.
+    const systemPrompt = `Bạn là AI Copywriter chuyên nghiệp cho giải pháp Bella Enterprise (Bella EOS & Bella EIP) tại Việt Nam.
+Nhiệm vụ: Chuyển đổi Mục tiêu Kinh doanh nội bộ của CEO thành 1 bài đăng ${platform === 'facebook' ? 'Facebook' : platform} hấp dẫn DÀNH CHO KHÁCH HÀNG MỤC TIÊU.
 
-Quy tắc QUAN TRỌNG:
-- Viết bằng tiếng Việt tự nhiên, hấp dẫn
-- Tông giọng: ${voiceTone || 'Professional & Premium'}
-- Phân khúc mục tiêu: ${segment || 'Khách hàng tiềm năng'}
-- Mục tiêu bài viết: ${goal || objective}
-- KHÔNG bao gồm tiêu đề nội bộ, mã hệ thống, hay metadata kỹ thuật
-- Bắt đầu bằng hook mạnh (câu hỏi, con số, hoặc tuyên bố táo bạo)
-- Kết thúc bằng CTA rõ ràng
-- Thêm 3-5 hashtag phù hợp ở cuối
-- Độ dài: 150-300 từ
+Quy tắc BẮT BUỘC:
+1. "Mục tiêu kinh doanh" truyền vào là chỉ thị NỘI BỘ của CEO (Ví dụ: "Tăng 20% Spa demo... với ngân sách 50M").
+2. TUYỆT ĐỐI KHÔNG in lại ngân sách nội bộ (50 triệu, budget,...) hay các chỉ tiêu quản trị nội bộ vào bài viết tiếp thị công khai.
+3. Chuyển đổi chỉ thị thành OFFER DÀNH CHO KHÁCH HÀNG:
+   - Nếu mục tiêu liên quan đến "Spa demo" / "Spa": Đối tượng là Chủ Spa / Quản lý Thẩm mỹ viện. Offer là Đăng ký trải nghiệm Demo miễn phí phần mềm quản lý Spa thông minh Bella EOS.
+   - Nếu liên quan đến sản phẩm khác: Viết nội dung quảng bá lợi ích cho khách hàng.
+4. Tông giọng: ${voiceTone || 'Professional & Premium'}
+5. Bắt đầu bằng hook thu hút chủ Spa / khách hàng mục tiêu (câu hỏi, giải pháp vấn đề)
+6. Thân bài nêu rõ lợi ích giải pháp: tối ưu vận hành, tự động đặt lịch, quản lý doanh thu
+7. Kết thúc bằng Kêu gọi hành động (CTA) đăng ký Demo rõ ràng
+8. Thêm 3-5 hashtag chuẩn (#BellaEOS #QuanLySpa #DemoMiễnPhí #SpaManagement)
+9. Độ dài: 150-250 từ.
 
-Chỉ trả về nội dung bài đăng, không có gì khác.`;
+Chỉ trả về nội dung bài đăng Facebook hoàn chỉnh, không kèm lời giải thích.`;
 
-    const userMessage = `Mục tiêu kinh doanh: "${objective}"
+    const userMessage = `Mục tiêu chỉ thị của CEO: "${objective}"
 
-Hãy viết bài đăng Facebook hấp dẫn, chuyên nghiệp cho chiến dịch này.`;
+Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàng mục tiêu để đạt mục tiêu trên.`;
 
     // ── Try OpenAI GPT-4o ───────────────────────────────────────────────────
     const openaiKey = client_openai_key || process.env.OPENAI_API_KEY;
@@ -164,20 +166,39 @@ Hãy viết bài đăng Facebook hấp dẫn, chuyên nghiệp cho chiến dịc
 
 // ─── Built-in Fallback Content Writer ────────────────────────────────────────
 function generateFallbackPost(objective: string, tone?: string, segment?: string, goal?: string): string {
-  // Extract key numbers from objective
-  const numbers = objective.match(/\d+%|\d+\s*(triệu|tỷ|k|đ)/gi) || [];
-  const hasNumber = numbers.length > 0;
+  const lower = objective.toLowerCase();
+  const isSpa = lower.includes('spa') || lower.includes('thẩm mỹ') || lower.includes('beauty');
 
-  const hooks = [
-    `✨ Bạn có đang tìm kiếm sự thay đổi thật sự cho ${segment || 'doanh nghiệp'} của mình?`,
-    `📊 Con số không nói dối — và đây là điều chúng tôi cam kết mang lại cho bạn.`,
-    `🎯 Chiến lược đúng + Thực thi đúng = Kết quả vượt mong đợi.`
-  ];
-  const hook = hooks[Math.floor(Math.random() * hooks.length)];
+  if (isSpa) {
+    return `🌿 [ĐĂNG KÝ TRẢI NGHIỆM DEMO MIỄN PHÍ] GIẢI PHÁP QUẢN LÝ SPA THÔNG MINH BELLA EOS
 
-  const body = `\n\n${objective}\n\nChúng tôi hiểu rằng mỗi doanh nghiệp đều có hành trình riêng. Đội ngũ chuyên gia của chúng tôi cam kết đồng hành cùng bạn từng bước — từ chiến lược đến triển khai thực tế.`;
+Bạn đang là Chủ Spa hay Quản lý Thẩm mỹ viện đang gặp khó khăn trong việc:
+⚡ Tối ưu lịch hẹn kỹ thuật viên & giảm 90% thời gian xếp lịch?
+📊 Kiểm soát doanh thu, chi phí và hoa hồng nhân sự chính xác theo thời gian thực?
+🎯 Tự động hóa chăm sóc khách hàng cũ & thu hút khách hàng mới?
 
-  const cta = `\n\n💬 Để lại bình luận hoặc nhắn tin cho chúng tôi ngay hôm nay để nhận tư vấn miễn phí!\n\n#ChiếnLượcKinhDoanh #TăngTrưởng #${(segment || 'KhachHang').replace(/\s/g, '')} #BellaEOS`;
+Bella EOS giải quyết triệt để mọi bài toán vận hành Spa bằng công nghệ AI-Native hiện đại nhất!
 
-  return hook + body + cta;
+🎁 QUÀ TẶNG ĐẶC BIỆT THÁNG NÀY:
+• 1 Buổi trải nghiệm Demo 1-1 trực tiếp cùng Chuyên gia Vận hành
+• Bộ tài liệu độc quyền "Quy Trình Chuẩn Hóa Vận Hành Spa Chuyên Nghiệp"
+
+👉 Đăng ký nhận Demo ngay hôm nay tại: https://bella.vn/demo-spa
+
+#BellaEOS #QuanLySpa #SpaManagement #GiaiPhapSpa #DemoMienPhi #TuDongHoaSpa`;
+  }
+
+  // Generic business offer fallback
+  return `🚀 BỨT PHÁ DOANH THU VỚI NỀN TẢNG ĐỒNG HÀNH VẬN HÀNH THÔNG MINH BELLA EOS
+
+Bạn đang tìm kiếm giải pháp giúp tối ưu hóa quy trình vận hành và tăng trưởng doanh thu bền vững cho doanh nghiệp?
+
+Bella EOS mang đến hệ sinh thái công nghệ quản trị AI-Native toàn diện:
+✅ Tự động hóa 80% công việc điều phối & lập kế hoạch
+✅ Quản lý dữ liệu tập trung, theo dõi KPI & ROI thời gian thực
+✅ Tối ưu hóa chi phí vận hành & tăng tốc độ thực thi chiến dịch
+
+👉 Đăng ký tư vấn và trải nghiệm giải pháp ngay hôm nay!
+
+#BellaEOS #NenTangVatHanh #ChuyenDoiSo #QuanTriDoanhNghiep #TốiƯuDoanhThu`;
 }
