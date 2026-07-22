@@ -1,22 +1,28 @@
 {
   "name": "bella-ai-platform",
-  "version": "2.1.0",
-  "description": "Enterprise AI Operating Model Platform for Bella EIP",
-  "main": "index.html",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "start": "serve . -p 3000",
-    "dev": "serve . -p 3000"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
-  "keywords": [
-    "ai-platform",
-    "multi-agent",
-    "enterprise-ai-os",
-    "threejs",
-    "bella-eip"
-  ],
-  "author": "Bella Corporation",
-  "license": "MIT",
   "dependencies": {
-    "serve": "^14.2.4"
+    "next": "16.2.11",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "@supabase/supabase-js": "^2.48.0",
+    "lucide-react": "^0.474.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.11",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

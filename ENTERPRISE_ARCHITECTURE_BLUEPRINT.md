@@ -1,478 +1,216 @@
-# 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA ENTERPRISE OPERATING SYSTEM (BELLA EOS)
-> **STATUS**: `OPERATIONAL` • **SPECIFICATION VERSION**: `v12.0 (ENTERPRISE CONTEXT LAYER & CAPABILITY REGISTRY)`  
+# 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA OPERATING SYSTEM (BELLA EOS)
+> **STATUS**: `ARCHITECTURE FREEZE (v1.0)` • **SPECIFICATION VERSION**: `v13.0`  
 > **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
 ---
 
 ## 1. HỆ SINH THÁI THƯƠNG HIỆU BELLA AI PLATFORM
 
-Hệ sinh thái được định vị theo mô hình thương hiệu nhiều tầng rõ ràng để phát triển bền vững trong 10-20 năm:
+Hệ sinh thái được định vị theo mô hình thương hiệu nhiều tầng rõ ràng để phát triển bền vững trong 15-20 năm:
 
 ```
-Bella AI Platform (Thương hiệu hệ sinh thái)
+                    Bella AI Platform
+                           │
+        ┌──────────────────┴──────────────────┐
+        │                                     │
+   Bella EOS                           Bella EIP
+Enterprise Brain                  Business Applications
+(System of Orchestration)          (System of Record)
         │
-        ├── Bella EOS (Enterprise Operating System - Lõi Điều hành & Orchestration)
-        │
-        ├── Bella EIP (Enterprise Integration Platform / Business Suite - Ứng dụng nghiệp vụ / System of Record)
-        │
-        ├── Bella Workers (Lực lượng lao động số AI - Cung cấp Capabilities)
-        │
-        ├── Bella SDK (Bộ công cụ phát triển)
-        │
-        ├── Bella Connect (Cổng kết nối SAP, MISA, Facebook, TikTok...)
-        │
-        └── Bella Marketplace (Chợ quy trình SOP & Extension Packages)
+        ├─► Bella Workers (AI & Human Workforce)
+        ├─► Bella Connect (Enterprise Connectors)
+        ├─► Bella SDK (Development Kits)
+        └─► Bella Marketplace (SOP & Extensions)
 ```
 
 ### Phân vai và Định vị thành phần:
 
 1. **Bella AI Platform (Thương hiệu tổng)**: Toàn bộ hệ sinh thái công nghệ AI dành cho doanh nghiệp.
-2. **Bella EOS (Lõi Điều hành - System of Orchestration)**: Hệ điều hành chịu trách nhiệm cho các dịch vụ nền tảng: `Kernel`, `Process Runtime`, `Policy`, `Enterprise Context`, `Memory`, `Command Bus`, `Capability Registry`, `Dispatch`, `Evidence` và `Learning`.
-3. **Bella EIP (Hệ thống Nghiệp vụ - System of Record / Business Suite)**: Gói ứng dụng nghiệp vụ sinh dữ liệu bao gồm `CRM`, `Booking`, `POS`, `Inventory`, `Finance`, `Payroll` và `BI Dashboard`. EIP là nơi dữ liệu nghiệp vụ sinh ra, Bella EOS sẽ sử dụng dữ liệu này để ra quyết định và điều hành qua lớp kết nối an toàn.
-4. **Bella Workers**: Lực lượng lao động số thực hiện các nhiệm vụ được định tuyến dựa theo **Năng lực (Capabilities)** thay vì định tuyến theo tên model AI cố định.
-5. **Bella Connect**: Lớp trung gian kết nối các nguồn cấp ngoài (Google Analytics, Facebook, MISA, SAP...) chuyển đổi về mô hình dữ liệu chuẩn của EOS.
+2. **Bella EOS (Enterprise Operating System - Lõi Điều hành)**: Đóng vai trò là **Enterprise Brain** điều hành toàn bộ doanh nghiệp. Chịu trách nhiệm cho các dịch vụ nền tảng: `Kernel`, `EOM`, `Brain Centers`, `Orchestration`, `Internal API Gateway` và `Execution`.
+3. **Bella EIP (Enterprise Integration Platform / Business Suite)**: Gói ứng dụng nghiệp vụ sinh dữ liệu bao gồm `CRM`, `Booking`, `POS`, `Inventory`, `Finance`, `Payroll` và `BI Dashboard`. EIP là **System of Record** - nơi ghi nhận dữ liệu thực tế, không tự đưa ra quyết định hay lập kế hoạch.
+4. **Bella Workers**: Lực lượng lao động số thực hiện các nhiệm vụ được định tuyến dựa theo **Năng lực (Capabilities)** thay vì chỉ định model AI cứng.
+5. **Bella Connect**: Lớp kết nối ngoại vi (Google Analytics, Facebook, MISA, SAP...) dịch chuyển về mô hình dữ liệu chuẩn của EOS.
 6. **Bella SDK**: Nền tảng mở cho phép lập trình viên tích hợp các executor và adapter mới.
 7. **Marketplace**: Nơi phân phối các gói SOP chuẩn và extension.
 
 ---
 
-## 2. THE 6-LAYER ENTERPRISE STACK
+## 2. 4 CORE DOMAINS OF BELLA EOS
 
-Bella EOS v12.0 được gom lại thành **6 lớp lớn** nhằm phân tách rõ trách nhiệm dữ liệu, điều hành và thực thi:
+Kiến trúc được phân tách thành 4 miền logic (domains) độc lập:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│ 1. Executive Intent Layer (Tương tác Người và Tiếp nhận Ý chí Strategic)│
-├─────────────────────────────────────────────────────────────────────────┤
-│ 2. Goal & Planning Layer (Phân rã OKRs & Mô phỏng Monte Carlo / Path)   │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 3. Process Runtime Layer (Thực thi SOP qua State Machine 12 trạng thái) │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 4. Enterprise Context Layer (BCE, Enterprise Memory, Knowledge Graph)   │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 5. Policy & Scheduler (Capability Registry, Compliance, Cost/SLA check) │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 6. Execution Coordination Layer (Queue, Dispatcher, Heartbeat, Audit)   │
-└─────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│ Domain 1: Bella Kernel (Runtime Foundation)            │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Enterprise Object Model (Common Grammar)               │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Domain 2: Enterprise Brain (6 Cognitive Centers)       │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Domain 3: Orchestration (Process Control & Scheduling) │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Internal API Gateway (Unified Adapter Interfaces)      │
+└───────────────────────────┬────────────────────────────┘
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ Domain 4: Execution (Executor Coordinator)             │
+└────────────────────────────────────────────────────────┘
 ```
 
-1. **Executive Intent Layer**: Nơi tiếp nhận ý chí của CEO/HĐQT dưới dạng ngôn ngữ tự nhiên và chuyển dịch thành mục tiêu vận hành doanh nghiệp.
-2. **Goal & Planning Layer**: Phân rã mục tiêu thành OKRs của các phòng ban (Mkt, Sales, HR, Finance, Operations) và mô phỏng tối ưu hóa lộ trình.
-3. **Process Runtime Layer**: Chịu trách nhiệm thực thi các bước của quy trình SOP theo mô hình máy trạng thái (State Machine).
-4. **Enterprise Context Layer (ECL)**: Tổng hợp ngữ cảnh từ Connectors, truy xuất bộ nhớ và bản đồ tri thức để xây dựng Gói Ngữ cảnh Chuẩn hóa (Canonical Context).
-5. **Policy & Scheduler Layer**: Kiểm tra tính tuân thủ chính sách, đối chiếu năng lực yêu cầu của nhiệm vụ với **Capability Registry** để tự động lựa chọn Executor phù hợp nhất (dựa trên chi phí, SLA, token quota, tải hiện tại).
-6. **Execution Coordination Layer**: Phụ trách phân phối việc (Dispatch), quản lý hàng đợi (Queue), giám sát trạng thái (Heartbeat, Timeout), xử lý lỗi (Retry) và lưu trữ chứng cứ (Evidence).
+### Domain 1: Bella Kernel
+* **Trách nhiệm**: Nền tảng runtime hệ thống, quản lý định danh, phân quyền, giao dịch, nhật ký kiểm toán (audit logs) và luồng phân phối sự kiện hệ thống. Kernel hoàn toàn độc lập với các khái niệm kinh doanh hay AI.
+
+### Enterprise Object Model (EOM)
+* **Trách nhiệm**: Ngôn ngữ chung của toàn bộ nền tảng. Tất cả các dữ liệu, tài liệu, kết quả đánh giá, và lệnh điều hành đều được chuẩn hóa thành các thực thể EOM trước khi đưa vào bộ não xử lý.
+* **13 EOM Entities**: `Customer`, `Employee`, `Invoice`, `Campaign`, `Task`, `Process`, `Document`, `Decision`, `Evidence`, `Asset`, `Policy`, `Capability`, `Worker`.
+
+### Domain 2: Enterprise Brain (6 Cognitive Centers)
+* **Trách nhiệm**: Trái tim thông minh của hệ thống. Hiểu doanh nghiệp hoạt động thế nào, mục tiêu là gì, và cần học hỏi gì tiếp theo.
+* **6 Brain Centers**:
+  1. **🧠 Memory Center**: Bộ nhớ hoạt động (Operational), Bộ nhớ số liệu (Business), Bộ nhớ quyết định (Decision), Bộ nhớ hội thoại (Conversation) và Bộ nhớ tài liệu (Document).
+  2. **🧠 Understanding Center**: **Enterprise Understanding Center** chịu trách nhiệm phân tích thông tin thô từ mọi nguồn dữ liệu (Documents, Database, API, CRM, ERP, Meetings, Email, Chat, Audio, Video) thành tri thức cấu trúc.
+  3. **🧬 Knowledge Center**: Bản đồ tri thức (Knowledge Graph), Company DNA, sơ đồ phân loại (Taxonomy, Ontology), và bộ chỉ mục tìm kiếm ngữ nghĩa.
+  4. **📊 Context Center**: Trích xuất dữ liệu, kiểm duyệt bảo mật và biên dịch thành **Canonical Context Packages**. **Context Center không bao giờ để lộ dữ liệu thô (raw database)** cho AI.
+  5. **⚖️ Reasoning Center**: Phân rã mục tiêu (Goal Decompose), lập kế hoạch, kiểm tra tuân thủ chính sách (Policy Check) và chạy mô phỏng dự báo Monte Carlo.
+  6. **🧬 Learning Center**: Phân tích kết quả thực thi (Evidence), cập nhật DNA và tối ưu hóa SOP (SOP Mutation).
+
+### Domain 3: Orchestration
+* **Trách nhiệm**: Tiếp nhận ý chí của CEO (Intent), phân rã thành OKR và lập lịch thực thi dựa trên năng lực.
+* **Thành phần**: Intent Engine, Goal Engine, Planning Engine, Workflow Runtime, Policy Engine, Capability Scheduler.
+
+### Internal API Gateway
+* **Trách nhiệm**: Hợp đồng giao tiếp trung gian (Internal API Gateway). Decouple toàn bộ quy trình lập kế hoạch khỏi lớp mô hình thực thi cụ thể.
+
+### Domain 4: Execution
+* **Trách nhiệm**: Điều phối lực lượng lao động (Workers). **Execution / Workers tuyệt đối không được truy cập trực tiếp vào Brain/Database**, mà chỉ thực thi dựa trên gói Canonical Context được Gateway gửi sang.
 
 ---
 
-## 3. CLOSED-LOOP FLYWHEEL & EVOLUTION ENGINES
+## 3. CLOSED-LOOP FLYWHEEL & INGESTION PIPELINE
 
-Bella EOS triển khai một vòng lặp tự tối ưu hóa khép kín 8 bước (**Closed-Loop Learning Flywheel**) để cải tiến quy trình liên tục:
-
+### 1. Vòng lặp Học hỏi Tự động (Closed-Loop Learning Flywheel)
 ```
-        Executive Intent Formulation
-                     │
-                     ▼
-        Planning & Simulation (Monte Carlo & Path Optimization)
-                     │
-                     ▼
-        Execution Coordination (Dispatch via Capability Scheduler)
-                     │
-                     ▼
-        Observation (Evidence & Real-Time Telemetry)
-                     │
-                     ▼
-        Evaluation (Enterprise Quality Engine - EQE)
-                     │
-                     ▼
-        Learning Mutation (SOP & Skill Adjustments)
-                     │
-                     ▼
-        Knowledge Graph Sync (Enterprise Object Model Update)
-```
-
-### Các Engine Tiến Hóa:
-
-1. **Goal Engine (`GoalEngine`)**:
-   - Phân rã định hướng chiến lược (ví dụ: *"Tăng doanh thu 20%"*) thành OKRs phòng ban:
-     - *Marketing*: Chỉ tiêu Leads và Reach.
-     - *Sales*: Tỷ lệ chuyển đổi và số lượt đặt lịch.
-     - *HR*: Đào tạo năng lực nhân sự mới.
-     - *Finance*: Giới hạn chi phí và tỷ suất lợi nhuận ròng.
-     - *Operations*: Thời gian hoàn thành SLA trung bình.
-
-2. **Simulation Engine (`SimulationEngine`)**:
-   - Chạy mô phỏng Monte Carlo để dự báo các chỉ số ROI, Cashflow và Net profit trước khi thực thi.
-
-3. **Optimization Engine (`OptimizationEngine`)**:
-   - Tính toán toán học đường dẫn quy trình tối ưu dựa trên dữ liệu hiệu năng lịch sử.
-
-4. **Knowledge Graph Subsystem (`KnowledgeGraphService`)**:
-   - Bản đồ hóa các thực thể **Enterprise Object Model (EOM)** bao gồm Customer, Booking, Invoice, Campaign, Process, Task, Evidence, Capability và các quan hệ `GOVERNS`, `APPROVED_BY`, `DEPENDS_ON`.
-
-5. **Learning Engine (`LearningEngine`)**:
-   - Đánh giá chất lượng đầu ra thông qua điểm số từ EQE và thực hiện đột biến SOP tự động.
-
----
-
-## 4. BUSINESS CONTEXT ENGINE (BCE) & EIL CONNECTORS
-
-Lớp Ngữ cảnh Doanh nghiệp (Enterprise Intelligence Layer - EIL) tích hợp bộ điều phối **Business Context Engine (BCE)** để lấy thông tin từ các cổng kết nối độc lập, sau đó chuẩn hóa thành một gói **Canonical Context Model** duy nhất:
-
-```
-    [Bella EIP Connector] ────┐
-    [Facebook Connector]  ────┼───► [Business Context Engine] ───► Unified Enterprise Context
-    [MISA ERP Connector]  ────┤
-    [Google Analytics]    ────┘
+         CEO Strategic Intent
+                  │
+                  ▼
+         Goal Decompose & OKRs
+                  │
+                  ▼
+         Monte Carlo ROI Projections
+                  │
+                  ▼
+         Capability Scheduling & Routing
+                  │
+                  ▼
+         Internal API Gateway Dispatch
+                  │
+                  ▼
+         Worker Execution
+                  │
+                  ▼
+         Quality Review (EQE) & Evidence Verification
+                  │
+                  ▼
+         SOP Mutation & Learning Loop
 ```
 
-### Các Cổng kết nối tích hợp (Active Connectors):
-* **Bella EIP Connector (`EipConnector`)**: Đọc trạng thái dữ liệu nghiệp vụ: Số khách hàng hoạt động, hôm nay có bao nhiêu lượt đặt lịch (active bookings), doanh thu hiện tại.
-* **Google Analytics Connector (`GoogleAnalyticsConnector`)**: Theo dõi lượt truy cập Website hàng ngày, tỷ lệ thoát (bounce rate), tỷ lệ chuyển đổi.
-* **Facebook Graph Connector (`FacebookConnector`)**: Đo lường lượt tiếp cận trang 24h, tỷ lệ tương tác của bài viết.
-* **MISA ERP Connector (`MisaConnector`)**: Giám sát lượng hàng tồn kho cảnh báo, lượng tiền mặt lưu động (cash on hand), công nợ phải trả.
-* **Brand Guidelines Indexer**: Phân tích quy định thương hiệu (ví dụ: cấm đăng bài ban đêm, cấm sử dụng từ ngữ phi chuẩn).
-
-### Cấu trúc Gói Ngữ Cảnh Chuẩn Hóa (EIL Context Package JSON):
-```json
-{
-  "taskId": "task-step-6",
-  "objective": "Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu",
-  "erp": {
-    "costCenter": "CC-BELLA-2026",
-    "approvedBudgetVnd": 50000000,
-    "currency": "VND",
-    "cashOnHandVnd": 12400000000,
-    "payableAmountVnd": 45000000,
-    "inventoryAlerts": 3
-  },
-  "crm": {
-    "targetSegment": "Enterprise VIP",
-    "minEqeScore": 90,
-    "activeCustomers": 1289,
-    "activeBookings": 42,
-    "dailyWebsiteSessions": 4200,
-    "facebookReach24h": 14500
-  },
-  "hr": {
-    "roleRequired": "mkt",
-    "slaHours": 24,
-    "approvalRole": "CEO"
-  },
-  "governance": {
-    "maxAutoSpendVnd": 100000000,
-    "policyId": "POL-ENTERPRISE-GOV-2026",
-    "nightPostingAllowed": false
-  },
-  "decisionLineage": ["DEC-INITIAL-INTENT-001"]
-}
+### 2. Ingestion & Understanding Pipeline
+Pipeline tự động hóa việc đưa tri thức vào bộ não doanh nghiệp mà không cần nhập liệu thủ công:
+```
+Upload Document ➔ OCR ➔ Parser ➔ Normalizer ➔ Classification ➔ Chunking ➔ Embedding ➔ Entity Extraction ➔ Relationship Builder ➔ Knowledge Graph Sync ➔ Memory Update ➔ Company DNA Sync
 ```
 
 ---
 
-## 5. ENTERPRISE CONTEXT LAYER: ENTERPRISE MEMORY
+## 4. 🔒 THE 5 FROZEN CONTRACTS
 
-Để ra quyết định đúng đắn, hệ thống không chỉ cần Context ngắn hạn mà cần một hệ thống lưu trữ bộ nhớ doanh nghiệp sâu sắc (**Enterprise Memory**):
+Để đảm bảo hệ thống có tuổi thọ từ 15-20 năm mà không phát sinh lỗi tương thích ngược, 5 hợp đồng kiến trúc sau đây chính thức được đóng băng:
 
-* **Operational Memory (Bộ nhớ Vận hành)**: Ghi nhớ các bước quy trình, các lần thực thi SOP trước đó, các phiên làm việc và vết logs lỗi.
-* **Business Memory (Bộ nhớ Nghiệp vụ)**: Lưu giữ thông tin về lịch sử biến động dữ liệu của Bella EIP (chiến dịch thành công/thất bại, doanh thu, tăng trưởng khách hàng).
-* **Reasoning Memory (Bộ nhớ Tư duy)**: Lưu trữ chuỗi lập luận (chain of thoughts) của các mô phỏng Monte Carlo, các quyết định điều hướng của Scheduler.
-* **Conversation Memory (Bộ nhớ Hội thoại)**: Lưu lịch sử hội thoại, các ý chí điều khiển trực tiếp từ CEO/HĐQT qua Chat.
-* **Document Memory (Bộ nhớ Tài liệu)**: Cơ sở dữ liệu tri thức nội bộ được vector hóa (SOPs, Brand Guidelines, Sách hướng dẫn vận hành).
-
----
-
-## 6. CAPABILITY REGISTRY & SCHEDULER FLOW
-
-Hệ thống không quản lý tĩnh theo tên AI Agent mà quản lý động theo **Năng lực (Capabilities)**:
-
-### 1. Quy trình Lập lịch và Điều Phối (Scheduler Flow):
-```
-    Nhiệm vụ (Task)
-         │
-         ▼
-    Yêu cầu Năng lực (Capability Requirement)
-         │
-         ▼
-    Kiểm tra Chính sách & Ngân sách (Policy & Budget Check)
-         │
-         ▼
-    Đối chiếu Ngữ cảnh Doanh nghiệp (Business Context Check)
-         │
-         ▼
-    Bộ Lập Lịch (Scheduler) ◄─── Đối chiếu ───► Capability Registry (Workers)
-         │
-         ▼
-    Lựa chọn Thực thi phù hợp nhất (Cost, SLA, Quota, Load)
-         │
-         ▼
-    Phân phối và Đăng ký Hàng đợi (Dispatch & Queue)
-```
-
-### 2. Định nghĩa Capability Registry:
-Các AI Workers (Claude, Gemini, GPT) và Human Workers sẽ khai báo các Capabilities tương ứng:
-* **Hermes Worker**: `SEO`, `Facebook Graph API`, `Publishing`, `Web Screenshot`.
-* **Claude Worker**: `Architecture Design`, `Coding`, `Strategic Reasoning`.
-* **Gemini Worker**: `Video Analysis`, `Multi-modal Vision`, `Long Context Processing`.
-* **OpenAI Worker**: `Reasoning`, `Coding`, `Function Calling`.
+1. **Enterprise Object Model (EOM)**: Cấu trúc JSON Schema cố định cho 13 thực thể chính để tất cả các thành phần giao tiếp chung một ngôn ngữ.
+2. **Canonical Context Package**: Chuẩn đóng gói ngữ cảnh duy nhất gửi đến AI Workers (chỉ chứa dữ liệu lọc bảo mật và đã được rút gọn tối ưu token).
+3. **Capability Registry**: Chuẩn mô tả năng lực của Worker (định danh, proficient level, SLA, đơn giá token).
+4. **Internal Event Contract**: Hệ thống sự kiện bất biến giao tiếp giữa các domains (`IntentCreated`, `GoalGenerated`, `PlanGenerated`, `TaskCreated`, `TaskCompleted`, `EvidenceVerified`, `LearningUpdated`).
+5. **Internal API Contract**: Giao diện (Interface) các dịch vụ cốt lõi:
+   - *Context API*
+   - *Memory API*
+   - *Planning API*
+   - *Execution API*
+   - *Learning API*
 
 ---
 
-## 7. EXECUTION COORDINATION LAYER
+## 5. TECHNOLOGY STACK (FREE-FIRST & SCALABLE)
 
-Execution Coordination Layer chịu trách nhiệm đảm bảo tính tin cậy của giao dịch quy trình:
-
-```typescript
-interface ExecutionCoordinator {
-    dispatch(task: Task, context: CanonicalContext): Promise<string>; // Trả về Task ID
-    queue: TaskQueue;                                                 // Quản lý hàng đợi nhiệm vụ
-    heartbeat(taskId: string): void;                                  // Giám sát trạng thái hoạt động
-    timeout(taskId: string, maxSlaHours: number): void;               // Xử lý quá hạn
-    retry(taskId: string, error: Error): Promise<boolean>;            // Tự động thử lại
-    compensate(taskId: string, error: Error): Promise<void>;          // Giao dịch bù (roll back trạng thái)
-    verify(taskId: string): Promise<Evidence>;                        // Xác thực chứng cứ (Evidence)
-}
-```
+* **Frontend**: Next.js (App Router), React, TypeScript, CSS Modules, Framer Motion, Three.js (React Three Fiber).
+* **Backend**: Next.js Route Handlers, TypeScript.
+* **Database & Persistence**: Supabase PostgreSQL.
+* **Object Storage**: Supabase Storage (SOPs, PDF, DOCX, media assets).
+* **Vector Database (RAG)**: pgvector trên Supabase.
+* **Authentication**: Supabase Auth (với Row Level Security - RLS).
+* **File Parsing & OCR**: PDF.js, Mammoth (DOCX), xlsx, Tesseract.js.
+* **AI Executors**: Hermes (Local/VPS execution node), Claude, GPT, Gemini.
+* **Deployment**: Vercel (Development/Staging), VPS Ubuntu + Docker + Nginx (Production).
 
 ---
 
-## 8. EVENT BUS DECISION SYSTEM
+## 6. PROJECT DIRECTORY STRUCTURE
 
-Toàn bộ hệ thống giao tiếp bất đồng bộ qua **Event Bus** để đảm bảo khả năng mở rộng ở quy mô lớn:
+Dự án Next.js được tổ chức cấu trúc file theo mô hình domain cô lập như sau:
 
 ```
-CEO Intent ➔ [Executive Intent] ➔ Event: IntentCreated ➔ [Goal Engine] ➔ OKRs ➔ Event: OKRsSet 
-           ➔ [Planning Engine] ➔ Task DAG ➔ Event: TasksPlanned ➔ [Scheduler] ➔ Select Executor 
-           ➔ Event: TaskDispatched ➔ [Execution Coordination] ➔ [Executor] ➔ [Evidence Store] ➔ Event: TaskDone 
-           ➔ [Learning Engine] ➔ Event: SOPMutated
-```
-
----
-
-## 9. ARCHITECTURE FREEZE: THREE FOUNDATIONAL SCHEMAS
-
-Để đảm bảo tính ổn định tối cao trong suốt vòng đời phát triển 15-20 năm tới, chúng ta chính thức **đóng băng (Architecture Freeze)** 3 lược đồ nền tảng dưới đây. Mọi thay đổi nghiệp vụ tương lai chỉ được phép kế thừa từ các cấu trúc chuẩn này.
-
-### ① Lược đồ Đối tượng Doanh nghiệp chuẩn - Enterprise Object Model (EOM)
-Tất cả các thành phần trong hệ sinh thái (DB, API, SDK, UI, Event) đều bắt buộc sử dụng chung cấu trúc EOM:
-
-```typescript
-type EomType = 'Customer' | 'Invoice' | 'Booking' | 'Task' | 'ProcessTemplate' | 'ProcessInstance' | 'Policy' | 'Resource' | 'Evidence' | 'Command' | 'Decision';
-
-interface EomObject {
-    id: string;
-    type: EomType;
-    createdAt: string;
-    updatedAt: string;
-    metadata: Record<string, any>;
-}
-
-// Chi tiết lược đồ của 11 thực thể EOM lõi:
-interface Customer extends EomObject {
-    name: string;
-    tier: 'VIP' | 'Regular';
-    segment: string;
-    contactInfo: { phone?: string; email?: string };
-}
-
-interface Invoice extends EomObject {
-    amountVnd: number;
-    taxCode?: string;
-    status: 'DRAFT' | 'PAID' | 'RECONCILED';
-    customerId: string;
-}
-
-interface Booking extends EomObject {
-    customerId: string;
-    time: string;
-    serviceName: string;
-    status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
-}
-
-interface Task extends EomObject {
-    title: string;
-    requiredCapabilityIds: string[];
-    assignedExecutor?: string;
-    status: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
-}
-
-interface ProcessTemplate extends EomObject {
-    name: string;
-    version: string;
-    description: string;
-    stepsCount: number;
-    tasksContract: { title: string; requiredCapabilityIds: string[] }[];
-}
-
-interface ProcessInstance extends EomObject {
-    templateId: string;
-    activeStep: number;
-    state: 'INIT' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'REVISED';
-    variables: Record<string, any>;
-}
-
-interface Policy extends EomObject {
-    ruleName: string;
-    conditions: string[];
-    maxSpendLimit: number;
-}
-
-interface Resource extends EomObject {
-    resourceType: 'API' | 'Compute' | 'TokenQuota';
-    limit: number;
-    used: number;
-}
-
-interface Evidence extends EomObject {
-    taskId: string;
-    hash: string;
-    payload: any;
-    verifiedAt: string;
-}
-
-interface Command extends EomObject {
-    commandName: string;
-    sender: string;
-    receiver: string;
-    payload: any;
-    dispatchedAt: string;
-}
-
-interface Decision extends EomObject {
-    objective: string;
-    pathChosen: string;
-    confidencePct: number;
-    reason: string;
-}
-```
-
-### ② Lược đồ Ngữ cảnh chuẩn - Canonical Context Package Schema
-Cấu trúc chuẩn của gói Context ECL phân phối đến mọi AI Model & Executor:
-
-```json
-{
-  "$schema": "https://bella.ai/schemas/canonical-context-v12.json",
-  "type": "object",
-  "required": ["taskId", "objective", "erp", "crm", "hr", "governance", "recalledMemoryExcerpt", "contextSources"],
-  "properties": {
-    "taskId": { "type": "string" },
-    "objective": { "type": "string" },
-    "contextSources": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["source", "domain", "version"],
-        "properties": {
-          "source": { "type": "string" },
-          "domain": { "type": "string" },
-          "version": { "type": "string" }
-        }
-      }
-    },
-    "erp": {
-      "type": "object",
-      "required": ["costCenter", "approvedBudgetVnd", "currency", "cashOnHandVnd", "payableAmountVnd", "inventoryAlerts"],
-      "properties": {
-        "costCenter": { "type": "string" },
-        "approvedBudgetVnd": { "type": "number" },
-        "currency": { "type": "string" },
-        "cashOnHandVnd": { "type": "number" },
-        "payableAmountVnd": { "type": "number" },
-        "inventoryAlerts": { "type": "number" }
-      }
-    },
-    "crm": {
-      "type": "object",
-      "required": ["targetSegment", "minEqeScore", "activeCustomers", "activeBookings", "dailyWebsiteSessions", "facebookReach24h"],
-      "properties": {
-        "targetSegment": { "type": "string" },
-        "minEqeScore": { "type": "number" },
-        "activeCustomers": { "type": "number" },
-        "activeBookings": { "type": "number" },
-        "dailyWebsiteSessions": { "type": "number" },
-        "facebookReach24h": { "type": "number" }
-      }
-    },
-    "hr": {
-      "type": "object",
-      "required": ["roleRequired", "slaHours", "approvalRole"],
-      "properties": {
-        "roleRequired": { "type": "string" },
-        "slaHours": { "type": "number" },
-        "approvalRole": { "type": "string" }
-      }
-    },
-    "governance": {
-      "type": "object",
-      "required": ["maxAutoSpendVnd", "policyId", "nightPostingAllowed"],
-      "properties": {
-        "maxAutoSpendVnd": { "type": "number" },
-        "policyId": { "type": "string" },
-        "nightPostingAllowed": { "type": "boolean" }
-      }
-    },
-    "recalledMemoryExcerpt": {
-      "type": "object",
-      "required": ["recentConversations"],
-      "properties": {
-        "recentConversations": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["speaker", "text"],
-            "properties": {
-              "speaker": { "type": "string" },
-              "text": { "type": "string" }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### ③ Lược đồ Đăng ký Năng lực chuẩn - Capability Registry Schema
-Được sử dụng bởi tất cả các AI Workers và Human Operators khi gia nhập lực lượng lao động số (Bella Workers):
-
-```typescript
-interface Capability {
-    id: string;               // Ví dụ: 'mkt.seo', 'dev.coding.nodejs', 'connector.misa'
-    name: string;             // Ví dụ: 'SEO Copywriting', 'NodeJS Programming', 'Misa API Integration'
-    version: string;          // Ví dụ: '1.0'
-    category: string;         // Ví dụ: 'Marketing' | 'Development' | 'Integration'
-    tags: string[];           // Ví dụ: ['social', 'api', 'backend']
-}
-
-interface CapabilityRegistration {
-    executorId: string;       // ID duy nhất của worker (ví dụ: 'hermes', 'claude-3-5')
-    workerType: 'AI' | 'Human';
-    activeCapabilities: {
-        capability: Capability;
-        proficiencyLevel: number; // Thang điểm 1 - 100
-        avgLatencyMs: number;
-    }[];
-    financialConstraints: {
-        costPerTokenVnd?: number;
-        costPerHourVnd?: number;
-        remainingBudgetLimitVnd: number;
-    };
-    concurrencyLimits: {
-        maxRatePerMin: number;
-        activeTasksCount: number;
-    };
-}
+src/
+├── app/                        # Next.js App Router (Pages & API Routes)
+│   ├── api/
+│   │   ├── intent/route.ts     # Parses intents & maps OKR goals
+│   │   ├── ingest/route.ts     # Ingestion & Understanding receiver
+│   │   └── execution/route.ts  # Dispatch API Gateway commands
+│   ├── layout.tsx
+│   └── page.tsx                # Main Dashboard UI
+│
+├── components/                 # React UI Components
+│   ├── OfficeViewport.tsx      # 3D Office Environment (Three.js)
+│   └── BrainConsoleModal.tsx   # Glassmorphic Brain Console UI
+│
+├── core/                       # Bella EOS Core (TypeScript)
+│   ├── kernel/                 # Domain 1: Kernel Event Store & transaction log
+│   ├── eom/                    # EOM Schema Validators
+│   ├── brain/                  # Domain 2: 6 Brain Cognitive Centers
+│   │   ├── memory.ts
+│   │   ├── understanding.ts
+│   │   ├── knowledge.ts
+│   │   ├── context.ts
+│   │   ├── reasoning.ts
+│   │   ├── learning.ts
+│   │   └── index.ts            # Facade exports
+│   ├── orchestration/          # Domain 3: Goal trees, Intent, & Scheduler
+│   └── execution/              # Domain 4: Execution Coordinator & API Gateway
+│
+├── connectors/                 # Bella Connect (EIP, SAP, MISA, Facebook, Google connectors)
+│   ├── eip-connector.ts
+│   ├── sap-connector.ts
+│   ├── index.ts
+│
+├── lib/                        # Supabase client wrapper
+│   └── supabase.ts
+│
+└── types/                      # Shared TS Interfaces
+    └── eom.ts                  # Frozen EOM typings
 ```
 
 ---
 
-## 10. ARCHITECTURE FREEZE POLICY
+## 7. ARCHITECTURE FREEZE COMPLIANCE RULES
 
-Để duy trì tính toàn vẹn và ổn định lâu dài của hệ thống trong 15-20 năm, chính sách đóng băng kiến trúc dưới đây được áp dụng bắt buộc:
-
-1. **Brand Architecture**: Cấu trúc thương hiệu 6 lớp (`Bella AI Platform` ➔ `Bella EOS` ➔ `Bella EIP` ➔ `Bella Workers` ➔ `Bella Connect` ➔ `Bella SDK` / `Marketplace`) là cố định và không thay đổi.
-2. **Module Boundary**: Ranh giới độc lập giữa các module được phân định nghiêm ngặt. Lõi điều phối (EOS) không được chứa mã nguồn nghiệp vụ của ứng dụng (EIP).
-3. **EOM Backward Compatibility**: Enterprise Object Model chỉ được phép thêm đối tượng mới khi có nhu cầu đặc thù của Extensions. Tuyệt đối không xóa hay sửa đổi các thuộc tính đã đóng băng của 11 EOM lõi.
-4. **Canonical Context Extensibility**: Gói ngữ cảnh chuẩn hóa cung cấp cho các AI Models chỉ được phép bổ sung trường (extension fields), không được thay đổi ý nghĩa của các trường cũ để tránh làm lỗi các SOP cũ.
-5. **Capability Registry Stability**: Giao thức kết nối năng lực đóng vai trò là hợp đồng giao dịch bất biến giữa Bella EOS và các AI/Human Workers.
-6. **Kernel Rules**: Mọi tính năng mới phải được phát triển dưới dạng Kernel Services, Connectors, Workers, Packages hoặc SDK Extensions, không chỉnh sửa kiến trúc lõi của Hệ điều hành.
+1. **Bella EIP is External System of Record**: Trực thuộc Bella EIP độc lập bên ngoài, chỉ lưu trữ dữ liệu nghiệp vụ và giao tiếp qua connectors, không nằm trong lõi EOS.
+2. **Bella EOS is Enterprise Brain**: Mọi quyết định, lập lịch, kiểm tra chính sách, và tiến hóa của doanh nghiệp đều phải thông qua các Cognitive Centers của EOS.
+3. **No Direct DB Access for AI**: AI Workers luôn giao tiếp qua gói Canonical Context bảo mật của Context Center, tuyệt đối không kết nối trực tiếp vào PostgreSQL của EIP hay ERP bên ngoài.
+4. **Capability-based Routing**: Điều phối công việc tự động dựa trên Năng lực, không gán tĩnh theo tên model AI để dễ dàng nâng cấp mô hình AI trong tương lai.
+5. **Human-in-the-Loop**: Hỗ trợ ngắt tiến trình bất kỳ lúc nào để chuyển quyền duyệt cho CEO/Con người khi phát hiện cảnh báo rủi ro hoặc kiểm định chất lượng (EQE Gate).
