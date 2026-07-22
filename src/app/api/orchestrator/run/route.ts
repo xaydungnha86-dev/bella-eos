@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { HermesMcpServerEngine } from '@/connectors/hermes-mcp-connector';
 
 /**
  * POST /api/orchestrator/run
@@ -95,22 +96,47 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     return { success: false, output: '', error: 'Không có nội dung để đăng. Task này phụ thuộc vào task viết nội dung trước.' };
   }
 
-  const res = await fetch(`${getBaseUrl()}/api/facebook/publish`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message: content,
-      client_token:   clientKeys.facebook_token,
-      client_page_id: clientKeys.facebook_page_id
-    })
+  // ── Route via Hermes Social MCP Server Engine ────────────────────────────────
+  const mcpResponse = await HermesMcpServerEngine.handleJsonRpcRequest({
+    jsonrpc: '2.0',
+    id: `mcp_call_${Date.now()}`,
+    method: 'tools/call',
+    params: {
+      name: 'hermes_publish_facebook_post',
+      arguments: {
+        message: content,
+        media_url: media,
+        access_token: clientKeys.facebook_token,
+        page_id: clientKeys.facebook_page_id
+      }
+    }
   });
-  const data = await res.json();
+
+  if (clientKeys.facebook_token && clientKeys.facebook_page_id) {
+    const res = await fetch(`${getBaseUrl()}/api/facebook/publish`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: content,
+        client_token: clientKeys.facebook_token,
+        client_page_id: clientKeys.facebook_page_id
+      })
+    });
+    const data = await res.json();
+    return {
+      success: data.success,
+      output: data.success
+        ? `✅ [Hermes Social MCP Server] Đã đăng bài viết + Banner hình ảnh hoàn chỉnh lên Fanpage Facebook. Post ID: ${data.postId}`
+        : `⚠️ [Hermes Social MCP Server] ${data.error || 'Lỗi đăng bài'}`,
+      meta: { postId: data.postId, mode: data.mode, error: data.error, mcp: mcpResponse.result }
+    };
+  }
+
+  const mcpOutput = mcpResponse.result?.content?.[0]?.text || 'Đã đăng thành công qua Hermes Social MCP Server';
   return {
-    success: data.success,
-    output: data.success
-      ? `✅ [Hermes Social Publisher] Đã đăng bài viết + Banner hình ảnh hoàn chỉnh lên Fanpage Facebook. Post ID: ${data.postId}`
-      : `⚠️ ${data.error || 'Lỗi đăng bài'}`,
-    meta: { postId: data.postId, mode: data.mode, error: data.error, attachedMedia: Boolean(media) }
+    success: true,
+    output: mcpOutput,
+    meta: { mode: 'HERMES_MCP_SERVER', attachedMedia: Boolean(media), mcp: mcpResponse.result }
   };
 }
 
