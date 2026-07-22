@@ -312,14 +312,17 @@ export default function Dashboard() {
 
     await delay(600);
     addLog('EipConnector', `Fetching active customer records from external EIP CRM`, 'text-slate-300');
-    const activeCustomers = EipConnector.getActiveCustomers();
+    const activeCustomers = await EipConnector.getActiveCustomers();
 
     await delay(500);
     addLog('Understanding Center', `Digesting API / EIP payload from: EIP CRM API`, 'text-slate-300');
     EnterpriseBrain.Understanding.understandApiFact('EIP CRM API', { activeCustomersCount: activeCustomers.length });
     
+    // Query Facebook Metrics
+    const fbMetrics = await FacebookConnector.getReachMetrics();
+    
     await delay(700);
-    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: ${activeCustomers.length + 1287} | Reach 24h: 14.5k. Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
+    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: ${activeCustomers.length + 1287} | Reach 24h: ${fbMetrics.postReach24h.toLocaleString()} (Nguồn: ${fbMetrics.source}). Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
 
     await delay(700);
     addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-400 font-semibold');
