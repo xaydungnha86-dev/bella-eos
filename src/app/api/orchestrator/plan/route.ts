@@ -22,16 +22,16 @@ import { NextResponse } from 'next/server';
 // ─── Agent Registry — available agents the LLM can assign tasks to ─────────
 const AGENT_REGISTRY = [
   {
-    id: 'hermes_content',
-    name: 'Hermes Content Agent',
-    description: 'Chuyên viết nội dung sáng tạo, marketing copy, bài đăng mạng xã hội, email marketing, quảng cáo',
+    id: 'eos_content_worker',
+    name: 'Bella EOS Content Worker',
+    description: 'AI Worker nội bộ của Bella EOS chuyên phân tích chỉ thị CEO và soạn thảo nội dung truyền thông, marketing copy chuẩn hóa',
     tools: ['write_facebook_post', 'write_zalo_message', 'write_email_campaign', 'write_ad_copy'],
     output_type: 'content'
   },
   {
-    id: 'apollo_social',
-    name: 'Apollo Social Agent',
-    description: 'Chuyên đăng bài và quản lý mạng xã hội: Facebook, Zalo, TikTok, Instagram',
+    id: 'hermes_social',
+    name: 'Hermes Social Publisher',
+    description: 'Agent kênh truyền thông Hermes chuyên nhận nội dung đã soạn thảo từ Bella EOS Worker và thực thi đăng bài lên các kênh xã hội (Facebook, Zalo, TikTok)',
     tools: ['publish_facebook', 'publish_zalo', 'publish_tiktok', 'schedule_post'],
     output_type: 'publication'
   },
@@ -45,7 +45,7 @@ const AGENT_REGISTRY = [
   {
     id: 'ares_ads',
     name: 'Ares Ads Agent',
-    description: 'Chuyên thiết lập và tối ưu quảng cáo trả phí (Facebook Ads, Google Ads, TikTok Ads)',
+    description: 'Chuyên nhận nội dung từ Bella EOS Worker để thiết lập và tối ưu chiến dịch quảng cáo trả phí (Facebook Ads, Google Ads, TikTok Ads)',
     tools: ['create_facebook_ad', 'setup_google_campaign', 'optimize_ad_budget', 'create_audience'],
     output_type: 'campaign'
   },
@@ -67,10 +67,12 @@ ${JSON.stringify(AGENT_REGISTRY, null, 2)}
 Quy tắc lập kế hoạch:
 1. Đọc mục tiêu của CEO một cách cẩn thận
 2. Xác định TẤT CẢ các công việc cần thực hiện để đạt được mục tiêu đó
-3. Chỉ chọn Agent phù hợp dựa trên "description" và "tools" của agent — KHÔNG hardcode
-4. Ưu tiên: nếu chiến dịch cần content TRƯỚC KHI đăng, phải có content task trước social task
-5. Mỗi task phải có input rõ ràng và expected_output
-6. Số lượng task: tối thiểu 2, tối đa 8 task cho mỗi kế hoạch
+3. Phân định vai trò RÕ RÀNG:
+   - "Bella EOS Content Worker" chịu trách nhiệm SOẠN THẢO NỘI DUNG (task_type: write_facebook_post)
+   - "Hermes Social Publisher" chịu trách nhiệm NHẬN NỘI DUNG VÀ ĐĂNG BÀI (task_type: publish_facebook, depends_on: [task soạn thảo])
+   - "Ares Ads Agent" chịu trách nhiệm NHẬN NỘI DUNG VÀ THIẾT LẬP QUẢNG CÁO (task_type: create_facebook_ad, depends_on: [task soạn thảo])
+4. Mỗi task phải có input rõ ràng và expected_output
+5. Số lượng task: tối thiểu 2, tối đa 8 task cho mỗi kế hoạch
 
 Trả về JSON THUẦN TÚY (không có markdown, không có backtick), theo schema sau:
 {
@@ -79,10 +81,10 @@ Trả về JSON THUẦN TÚY (không có markdown, không có backtick), theo sc
   "tasks": [
     {
       "task_id": "t1",
-      "agent_id": "hermes_content",
-      "agent_name": "Hermes Content Agent",
+      "agent_id": "eos_content_worker",
+      "agent_name": "Bella EOS Content Worker",
       "task_type": "write_facebook_post",
-      "task_description": "mô tả công việc cụ thể",
+      "task_description": "mô tả công việc soạn thảo bài viết",
       "input": {
         "objective": "...",
         "tone": "...",
@@ -232,54 +234,52 @@ function buildFallbackPlan(objective: string, context?: any) {
   const lowerObj = objective.toLowerCase();
   const tasks = [];
 
-  // Always: write content first
+  // Task 1: Bella EOS Content Worker drafts the post
   tasks.push({
     task_id: 't1',
-    agent_id: 'hermes_content',
-    agent_name: 'Hermes Content Agent',
+    agent_id: 'eos_content_worker',
+    agent_name: 'Bella EOS Content Worker',
     task_type: 'write_facebook_post',
-    task_description: `Viết bài đăng Facebook chuyên nghiệp cho chiến dịch: "${objective}"`,
+    task_description: `Soạn thảo bài đăng Facebook truyền thông cho chiến dịch: "${objective}"`,
     input: { objective, tone, target_audience: segment, platform: 'facebook' },
-    expected_output: 'Bài đăng Facebook sẵn sàng đăng, có hook, body, CTA và hashtag',
+    expected_output: 'Bài đăng Facebook hoàn chỉnh từ Bella EOS Worker, có hook, offer và hashtag',
     depends_on: []
   });
 
-  // If mentions social/fb/post → publish
-  if (lowerObj.includes('đăng') || lowerObj.includes('facebook') || lowerObj.includes('zalo') || lowerObj.includes('mạng xã hội')) {
-    tasks.push({
-      task_id: 't2',
-      agent_id: 'apollo_social',
-      agent_name: 'Apollo Social Agent',
-      task_type: 'publish_facebook',
-      task_description: 'Đăng nội dung đã viết lên Facebook Fanpage',
-      input: { content_from: 't1', platform: 'facebook' },
-      expected_output: 'Bài đăng thành công lên Facebook, trả về Post ID',
-      depends_on: ['t1']
-    });
-  }
+  // Task 2: Hermes Social Publisher receives the post from Bella EOS Worker and publishes it to Facebook
+  tasks.push({
+    task_id: 't2',
+    agent_id: 'hermes_social',
+    agent_name: 'Hermes Social Publisher',
+    task_type: 'publish_facebook',
+    task_description: 'Nhận bài viết từ Bella EOS Worker và thực thi đăng lên Fanpage Facebook',
+    input: { content_from: 't1', platform: 'facebook' },
+    expected_output: 'Hermes thực thi đăng bài thành công lên Fanpage Facebook, trả về Post ID',
+    depends_on: ['t1']
+  });
 
-  // If mentions ads/quảng cáo → create ads
-  if (lowerObj.includes('quảng cáo') || lowerObj.includes('ads') || lowerObj.includes('ngân sách')) {
+  // Task 3: Ares Ads Agent receives the post and sets up ad campaign
+  if (lowerObj.includes('quảng cáo') || lowerObj.includes('ads') || lowerObj.includes('ngân sách') || lowerObj.includes('demo') || lowerObj.includes('spa')) {
     tasks.push({
       task_id: 't3',
       agent_id: 'ares_ads',
       agent_name: 'Ares Ads Agent',
       task_type: 'create_facebook_ad',
-      task_description: 'Thiết lập chiến dịch quảng cáo Facebook dựa trên nội dung đã viết',
+      task_description: 'Nhận nội dung từ Bella EOS Worker và thiết lập chiến dịch quảng cáo Facebook Ads',
       input: { objective, budget_hint: objective, content_from: 't1' },
-      expected_output: 'Cấu hình chiến dịch quảng cáo Facebook hoàn chỉnh',
+      expected_output: 'Cấu hình chiến dịch quảng cáo Facebook Ads hoàn chỉnh',
       depends_on: ['t1']
     });
   }
 
-  // If mentions phân tích/kpi/đo lường → analytics
-  if (lowerObj.includes('phân tích') || lowerObj.includes('kpi') || lowerObj.includes('báo cáo') || lowerObj.includes('đo lường')) {
+  // Task 4: Athena Analytics Agent forecasts KPI/ROI
+  if (lowerObj.includes('phân tích') || lowerObj.includes('kpi') || lowerObj.includes('báo cáo') || lowerObj.includes('đo lường') || lowerObj.includes('30 ngày')) {
     tasks.push({
       task_id: `t${tasks.length + 1}`,
       agent_id: 'athena_analytics',
       agent_name: 'Athena Analytics Agent',
       task_type: 'generate_report',
-      task_description: 'Phân tích và dự báo hiệu suất chiến dịch',
+      task_description: 'Phân tích và dự báo hiệu suất KPI cho chiến dịch',
       input: { objective, metrics: ['reach', 'engagement', 'conversion', 'roi'] },
       expected_output: 'Báo cáo dự báo KPI và ROI cho chiến dịch',
       depends_on: []
@@ -288,7 +288,7 @@ function buildFallbackPlan(objective: string, context?: any) {
 
   return {
     plan_title: `Kế hoạch: ${objective.substring(0, 60)}...`,
-    reasoning: 'Kế hoạch được tạo tự động dựa trên phân tích từ khóa trong mục tiêu. Cấu hình AI API Key để có kế hoạch thông minh hơn.',
+    reasoning: 'Bella EOS Content Worker soạn thảo bài viết ➔ Hermes Social Agent nhận bài và thực thi đăng ➔ Ares Ads thiết lập chiến dịch ➔ Athena Analytics dự báo KPI.',
     tasks
   };
 }
