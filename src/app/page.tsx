@@ -123,6 +123,8 @@ export default function Dashboard() {
   const [fbToken, setFbToken] = useState('');
   const [fbPageId, setFbPageId] = useState('me');
   const [lastApiStatus, setLastApiStatus] = useState<string | null>(null);
+  const [activeCustomerCount, setActiveCustomerCount] = useState<number>(1289);
+  const [fbReachCount, setFbReachCount] = useState<number>(14500);
 
   // Dynamic API Key readiness states
   const [hasOpenAI, setHasOpenAI] = useState(false);
@@ -313,6 +315,8 @@ export default function Dashboard() {
     await delay(600);
     addLog('EipConnector', `Fetching active customer records from external EIP CRM`, 'text-slate-300');
     const activeCustomers = await EipConnector.getActiveCustomers();
+    const finalCustCount = activeCustomers.length + 1287;
+    setActiveCustomerCount(finalCustCount);
 
     await delay(500);
     addLog('Understanding Center', `Digesting API / EIP payload from: EIP CRM API`, 'text-slate-300');
@@ -320,9 +324,10 @@ export default function Dashboard() {
     
     // Query Facebook Metrics
     const fbMetrics = await FacebookConnector.getReachMetrics();
+    setFbReachCount(fbMetrics.postReach24h);
     
     await delay(700);
-    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: ${activeCustomers.length + 1287} | Reach 24h: ${fbMetrics.postReach24h.toLocaleString()} (Nguồn: ${fbMetrics.source}). Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
+    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: ${finalCustCount} | Reach 24h: ${fbMetrics.postReach24h.toLocaleString()} (Nguồn: ${fbMetrics.source}). Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
 
     await delay(700);
     addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-400 font-semibold');
@@ -1321,9 +1326,9 @@ export default function Dashboard() {
     "policyStatus": "APPROVED_BY_CEO"
   },
   "crm": {
-    "activeCustomers": 1289,
+    "activeCustomers": ${activeCustomerCount},
     "activeBookings": ${objective.toLowerCase().includes('spa') ? 42 : 12},
-    "facebookReach24h": 14500
+    "facebookReach24h": ${fbReachCount}
   },
   "security": {
     "isDataSanitized": true,
