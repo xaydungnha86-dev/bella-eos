@@ -13,6 +13,16 @@ import { OrchestrationEngine } from '../core/orchestration/orchestration';
 import { InternalApiGateway } from '../core/execution/execution';
 import { FacebookConnector } from '../connectors/index';
 
+// ─── Helper: read API keys from localStorage (set by /settings page) ─────────
+const LS_KEY = 'bella_eos_integrations';
+function getStoredKey(provider: string, key_name: string): string {
+  if (typeof window === 'undefined') return '';
+  try {
+    const store = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    return store[`${provider}::${key_name}`] || '';
+  } catch { return ''; }
+}
+
 // 11 AI Workforce Matrix static definition
 const AI_WORKFORCE = [
   { id: 'coo', name: 'AI COO Orchestrator', type: 'AI', role: 'Operations', avatar: '🤖', capability: 'Process planning & scheduling', status: 'idle', prof: 98, color: 'from-cyan-500 to-blue-500' },

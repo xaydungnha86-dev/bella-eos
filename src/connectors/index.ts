@@ -61,22 +61,36 @@ export class FacebookConnector {
   }
 
   /**
-   * Publishes a post to Facebook via the secure server-side proxy.
-   * Token NEVER leaves the server — /api/facebook/publish reads it from .env.local.
-   * Falls back gracefully when the token is not yet configured.
+   * Publishes a post via the secure server-side proxy.
+   * Reads the token from localStorage (set by /settings page) and passes it
+   * to the server-side route so it never has to be in .env.
    */
   static async publishRealPost(
     message: string,
-    _accessToken?: string,   // kept for signature compat; token is now server-only
-    pageId?: string
+    _accessToken?: string,
+    _pageId?: string
   ): Promise<{ success: boolean; postId?: string; error?: string; mode: 'REAL_API' | 'CONFIG_REQUIRED' }> {
-    console.log(`[FacebookConnector] Routing post through secure server proxy for: "${message.substring(0, 40)}..."`);
+    // Read tokens from localStorage (set by the customer via /settings UI)
+    const clientToken = (() => {
+      if (typeof window === 'undefined') return '';
+      try { return JSON.parse(localStorage.getItem('bella_eos_integrations') || '{}')['facebook::page_access_token'] || ''; } catch { return ''; }
+    })();
+    const clientPageId = (() => {
+      if (typeof window === 'undefined') return 'me';
+      try { return JSON.parse(localStorage.getItem('bella_eos_integrations') || '{}')['facebook::page_id'] || 'me'; } catch { return 'me'; }
+    })();
+
+    console.log(`[FacebookConnector] Routing post via server proxy. Token source: ${clientToken ? 'localStorage' : 'server-env'}`);
 
     try {
       const response = await fetch('/api/facebook/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, pageId: pageId || 'me' })
+        body: JSON.stringify({
+          message,
+          client_token: clientToken || undefined,
+          client_page_id: clientPageId || undefined
+        })
       });
 
       const data = await response.json();
@@ -85,12 +99,11 @@ export class FacebookConnector {
         return {
           success: false,
           mode: 'CONFIG_REQUIRED',
-          error: data.error || 'Chưa cấu hình FACEBOOK_PAGE_ACCESS_TOKEN trong .env.local.'
+          error: data.error || 'Chưa cấu hình Facebook Token. Vào Cài đặt Tích hợp → Facebook Fanpage để nhập.'
         };
       }
 
       if (!response.ok || !data.success) {
-        console.error('[FacebookConnector] Server proxy error:', data.error);
         return { success: false, mode: 'REAL_API', error: data.error };
       }
 
@@ -98,7 +111,6 @@ export class FacebookConnector {
       return { success: true, mode: 'REAL_API', postId: data.postId };
 
     } catch (err: any) {
-      console.error('[FacebookConnector] Fetch error:', err);
       return { success: false, mode: 'REAL_API', error: `Lỗi kết nối: ${err.message}` };
     }
   }
