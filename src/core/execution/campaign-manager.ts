@@ -201,7 +201,22 @@ class CampaignExecutionManagerClass {
       this.addLog('CONTEXT CENTER', `🔒 Đang lọc bảo mật và biên dịch gói Canonical Context Package...`, 'text-blue-400');
       const mockStep = { id: 1, name: 'Setup chiến dịch', agent: 'orchestrator' };
       const contextPackage = EnterpriseBrain.Context.compileContext(mockStep, objective);
-      this.addLog('CONTEXT CENTER', `✅ Đã xuất Gói ngữ cảnh chuẩn hóa (Tone giọng: ${contextPackage.brandDna.voiceTone} | Thiết kế: ${contextPackage.brandDna.designStyle}).`, 'text-emerald-400');
+      
+      let pastPlansMd = '';
+      if (typeof window !== 'undefined') {
+        try {
+          const history = JSON.parse(localStorage.getItem('bella_eos_marketing_history') || '[]');
+          if (history.length > 0) {
+            pastPlansMd = history.slice(0, 3).map((h: any, i: number) => `--- Lịch sử Kế hoạch #${i+1} [Mục tiêu: ${h.objective}] ---\n${h.markdownContent.substring(0, 400)}...`).join('\n\n');
+          }
+        } catch (e) {}
+      }
+
+      (contextPackage as any).activeCustomerCount = this.state.activeCustomerCount;
+      (contextPackage as any).fbReachCount = this.state.fbReachCount;
+      (contextPackage as any).past_plans_md = pastPlansMd;
+
+      this.addLog('CONTEXT CENTER', `✅ Đã xuất Gói ngữ cảnh chuẩn hóa (Tone: ${contextPackage.brandDna.voiceTone} | Lịch sử kế hoạch: ${pastPlansMd ? 'Đã tải ' + pastPlansMd.length + ' ký tự tri thức' : 'Chưa có'}).`, 'text-emerald-400');
 
       // Step 5: AI Orchestration & Execution via Gateway
       this.state.activeStep = 4;
@@ -241,6 +256,25 @@ class CampaignExecutionManagerClass {
             if (evt.tasks) {
               this.state.dynamicTasks = evt.tasks;
               this.notify();
+
+              // Auto persist Marketing Manager Markdown output to localStorage for Continuous Learning
+              const mktTask = evt.tasks.find((t: any) => t.agent_id === 'eos_marketing_manager' || t.task_type === 'analyze_marketing_strategy');
+              if (mktTask && mktTask.output && typeof window !== 'undefined') {
+                try {
+                  localStorage.setItem('bella_eos_latest_marketing_plan.md', mktTask.output);
+                  const history = JSON.parse(localStorage.getItem('bella_eos_marketing_history') || '[]');
+                  if (!history.some((h: any) => h.id === mktTask.task_id && h.markdownContent === mktTask.output)) {
+                    history.unshift({
+                      id: mktTask.task_id || `plan_${Date.now()}`,
+                      timestamp: new Date().toISOString(),
+                      objective: this.state.objective,
+                      markdownContent: mktTask.output
+                    });
+                    localStorage.setItem('bella_eos_marketing_history', JSON.stringify(history.slice(0, 20)));
+                    this.addLog('KNOWLEDGE AGENT', '💾 Đã lưu bản Kế hoạch Marketing (.md) vào LocalStorage để học tập liên tục!', 'text-emerald-400 font-bold');
+                  }
+                } catch (e) {}
+              }
             }
             if (evt.verificationReport) {
               this.state.verificationReport = evt.verificationReport;

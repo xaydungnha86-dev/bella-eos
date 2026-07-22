@@ -6,7 +6,7 @@ import {
   Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
   Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe,
-  X, Copy, Check, Code
+  X, Copy, Check, Code, Download
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { EnterpriseBrain } from '../core/brain';
@@ -1523,17 +1523,35 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between mb-1.5">
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kết Quả Thực Thi Chi Tiết (Full Output)</h4>
                   {selectedTask.output && (
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(selectedTask.output);
-                        setCopiedOutput(true);
-                        setTimeout(() => setCopiedOutput(false), 2000);
-                      }}
-                      className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-500 flex items-center gap-1 cursor-pointer"
-                    >
-                      {copiedOutput ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                      {copiedOutput ? 'Đã Sao Chép!' : 'Sao Chép Kết Quả'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const blob = new Blob([selectedTask.output], { type: 'text/markdown;charset=utf-8;' });
+                          const url = URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', `MarketingPlan_${selectedTask.task_id}_${Date.now()}.md`);
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="text-[10px] font-bold text-emerald-600 hover:text-emerald-500 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                      >
+                        <Download className="w-3 h-3 text-emerald-600" />
+                        <span>Tải File .md</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedTask.output);
+                          setCopiedOutput(true);
+                          setTimeout(() => setCopiedOutput(false), 2000);
+                        }}
+                        className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-500 flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedOutput ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                        {copiedOutput ? 'Đã Sao Chép!' : 'Sao Chép Kết Quả'}
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner max-h-72 overflow-y-auto">
