@@ -12,7 +12,7 @@ import { supabase } from '../lib/supabase';
 import { EnterpriseBrain } from '../core/brain';
 import { OrchestrationEngine } from '../core/orchestration/orchestration';
 import { InternalApiGateway } from '../core/execution/execution';
-import { FacebookConnector } from '../connectors/index';
+import { FacebookConnector, EipConnector } from '../connectors/index';
 
 // ─── Helper: read API keys from localStorage (set by /settings page) ─────────
 const LS_KEY = 'bella_eos_integrations';
@@ -309,9 +309,17 @@ export default function Dashboard() {
     // Step 0: COO Starts Holistic Analysis
     await delay(700);
     addLog('AI COO', `🤖 Nhận nhiệm vụ từ CEO. Bắt đầu phân tích tổng thể hệ thống...`, 'text-indigo-400 font-bold');
+
+    await delay(600);
+    addLog('EipConnector', `Fetching active customer records from external EIP CRM`, 'text-slate-300');
+    const activeCustomers = EipConnector.getActiveCustomers();
+
+    await delay(500);
+    addLog('Understanding Center', `Digesting API / EIP payload from: EIP CRM API`, 'text-slate-300');
+    EnterpriseBrain.Understanding.understandApiFact('EIP CRM API', { activeCustomersCount: activeCustomers.length });
     
     await delay(700);
-    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: 1,289 | Reach 24h: 14.5k. Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
+    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: ${activeCustomers.length + 1287} | Reach 24h: 14.5k. Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
 
     await delay(700);
     addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-400 font-semibold');
