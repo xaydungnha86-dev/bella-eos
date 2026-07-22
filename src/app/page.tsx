@@ -369,12 +369,12 @@ export default function Dashboard() {
             </div>
 
             {/* Simulated interactive graph topology */}
-            <div className="flex-1 glass-panel rounded-2xl border border-slate-200/80 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+            <div className="flex-1 glass-panel rounded-2xl border border-slate-200/80 flex flex-col items-center justify-start p-4 pt-12 relative overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.04),transparent)] pointer-events-none"></div>
               
               {/* Dynamic node link tree display */}
               {isProcessing || activeStep >= 0 ? (
-                <div className="flex flex-col items-center justify-center gap-6 w-full max-w-2xl z-10 transition-all duration-500 overflow-y-auto max-h-[520px] pr-1">
+                <div className="flex flex-col items-center gap-5 w-full max-w-3xl z-10 transition-all duration-500 overflow-y-auto max-h-[calc(100vh-270px)] px-2 pt-2 pb-8">
                   {/* Root Objective Node */}
                   <div className="flex flex-col items-center shrink-0">
                     <div className="glass-panel-glow px-4 py-2.5 rounded-xl text-center border-indigo-400 text-xs font-semibold max-w-md shadow-sm">
