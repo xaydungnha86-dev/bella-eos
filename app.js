@@ -7687,6 +7687,28 @@ function initApp() {
     renderKanbanBoard();
     initSupabaseRealtimeSync();
     updateGlobalMetricsUI();
+
+    // Initialize Spa Owner Command Center values from BCE inputs
+    const mainMetricTypeSelect = document.getElementById('main-metric-type');
+    const bceMetricTypeSelect = document.getElementById('bce-edit-metric-type');
+    const mainFollowersInput = document.getElementById('main-followers');
+    const bceFollowersInput = document.getElementById('bce-edit-followers');
+    const mainBudgetInput = document.getElementById('main-budget');
+    const bceBudgetInput = document.getElementById('bce-edit-budget');
+    const mainVoiceSelect = document.getElementById('main-voice');
+    const bceVoiceSelect = document.getElementById('bce-edit-voice');
+    const mainSegmentInput = document.getElementById('main-segment');
+    const bceSegmentInput = document.getElementById('bce-edit-segment');
+
+    if (mainMetricTypeSelect && bceMetricTypeSelect) mainMetricTypeSelect.value = bceMetricTypeSelect.value;
+    if (mainFollowersInput && bceFollowersInput) mainFollowersInput.value = bceFollowersInput.value;
+    if (mainBudgetInput && bceBudgetInput) mainBudgetInput.value = bceBudgetInput.value;
+    if (mainVoiceSelect && bceVoiceSelect) mainVoiceSelect.value = bceVoiceSelect.value;
+    if (mainSegmentInput && bceSegmentInput) mainSegmentInput.value = bceSegmentInput.value;
+    
+    if (typeof onMainMetricTypeChange === 'function') {
+        onMainMetricTypeChange();
+    }
 }
 
 if (document.readyState === 'loading') {
@@ -8028,3 +8050,113 @@ function toggleEipFabricPanel() {
 }
 
 window.toggleEipFabricPanel = toggleEipFabricPanel;
+
+// =========================================================================
+// SPA OWNER COMMAND CENTER SYNC & PRESETS HELPER
+// =========================================================================
+function selectSpaPreset(type) {
+    const mainPromptInput = document.getElementById('ceo-command-input');
+    const mainMetricTypeSelect = document.getElementById('main-metric-type');
+    const mainFollowersInput = document.getElementById('main-followers');
+    const mainBudgetInput = document.getElementById('main-budget');
+    const mainVoiceSelect = document.getElementById('main-voice');
+    const mainSegmentInput = document.getElementById('main-segment');
+
+    if (!mainPromptInput || !mainMetricTypeSelect || !mainFollowersInput || !mainBudgetInput || !mainVoiceSelect || !mainSegmentInput) return;
+
+    if (type === 'sales') {
+        mainPromptInput.value = "Tăng doanh số Spa 30 triệu VND trong 30 ngày bằng các chương trình khuyến mãi liệu trình mới";
+        mainMetricTypeSelect.value = "targetRevenueVnd";
+        mainFollowersInput.value = "30000000";
+        mainBudgetInput.value = "10000000";
+        mainVoiceSelect.value = "Professional & Premium";
+        mainSegmentInput.value = "Khách hàng VIP Spa & Skincare";
+    } else if (type === 'post') {
+        mainPromptInput.value = "Đăng bài viết giới thiệu các dịch vụ trị mụn và làm trắng da lên Facebook Page hàng tuần";
+        mainMetricTypeSelect.value = "targetFollowers";
+        mainFollowersInput.value = "500";
+        mainBudgetInput.value = "4000000";
+        mainVoiceSelect.value = "Friendly & Casual";
+        mainSegmentInput.value = "Chị em phụ nữ thích làm đẹp từ 22-45 tuổi";
+    } else if (type === 'recruit') {
+        mainPromptInput.value = "Tuyển dụng gấp 3 kỹ thuật viên và 1 lễ tân làm việc tại chi nhánh Hà Nội";
+        mainMetricTypeSelect.value = "targetStaffCount";
+        mainFollowersInput.value = "4";
+        mainBudgetInput.value = "6000000";
+        mainVoiceSelect.value = "Professional & Premium";
+        mainSegmentInput.value = "Kỹ thuật viên Spa có tay nghề cao";
+    } else if (type === 'lead') {
+        mainPromptInput.value = "Tặng voucher trải nghiệm dịch vụ chăm sóc da miễn phí để thu hút 200 khách hàng đăng ký mới";
+        mainMetricTypeSelect.value = "targetLeads";
+        mainFollowersInput.value = "200";
+        mainBudgetInput.value = "12000000";
+        mainVoiceSelect.value = "Friendly & Casual";
+        mainSegmentInput.value = "Nhân viên văn phòng và người trẻ từ 18-35 tuổi";
+    }
+
+    // Trigger updates
+    onMainMetricTypeChange();
+    syncMainToBce();
+}
+
+function onMainMetricTypeChange() {
+    const mainMetricTypeSelect = document.getElementById('main-metric-type');
+    const mainFollowersLabel = document.getElementById('main-followers-label');
+    const mainFollowersInput = document.getElementById('main-followers');
+
+    if (!mainMetricTypeSelect || !mainFollowersLabel || !mainFollowersInput) return;
+
+    const val = mainMetricTypeSelect.value;
+    if (val === 'targetFollowers') {
+        mainFollowersLabel.textContent = "Mục tiêu Followers";
+    } else if (val === 'targetRevenueVnd') {
+        mainFollowersLabel.textContent = "Mục tiêu Doanh số (VND)";
+    } else if (val === 'targetLeads') {
+        mainFollowersLabel.textContent = "Mục tiêu Leads";
+    } else if (val === 'targetStaffCount') {
+        mainFollowersLabel.textContent = "Mục tiêu Nhân sự";
+    }
+
+    // Sync type select to BCE hidden field
+    const bceMetricTypeSelect = document.getElementById('bce-edit-metric-type');
+    if (bceMetricTypeSelect) {
+        bceMetricTypeSelect.value = val;
+        // Call the existing BCE change handler to update label in BCE
+        if (typeof onMetricTypeChange === 'function') {
+            onMetricTypeChange();
+        }
+    }
+}
+
+function syncMainToBce() {
+    const mainMetricTypeSelect = document.getElementById('main-metric-type');
+    const mainFollowersInput = document.getElementById('main-followers');
+    const mainBudgetInput = document.getElementById('main-budget');
+    const mainVoiceSelect = document.getElementById('main-voice');
+    const mainSegmentInput = document.getElementById('main-segment');
+
+    const bceBudgetInput = document.getElementById('bce-edit-budget');
+    const bceFollowersInput = document.getElementById('bce-edit-followers');
+    const bceVoiceSelect = document.getElementById('bce-edit-voice');
+    const bceSegmentInput = document.getElementById('bce-edit-segment');
+
+    if (bceBudgetInput && mainBudgetInput) bceBudgetInput.value = mainBudgetInput.value;
+    if (bceVoiceSelect && mainVoiceSelect) bceVoiceSelect.value = mainVoiceSelect.value;
+    if (bceSegmentInput && mainSegmentInput) bceSegmentInput.value = mainSegmentInput.value;
+    if (bceFollowersInput && mainFollowersInput) {
+        bceFollowersInput.value = mainFollowersInput.value;
+        if (mainMetricTypeSelect) {
+            bceFollowersInput.dataset.metricKey = mainMetricTypeSelect.value;
+        }
+    }
+
+    // Trigger EIL Live Compiled Context updates
+    if (typeof updateLiveCompiledContext === 'function') {
+        updateLiveCompiledContext();
+    }
+}
+
+// Bind to window so they are accessible from HTML onclick attributes
+window.selectSpaPreset = selectSpaPreset;
+window.onMainMetricTypeChange = onMainMetricTypeChange;
+window.syncMainToBce = syncMainToBce;

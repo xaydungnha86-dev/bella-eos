@@ -214,41 +214,112 @@
                 <!-- Three.js Canvas will be appended here -->
 
                 <!-- Floating 3D Controls Helper & Actions -->
-                <div class="absolute top-4 left-4 flex flex-col gap-3 z-[25] pointer-events-none select-none">
-                    <!-- Info Card -->
-                    <div id="controls-info-card" class="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3 text-xs text-slate-350 shadow-lg pointer-events-auto w-[260px]">
-                        <div class="flex items-center justify-between gap-4 font-semibold text-white mb-1">
-                            <div class="flex items-center gap-2">
-                                <i class="fa-solid fa-cubes text-cyan-400"></i>
-                                <span>Văn phòng 3D Phòng Ban AI</span>
+                <div class="absolu                <!-- Floating Spa Owner AI Command Center -->
+                <div class="absolute top-4 left-4 flex flex-col gap-3.5 z-[25] pointer-events-none select-none w-[340px]">
+                    <!-- Smart Command Center Panel -->
+                    <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4.5 text-xs text-slate-350 shadow-xl pointer-events-auto flex flex-col gap-3.5">
+                        <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+                                <i class="fa-solid fa-seedling text-sm"></i>
                             </div>
-                            <!-- Collapse Toggle Button -->
-                            <button id="btn-toggle-info" class="w-5 h-5 rounded hover:bg-slate-800/80 flex items-center justify-center text-slate-400 hover:text-slate-200 transition active:scale-95" title="Thu gọn / Mở rộng">
-                                <i id="icon-toggle-info" class="fa-solid fa-chevron-up text-[9px]"></i>
-                            </button>
+                            <div>
+                                <h3 class="font-sans font-bold text-slate-100 text-xs tracking-wide uppercase">BẢNG ĐIỀU HÀNH BELLA SPA AI</h3>
+                                <p class="text-[9px] text-slate-400 font-sans">Trợ lý Chiến dịch Tự động hóa dành cho Chủ Doanh nghiệp</p>
+                            </div>
                         </div>
-                        <div id="info-card-content" class="text-[10px] text-slate-400 space-y-0.5 leading-normal mt-1.5 transition-all duration-300">
-                            <p><i class="fa-solid fa-mouse text-slate-500"></i> Kéo chuột trái: Xoay góc nhìn 3D</p>
-                            <p><i class="fa-solid fa-arrows-up-down-left-right text-slate-500"></i> Kéo chuột phải / Shift: Di chuyển vị trí</p>
-                            <p><i class="fa-solid fa-scroll text-slate-500"></i> Cuộn chuột: Zoom vào / ra</p>
-                            <p><i class="fa-solid fa-hand-pointer text-cyan-400"></i> Kéo thả để di chuyển. Nhấn **[R]** hoặc **[Phím cách]** để xoay.</p>
+
+                        <!-- Presets / Quick actions -->
+                        <div class="space-y-1.5">
+                            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">1. Chọn nhanh Mẫu Chiến dịch</span>
+                            <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                <button type="button" onclick="selectSpaPreset('sales')" class="bg-slate-950 hover:bg-pink-950/20 border border-slate-800 hover:border-pink-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
+                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-chart-line text-pink-400 text-[10px]"></i> Tăng Doanh Số</span>
+                                    <span class="text-[8px] text-slate-500">Bán gói liệu trình Spa</span>
+                                </button>
+                                <button type="button" onclick="selectSpaPreset('post')" class="bg-slate-950 hover:bg-cyan-950/20 border border-slate-800 hover:border-cyan-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
+                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-paper-plane text-cyan-400 text-[10px]"></i> Đăng bài Social</span>
+                                    <span class="text-[8px] text-slate-500">Chăm sóc tương tác trang</span>
+                                </button>
+                                <button type="button" onclick="selectSpaPreset('recruit')" class="bg-slate-950 hover:bg-amber-950/20 border border-slate-800 hover:border-amber-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
+                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-users text-amber-400 text-[10px]"></i> Tuyển nhân sự</span>
+                                    <span class="text-[8px] text-slate-500">Tuyển KTV & Lễ tân gấp</span>
+                                </button>
+                                <button type="button" onclick="selectSpaPreset('lead')" class="bg-slate-950 hover:bg-purple-950/20 border border-slate-800 hover:border-purple-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
+                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-gift text-purple-400 text-[10px]"></i> Tặng quà/Leads</span>
+                                    <span class="text-[8px] text-slate-500">Chạy Voucher ưu đãi 50%</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Config Fields -->
+                        <div class="space-y-3 border-t border-slate-800/80 pt-3">
+                            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">2. Cấu hình nhanh Thông số</span>
+                            
+                            <div class="space-y-2">
+                                <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                    <div>
+                                        <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Loại Mục Tiêu</label>
+                                        <select id="main-metric-type" onchange="onMainMetricTypeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:border-pink-500 cursor-pointer">
+                                            <option value="targetFollowers">Followers (Người theo dõi)</option>
+                                            <option value="targetRevenueVnd">Doanh số (VND)</option>
+                                            <option value="targetLeads">Leads / Đăng ký</option>
+                                            <option value="targetStaffCount">Nhân sự (Người)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label id="main-followers-label" class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Mục tiêu Followers</label>
+                                        <input type="number" id="main-followers" value="1000" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-pink-500">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                    <div>
+                                        <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Ngân sách (VND)</label>
+                                        <input type="number" id="main-budget" value="10000000" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-pink-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Tông giọng bài viết</label>
+                                        <select id="main-voice" onchange="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:border-pink-500 cursor-pointer">
+                                            <option value="Professional & Premium">Professional & Premium</option>
+                                            <option value="Friendly & Casual">Friendly & Casual</option>
+                                            <option value="Energetic & Bold">Energetic & Bold</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Khách hàng mục tiêu</label>
+                                    <input type="text" id="main-segment" value="VIP Beauty & Spa Clients" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-100 focus:outline-none focus:border-pink-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Direct Prompt Directive -->
+                        <div class="space-y-1.5 border-t border-slate-800/80 pt-3">
+                            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">3. Chỉ thị mong muốn của bạn</span>
+                            <div class="flex gap-2">
+                                <input type="text" id="ceo-command-input" placeholder="Ví dụ: Tăng doanh số 20tr trong 30 ngày..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-pink-500 shadow-sm font-sans">
+                                <button id="btn-send-command" class="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center justify-center shadow-lg shadow-pink-500/20 active:scale-95" title="Gửi chỉ thị cho AI COO">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Interactive Layout Controls -->
-                    <div class="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 flex items-center gap-1.5 shadow-lg pointer-events-auto w-fit">
-                        <button id="btn-reset-cam" class="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all" title="Reset Camera 3D">
-                            <i class="fa-solid fa-video text-cyan-400"></i>
+                    <div class="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 flex items-center justify-between shadow-lg pointer-events-auto">
+                        <button id="btn-reset-cam" class="bg-slate-950 hover:bg-slate-800 text-slate-350 border border-slate-800 px-2 py-1.5 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Reset Camera 3D">
+                            <i class="fa-solid fa-video text-pink-400"></i>
                             <span>Cam 3D</span>
                         </button>
                         <div class="w-px h-3 bg-slate-800"></div>
-                        <button id="btn-layout-dept" class="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all" title="Di chuyển toàn bộ phòng ban">
-                            <i class="fa-solid fa-up-down-left-right text-cyan-400"></i>
-                            <span id="layout-dept-status">Sắp xếp Phòng ban</span>
+                        <button id="btn-layout-dept" class="bg-slate-950 hover:bg-slate-800 text-slate-355 border border-slate-800 px-2 py-1.5 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Di chuyển toàn bộ phòng ban">
+                            <i class="fa-solid fa-up-down-left-right text-pink-400"></i>
+                            <span id="layout-dept-status">Xếp phòng</span>
                         </button>
-                        <button id="btn-layout-seat" class="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 active:scale-95 transition-all" title="Di chuyển vị trí ngồi">
-                            <i class="fa-solid fa-chair text-cyan-400"></i>
-                            <span id="layout-seat-status">Sắp xếp Chỗ ngồi</span>
+                        <button id="btn-layout-seat" class="bg-slate-950 hover:bg-slate-800 text-slate-355 border border-slate-800 px-2 py-1.5 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Di chuyển vị trí ngồi">
+                            <i class="fa-solid fa-chair text-pink-400"></i>
+                            <span id="layout-seat-status">Xếp chỗ</span>
                         </button>
                     </div>
                 </div>
@@ -389,17 +460,14 @@
                 <!-- Dynamic Logs Insertion -->
             </div>
 
-            <!-- Interactive Human-in-the-loop CEO Strategic Objective Box -->
-            <div class="p-3 border-t border-slate-800 bg-slate-950/90">
-                <label class="block text-[11px] font-bold text-amber-400 mb-1.5 flex items-center justify-between">
-                    <span><i class="fa-solid fa-bullseye text-amber-400 mr-1"></i> CEO STRATEGIC OBJECTIVE & BUDGET:</span>
-                    <span class="text-[9px] text-cyan-400 font-mono">Autonomous AI COO Engine</span>
-                </label>
-                <div class="flex gap-2">
-                    <input type="text" id="ceo-command-input" placeholder="Ví dụ: Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu..." class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 shadow-sm font-sans">
-                    <button id="btn-send-command" class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs transition flex items-center justify-center shadow-lg shadow-amber-500/20" title="AI COO tiếp nhận Objective và tự sinh Project Workflow">
-                        <i class="fa-solid fa-bolt"></i>
+            <!-- Action Hub for Spa Owner -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950/95 space-y-3 shrink-0">
+                <div class="flex flex-col gap-2">
+                    <button type="button" onclick="showCampaignExecutiveReport()" class="w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 text-white font-bold text-xs py-3 px-4 rounded-xl shadow-lg shadow-pink-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-chart-pie text-sm"></i>
+                        <span>📊 XEM BÁO CÁO & ROI CHIẾN DỊCH</span>
                     </button>
+                    <p class="text-[9px] text-slate-500 text-center leading-normal">Xem phân tích dữ liệu, doanh thu dự báo và kế hoạch phân bổ bài đăng AI chi tiết.</p>
                 </div>
             </div>
         </aside>
