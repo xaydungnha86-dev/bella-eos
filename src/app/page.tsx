@@ -304,58 +304,58 @@ export default function Dashboard() {
     setVerificationReport(null);
     setDynamicTasks([]);
     setOrchestratorPlan(null);
-    addLog('CEO INTENT', `🎯 Ý chí chiến lược nhận được: "${objective}"`, 'text-amber-600 font-bold');
+    addLog('CEO INTENT', `🎯 Ý chí chiến lược nhận được: "${objective}"`, 'text-amber-400 font-bold');
 
     // Step 0: COO Starts Holistic Analysis
     await delay(700);
-    addLog('AI COO', `🤖 Nhận nhiệm vụ từ CEO. Bắt đầu phân tích tổng thể hệ thống...`, 'text-indigo-600 font-bold');
+    addLog('AI COO', `🤖 Nhận nhiệm vụ từ CEO. Bắt đầu phân tích tổng thể hệ thống...`, 'text-indigo-400 font-bold');
     
     await delay(700);
-    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: 1,289 | Reach 24h: 14.5k. Khởi tạo Context Package.`, 'text-slate-600 font-semibold');
+    addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: 1,289 | Reach 24h: 14.5k. Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
 
     await delay(700);
-    addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-750 font-semibold');
-    addLog('SOP PROTOCOL', `⚙️ Đã load SOP-MKT-V1.8 (Soạn thảo nội dung) và SOP-DSN-V2.1 (Thiết kế đồ họa).`, 'text-cyan-600');
+    addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-400 font-semibold');
+    addLog('SOP PROTOCOL', `⚙️ Đã load SOP-MKT-V1.8 (Soạn thảo nội dung) và SOP-DSN-V2.1 (Thiết kế đồ họa).`, 'text-cyan-300');
 
     await delay(700);
-    addLog('BRAND DNA', `🧬 Đang kiểm duyệt Nhận diện Thương hiệu (Brand DNA)...`, 'text-pink-600 font-semibold');
-    addLog('BRAND DNA', `🧬 Đã nhận đặc đặc tính: Tone giọng [${dnaState.tone}] & Phong cách UI [${dnaState.style}].`, 'text-pink-650');
+    addLog('BRAND DNA', `🧬 Đang kiểm duyệt Nhận diện Thương hiệu (Brand DNA)...`, 'text-pink-400 font-semibold');
+    addLog('BRAND DNA', `🧬 Đã nhận đặc đặc tính: Tone giọng [${dnaState.tone}] & Phong cách UI [${dnaState.style}].`, 'text-pink-300');
 
     await delay(700);
-    addLog('FINANCIAL AUDIT', `💰 Kiểm tra Tình hình Tài chính & Chính sách chi tiêu...`, 'text-purple-650 font-semibold');
+    addLog('FINANCIAL AUDIT', `💰 Kiểm tra Tình hình Tài chính & Chính sách chi tiêu...`, 'text-purple-400 font-semibold');
     const budgetLimit = objective.toLowerCase().includes('50 triệu') ? '50,000,000' : '100,000,000';
-    addLog('FINANCIAL AUDIT', `💰 Ngân sách dự kiến: ${budgetLimit} VND. Trạng thái chính sách: ĐẠT YÊU CẦU (POL-GOV-001).`, 'text-purple-600');
+    addLog('FINANCIAL AUDIT', `💰 Ngân sách dự kiến: ${budgetLimit} VND. Trạng thái chính sách: ĐẠT YÊU CẦU (POL-GOV-001).`, 'text-purple-300');
 
     // Step 1: Parse Intent
     await delay(700);
     const parsedIntent = OrchestrationEngine.IntentEngine.parseIntent(objective);
-    addLog('INTENT ENGINE', `🔍 Phân tích mục tiêu chiến lược hoàn tất.`, 'text-cyan-600');
+    addLog('INTENT ENGINE', `🔍 Phân tích mục tiêu chiến lược hoàn tất.`, 'text-cyan-300');
 
     // Step 2: Goal Decompose
     await delay(800);
     setActiveStep(1);
     const goals = OrchestrationEngine.GoalEngine.decomposeGoal(objective);
     setGoalTree(goals);
-    addLog('GOAL ENGINE', `📊 Phân rã chỉ thị của CEO thành sơ đồ OKRs phòng ban (Mkt, Sales, Finance).`, 'text-indigo-600 font-bold');
+    addLog('GOAL ENGINE', `📊 Phân rã chỉ thị của CEO thành sơ đồ OKRs phòng ban (Mkt, Sales, Finance).`, 'text-indigo-400 font-bold');
 
     // Step 3: Run Monte Carlo Simulation
     await delay(1000);
     setActiveStep(2);
-    addLog('REASONING CENTER', `🎲 Đang chạy 10,000 lần mô phỏng Monte Carlo dự báo ROI & Dòng tiền...`, 'text-purple-600');
+    addLog('REASONING CENTER', `🎲 Đang chạy 10,000 lần mô phỏng Monte Carlo dự báo ROI & Dòng tiền...`, 'text-purple-300');
     const simulationResult = EnterpriseBrain.Reasoning.runMonteCarlo('marketing_pos');
-    addLog('REASONING CENTER', `📈 ROI Dự kiến: ${simulationResult.projectedRoi} | Xác suất thành công: ${simulationResult.confidence}% | Dòng tiền: ${simulationResult.cashflow}`, 'text-emerald-600 font-semibold');
+    addLog('REASONING CENTER', `📈 ROI Dự kiến: ${simulationResult.projectedRoi} | Xác suất thành công: ${simulationResult.confidence}% | Dòng tiền: ${simulationResult.cashflow}`, 'text-emerald-400 font-semibold');
 
     // Step 4: Selective Context Builder
     await delay(800);
     setActiveStep(3);
-    addLog('CONTEXT CENTER', `🔒 Đang lọc bảo mật và biên dịch gói Canonical Context Package...`, 'text-blue-600');
+    addLog('CONTEXT CENTER', `🔒 Đang lọc bảo mật và biên dịch gói Canonical Context Package...`, 'text-blue-400');
     const mockStep = { id: 1, name: 'Setup chiến dịch', agent: 'orchestrator' };
     const contextPackage = EnterpriseBrain.Context.compileContext(mockStep, objective);
-    addLog('CONTEXT CENTER', `✅ Đã xuất Gói ngữ cảnh chuẩn hóa (Tone giọng: ${contextPackage.brandDna.voiceTone} | Thiết kế: ${contextPackage.brandDna.designStyle}).`, 'text-emerald-600');
+    addLog('CONTEXT CENTER', `✅ Đã xuất Gói ngữ cảnh chuẩn hóa (Tone giọng: ${contextPackage.brandDna.voiceTone} | Thiết kế: ${contextPackage.brandDna.designStyle}).`, 'text-emerald-400');
 
     // Step 5: AI Orchestration & Execution via Gateway
     setActiveStep(4);
-    addLog('GATEWAY', `⚡ Kích hoạt AI Orchestrator Gateway — Bắt đầu phân bổ nhiệm vụ động...`, 'text-amber-600 font-semibold');
+    addLog('GATEWAY', `⚡ Kích hoạt AI Orchestrator Gateway — Bắt đầu phân bổ nhiệm vụ động...`, 'text-amber-400 font-semibold');
 
     let dispatchResult: any;
     try {
@@ -365,7 +365,7 @@ export default function Dashboard() {
         contextPackage,
         (evt) => {
           if (evt.phase === 'PLANNING') {
-            addLog('AI ORCHESTRATOR', evt.message, 'text-indigo-600 font-bold');
+            addLog('AI ORCHESTRATOR', evt.message, 'text-indigo-400 font-bold');
           } else if (evt.phase === 'PLAN_READY') {
             setOrchestratorPlan({
               title: evt.planTitle || '',
@@ -374,31 +374,31 @@ export default function Dashboard() {
               model: evt.aiModel || ''
             });
             setDynamicTasks(evt.tasks || []);
-            addLog('AI ORCHESTRATOR', `📋 Kế hoạch: "${evt.planTitle}" (AI COO Orchestrator)`, 'text-cyan-600 font-bold');
+            addLog('AI ORCHESTRATOR', `📋 Kế hoạch: "${evt.planTitle}" (AI COO Orchestrator)`, 'text-cyan-400 font-bold');
             if (evt.planReasoning) {
-              addLog('ORCHESTRATOR LOGIC', `💡 Lý do phân bổ: ${evt.planReasoning}`, 'text-slate-600 italic');
+              addLog('ORCHESTRATOR LOGIC', `💡 Lý do phân bổ: ${evt.planReasoning}`, 'text-slate-400 italic');
             }
             if (evt.warning) {
-              addLog('ORCHESTRATOR WARN', `⚠️ ${evt.warning}`, 'text-amber-600');
+              addLog('ORCHESTRATOR WARN', `⚠️ ${evt.warning}`, 'text-amber-400');
             }
             evt.tasks?.forEach((t: any, idx: number) => {
-              addLog('CAPABILITY ROUTER', `📌 Task #${idx + 1} [${t.task_id}]: Gán Agent '${t.agent_name}' ➔ Công việc '${t.task_type}'`, 'text-purple-600 font-medium');
+              addLog('CAPABILITY ROUTER', `📌 Task #${idx + 1} [${t.task_id}]: Gán Agent '${t.agent_name}' ➔ Công việc '${t.task_type}'`, 'text-purple-400 font-medium');
             });
           } else if (evt.phase === 'EXECUTING') {
-            addLog('AGENT RUNNER', evt.message, 'text-amber-600 font-semibold');
+            addLog('AGENT RUNNER', evt.message, 'text-amber-400 font-semibold');
           } else if (evt.phase === 'COMPLETED' || evt.phase === 'VERIFIED') {
             if (evt.tasks) setDynamicTasks(evt.tasks);
             if (evt.verificationReport) setVerificationReport(evt.verificationReport);
 
             if (evt.phase === 'VERIFIED') {
               const icon = evt.verificationReport?.isCompleted ? '🎉' : '⚠️';
-              const colorCls = evt.verificationReport?.isCompleted ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold';
+              const colorCls = evt.verificationReport?.isCompleted ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold';
               addLog('GOAL AUDIT SERVICE', `${icon} ${evt.verificationReport?.verificationSummary}`, colorCls);
             } else {
-              addLog('AGENT RUNNER', evt.message, 'text-emerald-600 font-bold');
+              addLog('AGENT RUNNER', evt.message, 'text-emerald-400 font-bold');
               evt.tasks?.forEach((res: any) => {
                 const icon = res.success ? '✅' : '❌';
-                const cls = res.success ? 'text-emerald-700 font-medium' : 'text-red-600';
+                const cls = res.success ? 'text-emerald-300 font-medium' : 'text-red-400';
                 addLog(`AGENT [${res.agent_name}]`, `${icon} Output [${res.task_type}]: ${res.output.substring(0, 150)}${res.output.length > 150 ? '...' : ''}`, cls);
               });
             }
@@ -406,7 +406,7 @@ export default function Dashboard() {
         }
       );
     } catch (err: any) {
-      addLog('ORCHESTRATOR ERROR', `❌ Lỗi điều phối: ${err.message}`, 'text-red-600 font-bold');
+      addLog('ORCHESTRATOR ERROR', `❌ Lỗi điều phối: ${err.message}`, 'text-red-400 font-bold');
       setIsProcessing(false);
       return;
     }
@@ -430,19 +430,19 @@ export default function Dashboard() {
     // Step 6: Evidence validation
     await delay(800);
     setActiveStep(6);
-    addLog('EVIDENCE SERVICE', `🔍 Nhận chứng cứ kỹ thuật số (Verified Sign-off Hash).`, 'text-teal-600');
-    addLog('EVIDENCE SERVICE', `✅ Checksum hợp quy luật: ĐẠT | Điểm số chất lượng EQE: 96/100.`, 'text-emerald-600 font-bold');
+    addLog('EVIDENCE SERVICE', `🔍 Nhận chứng cứ kỹ thuật số (Verified Sign-off Hash).`, 'text-teal-400');
+    addLog('EVIDENCE SERVICE', `✅ Checksum hợp quy luật: ĐẠT | Điểm số chất lượng EQE: 96/100.`, 'text-emerald-400 font-bold');
 
     // Step 7: Closed Loop Learning
     await delay(800);
     setActiveStep(7);
-    addLog('LEARNING CENTER', `🧬 Bắt đầu đột biến quy trình (SOP Mutation) dựa trên Feedback mới.`, 'text-pink-600');
+    addLog('LEARNING CENTER', `🧬 Bắt đầu đột biến quy trình (SOP Mutation) dựa trên Feedback mới.`, 'text-pink-400');
     const mutationResult = EnterpriseBrain.Learning.learnFromEvidence(mockStep, 'EQE quality check passed with score 96.');
-    addLog('LEARNING CENTER', `🧬 Đột biến thành công: ${mutationResult.target} ➔ ${mutationResult.mutationStatus}`, 'text-emerald-600 font-bold');
+    addLog('LEARNING CENTER', `🧬 Đột biến thành công: ${mutationResult.target} ➔ ${mutationResult.mutationStatus}`, 'text-emerald-400 font-bold');
 
     setIsProcessing(false);
     setActiveStep(8);
-    addLog('SYSTEM', `🏁 Hoàn tất quy trình chạy cho Strategic Intent của CEO!`, 'text-amber-600 font-bold');
+    addLog('SYSTEM', `🏁 Hoàn tất quy trình chạy cho Strategic Intent của CEO!`, 'text-amber-400 font-bold');
   };
 
   // 2. Ingest document
