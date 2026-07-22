@@ -50,25 +50,52 @@ export async function POST(request: Request) {
     const effectiveTone = voiceTone || brandDna?.voiceTone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
     const effectiveSegment = segment || brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
 
-    const defaultSystemPrompt = `Bạn là AI Copywriter chuyên nghiệp cho giải pháp Bella Enterprise (Bella EOS & Bella EIP) tại Việt Nam.
+    const defaultSystemPrompt = `Bạn là AI Copywriter cấp cao của hệ sinh thái Bella Enterprise (Bella EOS & Bella EIP).
+Nhiệm vụ: Dựa trên Bản kế hoạch Marketing chiến lược (Lộ trình Tuần W1-W4 và Lịch Ngày), soạn thảo BỘ NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN VÀ THEO NGÀY (CONTENT CALENDAR) với khung giờ đăng bài cụ thể để gửi qua Hermes Publisher lập lịch tự động.
 
-CONTEXT DOANH NGHIỆP & BRAND DNA (INPUT BẮT BUỘC):
-- Tông giọng thương hiệu (Voice Tone): ${effectiveTone}
-- Phân khúc khách hàng mục tiêu: ${effectiveSegment}
-- Yêu cầu phong cách: Soạn bài chuẩn xác theo Tông Giọng Thương Hiệu ("${effectiveTone}"), từ ngữ tinh tế, thể hiện đẳng cấp doanh nghiệp.
+BẮT BUỘC TRẢ VỀ BỘ LỊCH NỘI DUNG 4 TUẦN CHI TIẾT THEO CẤU TRÚC SAU:
 
-Quy tắc BẮT BUỘC:
-1. "Mục tiêu kinh doanh" truyền vào là chỉ thị NỘI BỘ của CEO (Ví dụ: "Tăng 20% Spa demo... với ngân sách 50M").
-2. TUYỆT ĐỐI KHÔNG in lại ngân sách nội bộ (50 triệu, budget,...) hay các chỉ tiêu quản trị nội bộ vào bài viết tiếp thị công khai.
-3. Soạn bài viết tiếp thị tuân thủ RÕ RÀNG TÔNG GIỌNG THƯƠNG HIỆU ("${effectiveTone}").
-4. Chuyển đổi chỉ thị thành OFFER DÀNH CHO KHÁCH HÀNG (Đăng ký trải nghiệm Demo miễn phí phần mềm quản lý Spa thông minh Bella EOS).
-5. Bắt đầu bằng hook thu hút đúng đối tượng khách hàng mục tiêu (${effectiveSegment}).
-6. Thân bài nêu rõ lợi ích giải pháp: tối ưu vận hành, tự động đặt lịch, quản lý doanh thu.
-7. Kết thúc bằng Kêu gọi hành động (CTA) đăng ký Demo rõ ràng.
-8. Thêm 3-5 hashtag chuẩn (#BellaEOS #QuanLySpa #DemoMiễnPhí #SpaManagement).
-9. Độ dài: 150-250 từ.
+📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG 8)
 
-Chỉ trả về nội dung bài đăng Facebook hoàn chỉnh, không kèm lời giải thích.`;
+---
+### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
+- ⏰ **Lịch đăng bài tự động**: 09:00 AM — Thứ Hai, Ngày 04/08/2026
+- 🎯 **Chủ đề truyền thông**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
+- 📝 **Nội dung xuất bản (Post Body)**:
+🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
+[Soạn nội dung bài viết chi tiết 150-250 từ nhắm vào đối tượng ${effectiveSegment}, nêu bật nỗi đau & giải pháp Bella EOS]
+👉 Đăng ký dùng thử bản Demo Bella EOS ngay hôm nay!
+#BellaEOS #QuanLySpa #TietKiemChiPhi #DemoMienPhi
+
+---
+### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
+- ⏰ **Lịch đăng bài tự động**: 14:30 PM — Thứ Tư, Ngày 13/08/2026
+- 🎯 **Chủ đề truyền thông**: Chứng minh năng lực thực tế — Hơn 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
+- 📝 **Nội dung xuất bản (Post Body)**:
+🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
+[Soạn nội dung bài viết chi tiết 150-250 từ]
+👉 Trải nghiệm hệ thống AI Agent tự động vận hành Bella EOS!
+#BellaEOS #CaseStudy #HieuSuatSpa #KiemSoatEOM
+
+---
+### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
+- ⏰ **Lịch đăng bài tự động**: 19:30 PM — Thứ Sáu, Ngày 22/08/2026
+- 🎯 **Chủ đề truyền thông**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
+- 📝 **Nội dung xuất bản (Post Body)**:
+🎁 ĐẶC QUYỀN THÁNG 8: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
+[Soạn nội dung bài viết chi tiết 150-250 từ]
+👉 Bấm vào link để giữ suất trải nghiệm miễn phí!
+#BellaEOS #UudaiThang8 #DemoFree #SpaTech
+
+---
+### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
+- ⏰ **Lịch đăng bài tự động**: 10:00 AM — Thứ Ba, Ngày 26/08/2026
+- 🎯 **Chủ đề truyền thông**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
+- 📝 **Nội dung xuất bản (Post Body)**:
+⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?
+[Soạn nội dung bài viết chi tiết 150-250 từ]
+👉 Khám phá ngay giải pháp Bella EOS Platform!
+#BellaEOS #AIAgents #TuDongHoaSpa #MarketingTuDong`;
 
     const effectiveSystemPrompt = systemPrompt ? systemPrompt : defaultSystemPrompt;
     const effectiveTemperature = temperature !== undefined && temperature !== null ? parseFloat(temperature as any) : 0.75;
@@ -212,22 +239,63 @@ function generateFallbackPost(objective: string, tone?: string, segment?: string
   const isSpa = lower.includes('spa') || lower.includes('thẩm mỹ') || lower.includes('beauty');
 
   if (isSpa) {
-    return `🌿 [ĐĂNG KÝ TRẢI NGHIỆM DEMO MIỄN PHÍ] GIẢI PHÁP QUẢN LÝ SPA THÔNG MINH BELLA EOS
+    return `📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG 8)
 
-Bạn đang là Chủ Spa hay Quản lý Thẩm mỹ viện đang gặp khó khăn trong việc:
-⚡ Tối ưu lịch hẹn kỹ thuật viên & giảm 90% thời gian xếp lịch?
-📊 Kiểm soát doanh thu, chi phí và hoa hồng nhân sự chính xác theo thời gian thực?
-🎯 Tự động hóa chăm sóc khách hàng cũ & thu hút khách hàng mới?
+---
+### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
+- ⏰ **Lịch đăng bài tự động**: 09:00 AM — Thứ Hai, Ngày 04/08/2026
+- 🎯 **Chủ đề**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
+- 📝 **Nội dung xuất bản (Post Body)**:
+🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
 
-Bella EOS giải quyết triệt để mọi bài toán vận hành Spa bằng công nghệ AI-Native hiện đại nhất!
+Quản lý lịch hẹn trùng lặp, dòng tiền thất thoát cuối tháng và nhân sự tiếp thị biến động đang là "cơn ác mộng" âm thầm bào mòn lợi nhuận của các chủ cơ sở làm đẹp.
 
-🎁 QUÀ TẶNG ĐẶC BIỆT THÁNG NÀY:
-• 1 Buổi trải nghiệm Demo 1-1 trực tiếp cùng Chuyên gia Vận hành
-• Bộ tài liệu độc quyền "Quy Trình Chuẩn Hóa Vận Hành Spa Chuyên Nghiệp"
+✨ Giải pháp đột phá Bella EOS xuất hiện mang đến Hệ điều hành Doanh nghiệp AI thông minh — Tự động hóa 100% quy trình từ đặt lịch, kiểm toán tài chính EOM chống thất thoát đến điều hành tiếp thị đa kênh.
 
-👉 Đăng ký nhận Demo ngay hôm nay tại: https://bella.vn/demo-spa
+👉 Đăng ký trải nghiệm bản Demo miễn phí ngay hôm nay để làm chủ công nghệ AI hàng đầu!
+#BellaEOS #QuanLySpa #TietKiemChiPhi #DemoMienPhi #TuDongHoaSpa
 
-#BellaEOS #QuanLySpa #SpaManagement #GiaiPhapSpa #DemoMienPhi #TuDongHoaSpa`;
+---
+### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
+- ⏰ **Lịch đăng bài tự động**: 14:30 PM — Thứ Tư, Ngày 13/08/2026
+- 🎯 **Chủ đề**: Chứng minh năng lực thực tế — 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
+- 📝 **Nội dung xuất bản (Post Body)**:
+🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
+
+Không chỉ là lời hứa, Bella EOS đã và đang phục vụ hơn 1,200+ cơ sở Spa/TMV tối ưu hóa vận hành thực tế. Tự động hóa xếp lịch khách hàng, kiểm soát doanh thu minh bạch và giữ chân khách hàng tự động qua Zalo/Facebook.
+
+✨ Bạn muốn chuyển đổi số cho cơ sở của mình mà không cần tốn chi phí phòng tiếp thị?
+
+👉 Trải nghiệm ngay lực lượng 12+ AI Agents tự động vận hành Bella EOS!
+#BellaEOS #CaseStudy #HieuSuatSpa #KiemSoatEOM #SpaManagement
+
+---
+### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
+- ⏰ **Lịch đăng bài tự động**: 19:30 PM — Thứ Sáu, Ngày 22/08/2026
+- 🎯 **Chủ đề**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
+- 📝 **Nội dung xuất bản (Post Body)**:
+🎁 ĐẶC QUYỀN THÁNG 8: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
+
+Nhằm hỗ trợ các chủ Spa gia tăng doanh thu bứt phá trong quý 3, Bella EOS dành tặng 50 suất trải nghiệm toàn bộ tính năng cao cấp của Hệ thống Quản lý AI hoàn toàn miễn phí.
+
+⏳ Số lượng ưu đãi có hạn và chỉ áp dụng đến hết ngày 31/08/2026.
+
+👉 Bấm vào liên kết bên dưới để nhận suất ưu đãi đặc quyền ngay bây giờ!
+#BellaEOS #UudaiThang8 #DemoFree #SpaTech #NhanDienThuongHieu
+
+---
+### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
+- ⏰ **Lịch đăng bài tự động**: 10:00 AM — Thứ Ba, Ngày 26/08/2026
+- 🎯 **Chủ đề**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
+- 📝 **Nội dung xuất bản (Post Body)**:
+⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?
+
+Từ phân tích yêu cầu CEO, soạn bài viết tiếp thị, thiết kế Banner 4K đến xuất bản tự động trên Fanpage — Tất cả được thực thi khép kín bởi lực lượng AI Workforce thông minh Bella EOS.
+
+🚀 Hãy bắt đầu hành trình tự động hóa tiếp thị chuẩn doanh nghiệp ngay hôm nay!
+
+👉 Khám phá ngay giải pháp Bella EOS Platform!
+#BellaEOS #AIAgents #TuDongHoaSpa #MarketingTuDong #ChuyenDoiSoSpa`;
   }
 
   // Generic business offer fallback
