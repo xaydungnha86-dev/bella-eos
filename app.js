@@ -8235,3 +8235,23 @@ function syncMainToBce() {
 window.selectSpaPreset = selectSpaPreset;
 window.onMainMetricTypeChange = onMainMetricTypeChange;
 window.syncMainToBce = syncMainToBce;
+
+function toggleSpaPanel() {
+    const panel = document.getElementById('spa-command-panel');
+    const toggleIcon = document.getElementById('spa-toggle-icon');
+    const toggleBtn = document.getElementById('btn-toggle-spa-panel');
+    if (!panel) return;
+    
+    panel.classList.toggle('hidden');
+    
+    if (toggleIcon && toggleBtn) {
+        if (panel.classList.contains('hidden')) {
+            toggleIcon.className = 'fa-solid fa-sliders text-pink-400';
+            toggleBtn.classList.remove('bg-pink-900/30', 'border-pink-500/40');
+        } else {
+            toggleIcon.className = 'fa-solid fa-xmark text-rose-500';
+            toggleBtn.classList.add('bg-pink-900/30', 'border-pink-500/40');
+        }
+    }
+}
+window.toggleSpaPanel = toggleSpaPanel;

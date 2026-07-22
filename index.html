@@ -213,92 +213,89 @@
             <div id="canvas-container" class="w-full flex-1 relative cursor-grab active:cursor-grabbing">
                 <!-- Three.js Canvas will be appended here -->
 
-                <!-- Floating Spa Owner AI Command Center -->
-                <div class="absolute top-4 left-4 flex flex-col gap-3.5 z-[25] pointer-events-none select-none w-[340px]">
-                    <!-- Smart Command Center Panel -->
-                    <div class="bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl p-4.5 text-xs text-slate-350 shadow-xl pointer-events-auto flex flex-col gap-3.5">
+                <!-- Floating Spa Owner AI Command Center & Controls -->
+                <div class="absolute top-4 left-4 flex flex-col gap-2 z-[25] pointer-events-none select-none w-[320px]">
+                    
+                    <!-- Toggle Button -->
+                    <button id="btn-toggle-spa-panel" onclick="toggleSpaPanel()" class="pointer-events-auto bg-slate-900/90 backdrop-blur-md hover:bg-slate-800 text-slate-200 border border-slate-800/80 px-3 py-2 rounded-xl text-[10px] font-bold flex items-center justify-between shadow-lg active:scale-95 transition-all cursor-pointer w-fit">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-sliders text-pink-400" id="spa-toggle-icon"></i>
+                            <span>⚙️ BẢNG ĐIỀU HÀNH AI</span>
+                        </div>
+                    </button>
+
+                    <!-- Smart Command Center Panel (Hidden by default to save viewport) -->
+                    <div id="spa-command-panel" class="hidden bg-slate-950/85 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 text-xs text-slate-350 shadow-2xl pointer-events-auto flex flex-col gap-3.5 max-h-[calc(100vh-160px)] overflow-y-auto custom-scrollbar">
                         <div class="flex items-center gap-2 border-b border-slate-800 pb-2.5">
-                            <div class="w-8 h-8 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400">
+                            <div class="w-8 h-8 rounded-xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-pink-400 shrink-0">
                                 <i class="fa-solid fa-seedling text-sm"></i>
                             </div>
                             <div>
                                 <h3 class="font-sans font-bold text-slate-100 text-xs tracking-wide uppercase">BẢNG ĐIỀU HÀNH BELLA SPA AI</h3>
-                                <p class="text-[9px] text-slate-400 font-sans">Trợ lý Chiến dịch Tự động hóa dành cho Chủ Doanh nghiệp</p>
+                                <p class="text-[8px] text-slate-400 font-sans">Trợ lý Chiến dịch Tự động hóa dành cho Chủ Doanh nghiệp</p>
                             </div>
                         </div>
 
-                        <!-- Presets / Quick actions -->
+                        <!-- Presets / Quick actions (Extremely clean pills) -->
                         <div class="space-y-1.5">
-                            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">1. Chọn nhanh Mẫu Chiến dịch</span>
-                            <div class="grid grid-cols-2 gap-2 text-[10px]">
-                                <button type="button" onclick="selectSpaPreset('sales')" class="bg-slate-950 hover:bg-pink-950/20 border border-slate-800 hover:border-pink-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
-                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-chart-line text-pink-400 text-[10px]"></i> Tăng Doanh Số</span>
-                                    <span class="text-[8px] text-slate-500">Bán gói liệu trình Spa</span>
-                                </button>
-                                <button type="button" onclick="selectSpaPreset('post')" class="bg-slate-950 hover:bg-cyan-950/20 border border-slate-800 hover:border-cyan-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
-                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-paper-plane text-cyan-400 text-[10px]"></i> Đăng bài Social</span>
-                                    <span class="text-[8px] text-slate-500">Chăm sóc tương tác trang</span>
-                                </button>
-                                <button type="button" onclick="selectSpaPreset('recruit')" class="bg-slate-950 hover:bg-amber-950/20 border border-slate-800 hover:border-amber-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
-                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-users text-amber-400 text-[10px]"></i> Tuyển nhân sự</span>
-                                    <span class="text-[8px] text-slate-500">Tuyển KTV & Lễ tân gấp</span>
-                                </button>
-                                <button type="button" onclick="selectSpaPreset('lead')" class="bg-slate-950 hover:bg-purple-950/20 border border-slate-800 hover:border-purple-850 text-left p-2.5 rounded-xl transition flex flex-col gap-0.5 active:scale-95 cursor-pointer">
-                                    <span class="font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-gift text-purple-400 text-[10px]"></i> Tặng quà/Leads</span>
-                                    <span class="text-[8px] text-slate-500">Chạy Voucher ưu đãi 50%</span>
-                                </button>
+                            <span class="text-[8px] uppercase font-bold text-slate-500 tracking-wider block">1. Chọn nhanh Mẫu Chiến dịch</span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="selectSpaPreset('sales')" class="bg-slate-950 hover:bg-pink-950/20 border border-slate-800 hover:border-pink-850 px-2 py-1.5 rounded-lg text-[9px] font-bold text-slate-200 transition active:scale-95 cursor-pointer">📈 Doanh số</button>
+                                <button type="button" onclick="selectSpaPreset('post')" class="bg-slate-950 hover:bg-cyan-950/20 border border-slate-800 hover:border-cyan-850 px-2 py-1.5 rounded-lg text-[9px] font-bold text-slate-200 transition active:scale-95 cursor-pointer">📘 Social</button>
+                                <button type="button" onclick="selectSpaPreset('recruit')" class="bg-slate-950 hover:bg-amber-950/20 border border-slate-800 hover:border-amber-850 px-2 py-1.5 rounded-lg text-[9px] font-bold text-slate-200 transition active:scale-95 cursor-pointer">👥 Nhân sự</button>
+                                <button type="button" onclick="selectSpaPreset('lead')" class="bg-slate-950 hover:bg-purple-950/20 border border-slate-800 hover:border-purple-850 px-2 py-1.5 rounded-lg text-[9px] font-bold text-slate-200 transition active:scale-95 cursor-pointer">🎁 Quà tặng</button>
                             </div>
                         </div>
 
                         <!-- Quick Config Fields -->
                         <div class="space-y-3 border-t border-slate-800/80 pt-3">
-                            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">2. Cấu hình nhanh Thông số</span>
+                            <span class="text-[8px] uppercase font-bold text-slate-500 tracking-wider block">2. Cấu hình nhanh Thông số</span>
                             
                             <div class="space-y-2">
                                 <div class="grid grid-cols-2 gap-2 text-[10px]">
                                     <div>
                                         <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Loại Mục Tiêu</label>
-                                        <select id="main-metric-type" onchange="onMainMetricTypeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:border-pink-500 cursor-pointer">
-                                            <option value="targetFollowers">Followers (Người theo dõi)</option>
-                                            <option value="targetRevenueVnd">Doanh số (VND)</option>
-                                            <option value="targetLeads">Leads / Đăng ký</option>
-                                            <option value="targetStaffCount">Nhân sự (Người)</option>
+                                        <select id="main-metric-type" onchange="onMainMetricTypeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-100 focus:outline-none focus:border-pink-500 cursor-pointer">
+                                            <option value="targetFollowers">Followers</option>
+                                            <option value="targetRevenueVnd">Doanh số</option>
+                                            <option value="targetLeads">Leads</option>
+                                            <option value="targetStaffCount">Nhân sự</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label id="main-followers-label" class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Mục tiêu Followers</label>
-                                        <input type="number" id="main-followers" value="1000" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-pink-500">
+                                        <input type="number" id="main-followers" value="1000" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-100 font-mono focus:outline-none focus:border-pink-500">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-2 text-[10px]">
                                     <div>
                                         <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Ngân sách (VND)</label>
-                                        <input type="number" id="main-budget" value="10000000" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-slate-100 font-mono focus:outline-none focus:border-pink-500">
+                                        <input type="number" id="main-budget" value="10000000" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-100 font-mono focus:outline-none focus:border-pink-500">
                                     </div>
                                     <div>
-                                        <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Tông giọng bài viết</label>
-                                        <select id="main-voice" onchange="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-slate-100 focus:outline-none focus:border-pink-500 cursor-pointer">
-                                            <option value="Professional & Premium">Professional & Premium</option>
-                                            <option value="Friendly & Casual">Friendly & Casual</option>
-                                            <option value="Energetic & Bold">Energetic & Bold</option>
+                                        <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Tông giọng</label>
+                                        <select id="main-voice" onchange="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[10px] text-slate-100 focus:outline-none focus:border-pink-500 cursor-pointer">
+                                            <option value="Professional & Premium">Premium</option>
+                                            <option value="Friendly & Casual">Casual</option>
+                                            <option value="Energetic & Bold">Bold</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="block text-slate-400 text-[8px] mb-0.5 uppercase tracking-wider font-bold">Khách hàng mục tiêu</label>
-                                    <input type="text" id="main-segment" value="VIP Beauty & Spa Clients" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-100 focus:outline-none focus:border-pink-500">
+                                    <input type="text" id="main-segment" value="VIP Beauty & Spa Clients" oninput="syncMainToBce()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-[10px] text-slate-100 focus:outline-none focus:border-pink-500">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Direct Prompt Directive -->
                         <div class="space-y-1.5 border-t border-slate-800/80 pt-3">
-                            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">3. Chỉ thị mong muốn của bạn</span>
+                            <span class="text-[8px] uppercase font-bold text-slate-500 tracking-wider block">3. Chỉ thị mong muốn của bạn</span>
                             <div class="flex gap-2">
-                                <input type="text" id="ceo-command-input" placeholder="Ví dụ: Tăng doanh số 20tr trong 30 ngày..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-pink-500 shadow-sm font-sans">
-                                <button id="btn-send-command" class="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 text-white font-bold px-3 py-2 rounded-xl text-xs transition flex items-center justify-center shadow-lg shadow-pink-500/20 active:scale-95" title="Gửi chỉ thị cho AI COO">
+                                <input type="text" id="ceo-command-input" placeholder="Ví dụ: Tăng doanh số 20tr trong 30 ngày..." class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-[10px] text-slate-100 placeholder-slate-500 focus:outline-none focus:border-pink-500 shadow-sm font-sans">
+                                <button id="btn-send-command" class="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 text-white font-bold px-3 py-1.5 rounded-xl text-[10px] transition flex items-center justify-center shadow-lg shadow-pink-500/20 active:scale-95 cursor-pointer" title="Gửi chỉ thị cho AI COO">
                                     <i class="fa-solid fa-bolt"></i>
                                 </button>
                             </div>
@@ -306,17 +303,17 @@
                     </div>
 
                     <!-- Interactive Layout Controls -->
-                    <div class="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 flex items-center justify-between shadow-lg pointer-events-auto">
-                        <button id="btn-reset-cam" class="bg-slate-950 hover:bg-slate-800 text-slate-350 border border-slate-800 px-2 py-1.5 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Reset Camera 3D">
+                    <div class="bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-800/80 flex items-center justify-between shadow-lg pointer-events-auto">
+                        <button id="btn-reset-cam" class="bg-slate-950 hover:bg-slate-800 text-slate-350 border border-slate-800 px-2 py-1 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Reset Camera 3D">
                             <i class="fa-solid fa-video text-pink-400"></i>
                             <span>Cam 3D</span>
                         </button>
                         <div class="w-px h-3 bg-slate-800"></div>
-                        <button id="btn-layout-dept" class="bg-slate-950 hover:bg-slate-800 text-slate-355 border border-slate-800 px-2 py-1.5 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Di chuyển toàn bộ phòng ban">
+                        <button id="btn-layout-dept" class="bg-slate-950 hover:bg-slate-800 text-slate-355 border border-slate-800 px-2 py-1 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Di chuyển toàn bộ phòng ban">
                             <i class="fa-solid fa-up-down-left-right text-pink-400"></i>
                             <span id="layout-dept-status">Xếp phòng</span>
                         </button>
-                        <button id="btn-layout-seat" class="bg-slate-950 hover:bg-slate-800 text-slate-355 border border-slate-800 px-2 py-1.5 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Di chuyển vị trí ngồi">
+                        <button id="btn-layout-seat" class="bg-slate-950 hover:bg-slate-800 text-slate-355 border border-slate-800 px-2 py-1 rounded-lg text-[9px] font-semibold flex items-center gap-1 active:scale-95 transition-all cursor-pointer" title="Di chuyển vị trí ngồi">
                             <i class="fa-solid fa-chair text-pink-400"></i>
                             <span id="layout-seat-status">Xếp chỗ</span>
                         </button>
