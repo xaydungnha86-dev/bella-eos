@@ -6668,7 +6668,7 @@ function onMetricTypeChange() {
 window.onMetricTypeChange = onMetricTypeChange;
 
 async function testGeminiConnection() {
-    const key = document.getElementById('settings-gemini-key').value.trim();
+    let key = document.getElementById('settings-gemini-key').value.trim();
     const statusSpan = document.getElementById('gemini-test-status');
     
     if (!key) {
@@ -6676,6 +6676,10 @@ async function testGeminiConnection() {
         statusSpan.textContent = "❌ Vui lòng nhập API Key trước khi kiểm tra.";
         return;
     }
+    
+    // Strip accidental quotes
+    if (key.startsWith('"') && key.endsWith('"')) key = key.slice(1, -1);
+    if (key.startsWith("'") && key.endsWith("'")) key = key.slice(1, -1);
     
     statusSpan.className = "block mt-1 text-[9px] font-mono text-slate-400 animate-pulse";
     statusSpan.textContent = "⏳ Đang kết nối thử nghiệm đến Google AI Studio...";
@@ -6685,6 +6689,8 @@ async function testGeminiConnection() {
         'gemini-1.5-pro',
         'gemini-pro'
     ];
+    
+    let lastError = null;
     
     for (const model of candidateModels) {
         try {
@@ -6701,18 +6707,21 @@ async function testGeminiConnection() {
                 statusSpan.className = "block mt-1 text-[9px] font-mono text-emerald-400 font-bold";
                 statusSpan.textContent = `✅ Kết nối THÀNH CÔNG! API Key hoạt động tốt (Model: ${model}).`;
                 return;
-            } else if (data.error && data.error.message && !data.error.message.includes('not found') && !data.error.message.includes('not supported')) {
-                statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
-                statusSpan.textContent = `❌ Lỗi: ${data.error.message}`;
-                return;
+            } else if (data.error) {
+                lastError = data.error.message || JSON.stringify(data.error);
+                if (lastError.includes('API key') || lastError.includes('key') || response.status === 400 || response.status === 403) {
+                    statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
+                    statusSpan.textContent = `❌ Lỗi: ${lastError}`;
+                    return;
+                }
             }
         } catch (err) {
-            // continue fallback
+            lastError = err.message;
         }
     }
     
     statusSpan.className = "block mt-1 text-[9px] font-mono text-rose-400";
-    statusSpan.textContent = "❌ Lỗi: Không có model nào tương thích hoặc Key không hợp lệ.";
+    statusSpan.textContent = `❌ Lỗi: ${lastError || "Không có model nào tương thích hoặc Key không hợp lệ."}`;
 }
 window.testGeminiConnection = testGeminiConnection;
 
