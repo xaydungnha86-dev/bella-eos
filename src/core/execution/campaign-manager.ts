@@ -398,7 +398,12 @@ class CampaignExecutionManagerClass {
         currentTasks
       );
 
-      const taskResults = dispatchResult?.summary?.results || dispatchResult?.payload?.execution?.results || [];
+      const taskResults = dispatchResult?.payload?.execution?.results || dispatchResult?.summary?.results || [];
+      if (taskResults && taskResults.length > 0) {
+        this.state.dynamicTasks = taskResults;
+        this.notify();
+      }
+
       const fbResult = taskResults.find((r: any) => r.task_type === 'publish_facebook' || r.task_type === 'schedule_post');
 
       if (fbResult) {
