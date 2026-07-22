@@ -45,6 +45,45 @@
 
 ---
 
+### 1.2 Ma Trận AI Agent Nghiệp Vụ Đa Miền Doanh Nghiệp (Enterprise Domain AI Agent Matrix)
+
+> **Mô hình AI Agent Không Giới Hạn**: Mỗi AI Agent phụ trách một miền nghiệp vụ riêng biệt, sở hữu bộ Skill chuyên sâu và được cô lập trong Context & Policy DNA riêng của doanh nghiệp.
+
+```
+┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🤖 MA TRẬN 8 MIỀN AI AGENT NGHIỆP VỤ DOANH NGHIỆP (ISOLATED SKILLS & CONTEXT)                    │
+├───────────────────────┬───────────────────────────────────┬───────────────────────────────────────┤
+│ Miền Nghiệp Vụ        │ Tên Agent / Worker Chuyên Biệt    │ Skills & Isolated Enterprise Context  │
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 1. Tài Chính & Đầu Tư  │ Hermes Finance & Treasury Agent   │ • Skill: Financial Modeling, CashFlow │
+│                       │                                   │ • Context: Financial DNA & Budgets    │
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 2. Pháp Lý & Tuân Thủ  │ Themis Legal & Compliance Agent   │ • Skill: Contract Audit, Risk Check   │
+│                       │                                   │ • Context: Legal DNA & Regulatory Code│
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 3. Kế Toán & Thuế     │ Pacioli Accounting & Tax Agent    │ • Skill: EOM Accounting, Tax Audit    │
+│                       │                                   │ • Context: Accounting Standards & Tax │
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 4. Vận Hành & SLA     │ Ops Operations & Supply Agent     │ • Skill: Capacity Planning, SLA Rules │
+│                       │                                   │ • Context: Operational SOPs & Matrix  │
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 5. Công Nghệ & Code   │ Turing Engineering Agent          │ • Skill: Code Generation, API Refactor│
+│                       │                                   │ • Context: System Architecture & Code │
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 6. Truyền Thông & PR  │ Apollo PR & Communications Agent  │ • Skill: Press Release, Crisis PR     │
+│                       │                                   │ • Context: Brand PR DNA & Guidelines  │
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 7. Nhân Sự & Đào Tạo  │ Demeter HR & Talent Agent         │ • Skill: Recruitment, Performance Appraisal│
+│                       │                                   │ • Context: HR Policy & Salary Matrix  │
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 8. Tiếp Thị & Media   │ Bella EOS Content & Creative      │ • Skill: Copywriting, 4K Banner/Video │
+│                       │ Workers                           │ • Context: Brand Marketing DNA & Offer│
+├───────────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+│ 9. Kênh Truyền Thông  │ Hermes Social & Channel Publisher │ • Skill: Social Publishing (FB, Zalo) │
+│                       │                                   │ • Context: Channel API Tokens         │
+└───────────────────────┴───────────────────────────────────┴───────────────────────────────────────┘
+```
+
 ## 2. KERNEL CONTAINER & FULL ENTERPRISE RUNTIMES MATRIX (v18.1)
 
 ```

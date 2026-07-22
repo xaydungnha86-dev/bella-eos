@@ -19,7 +19,7 @@ import { NextResponse } from 'next/server';
  * and produces a structured JSON execution plan.
  */
 
-// ─── Agent Registry — available agents the LLM can assign tasks to ─────────
+// ─── Agent Registry — 8 Enterprise Domain AI Agent Matrix ─────────────────
 const AGENT_REGISTRY = [
   {
     id: 'eos_content_worker',
@@ -43,6 +43,55 @@ const AGENT_REGISTRY = [
     output_type: 'publication'
   },
   {
+    id: 'hermes_finance',
+    name: 'Hermes Finance & Treasury Agent',
+    description: 'Agent Tài chính & Ngân sách chuyên mô hình hóa dòng tiền, thẩm định ngân sách chỉ thị CEO, tính toán chi phí và phân bổ vốn',
+    tools: ['audit_finance_budget', 'project_cashflow', 'evaluate_roi_financial'],
+    output_type: 'financial_approval'
+  },
+  {
+    id: 'themis_legal',
+    name: 'Themis Legal & Compliance Agent',
+    description: 'Agent Pháp lý & Tuân thủ chuyên rà soát quy định pháp luật, hợp đồng thương mại, điều khoản bảo vệ quyền sở hữu trí tuệ và chính sách thương hiệu',
+    tools: ['audit_legal_compliance', 'review_contract_terms', 'evaluate_policy_risk'],
+    output_type: 'legal_audit'
+  },
+  {
+    id: 'pacioli_accounting',
+    name: 'Pacioli Accounting & Tax Agent',
+    description: 'Agent Kế toán & Thuế chuyên nghiệp chuẩn hóa chứng từ EOM, phân bổ chi phí kế toán và kiểm soát nghĩa vụ thuế doanh nghiệp',
+    tools: ['normalize_ledger_eom', 'audit_tax_compliance', 'generate_invoice_records'],
+    output_type: 'accounting_record'
+  },
+  {
+    id: 'ops_operations',
+    name: 'Ops Operations & Supply Agent',
+    description: 'Agent Vận hành & SLA chuyên điều phối quy trình vận hành chuỗi chi nhánh, xếp lịch dịch vụ Spa, tối ưu công suất và SLA phục vụ',
+    tools: ['optimize_operational_sop', 'schedule_branch_capacity', 'audit_service_sla'],
+    output_type: 'operational_plan'
+  },
+  {
+    id: 'turing_code',
+    name: 'Turing Engineering & Code Agent',
+    description: 'Agent Công nghệ & Lập trình chuyên viết code, refactor ứng dụng, tích hợp API connector và đảm bảo hạ tầng hệ thống',
+    tools: ['generate_system_code', 'integrate_api_connector', 'refactor_codebase'],
+    output_type: 'engineering_artifact'
+  },
+  {
+    id: 'apollo_pr',
+    name: 'Apollo PR & Communications Agent',
+    description: 'Agent Truyền thông & PR thương hiệu chuyên viết thông cáo báo chí, xử lý truyền thông doanh nghiệp và thông điệp thương hiệu cao cấp',
+    tools: ['write_press_release', 'manage_brand_reputation'],
+    output_type: 'pr_campaign'
+  },
+  {
+    id: 'demeter_hr',
+    name: 'Demeter HR & Talent Agent',
+    description: 'Agent Nhân sự & Đào tạo chuyên quản lý thông tin nhân sự, tiêu chuẩn đào tạo KTV Spa, KPI nhân sự và ma trận chính sách đãi ngộ',
+    tools: ['manage_hr_policy', 'audit_staff_kpi', 'create_training_sop'],
+    output_type: 'hr_policy'
+  },
+  {
     id: 'ares_ads',
     name: 'Ares Ads Agent',
     description: 'Chuyên nhận bài viết + hình ảnh từ Bella EOS Worker để thiết lập và tối ưu chiến dịch quảng cáo trả phí (Facebook Ads, Google Ads, TikTok Ads)',
@@ -55,13 +104,6 @@ const AGENT_REGISTRY = [
     description: 'Chuyên phân tích dữ liệu, báo cáo hiệu suất, đo lường KPI, dự báo ROI',
     tools: ['analyze_campaign_data', 'generate_report', 'forecast_roi', 'segment_audience'],
     output_type: 'insight'
-  },
-  {
-    id: 'demeter_crm',
-    name: 'Demeter CRM Agent',
-    description: 'Chuyên quản lý dữ liệu khách hàng, phân khúc, lead nurturing, retention',
-    tools: ['update_crm', 'segment_customers', 'send_personalized_message', 'create_loyalty_offer'],
-    output_type: 'customer_action'
   }
 ];
 
