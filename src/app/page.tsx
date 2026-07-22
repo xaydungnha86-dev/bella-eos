@@ -1010,18 +1010,30 @@ export default function Dashboard() {
                     setObjective(e.target.value);
                     CampaignExecutionManager.updateState({ objective: e.target.value });
                   }}
-                  disabled={isProcessing}
+                  onFocus={(e) => e.target.select()}
                   placeholder="Ví dụ: Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu..."
-                  className="w-full h-12 bg-slate-50 border border-slate-200 hover:border-indigo-400 focus:border-indigo-500 focus:outline-none rounded-xl pl-11 pr-4 text-xs font-sans text-slate-800 placeholder-slate-400 shadow-inner transition-colors disabled:opacity-50"
+                  className="w-full h-12 bg-slate-50 border border-slate-200 hover:border-indigo-400 focus:border-indigo-500 focus:outline-none rounded-xl pl-11 pr-10 text-xs font-sans text-slate-800 placeholder-slate-400 shadow-inner transition-colors"
                 />
                 <Sparkles className="w-4 h-4 text-indigo-500 absolute left-4 top-4" />
+                {objective && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setObjective('');
+                      CampaignExecutionManager.updateState({ objective: '' });
+                    }}
+                    className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 font-bold text-xs bg-slate-200/60 hover:bg-slate-200 w-5 h-5 rounded-full flex items-center justify-center transition-colors cursor-pointer"
+                    title="Xóa lệnh hiện tại"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
               <button 
                 type="submit"
-                disabled={isProcessing}
-                className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-xs px-5 h-12 rounded-xl transition-all flex items-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
+                className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-xs px-5 h-12 rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer shrink-0"
               >
-                <span>Phân rã Kế hoạch (AI)</span>
+                <span>{isProcessing ? '⚡ Đang Phân Rã & Thực Thi...' : 'Phân rã Kế hoạch (AI)'}</span>
                 <Send className="w-4 h-4" />
               </button>
             </form>
