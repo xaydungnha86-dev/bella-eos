@@ -180,6 +180,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   let provider = 'enterprise-graphic-engine';
   let model = 'poster-design-skill-v2';
   let actualPrompt = '';
+  let modelWarning: string | undefined;
 
   try {
     const res = await fetch(`${getBaseUrl()}/api/ai/generate-image`, {
@@ -201,6 +202,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       provider = data.provider;
       model = data.model;
       actualPrompt = data.prompt || '';
+      if (data.warning) modelWarning = data.warning;
     } else {
       const ts = Date.now();
       imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
@@ -237,12 +239,14 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
     selectedModel: actualModelName
   };
 
+  const modelSwitchNotice = modelWarning ? `\n\n⚠️ THÔNG BÁO THAY ĐỔI MODEL: ${modelWarning}` : '';
+
   return {
     success: true,
     output: `🎨 [${brandName} Media & Creative Worker] ĐÃ HOÀN TẤT THIẾT KẾ BANNER ĐỒ HỌA CHUẨN BÁN HÀNG:\n\n` +
       `📋 QUY TRÌNH THIẾT KẾ & PROMPT YÊU CẦU AI:\n${detailedPrompt}\n\n` +
-      `🖼️ Image Banner URL (PNG 4K): ${imageUrl}`,
-    meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1200x630', status: 'GENERATED', designPlan }
+      `🖼️ Image Banner URL (PNG 4K): ${imageUrl}${modelSwitchNotice}`,
+    meta: { type: 'IMAGE_BANNER', imageUrl, provider, model, resolution: '1200x630', status: 'GENERATED', designPlan, modelWarning }
   };
 }
 

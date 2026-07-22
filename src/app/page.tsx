@@ -813,6 +813,16 @@ export default function Dashboard() {
                                 {t.task_description}
                               </p>
 
+                              {/* Model switch warning badge */}
+                              {isDone && t.meta?.modelWarning && (
+                                <div className="mt-2 flex items-start gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5">
+                                  <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
+                                  <p className="text-[9px] text-amber-800 font-semibold leading-tight">
+                                    ⚠️ THAY ĐỔI MODEL: {t.meta.modelWarning}
+                                  </p>
+                                </div>
+                              )}
+
                               {/* Output snippet */}
                               {t.output && (
                                 <p className="text-[9px] text-slate-500 mt-2 font-mono bg-white/80 p-1.5 rounded border border-slate-100 line-clamp-2">
@@ -1389,6 +1399,26 @@ export default function Dashboard() {
                   </span>
                 )}
               </div>
+
+              {/* Model Switch Warning Banner */}
+              {selectedTask.meta?.modelWarning && (
+                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3.5 flex items-start gap-3 shadow-sm">
+                  <div className="w-7 h-7 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-amber-800 text-[11px] uppercase tracking-wide mb-1">
+                      ⚠️ Thông báo: Hệ thống đã tự động thay đổi model
+                    </p>
+                    <p className="text-[11px] text-amber-700 leading-relaxed">
+                      {selectedTask.meta.modelWarning}
+                    </p>
+                    <p className="text-[10px] text-amber-600 mt-1.5 font-medium">
+                      Kiểm tra lại cấu hình Agent hoặc thay đổi model trong phần <strong>Cấu Hình AI Workforce</strong>.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Task Description */}
               <div>

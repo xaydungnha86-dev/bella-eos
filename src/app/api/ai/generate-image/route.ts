@@ -157,9 +157,12 @@ export async function POST(request: Request) {
             return {
               success: true,
               provider: 'google-gemini',
-              model: model || modelId,
+              model: modelId,
               imageUrl: dataUrl,
-              prompt: imagePrompt
+              prompt: imagePrompt,
+              warning: (model && model !== 'default' && model !== modelId) 
+                ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [${modelId}] do không khả dụng.` 
+                : undefined
             };
           }
           console.warn(`[AI Image Generator] Google Imagen API (${modelId}) notice:`, data.error?.message || data);
@@ -206,9 +209,12 @@ export async function POST(request: Request) {
             return {
               success: true,
               provider: 'google-gemini-native',
-              model: model || modelId,
+              model: modelId,
               imageUrl: dataUrl,
-              prompt: imagePrompt
+              prompt: imagePrompt,
+              warning: (model && model !== 'default' && model !== modelId) 
+                ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [${modelId}] do không khả dụng.` 
+                : undefined
             };
           }
           console.warn(`[AI Image Generator] Google Gemini Native Image API (${modelId}) notice:`, data.error?.message || data);
@@ -246,9 +252,12 @@ export async function POST(request: Request) {
           return {
             success: true,
             provider: 'openai',
-            model: model || 'dall-e-3',
+            model: 'dall-e-3',
             imageUrl: generatedUrl,
-            prompt: imagePrompt
+            prompt: imagePrompt,
+            warning: (model && model !== 'default' && model !== 'dall-e-3') 
+              ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [dall-e-3] do không khả dụng.` 
+              : undefined
           };
         }
         console.warn('[AI Image Generator] DALL-E 3 notice:', data.error?.message);
@@ -283,9 +292,12 @@ export async function POST(request: Request) {
           return {
             success: true,
             provider: 'fal.ai',
-            model: model || 'flux.1-schnell',
+            model: 'flux.1-schnell',
             imageUrl: generatedUrl,
-            prompt: imagePrompt
+            prompt: imagePrompt,
+            warning: (model && model !== 'default' && model !== 'flux.1-schnell') 
+              ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [flux.1-schnell] do không khả dụng.` 
+              : undefined
           };
         }
       } catch (e) {
