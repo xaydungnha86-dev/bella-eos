@@ -1,5 +1,65 @@
 import { NextResponse } from 'next/server';
 
+function getVietnameseDayOfWeek(date: Date): string {
+  const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  return days[date.getDay()];
+}
+
+function parseMonthAndYear(objective: string) {
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1;
+
+  const monthRegex = /(?:tháng|thang|thg|t|month)\s*(\d{1,2})/i;
+  const match = objective.match(monthRegex);
+  if (match) {
+    const parsedMonth = parseInt(match[1], 10);
+    if (parsedMonth >= 1 && parsedMonth <= 12) {
+      month = parsedMonth;
+    }
+  } else {
+    const englishMonths = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    const lowerObj = objective.toLowerCase();
+    for (let i = 0; i < englishMonths.length; i++) {
+      if (lowerObj.includes(englishMonths[i])) {
+        month = i + 1;
+        break;
+      }
+    }
+  }
+
+  const yearRegex = /\b(202\d|203\d)\b/;
+  const yearMatch = objective.match(yearRegex);
+  if (yearMatch) {
+    year = parseInt(yearMatch[1], 10);
+  }
+
+  return { month, year };
+}
+
+function generateWeeklyDates(objective: string) {
+  const { month, year } = parseMonthAndYear(objective);
+  const days = [4, 13, 22, 26];
+  const times = ['09:00 AM', '14:30 PM', '19:30 PM', '10:00 AM'];
+  
+  return days.map((day, index) => {
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = getVietnameseDayOfWeek(date);
+    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+    const timeStr = times[index];
+    return {
+      dateStr,
+      dayOfWeek,
+      timeStr,
+      fullDisplay: `${timeStr} — ${dayOfWeek}, Ngày ${dateStr}`,
+      month
+    };
+  });
+}
+
 /**
  * POST /api/ai/write-post
  *
@@ -50,16 +110,19 @@ export async function POST(request: Request) {
     const effectiveTone = voiceTone || brandDna?.voiceTone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
     const effectiveSegment = segment || brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
 
+    const weeklyDates = generateWeeklyDates(objective);
+    const { month } = parseMonthAndYear(objective);
+
     const defaultSystemPrompt = `Bạn là AI Copywriter cấp cao của hệ sinh thái Bella Enterprise (Bella EOS & Bella EIP).
 Nhiệm vụ: Dựa trên Bản kế hoạch Marketing chiến lược (Lộ trình Tuần W1-W4 và Lịch Ngày), soạn thảo BỘ NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN VÀ THEO NGÀY (CONTENT CALENDAR) với khung giờ đăng bài cụ thể để gửi qua Hermes Publisher lập lịch tự động.
 
 BẮT BUỘC TRẢ VỀ BỘ LỊCH NỘI DUNG 4 TUẦN CHI TIẾT THEO CẤU TRÚC SAU:
 
-📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG 8)
+📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG ${month})
 
 ---
 ### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
-- ⏰ **Lịch đăng bài tự động**: 09:00 AM — Thứ Hai, Ngày 04/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[0].fullDisplay}
 - 🎯 **Chủ đề truyền thông**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
 - 📝 **Nội dung xuất bản (Post Body)**:
 🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
@@ -69,7 +132,7 @@ BẮT BUỘC TRẢ VỀ BỘ LỊCH NỘI DUNG 4 TUẦN CHI TIẾT THEO CẤU TR
 
 ---
 ### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
-- ⏰ **Lịch đăng bài tự động**: 14:30 PM — Thứ Tư, Ngày 13/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[1].fullDisplay}
 - 🎯 **Chủ đề truyền thông**: Chứng minh năng lực thực tế — Hơn 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
 - 📝 **Nội dung xuất bản (Post Body)**:
 🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
@@ -79,17 +142,17 @@ BẮT BUỘC TRẢ VỀ BỘ LỊCH NỘI DUNG 4 TUẦN CHI TIẾT THEO CẤU TR
 
 ---
 ### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
-- ⏰ **Lịch đăng bài tự động**: 19:30 PM — Thứ Sáu, Ngày 22/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[2].fullDisplay}
 - 🎯 **Chủ đề truyền thông**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
 - 📝 **Nội dung xuất bản (Post Body)**:
-🎁 ĐẶC QUYỀN THÁNG 8: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
+🎁 ĐẶC QUYỀN THÁNG ${month}: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
 [Soạn nội dung bài viết chi tiết 150-250 từ]
 👉 Bấm vào link để giữ suất trải nghiệm miễn phí!
-#BellaEOS #UudaiThang8 #DemoFree #SpaTech
+#BellaEOS #UudaiThang${month} #DemoFree #SpaTech
 
 ---
 ### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
-- ⏰ **Lịch đăng bài tự động**: 10:00 AM — Thứ Ba, Ngày 26/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[3].fullDisplay}
 - 🎯 **Chủ đề truyền thông**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
 - 📝 **Nội dung xuất bản (Post Body)**:
 ⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?
@@ -237,13 +300,15 @@ Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàn
 function generateFallbackPost(objective: string, tone?: string, segment?: string, goal?: string): string {
   const lower = objective.toLowerCase();
   const isSpa = lower.includes('spa') || lower.includes('thẩm mỹ') || lower.includes('beauty');
+  const weeklyDates = generateWeeklyDates(objective);
+  const { month } = parseMonthAndYear(objective);
 
   if (isSpa) {
-    return `📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG 8)
+    return `📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG ${month})
 
 ---
 ### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
-- ⏰ **Lịch đăng bài tự động**: 09:00 AM — Thứ Hai, Ngày 04/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[0].fullDisplay}
 - 🎯 **Chủ đề**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
 - 📝 **Nội dung xuất bản (Post Body)**:
 🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
@@ -257,7 +322,7 @@ Quản lý lịch hẹn trùng lặp, dòng tiền thất thoát cuối tháng v
 
 ---
 ### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
-- ⏰ **Lịch đăng bài tự động**: 14:30 PM — Thứ Tư, Ngày 13/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[1].fullDisplay}
 - 🎯 **Chủ đề**: Chứng minh năng lực thực tế — 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
 - 📝 **Nội dung xuất bản (Post Body)**:
 🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
@@ -271,21 +336,21 @@ Không chỉ là lời hứa, Bella EOS đã và đang phục vụ hơn 1,200+ c
 
 ---
 ### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
-- ⏰ **Lịch đăng bài tự động**: 19:30 PM — Thứ Sáu, Ngày 22/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[2].fullDisplay}
 - 🎯 **Chủ đề**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
 - 📝 **Nội dung xuất bản (Post Body)**:
-🎁 ĐẶC QUYỀN THÁNG 8: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
+🎁 ĐẶC QUYỀN THÁNG ${month}: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
 
 Nhằm hỗ trợ các chủ Spa gia tăng doanh thu bứt phá trong quý 3, Bella EOS dành tặng 50 suất trải nghiệm toàn bộ tính năng cao cấp của Hệ thống Quản lý AI hoàn toàn miễn phí.
 
-⏳ Số lượng ưu đãi có hạn và chỉ áp dụng đến hết ngày 31/08/2026.
+⏳ Số lượng ưu đãi có hạn và chỉ áp dụng đến hết ngày ${month === 2 ? '28' : [4,6,9,11].includes(month) ? '30' : '31'}/${String(month).padStart(2, '0')}/2026.
 
 👉 Bấm vào liên kết bên dưới để nhận suất ưu đãi đặc quyền ngay bây giờ!
-#BellaEOS #UudaiThang8 #DemoFree #SpaTech #NhanDienThuongHieu
+#BellaEOS #UudaiThang${month} #DemoFree #SpaTech #NhanDienThuongHieu
 
 ---
 ### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
-- ⏰ **Lịch đăng bài tự động**: 10:00 AM — Thứ Ba, Ngày 26/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[3].fullDisplay}
 - 🎯 **Chủ đề**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
 - 📝 **Nội dung xuất bản (Post Body)**:
 ⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?

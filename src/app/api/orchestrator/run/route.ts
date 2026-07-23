@@ -1,6 +1,66 @@
 import { NextResponse } from 'next/server';
 import { HermesMcpServerEngine } from '@/connectors/hermes-mcp-connector';
 
+function getVietnameseDayOfWeek(date: Date): string {
+  const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  return days[date.getDay()];
+}
+
+function parseMonthAndYear(objective: string) {
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1;
+
+  const monthRegex = /(?:tháng|thang|thg|t|month)\s*(\d{1,2})/i;
+  const match = objective.match(monthRegex);
+  if (match) {
+    const parsedMonth = parseInt(match[1], 10);
+    if (parsedMonth >= 1 && parsedMonth <= 12) {
+      month = parsedMonth;
+    }
+  } else {
+    const englishMonths = [
+      'january', 'february', 'march', 'april', 'may', 'june',
+      'july', 'august', 'september', 'october', 'november', 'december'
+    ];
+    const lowerObj = objective.toLowerCase();
+    for (let i = 0; i < englishMonths.length; i++) {
+      if (lowerObj.includes(englishMonths[i])) {
+        month = i + 1;
+        break;
+      }
+    }
+  }
+
+  const yearRegex = /\b(202\d|203\d)\b/;
+  const yearMatch = objective.match(yearRegex);
+  if (yearMatch) {
+    year = parseInt(yearMatch[1], 10);
+  }
+
+  return { month, year };
+}
+
+function generateWeeklyDates(objective: string) {
+  const { month, year } = parseMonthAndYear(objective);
+  const days = [4, 13, 22, 26];
+  const times = ['09:00 AM', '14:30 PM', '19:30 PM', '10:00 AM'];
+  
+  return days.map((day, index) => {
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = getVietnameseDayOfWeek(date);
+    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+    const timeStr = times[index];
+    return {
+      dateStr,
+      dayOfWeek,
+      timeStr,
+      fullDisplay: `${timeStr} — ${dayOfWeek}, Ngày ${dateStr}`,
+      month
+    };
+  });
+}
+
 /**
  * POST /api/orchestrator/run
  *
@@ -78,11 +138,15 @@ async function tool_write_facebook_post(input: any, clientKeys: any): Promise<To
     console.warn('[tool_write_facebook_post] Write post fetch failed, using fallback calendar:', e);
   }
 
-  const fallbackCalendar = `📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG 8)
+  const objective = typeof input === 'string' ? input : input.objective || 'Spa Management Software';
+  const weeklyDates = generateWeeklyDates(objective);
+  const { month } = parseMonthAndYear(objective);
+
+  const fallbackCalendar = `📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG ${month})
 
 ---
 ### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
-- ⏰ **Lịch đăng bài tự động**: 09:00 AM — Thứ Hai, Ngày 04/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[0].fullDisplay}
 - 🎯 **Chủ đề**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
 - 📝 **Nội dung xuất bản (Post Body)**:
 🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
@@ -96,7 +160,7 @@ Quản lý lịch hẹn trùng lặp, dòng tiền thất thoát cuối tháng v
 
 ---
 ### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
-- ⏰ **Lịch đăng bài tự động**: 14:30 PM — Thứ Tư, Ngày 13/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[1].fullDisplay}
 - 🎯 **Chủ đề**: Chứng minh năng lực thực tế — 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
 - 📝 **Nội dung xuất bản (Post Body)**:
 🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
@@ -110,21 +174,21 @@ Không chỉ là lời hứa, Bella EOS đã và đang phục vụ hơn 1,200+ c
 
 ---
 ### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
-- ⏰ **Lịch đăng bài tự động**: 19:30 PM — Thứ Sáu, Ngày 22/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[2].fullDisplay}
 - 🎯 **Chủ đề**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
 - 📝 **Nội dung xuất bản (Post Body)**:
-🎁 ĐẶC QUYỀN THÁNG 8: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
+🎁 ĐẶC QUYỀN THÁNG ${month}: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
 
 Nhằm hỗ trợ các chủ Spa gia tăng doanh thu bứt phá trong quý 3, Bella EOS dành tặng 50 suất trải nghiệm toàn bộ tính năng cao cấp của Hệ thống Quản lý AI hoàn toàn miễn phí.
 
-⏳ Số lượng ưu đãi có hạn và chỉ áp dụng đến hết ngày 31/08/2026.
+⏳ Số lượng ưu đãi có hạn và chỉ áp dụng đến hết ngày ${month === 2 ? '28' : [4,6,9,11].includes(month) ? '30' : '31'}/${String(month).padStart(2, '0')}/2026.
 
 👉 Bấm vào liên kết bên dưới để nhận suất ưu đãi đặc quyền ngay bây giờ!
-#BellaEOS #UudaiThang8 #DemoFree #SpaTech #NhanDienThuongHieu
+#BellaEOS #UudaiThang${month} #DemoFree #SpaTech #NhanDienThuongHieu
 
 ---
 ### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
-- ⏰ **Lịch đăng bài tự động**: 10:00 AM — Thứ Ba, Ngày 26/08/2026
+- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[3].fullDisplay}
 - 🎯 **Chủ đề**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
 - 📝 **Nội dung xuất bản (Post Body)**:
 ⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?
@@ -433,16 +497,19 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
   // If content contains scheduled posts or 4-week calendar, build Hermes Schedule Matrix
   const isMultiPostCalendar = content.includes('TUẦN 1') || content.includes('CONTENT CALENDAR') || content.includes('Lịch đăng bài');
 
+  const pubObjective = input.objective || '';
+  const weeklyDates = generateWeeklyDates(pubObjective);
+
   const scheduleMatrix = `🚀 [HERMES SOCIAL PUBLISHER] ĐÃ THIẾT LẬP LẬP LỊCH ĐĂNG BÀI TỰ ĐỘNG (HERMES AUTO-PUBLISH SCHEDULE MATRIX):
 
 ✅ Đã nhận Bộ Lịch truyền thông 4 Tuần từ EOS Content Worker và Bộ Banner Graphic 4K (${imageUrl}) từ EOS Creative Worker.
 
 | Tuần / Giai đoạn | Ngày & Giờ Lập Lịch Đăng | Trạng Thái Hermes Queue | Kênh Đăng | Banner Attached | Queue / Post ID |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Tuần 1 (W1 - Pain Points)** | 🗓️ 04/08/2026 — 09:00 AM | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W1 PainPoints | \`hermes_queue_w1_001\` |
-| **Tuần 2 (W2 - Social Proof)** | 🗓️ 13/08/2026 — 14:30 PM | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W2 CaseStudy 1200+ | \`hermes_queue_w2_002\` |
-| **Tuần 3 (W3 - Demo Offer)** | 🗓️ 22/08/2026 — 19:30 PM | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W3 Demo Offer 50 | \`hermes_queue_w3_003\` |
-| **Tuần 4 (W4 - AI Workforce)** | 🗓️ 26/08/2026 — 10:00 AM | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W4 AI Workforce | \`hermes_queue_w4_004\` |
+| **Tuần 1 (W1 - Pain Points)** | 🗓️ ${weeklyDates[0].dateStr} — ${weeklyDates[0].timeStr} | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W1 PainPoints | \`hermes_queue_w1_001\` |
+| **Tuần 2 (W2 - Social Proof)** | 🗓️ ${weeklyDates[1].dateStr} — ${weeklyDates[1].timeStr} | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W2 CaseStudy 1200+ | \`hermes_queue_w2_002\` |
+| **Tuần 3 (W3 - Demo Offer)** | 🗓️ ${weeklyDates[2].dateStr} — ${weeklyDates[2].timeStr} | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W3 Demo Offer 50 | \`hermes_queue_w3_003\` |
+| **Tuần 4 (W4 - AI Workforce)** | 🗓️ ${weeklyDates[3].dateStr} — ${weeklyDates[3].timeStr} | ⏱️ SCHEDULED (ĐÃ LẬP LỊCH) | Fanpage Facebook & Zalo | Banner W4 AI Workforce | \`hermes_queue_w4_004\` |
 
 📌 **Ghi chú vận hành tự động**: Tất cả các bài viết tiếp thị và Banner đồ họa 4K trong bộ lịch đã được nạp vào Hàng chờ Lập lịch tự động (Hermes Queue). Đúng khung giờ vàng đã thiết lập, hệ thống Hermes MCP Server sẽ tự động xuất bản trực tiếp lên Fanpage Facebook và Zalo OA!`;
 
