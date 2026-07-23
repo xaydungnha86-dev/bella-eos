@@ -42,20 +42,53 @@ function parseMonthAndYear(objective: string) {
 
 function generateWeeklyDates(objective: string) {
   const { month, year } = parseMonthAndYear(objective);
-  const days = [4, 13, 22, 26];
+  const now = new Date();
+  
+  const targetDays = [4, 13, 22, 26];
+  const targetHours = [9, 14, 19, 10];
+  const targetMinutes = [0, 30, 30, 0];
   const times = ['09:00 AM', '14:30 PM', '19:30 PM', '10:00 AM'];
   
-  return days.map((day, index) => {
-    const date = new Date(year, month - 1, day);
+  const dateObjects: Date[] = [];
+  
+  for (let i = 0; i < 4; i++) {
+    const day = targetDays[i];
+    const hour = targetHours[i];
+    const minute = targetMinutes[i];
+    
+    let scheduledDate = new Date(year, month - 1, day, hour, minute);
+    
+    if (i === 0) {
+      if (scheduledDate < now) {
+        const todayTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
+        if (todayTarget < now) {
+          scheduledDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, hour, minute);
+        } else {
+          scheduledDate = todayTarget;
+        }
+      }
+    } else {
+      const prevDate = dateObjects[i - 1];
+      if (scheduledDate <= prevDate) {
+        scheduledDate = new Date(prevDate.getFullYear(), prevDate.getMonth(), prevDate.getDate() + 7, hour, minute);
+      }
+    }
+    dateObjects.push(scheduledDate);
+  }
+  
+  return dateObjects.map((date, index) => {
+    const day = date.getDate();
+    const m = date.getMonth() + 1;
+    const y = date.getFullYear();
     const dayOfWeek = getVietnameseDayOfWeek(date);
-    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+    const dateStr = `${String(day).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
     const timeStr = times[index];
     return {
       dateStr,
       dayOfWeek,
       timeStr,
       fullDisplay: `${timeStr} — ${dayOfWeek}, Ngày ${dateStr}`,
-      month
+      month: m
     };
   });
 }
