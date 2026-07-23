@@ -237,7 +237,7 @@ Partitioned Event Bus (Domain Events, Application Events, Integration Events)
 
 ---
 
-## 6. 🎯 KẾT QUẢ THI CÔNG HOÀN THÀNH 9 SPRINT (100% EXECUTED & PASSED)
+## 6. 🎯 KẾT QUẢ THI CÔNG HOÀN THÀNH SPRINT (100% EXECUTED & PASSED)
 
 | Sprint | Phân hệ Thi Công | Trạng Thái Thi Công & Build |
 | :--- | :--- | :--- |
@@ -250,3 +250,31 @@ Partitioned Event Bus (Domain Events, Application Events, Integration Events)
 | **Sprint 7** | Asset Runtime, Dependency Resolver, License Policy, Asset Installer | ✅ **PASSED 100%** |
 | **Sprint 8** | Identity Runtime, Human Approval Engine, Policy Runtime, Observability Contracts | ✅ **PASSED 100%** |
 | **Sprint 9** | AI Reliability Certification Suite & Chaos Engineering Certification Suite | ✅ **PASSED 100% (Build PASS)** |
+| **Sprint 10** | EWOS (Enterprise Workforce Operating System): Human-as-Runtime Capability Registry, Scorecard Dispatcher & SOP Continuous Learning Loop | ✅ **PASSED 100% (Build PASS)** |
+
+---
+
+## 7. 👥 TIẾN HÓA EWOS: KIẾN TRÚC NHÂN SỰ ĐỒNG HÀNH (HUMAN-AS-RUNTIME ARCHITECTURE)
+
+Hệ thống tiến hóa từ mô hình chỉ vận hành AI (Bella EOS) sang mô hình điều hành toàn vẹn lực lượng lao động hỗn hợp **EWOS (Enterprise Workforce Operating System)**, coi con người là một `Execution Runtime` trực tiếp.
+
+```
+                              CEO / Chỉ Thị Ý Chí
+                                       │
+                                       ▼
+                             Orchestration Engine
+                                       │
+                        ┌──────────────┴──────────────┐
+                        │                             │
+                        ▼                             ▼
+               Stateless AI Workers         Human Workforce Runtime
+                (Hermes, Ares...)            (Nguyễn Văn A, Trần Thị B)
+```
+
+### 7.1 Human Capability Registry
+Đăng ký các thông số nghiệp vụ của nhân viên con người (Skills, Timezone, Department, Workload, HourlyCost, Performance History) vào Kernel. Thuật toán `Scorecard Dispatcher` sẽ tính toán điểm tối ưu để tự động đề xuất phân chia công việc cho AI hoặc Nhân sự phù hợp nhất.
+
+### 7.2 Human-AI Collaboration & Live Feedback Loop
+* **Kênh Thảo Luận Đồng Kiến Tạo (Collaboration Log)**: Hỗ trợ trao đổi chỉ đạo giữa CEO, AI Agent và Nhân sự trên từng đầu việc.
+* **Mô phỏng giám sát SLA**: Tự động phát hiện chậm trễ trong thời gian thực, kích hoạt leo thang cảnh báo (Escalation Alert) để CEO điều chuyển hoặc phân bổ lại công việc.
+* **Continuous Learning (Đóng gói SOP)**: Khi con người hoàn thành công việc xuất sắc, CEO có thể thu hoạch và đóng gói kinh nghiệm làm việc đó thành **AI SOP Skill Pack** mới để tái đào tạo và nâng cấp năng lực cho các AI Agent thế hệ tiếp theo.
