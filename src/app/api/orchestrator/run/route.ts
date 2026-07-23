@@ -672,6 +672,17 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const learnedLessonsPrompt = LearningCenter.getLearnedLessonsPrompt();
   const memoryContextPrompt = (pastPlansMd ? `\n\nLỊCH SỬ KẾ HOẠCH BÀI HỌC CÁC CHIẾN DỊCH TRƯỚC:\n${pastPlansMd}` : '') + (learnedLessonsPrompt ? `\n${learnedLessonsPrompt}` : '');
 
+  // Dynamic Month Extraction
+  let targetMonthStr = 'Tháng 8';
+  const monthRegex = /(?:tháng|thang|thg|t|month)\s*(\d{1,2})/i;
+  const match = objective.match(monthRegex);
+  if (match) {
+    targetMonthStr = `Tháng ${match[1]}`;
+  } else {
+    const now = new Date();
+    targetMonthStr = `Tháng ${now.getMonth() + 1}`;
+  }
+
   const defaultTemplate = `# 🎯 [AI MARKETING MANAGER] BẢN PHÂN TÍCH CHIẾN LƯỢC & KẾ HOẠCH TRIỂN KHAI CHI TIẾT
 
 ## 1. 🏢 PHÂN TÍCH HIỆN TRẠNG DOANH NGHIỆP & ĐỊNH VỊ SẢN PHẨM:
@@ -684,7 +695,7 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
 
 ## 2. 🎯 PHÂN TÍCH CHỈ THỊ CEO & ĐÁNH GIÁ MỤC TIÊU:
 - **Chỉ thị của CEO**: "${objective}"
-- **Mục tiêu chiến lược**: Xây dựng nhận diện thương hiệu mạnh mẽ, định vị ${brandName} là giải pháp AI số 1 cho ngành Spa & TMV trong Tháng 8, kích thích hành động đăng ký trải nghiệm Demo trực tiếp.
+- **Mục tiêu chiến lược**: Xây dựng nhận diện thương hiệu mạnh mẽ, định vị ${brandName} là giải pháp AI số 1 cho ngành Spa & TMV trong ${targetMonthStr}, kích thích hành động đăng ký trải nghiệm Demo trực tiếp.
 - **Đánh giá tính khả thi**: Mức độ ưu tiên cao. Khả thi 100% với sự hỗ trợ của lực lượng AI Agent (Copywriter, Creative Designer, Hermes Publisher, Ares Ads Agent).
 
 ## 3. 👥 CHÂN DUNG KHÁCH HÀNG MỤC TIÊU & MA TRẬN GÓC TRUYỀN THÔNG (ANGLES):
@@ -693,9 +704,9 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
 - **Ma trận Góc truyền thông (Angles)**:
   - *Angle 1 (Giải pháp đột phá)*: "Tự động hóa 100% vận hành Spa — Giải phóng 80% thời gian quản lý cùng ${brandName}".
   - *Angle 2 (Social Proof & Uy tín)*: "Hơn ${activeCustomers.toLocaleString()}+ Chủ Spa tin dùng ${brandName} nâng cao 300% hiệu suất".
-  - *Angle 3 (Urgency Offer)*: "Tặng bản dùng thử Demo miễn phí cho 50 cơ sở đăng ký sớm nhất trong Tháng 8".
+  - *Angle 3 (Urgency Offer)*: "Tặng bản dùng thử Demo miễn phí cho 50 cơ sở đăng ký sớm nhất trong ${targetMonthStr}".
 
-## 4. 📅 KẾ HOẠCH TRIỂN KHAI CHI TIẾT THEO TUẦN & NGÀY (ROADMAP CHI TIẾT THÁNG 8):
+## 4. 📅 KẾ HOẠCH TRIỂN KHAI CHI TIẾT THEO TUẦN & NGÀY (ROADMAP CHI TIẾT ${targetMonthStr.toUpperCase()}):
 ### 📍 TUẦN 1 (W1): KÍCH HOẠT NHẬN DIỆN & ĐÁNH VÀO NỖI ĐAU (BRAND AWARENESS & PAIN POINTS)
 - **Ngày 1 - 2**:
   - *Task #1 (AI Marketing Manager)*: Phân tích bối cảnh & duyệt kế hoạch tổng thể (AWAITED CEO APPROVAL).

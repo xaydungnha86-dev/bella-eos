@@ -52,25 +52,28 @@ function generateWeeklyDates(objective: string) {
   const dateObjects: Date[] = [];
   
   for (let i = 0; i < 4; i++) {
-    const day = targetDays[i];
     const hour = targetHours[i];
     const minute = targetMinutes[i];
     
-    let scheduledDate = new Date(year, month - 1, day, hour, minute);
+    let scheduledDate: Date;
     
-    if (i === 0) {
+    // If targeting the current month and year, start scheduling from today/tomorrow
+    if (year === now.getFullYear() && month === (now.getMonth() + 1)) {
+      const baseDay = now.getDate() + (i * 7);
+      scheduledDate = new Date(year, month - 1, baseDay, hour, minute);
       if (scheduledDate < now) {
-        const todayTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute);
-        if (todayTarget < now) {
-          scheduledDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, hour, minute);
-        } else {
-          scheduledDate = todayTarget;
-        }
+        scheduledDate = new Date(year, month - 1, baseDay + 1, hour, minute);
       }
     } else {
-      const prevDate = dateObjects[i - 1];
-      if (scheduledDate <= prevDate) {
-        scheduledDate = new Date(prevDate.getFullYear(), prevDate.getMonth(), prevDate.getDate() + 7, hour, minute);
+      const day = targetDays[i];
+      scheduledDate = new Date(year, month - 1, day, hour, minute);
+      // Ensure it doesn't fall in the past relative to now (e.g. if the month itself is in the past)
+      if (scheduledDate < now) {
+        const baseDay = now.getDate() + (i * 7);
+        scheduledDate = new Date(now.getFullYear(), now.getMonth(), baseDay, hour, minute);
+        if (scheduledDate < now) {
+          scheduledDate = new Date(now.getFullYear(), now.getMonth(), baseDay + 1, hour, minute);
+        }
       }
     }
     dateObjects.push(scheduledDate);
