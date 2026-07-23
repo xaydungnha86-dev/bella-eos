@@ -51,11 +51,11 @@ async function tool_write_facebook_post(input: any, clientKeys: any): Promise<To
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        objective:    input.objective,
-        voiceTone:    input.tone,
+        objective:    input.objective || input.goal || 'Tạo nhận diện thương hiệu cho sản phẩm Bella EOS',
+        voiceTone:    input.tone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế',
         platform:     'facebook',
-        segment:      input.target_audience,
-        goal:         input.objective,
+        segment:      input.target_audience || 'Chủ Spa & Thẩm mỹ viện cao cấp',
+        goal:         input.objective || input.goal || 'Tạo nhận diện thương hiệu cho sản phẩm Bella EOS',
         client_openai_key:    cw.openai,
         client_anthropic_key: cw.anthropic,
         client_gemini_key:    cw.gemini,
@@ -289,8 +289,17 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   const { PosterDesignSkill } = await import('@/core/skills/poster-design-skill');
   
   if (!actualPrompt) {
-    const lines = copywriterContent.split('\n').map(l => l.trim()).filter(Boolean);
-    const headlineText = lines.length > 0 ? lines[0].replace(/^[#*🎯⚡👉🔥\s]+/, '').substring(0, 48) : `GIẢI PHÁP TỐI ƯU CÙNG ${brandName}`;
+    const cleanPostContent = extractSingleSocialPost(copywriterContent);
+    const lines = cleanPostContent.split('\n').map(l => l.trim()).filter(Boolean);
+    const headlineCandidate = lines.find(l => 
+      !l.includes('CONTENT WORKER') && 
+      !l.includes('CONTENT CALENDAR') && 
+      !l.includes('BỘ LỊCH NỘI DUNG') && 
+      l.length > 8
+    );
+    const headlineText = headlineCandidate 
+      ? headlineCandidate.replace(/^[#*🎯⚡👉🔥•\-\s]+/, '').replace(/\**/g, '').trim().substring(0, 48)
+      : `GIẢI PHÁP TỐI ƯU VẬN HÀNH SPA & TÀI CHÍNH EOM`;
     actualPrompt = PosterDesignSkill.buildSalesPosterPrompt(objective, headlineText, brandDna);
   }
 
@@ -880,7 +889,7 @@ export async function POST(request: Request) {
               agent_name:   remTask.agent_name,
               task_type:    remTask.task_type,
               task_description: remTask.task_description,
-              success:      false,
+              success:      undefined,
               status:       'PENDING_APPROVAL',
               output:       '',
               meta:         { status: 'WAITING_FOR_MARKETING_APPROVAL' }
@@ -903,7 +912,7 @@ export async function POST(request: Request) {
         isApproved:   true,
         output:       result.output,
         error:        result.error,
-        meta:         result.meta
+        meta:         { ...(result.meta || {}), status: 'COMPLETED', requiresHumanApproval: false }
       });
     }
 
@@ -1022,18 +1031,33 @@ function cleanMarkdownForSocialMedia(text: string): string {
 function extractSingleSocialPost(text: string): string {
   if (!text) return '';
 
-  // Look for Post Body markers: "Nội dung xuất bản (Post Body):", "Post Body:", etc.
-  const postBodyRegex = /(?:📝\s*Nội dung xuất bản(?:\s*\(Post Body\))?:\s*|Post Body:\s*)([\s\S]*?)(?=\n---|$\n###|\n📌|\n📅)/i;
+  let body = text;
+
+  // 1. Try matching "Nội dung xuất bản" or "Post Body" marker, supporting optional markdown (-, *, •, **)
+  const postBodyRegex = /(?:[\-\*•\s]*📝?\s*\**Nội dung xuất bản(?:\s*\(Post Body\))?\**\s*:?\s*)([\s\S]*?)(?=\n[\-\*•\s]*---|$\n[\-\*•\s]*###|\n[\-\*•\s]*📌|\n[\-\*•\s]*📅|\n[\-\*•\s]*###\s*📌|\n[\-\*•\s]*BÀI VIẾT TUẦN)/i;
   const match = text.match(postBodyRegex);
 
-  if (match && match[1] && match[1].trim().length > 20) {
-    let extracted = match[1].trim();
-    return cleanMarkdownForSocialMedia(extracted);
+  if (match && match[1] && match[1].trim().length > 15) {
+    body = match[1].trim();
+  } else {
+    // 2. Fallback: strip any report title lines & metadata bullet points
+    body = body
+      .replace(/^[\s\-*•]*📅[^\n]*\n+/gmi, '')
+      .replace(/^[\s\-*•]*###?[^\n]*\n+/gmi, '')
+      .replace(/^[\s\-*•]*(?:⏰|🎯|📝|📌|Lịch đăng|Chủ đề|BÀI VIẾT TUẦN)[^\n]*\n+/gmi, '');
   }
 
-  // Fallback: strip calendar report headers if present
-  let cleaned = text;
-  cleaned = cleaned.replace(/^📅\s*\[.*?\][^\n]*\n+/gi, '');
-  cleaned = cleaned.replace(/^(?:---|###\s*📌|📌|⏰|🎯|📝)[^\n]*\n+/gmi, '');
-  return cleanMarkdownForSocialMedia(cleaned.trim());
+  // 3. Strip remaining leading metadata lines if present (e.g. "Lịch đăng bài tự động...", "Chủ đề...")
+  const lines = body.split('\n');
+  const cleanLines = lines.filter(line => {
+    const l = line.trim().toLowerCase();
+    return !l.startsWith('lịch đăng bài') &&
+           !l.startsWith('chủ đề truyền thông') &&
+           !l.startsWith('chủ đề:') &&
+           !l.startsWith('nội dung xuất bản') &&
+           !l.includes('content calendar') &&
+           !l.includes('content worker');
+  });
+
+  return cleanMarkdownForSocialMedia(cleanLines.join('\n').trim());
 }

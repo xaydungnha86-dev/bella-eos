@@ -35,7 +35,13 @@ export class GoalVerificationEngine {
     for (const t of tasks || []) {
       const outputText = t.output || '';
       const errorText = t.error || '';
-      const isStatusOk = t.success === true;
+      const isStatusOk = t.success === true || t.status === 'COMPLETED' || t.isApproved === true;
+      const isPendingOrRunning = t.status === 'PENDING_APPROVAL' || t.status === 'RUNNING' || t.status === 'PENDING' || t.status === 'AWAITING_APPROVAL';
+
+      // Skip in-progress or queued tasks from failed steps audit
+      if (isPendingOrRunning && !t.error && !outputText.includes('CONFIG_REQUIRED')) {
+        continue;
+      }
 
       // Check if task output/error indicates missing configuration, token, or network issue
       const isMissingConfig =
@@ -43,19 +49,20 @@ export class GoalVerificationEngine {
         outputText.includes('Cần cấu hình') ||
         outputText.includes('Chưa cấu hình') ||
         errorText.includes('Chưa cấu hình') ||
-        t.meta?.status === 'PREPARED';
+        t.meta?.status === 'CONFIG_REQUIRED';
 
       const isNetworkDisconnected =
         errorText.includes('Lỗi kết nối') ||
         errorText.includes('Network Error') ||
         errorText.includes('503') ||
-        errorText.includes('502');
+        errorText.includes('502') ||
+        t.status === 'FAILED';
 
       if (isMissingConfig) {
         disconnectedCount++;
         failedSteps.push({
           taskId: t.task_id,
-          agentName: t.agent_name,
+          agentName: t.agent_name || t.agent_id,
           taskType: t.task_type,
           description: t.task_description,
           issueType: 'MISSING_API_KEY',
@@ -66,25 +73,25 @@ export class GoalVerificationEngine {
         disconnectedCount++;
         failedSteps.push({
           taskId: t.task_id,
-          agentName: t.agent_name,
+          agentName: t.agent_name || t.agent_id,
           taskType: t.task_type,
           description: t.task_description,
           issueType: 'DISCONNECTED',
           error: errorText || 'Mất kết nối API',
           fixSuggestion: 'Kiểm tra đường truyền internet hoặc kết nối máy chủ API.'
         });
-      } else if (!isStatusOk) {
+      } else if (!isStatusOk && t.status === 'FAILED') {
         failedCount++;
         failedSteps.push({
           taskId: t.task_id,
-          agentName: t.agent_name,
+          agentName: t.agent_name || t.agent_id,
           taskType: t.task_type,
           description: t.task_description,
           issueType: 'API_ERROR',
           error: errorText || 'Nhiệm vụ thất bại',
           fixSuggestion: 'Kiểm tra thông số đầu vào và nhật ký thực thi của Agent.'
         });
-      } else {
+      } else if (isStatusOk) {
         completedCount++;
       }
     }

@@ -191,50 +191,39 @@ export class PosterDesignSkill {
    */
   public static buildSalesPosterPrompt(objective: string, copyHeadline?: string, brandDna?: BrandDnaContext): string {
     const brandName = brandDna?.brandName || 'BELLA EOS';
-    const headlineText = copyHeadline || `GIẢI PHÁP TỐI ƯU CÙNG ${brandName}`;
     const primaryColor = brandDna?.brandColors?.primary || '#061E17';
     const accentColor = brandDna?.brandColors?.accent || '#D4AF37';
 
     const lowerObj = objective.toLowerCase();
     
-    let domainDesc = `commercial sales product graphic for ${brandName}`;
-    let bgDesc = `modern premium studio setting, professional clean background, harmonious warm lighting`;
-    let centerDesc = `sleek professional product mockups showcasing clean UI design and high-tech corporate dashboard interfaces`;
-    let offerDesc = `[DANG KY TRAI NGHIEM MIEN PHI]`;
-    let ctaDesc = `NHAN UU DAI NGAY`;
+    let domainDesc = `commercial product background for ${brandName}`;
+    let bgDesc = `modern premium studio setting, professional clean background, harmonious warm lighting, copy space on the left for text overlay`;
+    let centerDesc = `sleek professional product mockup or aesthetic device frame showing a clean web app dashboard mockup (no text, only charts and interface layout)`;
 
     if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp') || lowerObj.includes('salon')) {
-      domainDesc = `${brandName} Spa Management Software`;
-      bgDesc = `Luxurious Spa Treatment Room atmosphere with soft warm lighting, serene candles, lush greenery, and premium spa aesthetics`;
-      centerDesc = `A sleek 3D iPad Pro glass mockup displaying the Bella EOS Spa Management dashboard (booking calendar, revenue analytics chart showing +20% growth, staff scheduling)`;
-      offerDesc = `[DANG KY DEMO 1-1 MIEN PHI]`;
-      ctaDesc = `NHAN UU DAI NGAY`;
+      domainDesc = `${brandName} Spa Management software product setting`;
+      bgDesc = `Luxurious Spa Treatment Room atmosphere with soft warm lighting, serene candles, lush greenery, and premium spa aesthetics, copy space on the left for text overlay`;
+      centerDesc = `A sleek 3D iPad Pro glass mockup displaying a simulated spa management calendar and analytics dashboard (with empty areas, no text, only visual layout)`;
     } else if (lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ') || lowerObj.includes('chung cư') || lowerObj.includes('nhà đất')) {
-      domainDesc = `${brandName} Premium Real Estate Project`;
-      bgDesc = `Stunning high-end modern apartment building project view, warm golden hour sunset lighting, panoramic cityscape bokeh`;
-      centerDesc = `An elegant 3D glass showcase or architectural mockup displaying the project blueprint, layout pricing plan, and luxury residence exterior rendering`;
-      offerDesc = `[NHAN BANG GIA & UU DAI]`;
-      ctaDesc = `LIEN HE NGAY`;
+      domainDesc = `${brandName} Premium Real Estate project setting`;
+      bgDesc = `Stunning high-end modern apartment building project view, warm golden hour sunset lighting, panoramic cityscape bokeh, copy space on the left for text overlay`;
+      centerDesc = `An elegant 3D glass showcase or architectural mockup (no text, only architectural lines)`;
     } else if (lowerObj.includes('thời trang') || lowerObj.includes('quần áo') || lowerObj.includes('boutique') || lowerObj.includes('shop')) {
-      domainDesc = `${brandName} High-Fashion Designer Collection`;
-      bgDesc = `Chic modern fashion boutique interior, studio spotlighting, clothing apparel on designer racks`;
-      centerDesc = `A stylish lookbook presentation or dynamic glass frame showcasing elegant seasonal fashion design trends`;
-      offerDesc = `[GIAM NGAY 20% HOAC FREE SHIP]`;
-      ctaDesc = `MUA NGAY`;
+      domainDesc = `${brandName} High-Fashion designer collection background`;
+      bgDesc = `Chic modern fashion boutique interior, studio spotlighting, clothing apparel on designer racks, copy space on the left for text overlay`;
+      centerDesc = `A stylish minimalist layout or dynamic glass frame (no text)`;
     } else {
       const cleanObj = objective.replace(/chiến dịch|tạo|thiết kế|banner|viết bài/gi, '').trim();
       domainDesc = `${brandName} - ${cleanObj}`;
     }
 
-    const cleanHeadline = this.removeVietnameseAccents(headlineText);
-
     return [
-      `A high-converting 4K commercial sales poster graphic for ${domainDesc}.`,
+      `A high-converting premium commercial marketing banner background illustration for ${domainDesc}.`,
       `BACKGROUND CONTEXT: ${bgDesc}.`,
       `CENTER GRAPHIC: ${centerDesc}.`,
-      `TYPOGRAPHY LAYOUT: High-contrast sans-serif header reading '${cleanHeadline}' with no accents, prominent offer badge '${offerDesc}', clean CTA button '${ctaDesc}'.`,
-      `COLOR PALETTE: Primary brand color (${primaryColor}) and accent color (${accentColor}) details, with high-contrast text layout.`,
-      `QUALITY: 4K advertisement standards, high contrast, 16:9 aspect ratio, Meta/Facebook Ads ready, no spelling mistakes, no garbled text, only plain English or unaccented text.`
+      `COLOR PALETTE: Primary brand color (${primaryColor}) and accent color (${accentColor}) color scheme.`,
+      `CRITICAL REQUIREMENT: This is a background template. Strictly do NOT write any text, words, labels, or letters on the image. Leave the left side empty as clean copy space.`,
+      `QUALITY: 4K advertisement standards, high contrast, 16:9 aspect ratio, Meta/Facebook Ads ready, photorealistic illustration.`
     ].join(' ');
   }
 

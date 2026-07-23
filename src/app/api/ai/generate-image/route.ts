@@ -1,7 +1,26 @@
 import { NextResponse } from 'next/server';
 import { PosterDesignSkill, BrandDnaContext } from '@/core/skills/poster-design-skill';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+function saveBase64Image(base64Data: string): string {
+  try {
+    const dir = path.join(process.cwd(), 'public', 'temp-banners');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const filename = `gen_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.png`;
+    const filepath = path.join(dir, filename);
+    const buffer = Buffer.from(base64Data, 'base64');
+    fs.writeFileSync(filepath, buffer);
+    return `/temp-banners/${filename}`;
+  } catch (err) {
+    console.error('Failed to save base64 image locally:', err);
+    return '';
+  }
+}
 
 /**
  * POST /api/ai/generate-image
@@ -85,9 +104,17 @@ export async function POST(request: Request) {
     }
 
     if (copywriterContent) {
-      const lines = copywriterContent.split('\n').map(l => l.trim()).filter(Boolean);
-      if (lines.length > 0) {
-        dynamicHeadline = lines[0].replace(/^[#*🎯⚡👉🔥\s]+/, '').substring(0, 48);
+      const cleanContent = copywriterContent.replace(/^[\s\-*•]*📅[^\n]*\n+/gmi, '').replace(/^[\s\-*•]*###?[^\n]*\n+/gmi, '');
+      const lines = cleanContent.split('\n').map(l => l.trim()).filter(Boolean);
+      const headlineCandidate = lines.find(l => 
+        !l.includes('CONTENT WORKER') && 
+        !l.includes('CONTENT CALENDAR') && 
+        !l.includes('BỘ LỊCH NỘI DUNG') && 
+        !l.match(/^(?:---|###|📌|⏰|🎯|📝|📅|- ⏰|- 🎯|- 📝|Lịch đăng|Chủ đề)/i) &&
+        l.length > 8
+      );
+      if (headlineCandidate) {
+        dynamicHeadline = headlineCandidate.replace(/^[#*🎯⚡👉🔥•\-\s]+/, '').replace(/\**/g, '').trim().substring(0, 48);
       }
       const giftLine = lines.find(l => l.includes('🎁') || l.includes('QUÀ TẶNG') || l.includes('Demo') || l.includes('Đặc biệt'));
       if (giftLine) {
@@ -113,6 +140,22 @@ export async function POST(request: Request) {
 
     // Build structured 4K Commercial Sales Poster Prompt via PosterDesignSkill
     const imagePrompt = prompt || PosterDesignSkill.buildSalesPosterPrompt(objective, dynamicHeadline, brandDna);
+
+    const buildOverlayUrl = (aiImageUrl: string) => {
+      const baseUrl = getBaseUrl();
+      let resolvedBg = aiImageUrl;
+      
+      // If it's a raw base64 data URL (e.g. data:image/jpeg;base64,...), save it locally to a file to keep URL short
+      if (aiImageUrl.startsWith('data:image')) {
+        const base64Data = aiImageUrl.split(';base64,')[1];
+        const localPath = saveBase64Image(base64Data);
+        if (localPath) {
+          resolvedBg = localPath;
+        }
+      }
+      
+      return `${baseUrl}/api/ai/banner-image?bg=${encodeURIComponent(resolvedBg)}&headline=${encodeURIComponent(dynamicHeadline)}&badge=${encodeURIComponent(dynamicBadge)}&cta=${encodeURIComponent(dynamicCta)}&b1=${encodeURIComponent(dynamicBullets[0])}&b2=${encodeURIComponent(dynamicBullets[1])}&b3=${encodeURIComponent(dynamicBullets[2])}&brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${Date.now()}`;
+    };
 
     const tryImagen = async () => {
       const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -158,7 +201,7 @@ export async function POST(request: Request) {
               success: true,
               provider: 'google-gemini',
               model: modelId,
-              imageUrl: dataUrl,
+              imageUrl: buildOverlayUrl(dataUrl),
               prompt: imagePrompt,
               warning: (model && model !== 'default' && model !== modelId) 
                 ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [${modelId}] do không khả dụng.` 
@@ -210,7 +253,7 @@ export async function POST(request: Request) {
               success: true,
               provider: 'google-gemini-native',
               model: modelId,
-              imageUrl: dataUrl,
+              imageUrl: buildOverlayUrl(dataUrl),
               prompt: imagePrompt,
               warning: (model && model !== 'default' && model !== modelId) 
                 ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [${modelId}] do không khả dụng.` 
@@ -253,7 +296,7 @@ export async function POST(request: Request) {
             success: true,
             provider: 'openai',
             model: 'dall-e-3',
-            imageUrl: generatedUrl,
+            imageUrl: buildOverlayUrl(generatedUrl),
             prompt: imagePrompt,
             warning: (model && model !== 'default' && model !== 'dall-e-3') 
               ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [dall-e-3] do không khả dụng.` 
@@ -293,7 +336,7 @@ export async function POST(request: Request) {
             success: true,
             provider: 'fal.ai',
             model: 'flux.1-schnell',
-            imageUrl: generatedUrl,
+            imageUrl: buildOverlayUrl(generatedUrl),
             prompt: imagePrompt,
             warning: (model && model !== 'default' && model !== 'flux.1-schnell') 
               ? `Tự động chuyển đổi từ model cấu hình [${model}] sang [flux.1-schnell] do không khả dụng.` 

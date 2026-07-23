@@ -2,6 +2,23 @@ import { ImageResponse } from 'next/og';
 
 export const dynamic = 'force-dynamic';
 
+let fontRegular: ArrayBuffer | null = null;
+let fontBold: ArrayBuffer | null = null;
+
+async function loadFonts() {
+  if (!fontRegular) {
+    const res = await fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat-Medium.ttf');
+    if (!res.ok) throw new Error('Failed to load Montserrat Medium');
+    fontRegular = await res.arrayBuffer();
+  }
+  if (!fontBold) {
+    const res = await fetch('https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat-Bold.ttf');
+    if (!res.ok) throw new Error('Failed to load Montserrat Bold');
+    fontBold = await res.arrayBuffer();
+  }
+  return { fontRegular, fontBold };
+}
+
 /**
  * GET /api/ai/banner-image
  *
@@ -85,8 +102,38 @@ function hashString(str: string): number {
 
 export async function GET(request: Request) {
   try {
+    let fonts: any[] = [];
+    try {
+      const { fontRegular, fontBold } = await loadFonts();
+      fonts = [
+        {
+          name: 'Montserrat',
+          data: fontRegular,
+          weight: 500,
+          style: 'normal',
+        },
+        {
+          name: 'Montserrat',
+          data: fontBold,
+          weight: 700,
+          style: 'normal',
+        },
+      ];
+    } catch (fontErr) {
+      console.warn('Failed to load Google Fonts, falling back to system fonts:', fontErr);
+    }
+
+    const imageOptions = {
+      width: 1200,
+      height: 630,
+      ...(fonts.length > 0 ? { fonts } : {}),
+    };
+
     const { searchParams } = new URL(request.url);
-    const rawHeadline = searchParams.get('headline') || 'BELLA EOS GIẢI QUYẾT TRIỆT ĐỂ BÀI TOÁN SPA';
+    let rawHeadline = searchParams.get('headline') || 'BELLA EOS GIẢI QUYẾT TRIỆT ĐỂ BÀI TOÁN SPA';
+    if (rawHeadline.includes('CONTENT WORKER') || rawHeadline.includes('CONTENT CALENDAR') || rawHeadline.includes('BỘ LỊCH NỘI DUNG') || rawHeadline.startsWith('📅')) {
+      rawHeadline = 'BELLA EOS - GIẢI PHÁP QUẢN LÝ SPA TỰ ĐỘNG';
+    }
     const rawBadge = searchParams.get('badge') || '🎁 DEMO 1-1 MIỄN PHÍ CÙNG CHUYÊN GIA';
     const rawCta = searchParams.get('cta') || 'ĐĂNG KÝ TRẢI NGHIỆM NGAY';
     const b1 = searchParams.get('b1') || '⚡ Tối ưu xếp lịch & phân ca KTV Spa';
@@ -107,15 +154,25 @@ export async function GET(request: Request) {
     const theme = THEMES[textHash % THEMES.length];
 
     const lowerObj = objective.toLowerCase();
-    let bgPhotoUrl = SPA_PHOTOS[textHash % SPA_PHOTOS.length];
-    if (lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ') || lowerObj.includes('chung cư') || lowerObj.includes('nhà đất')) {
-      bgPhotoUrl = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop';
-    } else if (lowerObj.includes('thời trang') || lowerObj.includes('quần áo') || lowerObj.includes('boutique') || lowerObj.includes('shop')) {
-      bgPhotoUrl = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop';
-    } else if (lowerObj.includes('cà phê') || lowerObj.includes('nhà hàng') || lowerObj.includes('cafe') || lowerObj.includes('food')) {
-      bgPhotoUrl = 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200&auto=format&fit=crop';
-    } else if (!lowerObj.includes('spa') && !lowerObj.includes('thẩm mỹ') && !lowerObj.includes('làm đẹp') && !lowerObj.includes('salon')) {
-      bgPhotoUrl = 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop';
+    const paramBg = searchParams.get('bgPhotoUrl') || searchParams.get('bg');
+    let bgPhotoUrl = paramBg;
+    
+    if (bgPhotoUrl) {
+      if (bgPhotoUrl.startsWith('/')) {
+        const baseUrl = getBaseUrl(request);
+        bgPhotoUrl = `${baseUrl}${bgPhotoUrl}`;
+      }
+    } else {
+      bgPhotoUrl = SPA_PHOTOS[textHash % SPA_PHOTOS.length];
+      if (lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ') || lowerObj.includes('chung cư') || lowerObj.includes('nhà đất')) {
+        bgPhotoUrl = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop';
+      } else if (lowerObj.includes('thời trang') || lowerObj.includes('quần áo') || lowerObj.includes('boutique') || lowerObj.includes('shop')) {
+        bgPhotoUrl = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop';
+      } else if (lowerObj.includes('cà phê') || lowerObj.includes('nhà hàng') || lowerObj.includes('cafe') || lowerObj.includes('food')) {
+        bgPhotoUrl = 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200&auto=format&fit=crop';
+      } else if (!lowerObj.includes('spa') && !lowerObj.includes('thẩm mỹ') && !lowerObj.includes('làm đẹp') && !lowerObj.includes('salon')) {
+        bgPhotoUrl = 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop';
+      }
     }
 
     const spaPhotoUrl = bgPhotoUrl;
@@ -184,7 +241,7 @@ export async function GET(request: Request) {
               backgroundColor: theme.bg,
               backgroundImage: `radial-gradient(circle at 50% 30%, ${theme.radial} 0%, ${theme.bg} 85%)`,
               padding: '40px 60px',
-              fontFamily: 'sans-serif',
+              fontFamily: 'Montserrat, sans-serif',
               position: 'relative',
             }}
           >
@@ -245,7 +302,7 @@ export async function GET(request: Request) {
             </div>
           </div>
         ),
-        { width: 1200, height: 630 }
+        imageOptions
       );
     }
 
@@ -264,7 +321,7 @@ export async function GET(request: Request) {
               backgroundColor: theme.bg,
               backgroundImage: `radial-gradient(circle at 20% 50%, ${theme.radial} 0%, ${theme.bg} 85%)`,
               padding: '45px 55px',
-              fontFamily: 'sans-serif',
+              fontFamily: 'Montserrat, sans-serif',
               position: 'relative',
             }}
           >
@@ -310,7 +367,7 @@ export async function GET(request: Request) {
             </div>
           </div>
         ),
-        { width: 1200, height: 630 }
+        imageOptions
       );
     }
 
@@ -329,7 +386,7 @@ export async function GET(request: Request) {
               backgroundColor: theme.bg,
               backgroundImage: `radial-gradient(circle at 85% 20%, ${theme.radial} 0%, ${theme.bg} 75%)`,
               padding: '45px 55px',
-              fontFamily: 'sans-serif',
+              fontFamily: 'Montserrat, sans-serif',
               position: 'relative',
             }}
           >
@@ -392,7 +449,7 @@ export async function GET(request: Request) {
             </div>
           </div>
         ),
-        { width: 1200, height: 630 }
+        imageOptions
       );
     }
 
@@ -410,7 +467,7 @@ export async function GET(request: Request) {
             backgroundColor: theme.bg,
             backgroundImage: `radial-gradient(circle at 50% 50%, ${theme.radial} 0%, ${theme.bg} 90%)`,
             padding: '30px',
-            fontFamily: 'sans-serif',
+            fontFamily: 'Montserrat, sans-serif',
             position: 'relative',
           }}
         >
@@ -468,9 +525,17 @@ export async function GET(request: Request) {
           </div>
         </div>
       ),
-      { width: 1200, height: 630 }
+      imageOptions
     );
   } catch (err: any) {
     return new Response(`Banner Generation Error: ${err.message}`, { status: 500 });
   }
+}
+
+function getBaseUrl(request: Request): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  const host = request.headers.get('host');
+  if (host) return `http://${host}`;
+  return 'http://localhost:3000';
 }

@@ -11,7 +11,7 @@ export class EipConnector {
         const apiUrl = store['bella_eip::api_url'];
         const apiKey = store['bella_eip::api_key'];
         
-        if (apiUrl && apiKey) {
+        if (apiUrl && apiKey && !apiUrl.includes('eip.bella.vn') && !apiUrl.includes('placeholder')) {
           console.log(`[EipConnector] Connecting to EIP API at: ${apiUrl}`);
           const res = await fetch(`${apiUrl}/customers?status=active`, {
             headers: {
@@ -90,7 +90,7 @@ export class FacebookConnector {
         const token = store['facebook::page_access_token'];
         const pageId = store['facebook::page_id'] || 'me';
         
-        if (token && pageId && pageId !== 'me') {
+        if (token && pageId && pageId !== 'me' && !token.includes('your_facebook_page_access_token') && !token.includes('EAAG...')) {
           console.log(`[FacebookConnector] Querying Facebook Graph API for Page: ${pageId}`);
           const res = await fetch(`https://graph.facebook.com/v18.0/${pageId}?fields=fan_count&access_token=${token}`);
           if (res.ok) {
@@ -207,6 +207,10 @@ export class SupabaseConnector {
    */
   static async saveCanonicalContext(context: import('../types/eom').CanonicalContextPackage) {
     try {
+      const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      if (!supaUrl || supaUrl.includes('your-project-id') || supaUrl.includes('placeholder')) {
+        return { success: true };
+      }
       const { error } = await supabase.from('memory_records').insert([
         {
           type: 'canonical_context',

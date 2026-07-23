@@ -229,6 +229,11 @@ export default function Dashboard() {
   const [activeStep, setActiveStep] = useState<number>(-1);
   const [goalTree, setGoalTree] = useState<any>(null);
   const [dnaState, setDnaState] = useState({ tone: 'Professional & Premium', style: 'Minimalist & Glassmorphism' });
+  const handleDnaChange = (field: 'tone' | 'style', value: string) => {
+    const updated = { ...dnaState, [field]: value };
+    setDnaState(updated);
+    CampaignExecutionManager.updateState({ dnaState: updated });
+  };
   const [documents, setDocuments] = useState<{ name: string; size: string; status: string; rule: string }[]>([
     { name: 'Quy_dinh_Marketing_SPA_2026.pdf', size: '1.2 MB', status: 'COMPLETED', rule: 'Màu sắc thương hiệu: Rose & Gold. Lối diễn đạt: Premium.' },
     { name: 'Chinh_sach_Nhan_su_OT.docx', size: '840 KB', status: 'COMPLETED', rule: 'Tăng ca tính 150% lương, ca đêm phụ cấp 50k ăn uống.' }
@@ -291,6 +296,16 @@ export default function Dashboard() {
   // Persist non-manager state changes
   useEffect(() => { safeSet('bella_eos_documents', JSON.stringify(documents)); }, [documents]);
 
+  // Keep selectedTask reference fresh when dynamicTasks updates in the background
+  useEffect(() => {
+    if (selectedTask) {
+      const updated = dynamicTasks.find(t => t.task_id === selectedTask.task_id);
+      if (updated) {
+        setSelectedTask(updated);
+      }
+    }
+  }, [dynamicTasks]);
+
   // Initialize status log if empty
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -318,6 +333,25 @@ export default function Dashboard() {
       message,
       color: colorClass
     }]);
+  };
+
+  const handleCeoApprove = (taskId?: string) => {
+    const targetId = taskId || 't1';
+    setDynamicTasks(prev => prev.map(t =>
+      (t.task_id === targetId || t.agent_id === 'eos_marketing_manager' || t.status === 'AWAITING_APPROVAL' || t.task_type === 'analyze_marketing_strategy')
+        ? { ...t, status: 'COMPLETED', isApproved: true, success: true, meta: { ...(t.meta || {}), status: 'COMPLETED', requiresHumanApproval: false } }
+        : { ...t, status: 'RUNNING', meta: { ...(t.meta || {}), status: 'RUNNING' } }
+    ));
+    if (selectedTask) {
+      setSelectedTask((prev: any) => prev ? {
+        ...prev,
+        status: 'COMPLETED',
+        isApproved: true,
+        success: true,
+        meta: { ...(prev.meta || {}), status: 'COMPLETED', requiresHumanApproval: false }
+      } : null);
+    }
+    CampaignExecutionManager.approveTaskAndResume(targetId, InternalApiGateway);
   };
 
   // 1. Submit CEO Intent & Run Dynamic AI Orchestration
@@ -784,7 +818,7 @@ export default function Dashboard() {
                       </div>
 
                       {/* CEO HUMAN APPROVAL BANNER GATE */}
-                        {dynamicTasks.some(t => t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL' || (t.agent_id === 'eos_marketing_manager' && !t.isApproved && t.status !== 'COMPLETED')) && (
+                        {dynamicTasks.some(t => (t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL') && !t.isApproved && t.status !== 'COMPLETED') && (
                           <div className="w-full bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-amber-400/60 rounded-2xl p-4 text-left shadow-lg flex items-center justify-between gap-4 animate-fade-in">
                             <div className="flex items-start gap-3">
                               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white font-bold flex items-center justify-center text-xl shadow-md shrink-0 animate-bounce">
@@ -800,18 +834,7 @@ export default function Dashboard() {
                               </div>
                             </div>
                             <button
-                              onClick={() => {
-                                const targetTask = dynamicTasks.find(t => t.status === 'AWAITING_APPROVAL' || t.agent_id === 'eos_marketing_manager' || t.task_id === 't1') || dynamicTasks[0];
-                                const taskId = targetTask ? targetTask.task_id : 't1';
-                                
-                                setDynamicTasks(prev => prev.map(t =>
-                                  (t.task_id === taskId || t.agent_id === 'eos_marketing_manager' || t.status === 'AWAITING_APPROVAL')
-                                    ? { ...t, status: 'COMPLETED', isApproved: true, success: true }
-                                    : t
-                                ));
-
-                                CampaignExecutionManager.approveTaskAndResume(taskId, InternalApiGateway);
-                              }}
+                              onClick={() => handleCeoApprove('t1')}
                               className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer hover:scale-105 shrink-0"
                             >
                               <span>👑 CEO Phê Duyệt Kế Hoạch & Cho Phép Chạy Tiếp →</span>
@@ -821,11 +844,12 @@ export default function Dashboard() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                           {dynamicTasks.map((t: any, idx: number) => {
-                            const isAwaitingApproval = t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL';
+                            const isTask1Approved = dynamicTasks.some(item => (item.task_id === 't1' || item.agent_id === 'eos_marketing_manager' || item.task_type === 'analyze_marketing_strategy') && (item.status === 'COMPLETED' || item.isApproved));
+                            const isAwaitingApproval = (t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL') && !t.isApproved && t.status !== 'COMPLETED';
                             const isConfigReq = (t.output?.includes('CONFIG_REQUIRED') || t.output?.includes('hết hạn') || t.meta?.status === 'CONFIG_REQUIRED' || t.meta?.isExpired === true) && !isAwaitingApproval;
-                            const isPendingApproval = (t.status === 'PENDING_APPROVAL' || t.meta?.status === 'WAITING_FOR_MARKETING_APPROVAL') && !isConfigReq && !isAwaitingApproval;
                             const isDone = (t.success === true || t.status === 'COMPLETED' || t.isApproved) && !isConfigReq && !isAwaitingApproval;
-                            const isFailed = (t.success === false || t.error) && !isConfigReq && !isAwaitingApproval && !isPendingApproval;
+                            const isFailed = (t.status === 'FAILED' || (t.error && t.error.length > 0) || (t.success === false && t.status !== 'PENDING_APPROVAL' && t.status !== 'RUNNING' && t.status !== 'PENDING')) && !isConfigReq && !isAwaitingApproval && !isDone;
+                            const isPendingApproval = !isTask1Approved && (t.status === 'PENDING_APPROVAL' || t.meta?.status === 'WAITING_FOR_MARKETING_APPROVAL') && !isConfigReq && !isAwaitingApproval && !isDone && !isFailed;
 
                             return (
                               <div
@@ -909,13 +933,7 @@ export default function Dashboard() {
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const taskId = t.task_id || 't1';
-                                    setDynamicTasks(prev => prev.map(item =>
-                                      (item.task_id === taskId || item.agent_id === 'eos_marketing_manager' || item.status === 'AWAITING_APPROVAL')
-                                        ? { ...item, status: 'COMPLETED', isApproved: true, success: true }
-                                        : item
-                                    ));
-                                    CampaignExecutionManager.approveTaskAndResume(taskId, InternalApiGateway);
+                                    handleCeoApprove(t.task_id || 't1');
                                   }}
                                   className="mt-2.5 w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-[10px] py-1.5 px-3 rounded-lg shadow-sm flex items-center justify-center gap-1 cursor-pointer transition-all hover:scale-[1.02] z-10"
                                 >
@@ -988,11 +1006,11 @@ export default function Dashboard() {
 
                   {/* Bottom Actions flow status */}
                   {activeStep >= 4 && lastApiStatus && (
-                    <div className="glass-panel p-3 rounded-xl border border-indigo-200 flex items-center gap-3 text-left max-w-md shrink-0">
+                    <div className="glass-panel p-3 rounded-xl border border-indigo-200 flex items-center gap-3 text-left max-w-md shrink-0 w-full">
                       <Zap className="w-4 h-4 text-indigo-500 animate-bounce shrink-0" />
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-[9px] text-indigo-600 font-bold uppercase tracking-wider">AI Execution Gateway Output</p>
-                        <p className="text-[9px] text-emerald-600 mt-1 font-mono font-bold bg-emerald-50 p-1.5 rounded border border-emerald-100">
+                        <p className="text-[9px] text-emerald-600 mt-1 font-mono font-bold bg-emerald-50 p-1.5 rounded border border-emerald-100 whitespace-pre-wrap break-all max-h-32 overflow-y-auto">
                           {lastApiStatus}
                         </p>
                       </div>
@@ -1081,14 +1099,24 @@ export default function Dashboard() {
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                   <span>Company DNA Register</span>
                 </h3>
-                <div className="mt-3 space-y-2 text-[10px] text-slate-600">
-                  <div className="flex justify-between">
-                    <span>Voice Tone:</span>
-                    <span className="font-semibold text-amber-600">{dnaState.tone}</span>
+                <div className="mt-3 space-y-3 text-[10px] text-slate-600">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-slate-550 font-medium text-slate-500">Voice Tone:</span>
+                    <input
+                      type="text"
+                      value={dnaState.tone}
+                      onChange={(e) => handleDnaChange('tone', e.target.value)}
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                    />
                   </div>
-                  <div className="flex justify-between">
-                    <span>UI Style Class:</span>
-                    <span className="font-semibold text-cyan-600">{dnaState.style}</span>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-slate-550 font-medium text-slate-500">UI Style Class:</span>
+                    <input
+                      type="text"
+                      value={dnaState.style}
+                      onChange={(e) => handleDnaChange('style', e.target.value)}
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                    />
                   </div>
                 </div>
               </div>
@@ -1506,7 +1534,7 @@ export default function Dashboard() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto space-y-5 flex-1 font-sans text-xs">
               {/* Approval Banner inside modal */}
-              {(selectedTask.status === 'AWAITING_APPROVAL' || selectedTask.meta?.status === 'AWAITING_APPROVAL' || (selectedTask.agent_id === 'eos_marketing_manager' && !selectedTask.isApproved && selectedTask.status !== 'COMPLETED')) && (
+              {(selectedTask.status === 'AWAITING_APPROVAL' || selectedTask.meta?.status === 'AWAITING_APPROVAL') && !selectedTask.isApproved && selectedTask.status !== 'COMPLETED' && (
                 <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-amber-400/60 rounded-2xl p-4 text-left shadow-lg flex items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
                     <div className="w-9 h-9 rounded-xl bg-amber-500 text-white font-bold flex items-center justify-center text-lg shadow-md shrink-0">
@@ -1522,16 +1550,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <button
-                    onClick={() => {
-                      const taskId = selectedTask.task_id || 't1';
-                      setDynamicTasks(prev => prev.map(t =>
-                        (t.task_id === taskId || t.agent_id === 'eos_marketing_manager' || t.status === 'AWAITING_APPROVAL')
-                          ? { ...t, status: 'COMPLETED', isApproved: true, success: true }
-                          : t
-                      ));
-                      setSelectedTask((prev: any) => prev ? { ...prev, status: 'COMPLETED', isApproved: true, success: true } : null);
-                      CampaignExecutionManager.approveTaskAndResume(taskId, InternalApiGateway);
-                    }}
+                    onClick={() => handleCeoApprove(selectedTask.task_id || 't1')}
                     className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer hover:scale-105 shrink-0"
                   >
                     <span>👑 CEO Phê Duyệt Ngay & Chạy Tiếp →</span>
@@ -1540,19 +1559,23 @@ export default function Dashboard() {
               )}
               {/* Status Banner */}
               <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs font-semibold ${
-                selectedTask.success === true && !selectedTask.output?.includes('CONFIG_REQUIRED')
+                selectedTask.success === true || selectedTask.status === 'COMPLETED'
                   ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                   : selectedTask.output?.includes('CONFIG_REQUIRED')
                   ? 'bg-amber-50 border-amber-200 text-amber-800'
+                  : selectedTask.status === 'PENDING_APPROVAL' || selectedTask.status === 'RUNNING' || selectedTask.status === 'PENDING'
+                  ? 'bg-indigo-50 border-indigo-200 text-indigo-800'
                   : 'bg-red-50 border-red-200 text-red-800'
               }`}>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>Trạng Thái: {
-                    selectedTask.success === true && !selectedTask.output?.includes('CONFIG_REQUIRED')
+                    selectedTask.success === true || selectedTask.status === 'COMPLETED'
                       ? 'HOÀN THÀNH THÀNH CÔNG (SUCCESS)'
                       : selectedTask.output?.includes('CONFIG_REQUIRED')
                       ? 'CẦN CẤU HÌNH TOKEN (CONFIG REQUIRED)'
+                      : selectedTask.status === 'PENDING_APPROVAL' || selectedTask.status === 'RUNNING' || selectedTask.status === 'PENDING'
+                      ? 'ĐANG THỰC THI / ĐANG CHỜ (IN PROGRESS)'
                       : 'THẤT BẠI / MẤT KẾT NỐI (FAILED)'
                   }</span>
                 </div>
