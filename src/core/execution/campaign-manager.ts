@@ -1,6 +1,7 @@
 import { CanonicalContextPackage } from '../../types/eom';
 import { EnterpriseBrain } from '../brain';
 import { LearningCenter } from '../brain/learning';
+import { HUMAN_WORKER_REGISTRY, HumanWorker } from '../workforce/human-registry';
 
 export interface CampaignState {
   isProcessing: boolean;
@@ -16,6 +17,10 @@ export interface CampaignState {
   fbReachCount: number;
   objective: string;
   approvedTasks: string[];
+  humanWorkers: HumanWorker[];
+  collaborationLogs: any[];
+  aiProgress: number;
+  humanProgress: number;
 }
 
 export type Listener = (state: CampaignState) => void;
@@ -34,7 +39,11 @@ class CampaignExecutionManagerClass {
     activeCustomerCount: 1289,
     fbReachCount: 14500,
     objective: '',
-    approvedTasks: []
+    approvedTasks: [],
+    humanWorkers: HUMAN_WORKER_REGISTRY,
+    collaborationLogs: [],
+    aiProgress: 0,
+    humanProgress: 0
   };
 
   private listeners = new Set<Listener>();
@@ -79,7 +88,11 @@ class CampaignExecutionManagerClass {
       activeCustomerCount: 1289,
       fbReachCount: 14500,
       objective: '',
-      approvedTasks: []
+      approvedTasks: [],
+      humanWorkers: HUMAN_WORKER_REGISTRY,
+      collaborationLogs: [],
+      aiProgress: 0,
+      humanProgress: 0
     };
     this.notify();
   }
@@ -159,7 +172,11 @@ class CampaignExecutionManagerClass {
       activeCustomerCount: this.state.activeCustomerCount,
       fbReachCount: this.state.fbReachCount,
       objective,
-      approvedTasks: []
+      approvedTasks: [],
+      humanWorkers: HUMAN_WORKER_REGISTRY,
+      collaborationLogs: [],
+      aiProgress: 0,
+      humanProgress: 0
     };
     this.notify();
 
@@ -494,6 +511,110 @@ class CampaignExecutionManagerClass {
     this.addLog('LEARNING ENGINE', `🧬 Đã tiếp nhận đánh giá ${rating}⭐ từ CEO: "${feedbackText}". Đã đột biến SOP tri thức!`, 'text-pink-400 font-bold');
     this.notify();
     return result;
+  }
+
+  private calculateProgress() {
+    const tasks = this.state.dynamicTasks || [];
+    if (tasks.length === 0) {
+      this.state.aiProgress = 0;
+      this.state.humanProgress = 0;
+      return;
+    }
+    const aiTasks = tasks.filter(t => t.assignee_type !== 'Human');
+    const humanTasks = tasks.filter(t => t.assignee_type === 'Human');
+    
+    const completedAi = aiTasks.filter(t => t.status === 'COMPLETED').length;
+    const completedHuman = humanTasks.filter(t => t.status === 'COMPLETED').length;
+    
+    this.state.aiProgress = aiTasks.length > 0 ? Math.round((completedAi / aiTasks.length) * 100) : 100;
+    this.state.humanProgress = humanTasks.length > 0 ? Math.round((completedHuman / humanTasks.length) * 100) : 0;
+  }
+
+  public reassignTask(taskId: string, assigneeId: string, assigneeType: 'AI' | 'Human') {
+    this.state.dynamicTasks = this.state.dynamicTasks.map(t => {
+      if (t.task_id === taskId) {
+        let agent_name = t.agent_name;
+        if (assigneeType === 'Human') {
+          const human = this.state.humanWorkers.find(h => h.id === assigneeId);
+          if (human) agent_name = human.name;
+        } else {
+          // Restore default AI name if needed
+          if (assigneeId === 'eos_content_worker') agent_name = 'Bella EOS Content Worker';
+          if (assigneeId === 'eos_creative_worker') agent_name = 'Bella EOS Media & Creative Worker';
+          if (assigneeId === 'hermes_social') agent_name = 'Hermes Social Publisher';
+          if (assigneeId === 'ares_ads') agent_name = 'Ares Ads Agent';
+          if (assigneeId === 'athena_analytics') agent_name = 'Athena Analytics Agent';
+        }
+        return {
+          ...t,
+          assigned_to: assigneeId,
+          assignee_type: assigneeType,
+          agent_id: assigneeId,
+          agent_name
+        };
+      }
+      return t;
+    });
+    this.calculateProgress();
+    this.addLog('CAPABILITY ROUTER', `🔄 CEO đã phân bổ lại Task #${taskId} cho ${assigneeType === 'Human' ? 'nhân sự' : 'AI Agent'}: ${assigneeId}`, 'text-indigo-400 font-semibold');
+    this.notify();
+  }
+
+  public addCollaborationLog(taskId: string, author: string, message: string, attachment?: { name: string; url: string }) {
+    const newLog = {
+      id: `collab_${Date.now()}_${Math.random()}`,
+      taskId,
+      author,
+      message,
+      attachment,
+      time: new Date().toLocaleTimeString('vi-VN'),
+      date: new Date().toLocaleDateString('vi-VN')
+    };
+    this.state.collaborationLogs = [...(this.state.collaborationLogs || []), newLog];
+    this.addLog('COLLABORATION', `💬 [Task ${taskId}] ${author}: ${message}${attachment ? ` (Đính kèm: ${attachment.name})` : ''}`, 'text-slate-400');
+    this.notify();
+  }
+
+  public updateTaskStatus(taskId: string, status: string) {
+    this.state.dynamicTasks = this.state.dynamicTasks.map(t => {
+      if (t.task_id === taskId) {
+        return { ...t, status };
+      }
+      return t;
+    });
+    this.calculateProgress();
+    this.addLog('SYSTEM', `⚙️ Trạng thái Task #${taskId} chuyển sang: ${status}`, 'text-cyan-400 font-semibold');
+    this.notify();
+  }
+
+  public triggerSlaBreachSimulation(taskId: string) {
+    const task = this.state.dynamicTasks.find(t => t.task_id === taskId);
+    if (!task) return;
+    
+    this.addLog('SLA RUNTIME', `⚠️ [CẢNH BÁO SLA] Phát hiện Task #${taskId} (${task.agent_name}) chưa có cập nhật trong hơn 24 giờ qua!`, 'text-rose-500 font-bold');
+    
+    setTimeout(() => {
+      this.addLog('SLA ESCALATION', `🚨 [LỰA CHỌN LEO THANG] Task #${taskId} vượt quá SLA cho phép. Tự động chuyển tiếp cảnh báo tới COO & Manager để cấu hình xử lý lại nhân sự! Đề xuất: Phân bổ lại task sang AI hoặc nhân sự rảnh hơn.`, 'text-red-500 font-extrabold');
+      this.updateTaskStatus(taskId, 'BLOCKED');
+    }, 1500);
+  }
+
+  public packageHumanSopIntoSkillPack(taskId: string) {
+    const task = this.state.dynamicTasks.find(t => t.task_id === taskId);
+    if (!task) return;
+    
+    const workerName = task.agent_name;
+    
+    this.addLog('LEARNING ENGINE', `🔮 Bắt đầu phân tích kết quả & đóng gói SOP làm việc từ nhân sự ${workerName}...`, 'text-pink-400 font-bold');
+    
+    setTimeout(() => {
+      this.addLog('LEARNING ENGINE', `📝 Đã trích xuất checklist thiết kế & tiêu chuẩn thẩm mỹ của ${workerName}.`, 'text-pink-300');
+    }, 1000);
+    
+    setTimeout(() => {
+      this.addLog('SOP MUTATION', `🧬 Đột biến SOP thành công! Tạo mới Skill Pack: "AI-SOP-${task.task_type.toUpperCase()}-${workerName.replace(/\s+/g, '')}-V1.0"`, 'text-emerald-400 font-bold');
+      this.addLog('KNOWLEDGE AGENT', `💾 Tri thức của ${workerName} đã được lưu vào Enterprise Knowledge Hub để tái sử dụng trong tương lai.`, 'text-indigo-400 font-semibold');
+    }, 2200);
   }
 }
 

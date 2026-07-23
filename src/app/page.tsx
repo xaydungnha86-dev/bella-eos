@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
-  Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe,
+  Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe, MessageSquare,
   X, Copy, Check, Code, Download, RotateCcw
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -139,8 +139,17 @@ const AI_WORKFORCE = [
   { id: 'compliance_auditor', name: 'AI QA & Compliance Auditor', type: 'AI', role: 'Thẩm Định Chất Lượng', avatar: '🛡️', capability: 'Kiểm tra tỷ lệ chữ 20% & WCAG AA contrast', status: 'idle', prof: 98, color: 'from-slate-500 to-slate-700' }
 ];
 
+import { HUMAN_WORKER_REGISTRY, HumanWorker } from '../core/workforce/human-registry';
+
 export default function Dashboard() {
   // Application State
+  const [humanWorkers, setHumanWorkers] = useState<HumanWorker[]>(HUMAN_WORKER_REGISTRY);
+  const [collaborationLogs, setCollaborationLogs] = useState<any[]>([]);
+  const [aiProgress, setAiProgress] = useState<number>(0);
+  const [humanProgress, setHumanProgress] = useState<number>(0);
+  const [selectedTaskComment, setSelectedTaskComment] = useState('');
+  const [isReassignmentOpen, setIsReassignmentOpen] = useState(false);
+  const [leftSidebarTab, setLeftSidebarTab] = useState<'ai' | 'human'>('ai');
   const [objective, setObjective] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeTab, setActiveTab] = useState<'timeline' | 'reasoning'>('timeline');
@@ -286,6 +295,10 @@ export default function Dashboard() {
       setActiveCustomerCount(state.activeCustomerCount);
       setFbReachCount(state.fbReachCount);
       setDnaState(state.dnaState);
+      setHumanWorkers(state.humanWorkers || []);
+      setCollaborationLogs(state.collaborationLogs || []);
+      setAiProgress(state.aiProgress || 0);
+      setHumanProgress(state.humanProgress || 0);
       if (state.objective) {
         setObjective(state.objective);
       }
@@ -543,119 +556,120 @@ export default function Dashboard() {
 
       {/* DASHBOARD BODY */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* LEFT COLUMN: 12 AI WORKFORCE MATRIX */}
+        {/* LEFT COLUMN: ENTERPRISE WORKFORCE MATRIX */}
         <aside className="w-80 border-r border-slate-200 bg-white/60 backdrop-blur-md flex flex-col shrink-0">
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-indigo-500" />
-              <h2 className="font-display font-semibold text-xs text-slate-700 uppercase tracking-wider">AI Workforce Matrix</h2>
+          <div className="p-3 border-b border-slate-200 flex flex-col gap-2">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-indigo-500" />
+                <h2 className="font-display font-semibold text-xs text-slate-700 uppercase tracking-wider">Workforce Matrix</h2>
+              </div>
+              <span className="text-[9px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">
+                {leftSidebarTab === 'ai' ? `${AI_WORKFORCE.length} Agents` : `${humanWorkers.length} Humans`}
+              </span>
             </div>
-            <span className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">{AI_WORKFORCE.length} Agents Ready</span>
+            
+            {/* Sidebar Tab Switcher */}
+            <div className="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-semibold">
+              <button
+                onClick={() => setLeftSidebarTab('ai')}
+                className={`flex-1 py-1.5 rounded-md text-center transition-all cursor-pointer ${leftSidebarTab === 'ai' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-505 text-slate-500 hover:text-slate-700'}`}
+              >
+                🤖 AI Agents ({AI_WORKFORCE.length})
+              </button>
+              <button
+                onClick={() => setLeftSidebarTab('human')}
+                className={`flex-1 py-1.5 rounded-md text-center transition-all cursor-pointer ${leftSidebarTab === 'human' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-550 text-slate-500 hover:text-slate-700'}`}
+              >
+                👥 Nhân Sự ({humanWorkers.length})
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-4">
-            {/* SECTION 1: CORE EXECUTIVE TEAM */}
-            <div className="space-y-2">
-              <h3 className="font-display font-semibold text-[10px] text-slate-400 uppercase tracking-wider px-1">
-                Ban Điều Hành Trung Ương
-              </h3>
-              {coreAgents.map(ai => {
-                const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
-                const statusLabel = ai.id === 'human_ceo' 
-                  ? 'Human Authority' 
-                  : ai.id === 'coo' 
-                  ? 'EOS Kernel Active' 
-                  : ai.id === 'marketing_manager'
-                  ? 'Strategy Active'
-                  : ai.id === 'assistant'
-                  ? (isProcessing ? 'Synthesizing Reports' : 'Ready for CEO')
-                  : isRealApi 
-                  ? 'Real API Online' 
-                  : 'Rule Engine Ready';
-
-                return (
-                  <div 
-                    key={ai.id} 
-                    className="glass-panel p-2.5 rounded-xl border border-slate-150 bg-white hover:border-indigo-400 hover:bg-slate-50/50 transition-all group flex items-start gap-3 shadow-sm"
-                  >
-                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
-                      {ai.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
-                        <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{ai.type}</span>
+            {leftSidebarTab === 'human' ? (
+              <div className="space-y-3">
+                {humanWorkers.map(w => {
+                  const workloadColor = w.workload > 80 ? 'bg-rose-500' : w.workload > 60 ? 'bg-amber-500' : 'bg-emerald-500';
+                  const workloadText = w.workload > 80 ? 'Quá tải' : w.workload > 60 ? 'Bận' : 'Sẵn sàng';
+                  
+                  return (
+                    <div 
+                      key={w.id} 
+                      className="glass-panel p-3 rounded-xl border border-slate-150 bg-white hover:border-indigo-400 hover:bg-slate-50/50 transition-all flex flex-col gap-2 shadow-sm"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg shadow-xs shrink-0 bg-gradient-to-tr from-slate-100 to-slate-200">
+                          {w.avatar}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-xs text-slate-800 truncate">{w.name}</h4>
+                            <span className="text-[7px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{w.timezone}</span>
+                          </div>
+                          <p className="text-[9px] text-indigo-600 font-medium mt-0.5 truncate">{w.role}</p>
+                          <p className="text-[8px] text-slate-400 mt-0.5 truncate">{w.department}</p>
+                        </div>
                       </div>
-                      <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
-                      <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
-                      <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-105 text-[8px]">
-                        <span className="flex items-center gap-1 font-bold">
-                          <span className={`w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse`}></span> 
-                          <span className="text-emerald-700 font-semibold">{statusLabel}</span>
+                      
+                      {/* Workload Gauge */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[8px] font-bold text-slate-500 uppercase tracking-wide">
+                          <span>Khối lượng công việc:</span>
+                          <span className={`${w.workload > 80 ? 'text-rose-600' : w.workload > 60 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                            {w.workload}% ({workloadText})
+                          </span>
+                        </div>
+                        <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                          <div className={`h-full ${workloadColor} transition-all duration-500`} style={{ width: `${w.workload}%` }}></div>
+                        </div>
+                      </div>
+                      
+                      {/* Skills list */}
+                      <div className="flex flex-wrap gap-1">
+                        {w.skills.filter(s => !s.includes('_')).map(s => (
+                          <span key={s} className="text-[8px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                      
+                      {/* Rating and Cost footer */}
+                      <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[8px] text-slate-500">
+                        <span className="flex items-center gap-0.5 text-amber-500 font-bold">
+                          ★ <span className="text-slate-700">{w.performanceHistory}</span>
                         </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedAgentForConfig(ai);
-                            setIsAgentConfigModalOpen(true);
-                          }}
-                          className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1 cursor-pointer border border-indigo-100 shadow-2xs"
-                        >
-                          <Settings className="w-2.5 h-2.5" /> Cấu hình
-                        </button>
+                        <span className="font-semibold text-slate-700">Chi phí: ${w.hourlyCost}/h</span>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* SECTION 2: DYNAMIC ALLOCATED WORKERS */}
-            <div className="pt-2 border-t border-slate-100 space-y-2">
-              <div className="flex items-center justify-between px-1">
-                <h3 className="font-display font-semibold text-[10px] text-slate-400 uppercase tracking-wider">
-                  Lực Lượng Vận Hành Phân Bổ
-                </h3>
-                {activeAgents.length > 0 && (
-                  <span className="text-[8.5px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">
-                    {activeAgents.length} Active
-                  </span>
-                )}
+                  );
+                })}
               </div>
-
-              {!isProcessing && activeStep === -1 ? (
-                /* Idle State */
-                <div className="border border-dashed border-slate-200 rounded-xl p-3.5 text-center bg-slate-50/50 space-y-2">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
-                    <Cpu className="w-4 h-4" />
-                  </div>
-                  <p className="text-[11px] font-semibold text-slate-700">Đợi Phân Bổ Nhân Sự</p>
-                  <p className="text-[10px] text-slate-500 leading-normal">
-                    AI COO sẽ phân tích bối cảnh, SOP nội bộ, DNA và phân tách công việc để gán các Agent vận hành chuyên trách vào đây.
-                  </p>
-                </div>
-              ) : isProcessing && activeAgents.length === 0 ? (
-                /* Planning State */
-                <div className="border border-dashed border-indigo-200 rounded-xl p-3.5 text-center bg-indigo-50/20 space-y-2 animate-pulse">
-                  <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center mx-auto text-indigo-400">
-                    <Brain className="w-4 h-4 animate-spin" style={{ animationDuration: '3s' }} />
-                  </div>
-                  <p className="text-[11px] font-semibold text-indigo-700 font-display">COO Đang Hoạch Định...</p>
-                  <p className="text-[10px] text-slate-500 leading-normal">
-                    Đang phân tích Business Context, kiểm duyệt chính sách tài chính & quy trình SOP để phân phối Agent...
-                  </p>
-                </div>
-              ) : (
-                /* Active Allocated Workers */
+            ) : (
+              <div className="space-y-4">
+                {/* SECTION 1: CORE EXECUTIVE TEAM */}
                 <div className="space-y-2">
-                  {activeAgents.map(ai => {
+                  <h3 className="font-display font-semibold text-[10px] text-slate-400 uppercase tracking-wider px-1">
+                    Ban Điều Hành Trung Ương
+                  </h3>
+                  {coreAgents.map(ai => {
                     const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
-                    const statusLabel = isRealApi ? 'Real API Online' : 'Rule Engine Ready';
+                    const statusLabel = ai.id === 'human_ceo' 
+                      ? 'Human Authority' 
+                      : ai.id === 'coo' 
+                      ? 'EOS Kernel Active' 
+                      : ai.id === 'marketing_manager'
+                      ? 'Strategy Active'
+                      : ai.id === 'assistant'
+                      ? (isProcessing ? 'Synthesizing Reports' : 'Ready for CEO')
+                      : isRealApi 
+                      ? 'Real API Online' 
+                      : 'Rule Engine Ready';
 
                     return (
                       <div 
                         key={ai.id} 
-                        className="glass-panel p-2.5 rounded-xl border border-indigo-200 bg-indigo-50/5 hover:border-indigo-400 transition-all group flex items-start gap-3 shadow-xs ring-2 ring-indigo-500/5"
+                        className="glass-panel p-2.5 rounded-xl border border-slate-150 bg-white hover:border-indigo-400 hover:bg-slate-50/50 transition-all group flex items-start gap-3 shadow-sm"
                       >
                         <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
                           {ai.avatar}
@@ -663,13 +677,13 @@ export default function Dashboard() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
-                            <span className="text-[8px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">ALLOCATED</span>
+                            <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{ai.type}</span>
                           </div>
                           <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
                           <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
-                          <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 text-[8px]">
+                          <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-105 text-[8px]">
                             <span className="flex items-center gap-1 font-bold">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 
+                              <span className={`w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse`}></span> 
                               <span className="text-emerald-700 font-semibold">{statusLabel}</span>
                             </span>
                             <button
@@ -688,29 +702,110 @@ export default function Dashboard() {
                     );
                   })}
                 </div>
-              )}
-            </div>
 
-            {/* SECTION 3: REGISTRY POOL (AVAILABLE AGENTS) */}
-            <div className="pt-2 border-t border-slate-100">
-              <details className="group border border-slate-150 rounded-xl bg-slate-50/50 overflow-hidden">
-                <summary className="flex items-center justify-between p-2.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider cursor-pointer list-none select-none hover:text-slate-600 hover:bg-slate-50 transition-colors">
-                  <span>Registry Pool ({operationalAgents.length - activeAgents.length} Idle)</span>
-                  <span className="transition-transform group-open:rotate-180 text-[7px]">▼</span>
-                </summary>
-                <div className="p-2 border-t border-slate-100 space-y-1.5 bg-white max-h-48 overflow-y-auto">
-                  {operationalAgents.filter(ai => !activeAgents.includes(ai)).map(ai => (
-                    <div key={ai.id} className="flex items-center justify-between p-1.5 rounded bg-slate-50/70 border border-slate-100 text-[9px] hover:bg-slate-50 hover:border-slate-200 transition-all">
-                      <span className="flex items-center gap-1.5 text-slate-600">
-                        <span>{ai.avatar}</span>
-                        <span className="font-semibold truncate max-w-[130px]">{ai.name}</span>
+                {/* SECTION 2: DYNAMIC ALLOCATED WORKERS */}
+                <div className="pt-2 border-t border-slate-100 space-y-2">
+                  <div className="flex items-center justify-between px-1">
+                    <h3 className="font-display font-semibold text-[10px] text-slate-400 uppercase tracking-wider">
+                      Lực Lượng Vận Hành Phân Bổ
+                    </h3>
+                    {activeAgents.length > 0 && (
+                      <span className="text-[8.5px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">
+                        {activeAgents.length} Active
                       </span>
-                      <span className="text-[7px] bg-slate-100 px-1 py-0.5 rounded text-slate-400 font-bold uppercase">IDLE</span>
+                    )}
+                  </div>
+
+                  {!isProcessing && activeStep === -1 ? (
+                    /* Idle State */
+                    <div className="border border-dashed border-slate-200 rounded-xl p-3.5 text-center bg-slate-50/50 space-y-2">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                        <Cpu className="w-4 h-4" />
+                      </div>
+                      <p className="text-[11px] font-semibold text-slate-700">Đợi Phân Bổ Nhân Sự</p>
+                      <p className="text-[10px] text-slate-500 leading-normal">
+                        AI COO sẽ phân tích bối cảnh, SOP nội bộ, DNA và phân tách công việc để gán các Agent vận hành chuyên trách vào đây.
+                      </p>
                     </div>
-                  ))}
+                  ) : isProcessing && activeAgents.length === 0 ? (
+                    /* Planning State */
+                    <div className="border border-dashed border-indigo-200 rounded-xl p-3.5 text-center bg-indigo-50/20 space-y-2 animate-pulse">
+                      <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center mx-auto text-indigo-400">
+                        <Brain className="w-4 h-4 animate-spin" style={{ animationDuration: '3s' }} />
+                      </div>
+                      <p className="text-[11px] font-semibold text-indigo-700 font-display">COO Đang Hoạch Định...</p>
+                      <p className="text-[10px] text-slate-500 leading-normal">
+                        Đang phân tích Business Context, kiểm duyệt chính sách tài chính & quy trình SOP để phân phối Agent...
+                      </p>
+                    </div>
+                  ) : (
+                    /* Active Allocated Workers */
+                    <div className="space-y-2">
+                      {activeAgents.map(ai => {
+                        const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
+                        const statusLabel = isRealApi ? 'Real API Online' : 'Rule Engine Ready';
+
+                        return (
+                          <div 
+                            key={ai.id} 
+                            className="glass-panel p-2.5 rounded-xl border border-indigo-200 bg-indigo-50/5 hover:border-indigo-400 transition-all group flex items-start gap-3 shadow-xs ring-2 ring-indigo-500/5"
+                          >
+                            <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                              {ai.avatar}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
+                                <span className="text-[8px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide">ALLOCATED</span>
+                              </div>
+                              <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
+                              <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
+                              <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100 text-[8px]">
+                                <span className="flex items-center gap-1 font-bold">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 
+                                  <span className="text-emerald-700 font-semibold">{statusLabel}</span>
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedAgentForConfig(ai);
+                                    setIsAgentConfigModalOpen(true);
+                                  }}
+                                  className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1 cursor-pointer border border-indigo-100 shadow-2xs"
+                                >
+                                  <Settings className="w-2.5 h-2.5" /> Cấu hình
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </details>
-            </div>
+
+                {/* SECTION 3: REGISTRY POOL (AVAILABLE AGENTS) */}
+                <div className="pt-2 border-t border-slate-100">
+                  <details className="group border border-slate-150 rounded-xl bg-slate-50/50 overflow-hidden">
+                    <summary className="flex items-center justify-between p-2.5 text-[9px] text-slate-400 font-bold uppercase tracking-wider cursor-pointer list-none select-none hover:text-slate-650 hover:bg-slate-50 transition-colors">
+                      <span>Registry Pool ({operationalAgents.length - activeAgents.length} Idle)</span>
+                      <span className="transition-transform group-open:rotate-180 text-[7px]">▼</span>
+                    </summary>
+                    <div className="p-2 border-t border-slate-100 space-y-1.5 bg-white max-h-48 overflow-y-auto">
+                      {operationalAgents.filter(ai => !activeAgents.includes(ai)).map(ai => (
+                        <div key={ai.id} className="flex items-center justify-between p-1.5 rounded bg-slate-50/70 border border-slate-100 text-[9px] hover:bg-slate-50 hover:border-slate-200 transition-all">
+                          <span className="flex items-center gap-1.5 text-slate-600">
+                            <span>{ai.avatar}</span>
+                            <span className="font-semibold truncate max-w-[130px]">{ai.name}</span>
+                          </span>
+                          <span className="text-[7px] bg-slate-100 px-1 py-0.5 rounded text-slate-400 font-bold uppercase">IDLE</span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
@@ -780,22 +875,66 @@ export default function Dashboard() {
                   <div className="w-0.5 h-4 bg-gradient-to-b from-indigo-400 to-cyan-400 shrink-0"></div>
 
                   {/* Goal Completion Audit Bar (when available) */}
-                  {verificationReport && (
-                    <div className="w-full max-w-lg bg-white border border-slate-200 rounded-xl p-3 shadow-sm">
-                      <div className="flex items-center justify-between text-[11px] font-bold mb-1.5">
-                        <span className="flex items-center gap-1.5 text-slate-700">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                          Tiến Độ Mục Tiêu
+                  {dynamicTasks.length > 0 && (
+                    <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3 shrink-0">
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                        <span className="flex items-center gap-1.5 font-display uppercase tracking-wide">
+                          <CheckCircle2 className="w-4 h-4 text-indigo-500 animate-pulse" />
+                          Tiến Độ Chiến Dịch Hệ Điều Hành EWOS
                         </span>
-                        <span className={`font-mono ${verificationReport.isCompleted ? 'text-emerald-600' : 'text-amber-600'}`}>
-                          {verificationReport.completionPercentage}% HOÀN THÀNH ({verificationReport.completedTasks}/{verificationReport.totalTasks} Tasks)
+                        <span className="font-mono text-indigo-650 text-indigo-650 text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-150 font-bold">
+                          {verificationReport?.completionPercentage || Math.round((dynamicTasks.filter(t => t.status === 'COMPLETED').length / dynamicTasks.length) * 100)}% Hoàn thành
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      
+                      {/* Overall Progress Bar */}
+                      <div className="w-full h-2.5 bg-slate-105 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full transition-all duration-700 ${verificationReport.isCompleted ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                          style={{ width: `${verificationReport.completionPercentage}%` }}
+                          className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 transition-all duration-1000"
+                          style={{ width: `${verificationReport?.completionPercentage || Math.round((dynamicTasks.filter(t => t.status === 'COMPLETED').length / dynamicTasks.length) * 100)}%` }}
                         />
+                      </div>
+                      
+                      {/* Sub-progress grid for AI and Human workforces */}
+                      <div className="grid grid-cols-2 gap-4 pt-1 text-[10px] text-slate-500">
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between font-semibold">
+                            <span className="flex items-center gap-1">🤖 AI Tasks:</span>
+                            <span className="text-indigo-600 font-bold">{aiProgress}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-indigo-500 transition-all duration-700" style={{ width: `${aiProgress}%` }} />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between font-semibold">
+                            <span className="flex items-center gap-1">👥 Human Tasks:</span>
+                            <span className="text-cyan-600 font-bold">{humanProgress}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-cyan-500 transition-all duration-700" style={{ width: `${humanProgress}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Workload Status Indicators */}
+                      <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-[9px] font-bold text-slate-500">
+                        <span className="flex items-center gap-1 bg-slate-50 border px-1.5 py-0.5 rounded">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          Đang chạy: {dynamicTasks.filter(t => t.status === 'RUNNING').length}
+                        </span>
+                        <span className="flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-700 px-1.5 py-0.5 rounded">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
+                          Bị Tắc (Blocked): {dynamicTasks.filter(t => t.status === 'BLOCKED').length}
+                        </span>
+                        <span className="flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-700 px-1.5 py-0.5 rounded">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                          Chờ Duyệt: {dynamicTasks.filter(t => t.status === 'AWAITING_APPROVAL' || t.status === 'PENDING_APPROVAL').length}
+                        </span>
+                        <span className="flex items-center gap-1 bg-indigo-50 border border-indigo-200 text-indigo-700 px-1.5 py-0.5 rounded">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                          Lên lịch: {dynamicTasks.filter(t => t.status === 'PENDING' || t.status === 'SCHEDULED').length}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -1557,58 +1696,112 @@ export default function Dashboard() {
                   </button>
                 </div>
               )}
+              
               {/* Status Banner */}
               <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs font-semibold ${
-                selectedTask.success === true || selectedTask.status === 'COMPLETED'
+                selectedTask.status === 'COMPLETED'
                   ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : selectedTask.output?.includes('CONFIG_REQUIRED')
-                  ? 'bg-amber-50 border-amber-200 text-amber-800'
-                  : selectedTask.status === 'PENDING_APPROVAL' || selectedTask.status === 'RUNNING' || selectedTask.status === 'PENDING'
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-800'
-                  : 'bg-red-50 border-red-200 text-red-800'
+                  : selectedTask.status === 'BLOCKED'
+                  ? 'bg-red-50 border-red-200 text-red-800 animate-pulse'
+                  : selectedTask.status === 'AWAITING_APPROVAL' || selectedTask.status === 'PENDING_APPROVAL'
+                  ? 'bg-amber-50 border-amber-200 text-amber-850'
+                  : 'bg-indigo-50 border-indigo-200 text-indigo-800'
               }`}>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>Trạng Thái: {
-                    selectedTask.success === true || selectedTask.status === 'COMPLETED'
+                    selectedTask.status === 'COMPLETED'
                       ? 'HOÀN THÀNH THÀNH CÔNG (SUCCESS)'
-                      : selectedTask.output?.includes('CONFIG_REQUIRED')
-                      ? 'CẦN CẤU HÌNH TOKEN (CONFIG REQUIRED)'
-                      : selectedTask.status === 'PENDING_APPROVAL' || selectedTask.status === 'RUNNING' || selectedTask.status === 'PENDING'
-                      ? 'ĐANG THỰC THI / ĐANG CHỜ (IN PROGRESS)'
-                      : 'THẤT BẠI / MẤT KẾT NỐI (FAILED)'
+                      : selectedTask.status === 'BLOCKED'
+                      ? 'BỊ TẮC NGHẼN (BLOCKED / SLA BREACH)'
+                      : selectedTask.status === 'AWAITING_APPROVAL' || selectedTask.status === 'PENDING_APPROVAL'
+                      ? 'ĐANG CHỜ CEO PHÊ DUYỆT (AWAITING APPROVAL)'
+                      : 'ĐANG THỰC THI (IN PROGRESS / ACTIVE)'
                   }</span>
                 </div>
-                {selectedTask.meta?.model && (
-                  <span className="text-[10px] font-mono bg-white/80 px-2 py-0.5 rounded border border-slate-200">
-                    Engine: {selectedTask.meta.model}
-                  </span>
+                <span className="text-[10px] font-mono bg-white/80 px-2 py-0.5 rounded border border-slate-200 uppercase font-bold text-indigo-600">
+                  Phân loại: {selectedTask.assignee_type || 'AI'}
+                </span>
+              </div>
+
+              {/* Dynamic Task Routing: Assignee selection & reassignment */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-indigo-500" /> Điều Phối Ủy Quyền Nhân Lực (Workforce Assignment)
+                  </h4>
+                  <button 
+                    onClick={() => setIsReassignmentOpen(!isReassignmentOpen)}
+                    className="text-[10px] text-indigo-600 hover:text-indigo-500 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>🔄 {isReassignmentOpen ? 'Đóng cấu hình' : 'Thay đổi phân bổ'}</span>
+                  </button>
+                </div>
+                
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-500">Người thực thi hiện tại:</span>
+                    <span className="font-bold text-slate-800 bg-white border px-2 py-1 rounded shadow-2xs flex items-center gap-1">
+                      <span>{selectedTask.assignee_type === 'Human' ? '👥' : '🤖'}</span>
+                      {selectedTask.agent_name || selectedTask.agent_id}
+                    </span>
+                  </div>
+                </div>
+
+                {isReassignmentOpen && (
+                  <div className="pt-2 border-t border-slate-150 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <p className="text-[9px] text-slate-400 font-semibold uppercase">Chọn Nhân Sự Hoặc AI Agent Để Gán Lại:</p>
+                    <div className="grid grid-cols-2 gap-2 text-[10px]">
+                      {/* AI Agent Selection options */}
+                      <div className="space-y-1">
+                        <span className="font-bold text-slate-655 text-slate-500 block">🤖 AI Workforce Pools:</span>
+                        {[
+                          { id: 'eos_content_worker', name: 'AI Content Worker' },
+                          { id: 'eos_creative_worker', name: 'AI Creative Worker' },
+                          { id: 'hermes_social', name: 'Hermes Social Publisher' },
+                          { id: 'ares_ads', name: 'Ares Ads Agent' }
+                        ].map(ai => (
+                          <button
+                            key={ai.id}
+                            onClick={() => {
+                              CampaignExecutionManager.reassignTask(selectedTask.task_id, ai.id, 'AI');
+                              const fresh = CampaignExecutionManager.getState().dynamicTasks.find(t => t.task_id === selectedTask.task_id);
+                              if (fresh) setSelectedTask(fresh);
+                              setIsReassignmentOpen(false);
+                            }}
+                            className={`w-full text-left p-1.5 rounded border transition-colors cursor-pointer ${selectedTask.assigned_to === ai.id ? 'bg-indigo-50 border-indigo-300 text-indigo-700 font-bold' : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'}`}
+                          >
+                            • {ai.name}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Human Workforce options */}
+                      <div className="space-y-1">
+                        <span className="font-bold text-slate-555 text-slate-500 block">👥 Nhân Sự (Human Workers):</span>
+                        {humanWorkers.map(hw => (
+                          <button
+                            key={hw.id}
+                            onClick={() => {
+                              CampaignExecutionManager.reassignTask(selectedTask.task_id, hw.id, 'Human');
+                              const fresh = CampaignExecutionManager.getState().dynamicTasks.find(t => t.task_id === selectedTask.task_id);
+                              if (fresh) setSelectedTask(fresh);
+                              setIsReassignmentOpen(false);
+                            }}
+                            className={`w-full text-left p-1.5 rounded border transition-colors cursor-pointer ${selectedTask.assigned_to === hw.id ? 'bg-cyan-50 border-cyan-300 text-cyan-700 font-bold' : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'}`}
+                          >
+                            • {hw.name} ({hw.role})
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {/* Model Switch Warning Banner */}
-              {selectedTask.meta?.modelWarning && (
-                <div className="bg-amber-50 border border-amber-300 rounded-xl p-3.5 flex items-start gap-3 shadow-sm">
-                  <div className="w-7 h-7 rounded-lg bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-amber-800 text-[11px] uppercase tracking-wide mb-1">
-                      ⚠️ Thông báo: Hệ thống đã tự động thay đổi model
-                    </p>
-                    <p className="text-[11px] text-amber-700 leading-relaxed">
-                      {selectedTask.meta.modelWarning}
-                    </p>
-                    <p className="text-[10px] text-amber-600 mt-1.5 font-medium">
-                      Kiểm tra lại cấu hình Agent hoặc thay đổi model trong phần <strong>Cấu Hình AI Workforce</strong>.
-                    </p>
-                  </div>
-                </div>
-              )}
-
               {/* Task Description */}
               <div>
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mô Tả Nhiệm Vụ (Task Description)</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Mô Tả Công Việc (Task Description)</h4>
                 <p className="text-xs text-slate-700 font-medium bg-slate-50 p-3 rounded-xl border border-slate-200">
                   {selectedTask.task_description}
                 </p>
@@ -1617,51 +1810,141 @@ export default function Dashboard() {
               {/* Input Payload */}
               {selectedTask.input && (
                 <div>
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Dữ Liệu Đầu Vào (Input Payload)</h4>
-                  <pre className="text-[11px] font-mono bg-slate-900 text-slate-200 p-3.5 rounded-xl overflow-x-auto max-h-36 border border-slate-800">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Context & Đầu Vào (Input Payload)</h4>
+                  <pre className="text-[10px] font-mono bg-slate-900 text-slate-200 p-3 rounded-xl overflow-x-auto max-h-28 border border-slate-800">
                     {JSON.stringify(selectedTask.input, null, 2)}
                   </pre>
                 </div>
               )}
 
-              {/* Output Result */}
+              {/* Execution Output or Draft File Link */}
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Kết Quả Thực Thi Chi Tiết (Full Output)</h4>
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Kết Quả / Sản Phẩm Thực Tế (Execution Output)
+                  </h4>
                   {selectedTask.output && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          const blob = new Blob([selectedTask.output], { type: 'text/markdown;charset=utf-8;' });
-                          const url = URL.createObjectURL(blob);
-                          const link = document.createElement('a');
-                          link.href = url;
-                          link.setAttribute('download', `MarketingPlan_${selectedTask.task_id}_${Date.now()}.md`);
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                        }}
-                        className="text-[10px] font-bold text-emerald-600 hover:text-emerald-500 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                      >
-                        <Download className="w-3 h-3 text-emerald-600" />
-                        <span>Tải File .md</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(selectedTask.output);
-                          setCopiedOutput(true);
-                          setTimeout(() => setCopiedOutput(false), 2000);
-                        }}
-                        className="text-[10px] font-semibold text-indigo-600 hover:text-indigo-500 flex items-center gap-1 cursor-pointer"
-                      >
-                        {copiedOutput ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                        {copiedOutput ? 'Đã Sao Chép!' : 'Sao Chép Kết Quả'}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedTask.output);
+                        setCopiedOutput(true);
+                        setTimeout(() => setCopiedOutput(false), 2000);
+                      }}
+                      className="text-[10px] font-semibold text-indigo-650 text-indigo-650 text-indigo-600 hover:text-indigo-500 flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedOutput ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                      {copiedOutput ? 'Đã Sao Chép!' : 'Sao Chép'}
+                    </button>
                   )}
                 </div>
-                <div className="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner max-h-72 overflow-y-auto">
-                  {selectedTask.output || selectedTask.error || 'Chưa có output cho bước này.'}
+                <div className="bg-slate-900 text-emerald-450 text-emerald-400 font-mono text-xs p-3.5 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner max-h-52 overflow-y-auto">
+                  {selectedTask.output || selectedTask.error || 'Đang chờ cập nhật sản phẩm thực thi.'}
+                </div>
+              </div>
+
+              {/* Interactive Human Worker Actions (When assigned to a human) */}
+              {selectedTask.assignee_type === 'Human' && (
+                <div className="bg-amber-50/50 border border-amber-200/80 rounded-xl p-3.5 space-y-2.5">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
+                    👑 Bảng Điều Khiển Nhân Sự (Human Workforce Controls)
+                  </h4>
+                  <p className="text-[10px] text-amber-700">
+                    Mô phỏng các trạng thái vận hành của con người trong hệ thống như trễ hạn SLA hoặc tự động thu hoạch & đóng gói kinh nghiệm thành AI SOP Skill Pack:
+                  </p>
+                  
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        CampaignExecutionManager.packageHumanSopIntoSkillPack(selectedTask.task_id);
+                      }}
+                      className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[10px] py-2 px-3 rounded-lg transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer hover:scale-102"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      <span>Đóng gói SOP thành AI Skill Pack</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        CampaignExecutionManager.triggerSlaBreachSimulation(selectedTask.task_id);
+                        setTimeout(() => {
+                          const fresh = CampaignExecutionManager.getState().dynamicTasks.find(t => t.task_id === selectedTask.task_id);
+                          if (fresh) setSelectedTask(fresh);
+                        }, 2000);
+                      }}
+                      className="flex-1 bg-rose-50 border border-rose-250 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300 font-bold text-[10px] py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <AlertTriangle className="w-3 h-3" />
+                      <span>Mô phỏng trễ hạn (SLA Breach)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Collaboration & Comments log section */}
+              <div className="border border-slate-200 rounded-xl p-4 bg-white space-y-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
+                  Kênh Thảo Luận Đồng Kiến Tạo (Human-AI Collaboration Log)
+                </h4>
+                
+                {/* Comments List */}
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {collaborationLogs.filter(c => c.taskId === selectedTask.task_id).length === 0 ? (
+                    <div className="text-center py-4 text-slate-400 italic text-[11px]">
+                      Chưa có trao đổi trong công việc này. Nhập tin nhắn phía dưới để gửi chỉ đạo.
+                    </div>
+                  ) : (
+                    collaborationLogs
+                      .filter(c => c.taskId === selectedTask.task_id)
+                      .map((c, i) => (
+                        <div key={i} className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5">
+                          <div className="flex items-center justify-between text-[9px] font-bold">
+                            <span className={`px-1.5 py-0.5 rounded ${c.author === 'CEO' ? 'bg-amber-100 text-amber-800' : c.author === 'System' ? 'bg-slate-200 text-slate-700' : 'bg-indigo-50 text-indigo-700'}`}>
+                              {c.author}
+                            </span>
+                            <span className="text-slate-400 font-mono font-medium">{c.time}</span>
+                          </div>
+                          <p className="text-slate-700 leading-relaxed font-medium">{c.message}</p>
+                          {c.attachment && (
+                            <div className="mt-1 flex items-center justify-between text-[9px] bg-white border rounded-lg p-2 shadow-3xs">
+                              <span className="text-slate-600 flex items-center gap-1">
+                                📎 {c.attachment.name}
+                              </span>
+                              <a href={c.attachment.url} target="_blank" className="text-indigo-600 hover:underline font-bold">
+                                Xem bản thảo thiết kế →
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                  )}
+                </div>
+
+                {/* Comment Input */}
+                <div className="flex gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={selectedTaskComment}
+                    onChange={(e) => setSelectedTaskComment(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && selectedTaskComment.trim()) {
+                        CampaignExecutionManager.addCollaborationLog(selectedTask.task_id, 'CEO', selectedTaskComment);
+                        setSelectedTaskComment('');
+                      }
+                    }}
+                    placeholder="Gửi tin chỉ đạo chiến dịch hoặc yêu cầu sửa đổi..."
+                    className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:border-indigo-500 placeholder:text-slate-400"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!selectedTaskComment.trim()) return;
+                      CampaignExecutionManager.addCollaborationLog(selectedTask.task_id, 'CEO', selectedTaskComment);
+                      setSelectedTaskComment('');
+                    }}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-md flex items-center gap-1 cursor-pointer"
+                  >
+                    <Send className="w-3 h-3" />
+                  </button>
                 </div>
               </div>
 
@@ -1672,13 +1955,13 @@ export default function Dashboard() {
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                     👑 CEO PHẢN HỒI ĐÁNH GIÁ & TỰ ĐỘNG ĐỘT BIẾN SOP
                   </h4>
-                  <span className="text-[9px] text-indigo-300 bg-indigo-900/60 px-2 py-0.5 rounded border border-indigo-700/50">
-                    Continuous Learning Loop
+                  <span className="text-[9px] text-indigo-300 bg-indigo-900/60 px-2 py-0.5 rounded border border-indigo-700/50 font-bold uppercase tracking-wider font-mono">
+                    Continuous Learning
                   </span>
                 </div>
                 
                 <p className="text-[11px] text-slate-300 leading-relaxed">
-                  Đánh giá chất lượng thực thi để hệ thống AI tự động học tập, cập nhật quy chuẩn và rút kinh nghiệm cho các chiến dịch tiếp theo:
+                  Đánh giá kết quả thực thi và chất lượng sản phẩm để hệ thống tự động ghi nhận bài học kinh nghiệm, nâng cấp quy trình làm việc DNA:
                 </p>
 
                 {/* Star Picker */}
@@ -1701,13 +1984,13 @@ export default function Dashboard() {
                 <textarea
                   value={feedbackText}
                   onChange={(e) => setFeedbackText(e.target.value)}
-                  placeholder="Nhập nhận xét của CEO (ví dụ: 'Nội dung W1 cần tăng tính gấp gáp', 'Banner W2 làm màu nền sáng hơn', 'CPL dự báo tốt')..."
+                  placeholder="Nhập nhận xét của CEO (ví dụ: 'Yêu cầu viết banner ngắn hơn', 'Nội dung làm nổi bật khuyến mãi', 'Cần banner sạch hơn')..."
                   className="w-full text-xs bg-slate-950/80 border border-indigo-800/60 rounded-xl p-3 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/80 min-h-[60px]"
                 />
 
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[10px] text-emerald-400 font-medium">
-                    {feedbackSubmitted ? '✅ Đã ghi nhận bài học! AI Workforce sẽ tự động áp dụng cho các chiến dịch tiếp theo.' : 'Tri thức sẽ tự động lưu vào bộ nhớ hệ thống'}
+                    {feedbackSubmitted ? '✅ Đã ghi nhận bài học! AI Workforce sẽ tự động áp dụng để cải tiến SOP.' : 'Tri thức sẽ tự động lưu vào bộ nhớ hệ thống'}
                   </span>
                   <button
                     type="button"

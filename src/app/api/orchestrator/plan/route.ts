@@ -1,4 +1,28 @@
 import { NextResponse } from 'next/server';
+import { rankCandidatesForTask } from '../../../../core/orchestration/hybrid-dispatcher';
+
+function enrichTasksWithScorecard(tasks: any[]) {
+  if (!Array.isArray(tasks)) return [];
+  return tasks.map(task => {
+    const candidates = rankCandidatesForTask(
+      task.task_type,
+      task.agent_id,
+      task.agent_name
+    );
+    
+    // Choose the highest scoring candidate (AI or human) as default assigned_to
+    const bestCandidate = candidates[0];
+    
+    return {
+      ...task,
+      assigned_to: bestCandidate ? bestCandidate.id : task.agent_id,
+      assignee_type: bestCandidate ? bestCandidate.type : 'AI',
+      candidate_scores: candidates,
+      due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days default SLA
+    };
+  });
+}
+
 
 /**
  * POST /api/orchestrator/plan
@@ -210,6 +234,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
         const data = await res.json();
         if (res.ok && data.choices?.[0]?.message?.content) {
           const plan = JSON.parse(data.choices[0].message.content);
+          if (plan) plan.tasks = enrichTasksWithScorecard(plan.tasks);
           return NextResponse.json({ success: true, plan, provider: 'openai', model: 'gpt-4o' });
         }
         console.warn('[orchestrator/plan] OpenAI error:', data.error?.message);
@@ -238,6 +263,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
         if (res.ok && data.content?.[0]?.text) {
           const raw = data.content[0].text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
           const plan = JSON.parse(raw);
+          if (plan) plan.tasks = enrichTasksWithScorecard(plan.tasks);
           return NextResponse.json({ success: true, plan, provider: 'anthropic', model: 'claude-3-5-sonnet' });
         }
         console.warn('[orchestrator/plan] Anthropic error:', data.error?.message);
@@ -266,6 +292,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
         if (res.ok && text) {
           const raw = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
           const plan = JSON.parse(raw);
+          if (plan) plan.tasks = enrichTasksWithScorecard(plan.tasks);
           return NextResponse.json({ success: true, plan, provider: 'gemini', model: 'gemini-2.5-flash' });
         }
         console.warn('[orchestrator/plan] Gemini error:', data.error?.message);
@@ -275,6 +302,7 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
     // ── Fallback: Rule-based planner (no LLM needed) ──────────────────────
     console.info('[orchestrator/plan] No AI key — using rule-based planner fallback.');
     const fallbackPlan = buildFallbackPlan(objective, context);
+    if (fallbackPlan) fallbackPlan.tasks = enrichTasksWithScorecard(fallbackPlan.tasks);
     return NextResponse.json({
       success: true,
       plan: fallbackPlan,
