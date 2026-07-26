@@ -6,7 +6,7 @@ import {
   Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
   Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe, MessageSquare,
-  X, Copy, Check, Code, Download, RotateCcw
+  X, Copy, Check, Code, Download, RotateCcw, Shield
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { EnterpriseBrain } from '../core/brain';
@@ -543,6 +543,13 @@ export default function Dashboard() {
           >
             <Key className="w-3.5 h-3.5 text-amber-600" />
             <span>Cài đặt Tích hợp</span>
+          </Link>
+          <Link
+            href="/executive"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span>Executive Control Room</span>
           </Link>
           <button 
             onClick={() => setIsBrainModalOpen(true)}

@@ -46,6 +46,35 @@ export class ApprovalRuntime implements IApproval {
 
     task.status = 'APPROVED';
     task.approverId = approverId;
+
+    // EWOS Learning Loop: Feed completed task review into ELR Continuous Improvement Runtime
+    try {
+      const { ContinuousImprovementRuntime } = await import('../elr/continuous-improvement-runtime');
+      const { LearningDNAManager } = await import('../assets/learning-dna');
+
+      await ContinuousImprovementRuntime.getInstance().executeCycle({
+        type: 'TASK_REVIEW',
+        source: `EWOS_APPROVAL_${requestId}`,
+        content: {
+          taskId: requestId,
+          title: task.title,
+          description: task.description,
+          approverId,
+          comments: comments || 'Task completed successfully',
+          role: task.requiredRole,
+        },
+        tenantId: 'default-tenant',
+        createdBy: approverId,
+        tags: ['EWOS_LEARNING', 'AUTO_SOP'],
+      });
+
+      const dna = LearningDNAManager.getInstance().getOrCreateDNA('default-tenant');
+      dna.appendLesson(`EWOS Task [${task.title}] completed by ${approverId}: ${comments || 'Verified SOP excellence'}`);
+      dna.appendOptimization(`Auto-updated Learning DNA from completed EWOS Task ${requestId}`);
+    } catch (e) {
+      // Non-blocking fallback for standalone test contexts
+    }
+
     return true;
   }
 

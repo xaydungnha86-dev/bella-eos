@@ -5,7 +5,7 @@
  * Asset governance interface for Marketplace items (Skills, SOPs, DNA Packs, Connectors).
  */
 
-export type AssetType = 'SKILL' | 'SOP' | 'DNA_PACK' | 'CONNECTOR' | 'PROMPT_PACK' | 'WORKFLOW';
+export type AssetType = 'SKILL' | 'SOP' | 'DNA_PACK' | 'CONNECTOR' | 'PROMPT_PACK' | 'WORKFLOW' | 'EVIDENCE_PACK' | 'LEARNING_DNA';
 
 export interface AssetManifest {
   id: string;
