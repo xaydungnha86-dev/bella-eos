@@ -180,47 +180,73 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
         throw new Error('No API key');
       }
       
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: prompt }]
-            }],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 2048,
-            }
-          })
-        }
-      );
+      // Try multiple Gemini models in order of preference
+      const models = [
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro',
+        'gemini-pro'
+      ];
       
-      if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`);
+      let lastError: Error | null = null;
+      
+      for (const modelName of models) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                  temperature: 0.7,
+                  maxOutputTokens: 2048,
+                }
+              })
+            }
+          );
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.warn(`[CreativeDirectorAgent] ${modelName} failed (${response.status}):`, errorText.substring(0, 200));
+            lastError = new Error(`Gemini API error: ${response.status}`);
+            continue; // Try next model
+          }
+          
+          const data = await response.json();
+          const fullText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          
+          console.log(`[CreativeDirectorAgent] ✓ Success with ${modelName}`);
+          
+          // Extract reasoning chain (before JSON)
+          const reasoningMatch = fullText.match(/REASONING:([\s\S]*?)(?=\{)/);
+          const reasoningText = reasoningMatch ? reasoningMatch[1].trim() : '';
+          const reasoningChain = reasoningText
+            .split('\n')
+            .map((line: string) => line.replace(/^[-*•]\s*/, '').trim())
+            .filter(Boolean);
+          
+          // Extract JSON (after reasoning)
+          const jsonMatch = fullText.match(/\{[\s\S]*\}/);
+          const structuredOutput = jsonMatch ? jsonMatch[0] : fullText;
+          
+          return {
+            structuredOutput,
+            confidence: 0.85,
+            reasoningChain
+          };
+        } catch (modelError) {
+          console.warn(`[CreativeDirectorAgent] ${modelName} exception:`, modelError);
+          lastError = modelError as Error;
+          continue;
+        }
       }
       
-      const data = await response.json();
-      const fullText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      
-      // Extract reasoning chain (before JSON)
-      const reasoningMatch = fullText.match(/REASONING:([\s\S]*?)(?=\{)/);
-      const reasoningText = reasoningMatch ? reasoningMatch[1].trim() : '';
-      const reasoningChain = reasoningText
-        .split('\n')
-        .map((line: string) => line.replace(/^[-*•]\s*/, '').trim())
-        .filter(Boolean);
-      
-      // Extract JSON (after reasoning)
-      const jsonMatch = fullText.match(/\{[\s\S]*\}/);
-      const structuredOutput = jsonMatch ? jsonMatch[0] : fullText;
-      
-      return {
-        structuredOutput,
-        confidence: 0.85,
-        reasoningChain
-      };
+      // All models failed
+      throw lastError || new Error('All Gemini models failed');
       
     } catch (error) {
       console.warn('[CreativeDirectorAgent] LLM call failed, using rule-based fallback:', error);

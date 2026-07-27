@@ -316,35 +316,36 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   // Infer objective from context, input, or copywriter content
   let objective = input.objective || context?.objective || input.format;
   
-  // If still no objective, try to infer from copywriter content
-  if (!objective && copywriterContent) {
+  // ALWAYS enrich/override objective based on copywriter content analysis
+  // (Original objective might be too generic like "Tạo nhận diện thương hiệu")
+  if (copywriterContent) {
     const contentLower = copywriterContent.toLowerCase();
     
     // Priority 1: Detect if this is ABOUT Bella EOS platform itself (enterprise software marketing)
-    if (contentLower.includes('bella eos') || contentLower.includes('enterprise') && (contentLower.includes('platform') || contentLower.includes('eic') || contentLower.includes('executive intelligence'))) {
+    if (contentLower.includes('bella eos') || contentLower.includes('eic') || (contentLower.includes('enterprise') && (contentLower.includes('platform') || contentLower.includes('executive intelligence')))) {
       objective = 'Enterprise AI Platform Marketing - BELLA EOS Brand Positioning';
+      console.log('[tool_generate_media_creative] Detected: BELLA EOS platform marketing');
     }
-    // Priority 2: Extract from executive report headers
-    else if (contentLower.includes('executive') || contentLower.includes('strategic report')) {
+    // Priority 2: Executive report
+    else if (contentLower.includes('executive strategic report') || contentLower.includes('báo cáo lãnh đạo')) {
       objective = 'Executive Strategic Report - Brand Positioning';
+      console.log('[tool_generate_media_creative] Detected: Executive report');
     }
-    // Priority 3: Extract from content type indicators
-    else if (contentLower.includes('báo cáo lãnh đạo')) {
-      objective = 'Báo cáo chiến lược thương hiệu cho Ban Giám đốc';
-    }
+    // Priority 3: Domain-specific (only if NOT platform)
     else if (contentLower.includes('spa') || contentLower.includes('thẩm mỹ')) {
-      objective = 'Spa Management Marketing Campaign';
+      // Check if it's platform FOR spa or spa business itself
+      if (!contentLower.includes('bella eos') && !contentLower.includes('platform')) {
+        objective = 'Spa Management Marketing Campaign';
+        console.log('[tool_generate_media_creative] Detected: Spa business');
+      }
     }
     else if (contentLower.includes('bất động sản') || contentLower.includes('căn hộ')) {
-      objective = 'Real Estate Marketing Campaign';
+      objective = objective || 'Real Estate Marketing Campaign';
+      console.log('[tool_generate_media_creative] Detected: Real estate');
     }
     else if (contentLower.includes('thời trang') || contentLower.includes('fashion')) {
-      objective = 'Fashion Retail Marketing Campaign';
-    }
-    else {
-      // Generic fallback based on content snippet
-      const firstLine = copywriterContent.split('\n').find(l => l.trim().length > 10) || '';
-      objective = firstLine.substring(0, 80) || 'Brand Marketing Campaign';
+      objective = objective || 'Fashion Retail Marketing Campaign';
+      console.log('[tool_generate_media_creative] Detected: Fashion');
     }
   }
   
@@ -353,7 +354,7 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
     objective = 'Brand Marketing Campaign';
   }
   
-  console.log(`[tool_generate_media_creative] Inferred objective: ${objective.substring(0, 100)}...`);
+  console.log(`[tool_generate_media_creative] Final objective: ${objective.substring(0, 100)}...`);
 
   const creativeConfig = clientKeys?.agent_configs?.['creative_designer'] || clientKeys?.agent_configs?.['eos_creative_worker'] || {};
   const preferredModel = creativeConfig.model;
