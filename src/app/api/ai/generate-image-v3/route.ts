@@ -321,13 +321,15 @@ export async function POST(request: Request) {
 
     const baseUrl = getBaseUrl();
     const svgUrl = `${baseUrl}/api/ai/banner-image?${new URLSearchParams({
-      headline: creativeBrief.posterHeadline,
-      badge: creativeBrief.keyMessage,
+      headline: creativeBrief.posterHeadline || 'GIẢI PHÁP TỐI ƯU',
+      badge: creativeBrief.posterHeadline || 'GIẢI PHÁP TỐI ƯU',
       cta: 'ĐĂNG KÝ TRẢI NGHIỆM NGAY',
       brandName: brandDna?.brandName || 'BELLA EOS',
       objective: objective,
       t: String(Date.now())
     }).toString()}`;
+    
+    console.log('[API v3] SVG fallback URL:', svgUrl);
 
     return NextResponse.json({
       success: true,

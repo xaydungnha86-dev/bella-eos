@@ -405,12 +405,17 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       })
     });
     const data = await res.json();
+    
+    console.log('[tool_generate_media_creative] v3 response:', JSON.stringify(data).substring(0, 300));
+    
     if (data.success && data.imageUrl) {
       imageUrl = data.imageUrl;
       provider = data.provider;
       model = data.model;
       actualPrompt = data.prompt || '';
       if (data.warning) modelWarning = data.warning;
+      
+      console.log(`[tool_generate_media_creative] Using imageUrl from v3: ${imageUrl.substring(0, 150)}`);
     } else {
       const ts = Date.now();
       imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
