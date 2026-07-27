@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Check LocalStorage - Bella EOS</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #061E17;
+      margin-bottom: 20px;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+    button {
+      background: #D4AF37;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #b8941f;
+    }
+    pre {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Bella EOS - LocalStorage Checker</h1>
+    
+    <button onclick="checkStorage()">Check LocalStorage</button>
+    <button onclick="testAPIKey()">Test API with Key</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    
+    <div id="result"></div>
+  </div>
+
+  <script>
+    function checkStorage() {
+      const result = document.getElementById('result');
+      
+      try {
+        const integrations = localStorage.getItem('bella_eos_integrations');
+        
+        if (!integrations) {
+          result.innerHTML = `
+            <div class="status error">
+              <strong>❌ NO DATA FOUND</strong><br>
+              localStorage.getItem('bella_eos_integrations') returned null<br><br>
+              <strong>Fix:</strong> Go to <a href="/settings">/settings</a> and enter your Gemini API key
+            </div>
+          `;
+          return;
+        }
+        
+        const data = JSON.parse(integrations);
+        const geminiKey = data['gemini::api_key'];
+        
+        if (!geminiKey) {
+          result.innerHTML = `
+            <div class="status error">
+              <strong>❌ GEMINI KEY NOT FOUND</strong><br>
+              localStorage has data but 'gemini::api_key' is missing<br><br>
+              <strong>Stored keys:</strong><br>
+              <pre>${JSON.stringify(Object.keys(data), null, 2)}</pre>
+              <strong>Fix:</strong> Go to <a href="/settings">/settings</a> and enter Gemini API key
+            </div>
+          `;
+          return;
+        }
+        
+        const maskedKey = geminiKey.substring(0, 10) + '...' + geminiKey.substring(geminiKey.length - 4);
+        
+        result.innerHTML = `
+          <div class="status success">
+            <strong>✅ GEMINI KEY FOUND</strong><br>
+            Key: ${maskedKey}<br>
+            Length: ${geminiKey.length} characters<br>
+            Starts with: ${geminiKey.substring(0, 6)}...<br>
+            Format: ${geminiKey.startsWith('AIzaSy') ? '✅ Valid (AIzaSy...)' : '⚠️ Unexpected format'}<br><br>
+            <strong>All stored keys:</strong><br>
+            <pre>${JSON.stringify(Object.keys(data), null, 2)}</pre>
+          </div>
+          <div class="status info">
+            <strong>💡 Next Steps:</strong><br>
+            1. Click "Test API with Key" button to verify the key works<br>
+            2. If test fails, key might be invalid or expired<br>
+            3. Get new key from: <a href="https://aistudio.google.com/app/apikey" target="_blank">https://aistudio.google.com/app/apikey</a>
+          </div>
+        `;
+      } catch (error) {
+        result.innerHTML = `
+          <div class="status error">
+            <strong>❌ ERROR</strong><br>
+            ${error.message}<br><br>
+            <strong>Stack:</strong><br>
+            <pre>${error.stack}</pre>
+          </div>
+        `;
+      }
+    }
+    
+    async function testAPIKey() {
+      const result = document.getElementById('result');
+      
+      try {
+        const integrations = localStorage.getItem('bella_eos_integrations');
+        if (!integrations) {
+          result.innerHTML = '<div class="status error">No localStorage data. Run "Check LocalStorage" first.</div>';
+          return;
+        }
+        
+        const data = JSON.parse(integrations);
+        const geminiKey = data['gemini::api_key'];
+        
+        if (!geminiKey) {
+          result.innerHTML = '<div class="status error">No Gemini key found. Go to /settings to add one.</div>';
+          return;
+        }
+        
+        result.innerHTML = '<div class="status info">⏳ Testing API key with Gemini...</div>';
+        
+        // Test with simple Gemini API call
+        const testRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'Say "Hello, API is working!"' }] }]
+          })
+        });
+        
+        if (!testRes.ok) {
+          const errorData = await testRes.json();
+          result.innerHTML = `
+            <div class="status error">
+              <strong>❌ API KEY TEST FAILED</strong><br>
+              Status: ${testRes.status} ${testRes.statusText}<br>
+              Error: ${JSON.stringify(errorData, null, 2)}<br><br>
+              <strong>Common Issues:</strong><br>
+              - Key is invalid or expired<br>
+              - Key doesn't have Gemini API enabled<br>
+              - Billing not set up in Google Cloud<br><br>
+              <strong>Fix:</strong> Generate new key at <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>
+            </div>
+          `;
+          return;
+        }
+        
+        const responseData = await testRes.json();
+        const generatedText = responseData.candidates?.[0]?.content?.parts?.[0]?.text || 'N/A';
+        
+        result.innerHTML = `
+          <div class="status success">
+            <strong>✅ API KEY TEST PASSED!</strong><br>
+            Your Gemini API key is valid and working.<br><br>
+            <strong>Test Response:</strong><br>
+            "${generatedText}"<br><br>
+            <strong>✓ The key should now work for image generation</strong><br>
+            Try running the workflow again from the dashboard.
+          </div>
+        `;
+      } catch (error) {
+        result.innerHTML = `
+          <div class="status error">
+            <strong>❌ TEST ERROR</strong><br>
+            ${error.message}
+          </div>
+        `;
+      }
+    }
+    
+    function clearStorage() {
+      if (confirm('Are you sure you want to clear all stored API keys?')) {
+        localStorage.removeItem('bella_eos_integrations');
+        document.getElementById('result').innerHTML = `
+          <div class="status info">
+            <strong>🗑️ STORAGE CLEARED</strong><br>
+            All API keys have been removed from localStorage.<br>
+            Go to <a href="/settings">/settings</a> to re-enter your keys.
+          </div>
+        `;
+      }
+    }
+    
+    // Auto-check on load
+    window.onload = checkStorage;
+  </script>
+</body>
+</html>

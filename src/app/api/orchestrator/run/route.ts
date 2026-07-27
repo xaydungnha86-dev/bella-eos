@@ -391,10 +391,19 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   let modelWarning: string | undefined;
   let creativeBrief: any = null;
 
+  // Debug logging for client keys
+  console.log('[tool_generate_media_creative] Client keys received:', {
+    hasOpenAI: !!openaiKey,
+    hasGemini: !!geminiKey,
+    hasFal: !!falKey,
+    geminiKeyPreview: geminiKey ? geminiKey.substring(0, 15) + '...' : 'MISSING'
+  });
+
   try {
     // Always use v3 (Creative Intelligence Engine with LLM reasoning)
     const endpoint = '/api/ai/generate-image-v3';
     console.log(`[tool_generate_media_creative] Using Creative Intelligence v3`);
+    console.log(`[tool_generate_media_creative] Passing gemini key: ${geminiKey ? 'YES ✅' : 'NO ❌'}`);
     
     const res = await fetch(`${getBaseUrl()}${endpoint}`, {
       method: 'POST',
