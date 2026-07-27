@@ -643,50 +643,37 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const segment = input.target_audience || context?.brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
   const brandName = context?.brandDna?.brandName || 'BELLA EOS';
   
-  // 1. Compile Enterprise Context Contract (ECC) Input
+  // 1. Invoke Platform Primitive: Enterprise Context Builder (ECC)
   const activeCustomers = context?.activeCustomerCount || 0;
   const fbReach = context?.fbReachCount || 0;
   const hasStats = activeCustomers > 0 && fbReach > 0;
   
-  const ecc: import('@/core/contracts/enterprise-context-contract').EnterpriseContextContract = {
-    contextId: `ECC-CTX-2026-${Date.now().toString().substring(8)}`,
-    timestamp: new Date().toISOString(),
+  const { EnterpriseContextBuilder } = await import('@/core/brain/context-builder');
+  const ecc = EnterpriseContextBuilder.getInstance().buildContext({
     objective,
     brandDna: {
       brandName,
       voiceTone: tone,
       designStyle: context?.brandDna?.designStyle || 'Minimalist & Glassmorphism',
-      targetSegment: segment,
-      strategicIntent: objective.toLowerCase().includes('premium') ? 'Become Premium Brand' : 'Acquire Customers'
+      targetSegment: segment
     },
-    evidenceIds: hasStats ? ['CRM-1029', 'FB-ANALYTICS-2039'] : ['SYSTEM-DEFAULT-STUB'],
-    coverage: {
-      crmActiveCount: activeCustomers,
-      fbReach24h: fbReach,
-      approvedBudgetLimitVnd: objective.toLowerCase().includes('50 triệu') ? 50000000 : 100000000,
-      piiRedacted: ['email', 'phone']
-    }
-  };
+    rawCrmStats: { activeCustomers, rawLeadsList: [{ name: 'Spa Anh Đào', email: 'anhdao@gmail.com' }] },
+    rawErpStats: { fbReach24h: fbReach },
+    approvedBudgetLimitVnd: objective.toLowerCase().includes('50 triệu') ? 50000000 : 100000000
+  });
 
-  // Determine dynamic stats message
-  const statsText = hasStats
-    ? `${brandName} đang phục vụ ${activeCustomers.toLocaleString()}+ cơ sở Spa/TMV trên toàn quốc; lượt tiếp cận 24h đạt ${fbReach.toLocaleString()}+. Hệ thống vận hành tự động định hình vị thế dẫn đầu.`
-    : `[Số liệu hiện tại về số lượng cơ sở Spa/TMV và lượt tiếp cận Fanpage chưa được cung cấp. Vui lòng nhập thông tin số liệu trong Company DNA Register ở cột phải để nhận báo cáo chuẩn xác nhất].`;
+  // 2. Invoke Platform Primitive: Enterprise Contract Registry (ECC registration)
+  const { ContractRegistry } = await import('@/core/contracts/contract-registry');
+  ContractRegistry.getInstance().registerEcc(ecc);
 
-  const angle2Text = hasStats
-    ? `Hơn ${activeCustomers.toLocaleString()}+ Chủ Spa tin dùng ${brandName} nâng cao 300% hiệu suất`
-    : `Hệ điều hành Doanh nghiệp AI thông minh ${brandName} giúp giải phóng 80% thời gian quản lý và nâng cao 300% hiệu suất vận hành`;
+  // 3. Invoke Platform Primitive: Enterprise Reasoning Engine (Shared DAG)
+  const { EnterpriseReasoningEngine } = await import('@/core/brain/reasoning-engine');
+  const sharedReasoning = EnterpriseReasoningEngine.getInstance().generateReasoningGraph(ecc);
 
-  const caseStudyText = hasStats
-    ? `Xuất bản bài viết Case Study thực tế từ các cơ sở trong số ${activeCustomers.toLocaleString()}+ Spa đã tự động hóa thành công với Bella EOS.`
-    : `Xuất bản bài viết hướng dẫn nghiệp vụ thực tế về cách tự động hóa quy trình vận hành và kiểm soát tài chính tránh thất thoát.`;
-
-  // 2. Check for pushback condition (unrealistic requests)
   const isExtremeGrowth = objective.toLowerCase().includes('300%') || objective.toLowerCase().includes('gấp 3') || objective.toLowerCase().includes('gấp ba');
   const isShortTime = objective.toLowerCase().includes('5 ngày') || objective.toLowerCase().includes('10 ngày') || objective.toLowerCase().includes('15 ngày');
   const triggerPushback = isExtremeGrowth && isShortTime;
 
-  // 3. Define Reasoning DAG, Confidence, and Fallback EIC JSON contract
   const overallConfidence = hasStats ? 92 : 45;
   const cmoConfidence = {
     overallPercentage: overallConfidence,
@@ -699,15 +686,6 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   };
 
   const eicContractId = `EIC-CMO-2026-${Date.now().toString().substring(7)}`;
-
-  // Draft Reasoning Graph Nodes (DAG based dependencies)
-  const reasoningNodes: import('@/core/contracts/executive-intelligence-contract').ReasoningNode[] = [
-    { id: 'GOAL', type: 'GOAL', dependsOn: [], evidence: [], confidence: 100, description: 'Chỉ thị CEO', outcome: objective },
-    { id: 'DIAGNOSIS', type: 'METRIC', dependsOn: ['GOAL'], evidence: ecc.evidenceIds, confidence: cmoConfidence.overallPercentage, description: 'Chuẩn đoán bối cảnh doanh nghiệp', outcome: hasStats ? 'Có số liệu thực tế' : 'Thiếu số liệu, yêu cầu làm rõ' },
-    { id: 'LEAKAGE', type: 'LEAKAGE', dependsOn: ['DIAGNOSIS'], evidence: ['CRM-LEAK-TEST'], confidence: hasStats ? 90 : 30, description: 'Phân tích điểm rò rỉ (Funnels)', outcome: triggerPushback ? 'Hạn chế năng lực cung ứng & Sales chốt kém' : 'Hụt lead đăng ký do thương hiệu mờ nhạt' },
-    { id: 'DECISION', type: 'DECISION', dependsOn: ['LEAKAGE'], evidence: [], confidence: hasStats ? 92 : 45, description: 'Lựa chọn chiến lược tối ưu', outcome: triggerPushback ? 'Bác bỏ mục tiêu 300% & Đề xuất 30% trong 60 ngày' : 'Retention + Upsell tối ưu CRM trước, scale ads sau' }
-  ];
-
   const pastPlansMd = context?.past_plans_md || input?.past_plans_md || '';
   const mmConfig = clientKeys?.agent_configs?.['marketing_manager'] || clientKeys?.agent_configs?.['eos_marketing_manager'] || {};
   const openaiKey = clientKeys?.openai || mmConfig.apiKey || process.env.OPENAI_API_KEY;
@@ -717,15 +695,8 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const learnedLessonsPrompt = LearningCenter.getLearnedLessonsPrompt();
   const memoryContextPrompt = (pastPlansMd ? `\n\nLỊCH SỬ KẾ HOẠCH BÀI HỌC CÁC CHIẾN DỊCH TRƯỚC:\n${pastPlansMd}` : '') + (learnedLessonsPrompt ? `\n${learnedLessonsPrompt}` : '');
 
-  // Month extraction
-  let targetMonthStr = 'Tháng 8';
-  const monthRegex = /(?:tháng|thang|thg|t|month)\s*(\d{1,2})/i;
-  const match = objective.match(monthRegex);
-  if (match) targetMonthStr = `Tháng ${match[1]}`;
-  else targetMonthStr = `Tháng ${new Date().getMonth() + 1}`;
-
-  // JSON Executive Intelligence Contract Stub
-  const mockEicJson: import('@/core/contracts/executive-intelligence-contract').ExecutiveIntelligenceContract & { confidence: any } = {
+  // Draft proposed EIC contract
+  const proposedEic: import('@/core/contracts/executive-intelligence-contract').ExecutiveIntelligenceContract & { confidence: any } = {
     metadata: {
       contractId: eicContractId,
       version: 1,
@@ -747,13 +718,13 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
         strengths: `Hệ điều hành AI tự động hóa vận hành, kiểm soát dòng tiền EOM chặt chẽ.`,
         weaknesses: `Dữ liệu phân tích đối thủ cạnh tranh gián tiếp chưa được tích hợp hoàn chỉnh.`,
         opportunities: `Áp dụng phễu CSKH và SMS/ZNS tự động hóa để nâng cao tỉ lệ giữ chân khách cũ.`,
-        threats: `Chi phí CPC Ads trên nền tảng mạng xã hội gia tăng mạnh.`
+        threats: `Chi phí CPC Ads trên nền t hạn chế.`
       },
       currentBottleneck: triggerPushback 
         ? 'Năng lực vận hành của kỹ thuật viên quá tải, không thể mở rộng quy mô gấp 3 trong thời gian ngắn.' 
         : 'Tỷ lệ chốt lịch hẹn (Sales Conversion) đang kém, hụt lead do thiếu uy tín xã hội (Social Proof).'
     },
-    reasoningGraph: { nodes: reasoningNodes },
+    reasoningGraph: { nodes: sharedReasoning.nodes },
     confidence: cmoConfidence,
     decision: {
       approvedStrategy: triggerPushback ? 'Tăng trưởng bền vững (30% trong 60 ngày)' : 'Retention & Referral + Social Proof (Tối ưu khách cũ, chứng minh năng lực)',
@@ -809,25 +780,41 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
     }
   };
 
+  // 4. Invoke Platform Primitive: Enterprise Policy Engine (Checks proposed EIC limit)
+  const { PolicyEngine } = await import('@/core/gov/policy-engine');
+  const policyCheck = PolicyEngine.getInstance().evaluateProposal(proposedEic);
+  if (!policyCheck.passed) {
+    proposedEic.metadata.status = 'BOARD_REVIEW';
+  }
+
+  // 5. Invoke Platform Primitive: Enterprise Contract Registry (EIC registration & versioning)
+  const eicVersion = ContractRegistry.getInstance().registerEic(proposedEic);
+
   // Human Readable Markdown Report (McKinsey Style)
   const defaultTemplate = `# 🏛️ EXECUTIVE DECISION PACKAGE (BẢN PHÂN TÍCH ĐIỀU HÀNH)
-*Được chuẩn hóa theo cấu trúc Enterprise Cognitive Layer (EIC v${mockEicJson.metadata.version})*
-*Mã định danh Giao kèo: **${mockEicJson.metadata.contractId}** | Trạng thái: **${mockEicJson.metadata.status}***
+*Được chuẩn hóa theo cấu trúc Enterprise Cognitive Layer (EIC v${eicVersion})*
+*Mã định danh Giao kèo: **${proposedEic.metadata.contractId}** | Trạng thái: **${proposedEic.metadata.status}***
+*Được kiểm duyệt bởi: **Enterprise Policy Engine** ➔ Trạng thái: **${policyCheck.passed ? 'ĐẠT (PASSED)' : 'BỊ CHẶN (BLOCKED)'}***
 
 ## 1. 🏢 TẦNG EXECUTIVE LAYER (LỚP ĐIỀU HÀNH THAM MƯU)
 
 ### 🎯 Strategic Intent (Mục tiêu & Định hướng Chiến lược)
-- **Mục tiêu kinh doanh của CEO**: "${mockEicJson.strategicIntent.businessObjective}"
-- **Định vị & Hướng thương hiệu**: ${mockEicJson.strategicIntent.strategicAlignment === 'Become Premium Brand' ? 'Xây dựng Định vị Thương hiệu Cao cấp (Premium Brand Alignment)' : 'Tập trung Thu hút Khách hàng Mới (Customer Acquisition Campaign)'}
-- **Phân khúc mục tiêu (Segment)**: ${mockEicJson.strategicIntent.targetAudience}
+- **Mục tiêu kinh doanh của CEO**: "${proposedEic.strategicIntent.businessObjective}"
+- **Định vị & Hướng thương hiệu**: ${proposedEic.strategicIntent.strategicAlignment === 'Become Premium Brand' ? 'Xây dựng Định vị Thương hiệu Cao cấp (Premium Brand Alignment)' : 'Tập trung Thu hút Khách hàng Mới (Customer Acquisition Campaign)'}
+- **Phân khúc mục tiêu (Segment)**: ${proposedEic.strategicIntent.targetAudience}
 
 ### 📊 Strategic Confidence (Độ tự tin & Bằng chứng dữ liệu)
-- **Độ tự tin chiến lược tổng thể**: **${mockEicJson.confidence.overallPercentage}%**
+- **Độ tự tin chiến lược tổng thể**: **${proposedEic.confidence.overallPercentage}%**
 - **Độ tin cậy nguồn dữ liệu**:
-  - Dữ liệu CRM (Khách hàng): **${mockEicJson.confidence.dimensionConfidence.crmDataCoverage}%**
-  - Dữ liệu ERP (Hóa đơn/Lịch hẹn): **${mockEicJson.confidence.dimensionConfidence.erpDataCoverage}%**
-  - Dữ liệu tài chính (Finance): **${mockEicJson.confidence.dimensionConfidence.financeDataCoverage}%**
-- **Đánh giá nguồn dữ liệu**: ${mockEicJson.confidence.reasoning}
+  - Dữ liệu CRM (Khách hàng): **${proposedEic.confidence.dimensionConfidence.crmDataCoverage}%**
+  - Dữ liệu ERP (Hóa đơn/Lịch hẹn): **${proposedEic.confidence.dimensionConfidence.erpDataCoverage}%**
+  - Dữ liệu tài chính (Finance): **${proposedEic.confidence.dimensionConfidence.financeDataCoverage}%**
+- **Đánh giá nguồn dữ liệu**: ${proposedEic.confidence.reasoning}
+
+${policyCheck.violations.length > 0 ? `### 🛡️ POLICY ENGINE VIOLATIONS (VI PHẠM CHÍNH SÁCH DOANH NGHIỆP)
+> [!CAUTION]
+> **Hệ thống Phát hiện ${policyCheck.violations.length} Vi phạm Chính sách cứng**:
+${policyCheck.violations.map(v => `> - **[${v.category}] ${v.policyName} (${v.severity})**: ${v.reason}`).join('\n')}` : ''}
 
 ${!hasStats ? `### ❓ Questions Before Decision (Câu hỏi làm rõ trước khi quyết định)
 > [!WARNING]
@@ -843,22 +830,19 @@ ${triggerPushback ? `### 🚨 CRITICAL PUSHBACK (BÁC BỎ & PHẢN BIỆN CEO)
 > - **Đề xuất thay đổi**: Điều chỉnh mục tiêu xuống **Tăng 30% trong 60 ngày** để có thời gian tuyển dụng KTV và tối ưu hóa phễu chốt lịch.` : `### 💡 Executive pushback & Critique (Ý kiến phản biện của CMO)
 - **Đánh giá giải pháp**: CMO AI đồng ý với định hướng chung, tuy nhiên phát hiện điểm nghẽn chính nằm ở **Tỷ lệ chốt lịch hẹn (Sales Funnel) kém**, không phải hoàn toàn do Marketing thiếu leads. Do đó, khuyến nghị tối ưu hóa kịch bản chốt đơn trước khi tăng mạnh ngân sách quảng cáo.`}
 
-### 🧠 Reasoning DAG Graph (Chuỗi Suy Luận Logic - Explainable AI)
-- **Node #1 (GOAL)**: Nhận chỉ thị CEO ➔ Trạng thái: Đạt 100% tự tin.
-- **Node #2 (DIAGNOSIS)**: Đối chiếu CRM & ERP ➔ Trạng thái: Kết quả [${mockEicJson.businessDiagnosis.currentBottleneck}].
-- **Node #3 (LEAKAGE)**: Phân tích điểm rò rỉ ➔ Trạng thái: Phát hiện hụt chốt lịch hẹn tại quầy, mã bằng chứng [CRM-LEAK-TEST].
-- **Node #4 (DECISION)**: Quyết định chiến lược ➔ Trạng thái: Đề xuất chiến lược [${mockEicJson.decision.approvedStrategy}].
+### 🧠 Shared Reasoning DAG Graph (Chuỗi Suy Luận Logic - Explainable AI)
+${sharedReasoning.nodes.map(node => `- **Node [${node.id}]** (Tự tin: ${node.confidence}%): ${node.description} ➔ Outcome: *${node.outcome}* ${node.dependsOn.length > 0 ? `(Phụ thuộc: ${node.dependsOn.join(', ')})` : ''}`).join('\n')}
 
 ### ⚖️ Strategic Decisions & Options (Lựa chọn & So sánh Chiến lược)
-- **Chiến lược đề xuất (Approved Strategy)**: **${mockEicJson.decision.approvedStrategy}**
+- **Chiến lược đề xuất (Approved Strategy)**: **${proposedEic.decision.approvedStrategy}**
 - **Chiến lược bị loại bỏ (Rejected Strategy)**:
-  - *Chiến lược*: "${mockEicJson.decision.rejectedStrategies[0].strategy}"
-  - *Lý do loại bỏ*: ${mockEicJson.decision.rejectedStrategies[0].reason}
-  - *Mức độ rủi ro nếu chạy*: **${mockEicJson.decision.rejectedStrategies[0].risk}**
+  - *Chiến lược*: "${proposedEic.decision.rejectedStrategies[0].strategy}"
+  - *Lý do loại bỏ*: ${proposedEic.decision.rejectedStrategies[0].reason}
+  - *Mức độ rủi ro nếu chạy*: **${proposedEic.decision.rejectedStrategies[0].risk}**
 - **Các giả định chiến lược (Assumptions)**:
-  1. ${mockEicJson.decision.assumptions[0]}
-  2. ${mockEicJson.decision.assumptions[1]}
-  3. ${mockEicJson.decision.assumptions[2]}
+  1. ${proposedEic.decision.assumptions[0]}
+  2. ${proposedEic.decision.assumptions[1]}
+  3. ${proposedEic.decision.assumptions[2]}
 
 ---
 
@@ -867,7 +851,7 @@ ${triggerPushback ? `### 🚨 CRITICAL PUSHBACK (BÁC BỎ & PHẢN BIỆN CEO)
 ### 👥 Cross-Department Plan (Ủy quyền & Phối hợp đa phòng ban)
 - **Ban Sáng tạo (Creative Director AI)**: Thiết kế banner Rose & Gold chuẩn 4K, truyền tải USP.
 - **Phòng Sales (Sales Director AI)**: Tái đào tạo kỹ thuật chốt booking qua chatbot & trực quầy.
-- **Ban Tài chính (Finance Director AI)**: Cấp ngân sách tối đa **${(mockEicJson.planning.spendLimitVnd).toLocaleString('vi-VN')} VND** cho chiến dịch này.
+- **Ban Tài chính (Finance Director AI)**: Cấp ngân sách tối đa **${(proposedEic.planning.spendLimitVnd).toLocaleString('vi-VN')} VND** cho chiến dịch này.
 
 ### ⏳ Timeline & Dependencies (Quan hệ phụ thuộc)
 - **Mốc phụ thuộc**: Bộ phận Sales phải chốt kịch bản tối ưu CRM ➔ Ban Sáng tạo mới tung Banner ➔ Media mới chạy Ads.
@@ -886,10 +870,10 @@ ${triggerPushback ? `### 🚨 CRITICAL PUSHBACK (BÁC BỎ & PHẢN BIỆN CEO)
 ## 3. ⚙️ TẦNG EXECUTION LAYER (LỚP THỰC THI CHI TIẾT)
 
 ### 📊 Business Impact Forecast (Dự báo tác động toàn doanh nghiệp)
-- **Doanh thu dự kiến**: **${mockEicJson.execution.businessImpactForecast.revenueGrowth}**
-- **Dòng tiền cải thiện**: **${mockEicJson.execution.businessImpactForecast.cashflowImprovement}**
-- **Tải lượng nhân sự (HR Load)**: **${mockEicJson.execution.businessImpactForecast.hrLoadIncrease}**
-- **Rủi ro chung**: **${mockEicJson.execution.businessImpactForecast.overallRisk}**
+- **Doanh thu dự kiến**: **${proposedEic.execution.businessImpactForecast.revenueGrowth}**
+- **Dòng tiền cải thiện**: **${proposedEic.execution.businessImpactForecast.cashflowImprovement}**
+- **Tải lượng nhân sự (HR Load)**: **${proposedEic.execution.businessImpactForecast.hrLoadIncrease}**
+- **Rủi ro chung**: **${proposedEic.execution.businessImpactForecast.overallRisk}**
 
 ### 📋 Task Pipeline & Giao việc (TEC Contracts)
 - **Task #1 [TEC-CMO-001]**: CMO AI phân tích chỉ thị & ký duyệt EDC ➔ Trạng thái: **COMPLETED**.
@@ -900,11 +884,10 @@ ${triggerPushback ? `### 🚨 CRITICAL PUSHBACK (BÁC BỎ & PHẢN BIỆN CEO)
 
 ## 💾 ENTERPRISE EXECUTIVE INTELLECTUAL CONTRACT JSON (EIC-SOURCE-OF-TRUTH)
 \`\`\`json
-${JSON.stringify(mockEicJson, null, 2)}
+${JSON.stringify(proposedEic, null, 2)}
 \`\`\`
 `;
 
-  // 4. Setup LLM Call to generate real EIC JSON and Markdown Report if keys are available
   const systemPrompt = `Bạn là CMO AI (Chief Marketing Officer / Executive Marketing Strategist) của thương hiệu ${brandName}.
 Nhiệm vụ của bạn là đọc Enterprise Context Contract (ECC) đầu vào và trả về một Enterprise Executive Intelligence Contract (EIC) hoàn chỉnh.
 
@@ -984,8 +967,8 @@ Hãy phân tích và xuất bản báo cáo kèm Executive Intelligence Contract
     }
   }
 
-  // Parse structured JSON EIC contract out of output content if possible
-  let finalEicContract = mockEicJson;
+  // Parse structured EIC JSON codeblock from LLM if available
+  let finalEicContract = proposedEic;
   if (content) {
     try {
       const jsonRegex = /```json\s*([\s\S]*?)\s*```/g;
@@ -993,7 +976,20 @@ Hãy phân tích và xuất bản báo cáo kèm Executive Intelligence Contract
       if (match && match[1]) {
         const parsed = JSON.parse(match[1]);
         if (parsed && parsed.metadata && parsed.strategicIntent) {
-          finalEicContract = parsed;
+          finalEicContract = {
+            ...parsed,
+            metadata: {
+              ...parsed.metadata,
+              version: eicVersion
+            }
+          };
+          // Verify via Policy Engine once more with LLM-generated contract
+          const policyCheckLlm = PolicyEngine.getInstance().evaluateProposal(finalEicContract);
+          if (!policyCheckLlm.passed) {
+            finalEicContract.metadata.status = 'BOARD_REVIEW';
+          }
+          // Update the versioned contract inside Registry
+          ContractRegistry.getInstance().registerEic(finalEicContract);
         }
       }
     } catch (e) {
