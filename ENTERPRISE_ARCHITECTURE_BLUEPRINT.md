@@ -1267,6 +1267,54 @@ When an AI employee answers a question using EKR knowledge, it references the ex
 
 ---
 
+## 24. 🏛️ ENTERPRISE SCALE ARCHITECTURE & ROADMAP (v21.0 — Phase 3/4)
+
+To achieve full operational resilience and scalability for global multi-tenant business clusters, Bella EOS incorporates five architectural blueprints under the "Enterprise Grade" design seal:
+
+### 24.1 Workflow Persistence (State Checkpoints)
+To handle infrastructure failures or server restarts mid-execution, the Orchestrator implements step-by-step checkpointing using the `IStateStore` API:
+```
+  [Task 1 Started] ➔ [Persist Checkpoint: IN_PROGRESS]
+  [Task 1 Finished] ➔ [Persist Checkpoint: COMPLETED + Outputs]
+                         │
+                  [System Crash / Reboot]
+                         │
+  [Resume Checkpoint] ➔ Reads DB ➔ Launches Task 2 (Skips Task 1 execution)
+```
+- **DB Schemas**: High-fidelity JSON state storage mapping task IDs, inputs, intermediate outputs, and in-flight variable states to PostgreSQL.
+
+### 24.2 Versioned Workflow Templates (Process Parity)
+Enforces immutability on running business processes. Workflow configurations and task definitions are pinned to their instantiation version:
+- Active instances initialized on `WorkflowTemplate v1` are locked to execution boundaries of `v1` until completion.
+- Structural edits, new steps, or updated policies published on `WorkflowTemplate v2` only apply to instances spawned post-release.
+- **Benefit**: Prevents mid-flight schema breakages, state mismatch issues, and infinite loops in live execution waves.
+
+### 24.3 Distributed Execution Architecture (Broker Routing)
+Moves away from in-process task execution. Scalability is achieved by routing execution payloads through message brokers to decoupled agent runner pools:
+- **Broker**: RabbitMQ or Apache Kafka distributes tasks matching routing keys (e.g., `tenant_id.capability.task_priority`).
+- **Runner Nodes**: Distributed node pools subscribe to specific queue paths, dynamically spinning up isolated runtime contexts for the targeted capabilities.
+- **Isolations**: Prevents resource starvation and enforces tenancy security boundaries.
+
+### 24.4 Cost Intelligence (Financial ROI Attribution)
+A financial tracking abstraction overlay computes precise return-on-investment parameters:
+- **Attribution Model**: Aggregates token usage fees (VND), prompt length costs, LLM provider rates, and computes metric outcomes (e.g., Lead cost reduction).
+- **Attribution Dimensions**: Allocates real costs per *Workflow instance*, *AI Worker persona*, *Department hierarchy*, and *Strategic Goal* node.
+- **ROI Engine**: Formulates business intelligence comparisons on Human hourly wage vs AI computational pricing.
+
+### 24.5 Business Audit Timeline (Explainability Trace)
+Exposes a chronological, business-readable state transition log of strategic initiatives for executive auditing:
+```
+[09:00:00] [CEO Initiative] "Launch Da Nang Marketing Program" initialized.
+[09:00:05] [ECR Plan] Resolved goal into 3 deliverables & 5 tasks (DAG constructed).
+[09:00:10] [Decision Policy] Auto-delegation threshold APPROVED (Budget < Limit).
+[09:01:30] [Stateless Worker] Worker "Ares" posted marketing copy to Zalo.
+[09:01:45] [Artifact Registry] Registered document proof (Zalo URL, 107kb).
+[09:03:00] [Human Runtime] Manager "Tran B" validated output (Approved).
+[09:04:00] [Outcome Verifier] KPI Leads verified at 210/200 ➔ Goal marked COMPLETE.
+```
+
+---
+
 *Archived & Sealed: Q3 2026*
 *Bella EOS Core Architecture Committee*
 
