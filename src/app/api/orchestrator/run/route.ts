@@ -296,8 +296,7 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
 }
 
 async function tool_generate_media_creative(input: any, clientKeys?: any, taskOutputs?: Record<string, string>, context?: any): Promise<ToolResult> {
-  const objective = input.objective || context?.objective || input.format || 'Spa Management System Banner';
-  
+  // Extract copywriter content first to help infer objective
   let copywriterContent = '';
   if (taskOutputs) {
     for (const key of Object.keys(taskOutputs)) {
@@ -313,6 +312,44 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       }
     }
   }
+
+  // Infer objective from context, input, or copywriter content
+  let objective = input.objective || context?.objective || input.format;
+  
+  // If still no objective, try to infer from copywriter content
+  if (!objective && copywriterContent) {
+    const contentLower = copywriterContent.toLowerCase();
+    
+    // Extract from executive report headers
+    if (contentLower.includes('executive') || contentLower.includes('strategic report')) {
+      objective = 'Executive Strategic Report - Brand Positioning';
+    }
+    // Extract from content type indicators
+    else if (contentLower.includes('báo cáo lãnh đạo')) {
+      objective = 'Báo cáo chiến lược thương hiệu cho Ban Giám đốc';
+    }
+    else if (contentLower.includes('spa') || contentLower.includes('thẩm mỹ')) {
+      objective = 'Spa Management Marketing Campaign';
+    }
+    else if (contentLower.includes('bất động sản') || contentLower.includes('căn hộ')) {
+      objective = 'Real Estate Marketing Campaign';
+    }
+    else if (contentLower.includes('thời trang') || contentLower.includes('fashion')) {
+      objective = 'Fashion Retail Marketing Campaign';
+    }
+    else {
+      // Generic fallback based on content snippet
+      const firstLine = copywriterContent.split('\n').find(l => l.trim().length > 10) || '';
+      objective = firstLine.substring(0, 80) || 'Brand Marketing Campaign';
+    }
+  }
+  
+  // Final fallback only if absolutely nothing available
+  if (!objective) {
+    objective = 'Brand Marketing Campaign';
+  }
+  
+  console.log(`[tool_generate_media_creative] Inferred objective: ${objective.substring(0, 100)}...`);
 
   const creativeConfig = clientKeys?.agent_configs?.['creative_designer'] || clientKeys?.agent_configs?.['eos_creative_worker'] || {};
   const preferredModel = creativeConfig.model;
