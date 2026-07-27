@@ -660,8 +660,24 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const tone = input.tone || context?.brandDna?.voiceTone || 'Professional & Premium';
   const segment = input.target_audience || context?.brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
   const brandName = context?.brandDna?.brandName || 'BELLA EOS';
-  const activeCustomers = context?.activeCustomerCount || 1289;
-  const fbReach = context?.fbReachCount || 14500;
+  
+  // Checking if actual operational metrics were supplied
+  const activeCustomers = context?.activeCustomerCount;
+  const fbReach = context?.fbReachCount;
+  const hasStats = typeof activeCustomers === 'number' && activeCustomers > 0 && typeof fbReach === 'number' && fbReach > 0;
+
+  const statsText = hasStats
+    ? `${brandName} đang phục vụ ${activeCustomers.toLocaleString()}+ cơ sở Spa/TMV trên toàn quốc; lượt tiếp cận 24h đạt ${fbReach.toLocaleString()}+. Hệ thống vận hành tự động định hình vị thế dẫn đầu.`
+    : `[Số liệu hiện tại về số lượng cơ sở Spa/TMV và lượt tiếp cận Fanpage chưa được cung cấp. Vui lòng nhập thông tin số liệu trong Company DNA Register ở cột phải để nhận báo cáo chuẩn xác nhất].`;
+
+  const angle2Text = hasStats
+    ? `Hơn ${activeCustomers.toLocaleString()}+ Chủ Spa tin dùng ${brandName} nâng cao 300% hiệu suất`
+    : `Hệ điều hành Doanh nghiệp AI thông minh ${brandName} giúp giải phóng 80% thời gian quản lý và nâng cao 300% hiệu suất vận hành`;
+
+  const caseStudyText = hasStats
+    ? `Xuất bản bài viết Case Study thực tế từ các cơ sở trong số ${activeCustomers.toLocaleString()}+ Spa đã tự động hóa thành công với Bella EOS.`
+    : `Xuất bản bài viết hướng dẫn nghiệp vụ thực tế về cách tự động hóa quy trình vận hành và kiểm soát tài chính tránh thất thoát.`;
+
   const pastPlansMd = context?.past_plans_md || input?.past_plans_md || '';
 
   const mmConfig = clientKeys?.agent_configs?.['marketing_manager'] || clientKeys?.agent_configs?.['eos_marketing_manager'] || {};
@@ -686,7 +702,7 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const defaultTemplate = `# 🎯 [AI MARKETING MANAGER] BẢN PHÂN TÍCH CHIẾN LƯỢC & KẾ HOẠCH TRIỂN KHAI CHI TIẾT
 
 ## 1. 🏢 PHÂN TÍCH HIỆN TRẠNG DOANH NGHIỆP & ĐỊNH VỊ SẢN PHẨM:
-- **Hiện trạng Doanh nghiệp**: ${brandName} đang phục vụ ${activeCustomers.toLocaleString()}+ cơ sở Spa/TMV trên toàn quốc; lượt tiếp cận 24h đạt ${fbReach.toLocaleString()}+. Hệ thống vận hành tự động định hình vị thế dẫn đầu.
+- **Hiện trạng Doanh nghiệp**: ${statsText}
 - **Sản phẩm cốt lõi**: Hệ điều hành Doanh nghiệp AI thông minh Bella EOS & Bella EIP — Quản lý vận hành toàn diện, kiểm soát tài chính EOM, xếp lịch và tiếp thị tự động.
 - **3 Lợi điểm bán hàng độc nhất (USP)**:
   1. *AI Agent Workforce tự động 100%*: 12+ AI Agent thực thi tự động từ lập kế hoạch, viết bài, thiết kế banner 4K đến chạy Ads.
@@ -703,7 +719,7 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
 - **Pain Points (Nỗi đau)**: Thất thoát doanh thu do quản lý thủ công, tốn chi phí nhân sự tiếp thị, quảng cáo không ra Lead.
 - **Ma trận Góc truyền thông (Angles)**:
   - *Angle 1 (Giải pháp đột phá)*: "Tự động hóa 100% vận hành Spa — Giải phóng 80% thời gian quản lý cùng ${brandName}".
-  - *Angle 2 (Social Proof & Uy tín)*: "Hơn ${activeCustomers.toLocaleString()}+ Chủ Spa tin dùng ${brandName} nâng cao 300% hiệu suất".
+  - *Angle 2 (Social Proof & Uy tín)*: "${angle2Text}".
   - *Angle 3 (Urgency Offer)*: "Tặng bản dùng thử Demo miễn phí cho 50 cơ sở đăng ký sớm nhất trong ${targetMonthStr}".
 
 ## 4. 📅 KẾ HOẠCH TRIỂN KHAI CHI TIẾT THEO TUẦN & NGÀY (ROADMAP CHI TIẾT ${targetMonthStr.toUpperCase()}):
@@ -719,7 +735,7 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
 
 ### 📍 TUẦN 2 (W2): CHỨNG MINH NĂNG LỰC GIẢI PHÁP & USP (SOCIAL PROOF & PRODUCT DEMO)
 - **Ngày 8 - 11**:
-  - Xuất bản bài viết Case Study thực tế từ 1,200+ Spa đã tự động hóa thành công với Bella EOS.
+  - ${caseStudyText}
   - Render Mockup Giao diện trực quan màn hình quản lý lịch hẹn & tài chính EOM.
 - **Ngày 12 - 14**:
   - Đẩy mạnh truyền thông về 12+ AI Agent Workforce tự động vận hành thay người.

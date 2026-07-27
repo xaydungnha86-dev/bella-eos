@@ -189,8 +189,8 @@ export default function Dashboard() {
   const [fbToken, setFbToken] = useState('');
   const [fbPageId, setFbPageId] = useState('me');
   const [lastApiStatus, setLastApiStatus] = useState<string | null>(null);
-  const [activeCustomerCount, setActiveCustomerCount] = useState<number>(1289);
-  const [fbReachCount, setFbReachCount] = useState<number>(14500);
+  const [activeCustomerCount, setActiveCustomerCount] = useState<number>(0);
+  const [fbReachCount, setFbReachCount] = useState<number>(0);
 
   // Dynamic API Key readiness states
   const [hasOpenAI, setHasOpenAI] = useState(false);
@@ -1262,6 +1262,34 @@ export default function Dashboard() {
                       value={dnaState.style}
                       onChange={(e) => handleDnaChange('style', e.target.value)}
                       className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-slate-550 font-medium text-slate-500">Active Customers (Spa/TMV):</span>
+                    <input
+                      type="number"
+                      value={activeCustomerCount || ''}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setActiveCustomerCount(val);
+                        CampaignExecutionManager.updateState({ activeCustomerCount: val });
+                      }}
+                      placeholder="Ví dụ: 120 (Mặc định: 0)"
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-slate-550 font-medium text-slate-500">24h Facebook Reach:</span>
+                    <input
+                      type="number"
+                      value={fbReachCount || ''}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setFbReachCount(val);
+                        CampaignExecutionManager.updateState({ fbReachCount: val });
+                      }}
+                      placeholder="Ví dụ: 5000 (Mặc định: 0)"
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
                     />
                   </div>
                 </div>
