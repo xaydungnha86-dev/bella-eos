@@ -389,9 +389,14 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   let model = 'poster-design-skill-v2';
   let actualPrompt = '';
   let modelWarning: string | undefined;
+  let creativeBrief: any = null;
 
   try {
-    const res = await fetch(`${getBaseUrl()}/api/ai/generate-image`, {
+    // Always use v3 (Creative Intelligence Engine with LLM reasoning)
+    const endpoint = '/api/ai/generate-image-v3';
+    console.log(`[tool_generate_media_creative] Using Creative Intelligence v3`);
+    
+    const res = await fetch(`${getBaseUrl()}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -401,12 +406,19 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
         client_gemini_key: geminiKey,
         client_fal_key: falKey,
         model: preferredModel,
-        brandDna
+        brandDna,
+        tenantId: 'demo',
+        format: '16:9'
       })
     });
+    
+    if (!res.ok) {
+      throw new Error(`v3 API returned ${res.status}`);
+    }
+    
     const data = await res.json();
     
-    console.log('[tool_generate_media_creative] v3 response:', JSON.stringify(data).substring(0, 300));
+    console.log(`[tool_generate_media_creative] v3 response:`, JSON.stringify(data).substring(0, 400));
     
     if (data.success && data.imageUrl) {
       imageUrl = data.imageUrl;
@@ -414,14 +426,16 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       model = data.model;
       actualPrompt = data.prompt || '';
       if (data.warning) modelWarning = data.warning;
+      if (data.creativeBrief) creativeBrief = data.creativeBrief;
       
-      console.log(`[tool_generate_media_creative] Using imageUrl from v3: ${imageUrl.substring(0, 150)}`);
+      console.log(`[tool_generate_media_creative] ✓ v3 generated image: ${imageUrl.substring(0, 150)}`);
     } else {
+      console.warn('[tool_generate_media_creative] v3 returned no imageUrl, using fallback');
       const ts = Date.now();
       imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
     }
   } catch (e) {
-    console.warn('[tool_generate_media_creative] Image API call fallback:', e);
+    console.error('[tool_generate_media_creative] v3 API call failed:', e);
     const ts = Date.now();
     imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
   }
