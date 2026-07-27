@@ -1,101 +1,5 @@
 import { NextResponse } from 'next/server';
 
-function getVietnameseDayOfWeek(date: Date): string {
-  const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-  return days[date.getDay()];
-}
-
-function parseMonthAndYear(objective: string) {
-  const now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth() + 1;
-
-  const monthRegex = /(?:tháng|thang|thg|t|month)\s*(\d{1,2})/i;
-  const match = objective.match(monthRegex);
-  if (match) {
-    const parsedMonth = parseInt(match[1], 10);
-    if (parsedMonth >= 1 && parsedMonth <= 12) {
-      month = parsedMonth;
-    }
-  } else {
-    const englishMonths = [
-      'january', 'february', 'march', 'april', 'may', 'june',
-      'july', 'august', 'september', 'october', 'november', 'december'
-    ];
-    const lowerObj = objective.toLowerCase();
-    for (let i = 0; i < englishMonths.length; i++) {
-      if (lowerObj.includes(englishMonths[i])) {
-        month = i + 1;
-        break;
-      }
-    }
-  }
-
-  const yearRegex = /\b(202\d|203\d)\b/;
-  const yearMatch = objective.match(yearRegex);
-  if (yearMatch) {
-    year = parseInt(yearMatch[1], 10);
-  }
-
-  return { month, year };
-}
-
-function generateWeeklyDates(objective: string) {
-  const { month, year } = parseMonthAndYear(objective);
-  const now = new Date();
-  
-  const targetDays = [4, 13, 22, 26];
-  const targetHours = [9, 14, 19, 10];
-  const targetMinutes = [0, 30, 30, 0];
-  const times = ['09:00 AM', '14:30 PM', '19:30 PM', '10:00 AM'];
-  
-  const dateObjects: Date[] = [];
-  
-  for (let i = 0; i < 4; i++) {
-    const hour = targetHours[i];
-    const minute = targetMinutes[i];
-    
-    let scheduledDate: Date;
-    
-    // If targeting the current month and year, start scheduling from today/tomorrow
-    if (year === now.getFullYear() && month === (now.getMonth() + 1)) {
-      const baseDay = now.getDate() + (i * 7);
-      scheduledDate = new Date(year, month - 1, baseDay, hour, minute);
-      if (scheduledDate < now) {
-        scheduledDate = new Date(year, month - 1, baseDay + 1, hour, minute);
-      }
-    } else {
-      const day = targetDays[i];
-      scheduledDate = new Date(year, month - 1, day, hour, minute);
-      // Ensure it doesn't fall in the past relative to now (e.g. if the month itself is in the past)
-      if (scheduledDate < now) {
-        const baseDay = now.getDate() + (i * 7);
-        scheduledDate = new Date(now.getFullYear(), now.getMonth(), baseDay, hour, minute);
-        if (scheduledDate < now) {
-          scheduledDate = new Date(now.getFullYear(), now.getMonth(), baseDay + 1, hour, minute);
-        }
-      }
-    }
-    dateObjects.push(scheduledDate);
-  }
-  
-  return dateObjects.map((date, index) => {
-    const day = date.getDate();
-    const m = date.getMonth() + 1;
-    const y = date.getFullYear();
-    const dayOfWeek = getVietnameseDayOfWeek(date);
-    const dateStr = `${String(day).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
-    const timeStr = times[index];
-    return {
-      dateStr,
-      dayOfWeek,
-      timeStr,
-      fullDisplay: `${timeStr} — ${dayOfWeek}, Ngày ${dateStr}`,
-      month: m
-    };
-  });
-}
-
 /**
  * POST /api/ai/write-post
  *
@@ -146,62 +50,53 @@ export async function POST(request: Request) {
     const effectiveTone = voiceTone || brandDna?.voiceTone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
     const effectiveSegment = segment || brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
 
-    const weeklyDates = generateWeeklyDates(objective);
-    const { month } = parseMonthAndYear(objective);
+    const defaultSystemPrompt = `Bạn là AI Copywriter Marketing chuyên nghiệp của Bella EOS.
 
-    const defaultSystemPrompt = `Bạn là AI Copywriter cấp cao của hệ sinh thái Bella Enterprise (Bella EOS & Bella EIP).
-Nhiệm vụ: Dựa trên Bản kế hoạch Marketing chiến lược (Lộ trình Tuần W1-W4 và Lịch Ngày), soạn thảo BỘ NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN VÀ THEO NGÀY (CONTENT CALENDAR) với khung giờ đăng bài cụ thể để gửi qua Hermes Publisher lập lịch tự động.
+NHIỆM VỤ: Viết BÀI ĐĂNG FACEBOOK DUY NHẤT (single post) để thu hút khách hàng mục tiêu mua sản phẩm/dịch vụ.
 
-BẮT BUỘC TRẢ VỀ BỘ LỊCH NỘI DUNG 4 TUẦN CHI TIẾT THEO CẤU TRÚC SAU:
+ĐỐI TƯỢNG KHÁCH HÀNG: ${effectiveSegment}
+TONE GIỌNG: ${effectiveTone}
 
-📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG ${month})
+CẤU TRÚC BÀI VIẾT (150-250 từ):
 
----
-### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[0].fullDisplay}
-- 🎯 **Chủ đề truyền thông**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
-[Soạn nội dung bài viết chi tiết 150-250 từ nhắm vào đối tượng ${effectiveSegment}, nêu bật nỗi đau & giải pháp Bella EOS]
-👉 Đăng ký dùng thử bản Demo Bella EOS ngay hôm nay!
-#BellaEOS #QuanLySpa #TietKiemChiPhi #DemoMienPhi
+1. **HOOK (Câu mở đầu bắt mắt)**
+   - Sử dụng emoji phù hợp
+   - Đặt câu hỏi hoặc thống kê gây shock
+   - Nêu bật nỗi đau/mong muốn của khách hàng
 
----
-### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[1].fullDisplay}
-- 🎯 **Chủ đề truyền thông**: Chứng minh năng lực thực tế — Hơn 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
-[Soạn nội dung bài viết chi tiết 150-250 từ]
-👉 Trải nghiệm hệ thống AI Agent tự động vận hành Bella EOS!
-#BellaEOS #CaseStudy #HieuSuatSpa #KiemSoatEOM
+2. **BODY (Nội dung chính)**
+   - Mô tả vấn đề khách hàng đang gặp phải
+   - Giới thiệu giải pháp (sản phẩm/dịch vụ)
+   - Nhấn mạnh lợi ích cụ thể (dùng số liệu nếu có)
+   - Tạo sự tin tưởng (social proof, case study)
 
----
-### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[2].fullDisplay}
-- 🎯 **Chủ đề truyền thông**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🎁 ĐẶC QUYỀN THÁNG ${month}: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
-[Soạn nội dung bài viết chi tiết 150-250 từ]
-👉 Bấm vào link để giữ suất trải nghiệm miễn phí!
-#BellaEOS #UudaiThang${month} #DemoFree #SpaTech
+3. **CTA (Kêu gọi hành động)**
+   - Rõ ràng, cụ thể
+   - Tạo tính cấp thiết (FOMO)
+   - Có emoji 👉 hoặc tương tự
 
----
-### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[3].fullDisplay}
-- 🎯 **Chủ đề truyền thông**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
-- 📝 **Nội dung xuất bản (Post Body)**:
-⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?
-[Soạn nội dung bài viết chi tiết 150-250 từ]
-👉 Khám phá ngay giải pháp Bella EOS Platform!
-#BellaEOS #AIAgents #TuDongHoaSpa #MarketingTuDong`;
+4. **HASHTAGS**
+   - 3-5 hashtags phù hợp với ngành hàng
+   - Không dùng quá nhiều hashtags
+
+QUAN TRỌNG:
+- Viết TỰ NHIÊN, không máy móc
+- Tập trung vào KHÁCH HÀNG, không tự sướng về sản phẩm
+- Sử dụng emoji hợp lý (không lạm dụng)
+- Nội dung NGẮN GỌN, Dễ ĐỌC (chia đoạn)
+- Mục tiêu: CHUYỂN ĐỔI KHÁCH HÀNG (không phải giáo dục hay báo cáo)
+
+CHỈ TRẢ VỀ NỘI DUNG BÀI ĐĂNG, KHÔNG CẦN TIÊU ĐỀ HAY METADATA.`;
 
     const effectiveSystemPrompt = systemPrompt ? systemPrompt : defaultSystemPrompt;
     const effectiveTemperature = temperature !== undefined && temperature !== null ? parseFloat(temperature as any) : 0.75;
 
-    const userMessage = `Mục tiêu chỉ thị của CEO: "${objective}"
+    const userMessage = `Mục tiêu chiến dịch: "${objective}"
 
-Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàng mục tiêu để đạt mục tiêu trên.`;
+Tone giọng: ${effectiveTone}
+Đối tượng mục tiêu: ${effectiveSegment}
+
+Hãy viết BÀI ĐĂNG FACEBOOK thu hút khách hàng mục tiêu này.`;
 
     const tryOpenAI = async () => {
       const openaiKey = client_openai_key || process.env.OPENAI_API_KEY;
@@ -336,78 +231,35 @@ Hãy viết bài đăng Facebook truyền thông cho đối tượng khách hàn
 function generateFallbackPost(objective: string, tone?: string, segment?: string, goal?: string): string {
   const lower = objective.toLowerCase();
   const isSpa = lower.includes('spa') || lower.includes('thẩm mỹ') || lower.includes('beauty');
-  const weeklyDates = generateWeeklyDates(objective);
-  const { month } = parseMonthAndYear(objective);
+  const effectiveTone = tone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
+  const effectiveSegment = segment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
 
   if (isSpa) {
-    return `📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG ${month})
-
----
-### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[0].fullDisplay}
-- 🎯 **Chủ đề**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
+    return `🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
 
 Quản lý lịch hẹn trùng lặp, dòng tiền thất thoát cuối tháng và nhân sự tiếp thị biến động đang là "cơn ác mộng" âm thầm bào mòn lợi nhuận của các chủ cơ sở làm đẹp.
 
-✨ Giải pháp đột phá Bella EOS xuất hiện mang đến Hệ điều hành Doanh nghiệp AI thông minh — Tự động hóa 100% quy trình từ đặt lịch, kiểm toán tài chính EOM chống thất thoát đến điều hành tiếp thị đa kênh.
+✨ Giải pháp đột phá Bella EOS xuất hiện mang đến Hệ điều hành Doanh nghiệp AI thông minh:
+
+✅ Tự động hóa 100% quy trình từ đặt lịch → kiểm toán tài chính → điều phối tiếp thị đa kênh
+✅ Giải phóng 80% thời gian vận hành, tăng 300% hiệu suất quản lý
+✅ Hơn 1,200+ Spa trên toàn quốc đã tin dùng và đạt kết quả vượt trội
 
 👉 Đăng ký trải nghiệm bản Demo miễn phí ngay hôm nay để làm chủ công nghệ AI hàng đầu!
-#BellaEOS #QuanLySpa #TietKiemChiPhi #DemoMienPhi #TuDongHoaSpa
 
----
-### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[1].fullDisplay}
-- 🎯 **Chủ đề**: Chứng minh năng lực thực tế — 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
-
-Không chỉ là lời hứa, Bella EOS đã và đang phục vụ hơn 1,200+ cơ sở Spa/TMV tối ưu hóa vận hành thực tế. Tự động hóa xếp lịch khách hàng, kiểm soát doanh thu minh bạch và giữ chân khách hàng tự động qua Zalo/Facebook.
-
-✨ Bạn muốn chuyển đổi số cho cơ sở của mình mà không cần tốn chi phí phòng tiếp thị?
-
-👉 Trải nghiệm ngay lực lượng 12+ AI Agents tự động vận hành Bella EOS!
-#BellaEOS #CaseStudy #HieuSuatSpa #KiemSoatEOM #SpaManagement
-
----
-### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[2].fullDisplay}
-- 🎯 **Chủ đề**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🎁 ĐẶC QUYỀN THÁNG ${month}: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
-
-Nhằm hỗ trợ các chủ Spa gia tăng doanh thu bứt phá trong quý 3, Bella EOS dành tặng 50 suất trải nghiệm toàn bộ tính năng cao cấp của Hệ thống Quản lý AI hoàn toàn miễn phí.
-
-⏳ Số lượng ưu đãi có hạn và chỉ áp dụng đến hết ngày ${month === 2 ? '28' : [4,6,9,11].includes(month) ? '30' : '31'}/${String(month).padStart(2, '0')}/2026.
-
-👉 Bấm vào liên kết bên dưới để nhận suất ưu đãi đặc quyền ngay bây giờ!
-#BellaEOS #UudaiThang${month} #DemoFree #SpaTech #NhanDienThuongHieu
-
----
-### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[3].fullDisplay}
-- 🎯 **Chủ đề**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
-- 📝 **Nội dung xuất bản (Post Body)**:
-⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?
-
-Từ phân tích yêu cầu CEO, soạn bài viết tiếp thị, thiết kế Banner 4K đến xuất bản tự động trên Fanpage — Tất cả được thực thi khép kín bởi lực lượng AI Workforce thông minh Bella EOS.
-
-🚀 Hãy bắt đầu hành trình tự động hóa tiếp thị chuẩn doanh nghiệp ngay hôm nay!
-
-👉 Khám phá ngay giải pháp Bella EOS Platform!
-#BellaEOS #AIAgents #TuDongHoaSpa #MarketingTuDong #ChuyenDoiSoSpa`;
+#BellaEOS #QuanLySpa #TietKiemChiPhi #DemoMienPhi #TuDongHoaSpa`;
   }
 
   // Generic business offer fallback
-  return `🚀 BỨT PHÁ DOANH THU VỚI NỀN TẢNG ĐỒNG HÀNH VẬN HÀNH THÔNG MINH BELLA EOS
+  return `🚀 BẠN ĐANG TÌM GIẢI PHÁP ĐỂ TĂNG TRƯỞNG DOANH THU BỀN VỮNG?
 
-Bạn đang tìm kiếm giải pháp giúp tối ưu hóa quy trình vận hành và tăng trưởng doanh thu bền vững cho doanh nghiệp?
+Tối ưu hóa quy trình vận hành, tăng năng suất làm việc và kiểm soát chi phí hiệu quả là yếu tố then chốt giúp doanh nghiệp bứt phá trong môi trường cạnh tranh khốc liệt.
 
-Bella EOS mang đến hệ sinh thái công nghệ quản trị AI-Native toàn diện:
+✨ Bella EOS - Hệ sinh thái công nghệ quản trị AI-Native mang đến:
+
 ✅ Tự động hóa 80% công việc điều phối & lập kế hoạch
 ✅ Quản lý dữ liệu tập trung, theo dõi KPI & ROI thời gian thực
-✅ Tối ưu hóa chi phí vận hành & tăng tốc độ thực thi chiến dịch
+✅ Tối ưu chi phí vận hành & tăng tốc độ thực thi chiến dịch
 
 👉 Đăng ký tư vấn và trải nghiệm giải pháp ngay hôm nay!
 

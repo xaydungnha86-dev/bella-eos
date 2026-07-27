@@ -310,6 +310,13 @@ export interface CreativeRequest {
   medium?: 'image' | 'video' | 'slide' | 'landing_page';
   tenantId?: string;
   preferredModel?: string;
+  
+  // Client API keys (from localStorage)
+  clientKeys?: {
+    gemini?: string;
+    openai?: string;
+    anthropic?: string;
+  };
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

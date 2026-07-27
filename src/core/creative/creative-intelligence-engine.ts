@@ -63,7 +63,7 @@ export class CreativeIntelligenceEngine {
     const layer2Start = Date.now();
     
     const creativeDirector = new CreativeDirectorAgent();
-    const creativeBrief = await creativeDirector.reason(businessContext);
+    const creativeBrief = await creativeDirector.reason(businessContext, request.clientKeys);
     
     const layer2Time = Date.now() - layer2Start;
     console.log(`[CIE] ✓ Layer 2 completed in ${layer2Time}ms`);

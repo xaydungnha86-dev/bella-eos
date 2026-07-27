@@ -56,7 +56,12 @@ export async function POST(request: Request) {
       format: format as any,
       medium: 'image',
       tenantId,
-      preferredModel: model
+      preferredModel: model,
+      clientKeys: {
+        gemini: client_gemini_key,
+        openai: client_openai_key,
+        anthropic: undefined
+      }
     });
 
     const { creativeBrief, composedPrompt, modelPrompts } = creativeOutput;

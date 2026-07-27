@@ -16,7 +16,7 @@ export class CreativeDirectorAgent {
   /**
    * Reason about business context and generate Creative Brief using LLM
    */
-  async reason(context: BusinessContextPackage): Promise<CreativeBrief> {
+  async reason(context: BusinessContextPackage, clientKeys?: { gemini?: string; openai?: string; anthropic?: string }): Promise<CreativeBrief> {
     
     console.log('[CreativeDirectorAgent] Starting creative reasoning...');
     
@@ -24,7 +24,7 @@ export class CreativeDirectorAgent {
     const reasoningPrompt = this.composeReasoningPrompt(context);
     
     // Call LLM for creative reasoning
-    const reasoning = await this.callLLMReasoning(reasoningPrompt);
+    const reasoning = await this.callLLMReasoning(reasoningPrompt, clientKeys);
     
     // Parse structured output
     let brief: CreativeBrief;
@@ -165,7 +165,7 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
   /**
    * Call LLM for creative reasoning
    */
-  private async callLLMReasoning(prompt: string): Promise<{
+  private async callLLMReasoning(prompt: string, clientKeys?: { gemini?: string; openai?: string; anthropic?: string }): Promise<{
     structuredOutput: string;
     confidence: number;
     reasoningChain: string[];
@@ -173,7 +173,7 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
     
     try {
       // Use Gemini Pro for reasoning
-      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+      const apiKey = clientKeys?.gemini || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       
       if (!apiKey) {
         console.warn('[CreativeDirectorAgent] No Gemini API key found, using fallback');
