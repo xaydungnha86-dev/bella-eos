@@ -298,7 +298,6 @@ async function tool_write_ad_copy(input: any, clientKeys: any): Promise<ToolResu
 async function tool_generate_media_creative(input: any, clientKeys?: any, taskOutputs?: Record<string, string>, context?: any): Promise<ToolResult> {
   const objective = input.objective || context?.objective || input.format || 'Spa Management System Banner';
   
-  // Extract previous Copywriter Worker Output dynamically from Task Graph Execution
   let copywriterContent = '';
   if (taskOutputs) {
     for (const key of Object.keys(taskOutputs)) {
@@ -329,7 +328,6 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
     if (preferredModel?.startsWith('flux')) falKey = customApiKey;
   }
 
-  // Construct dynamic Brand DNA Context
   const brandName = context?.brandDna?.brandName || 'BELLA EOS';
   const voiceTone = context?.brandDna?.voiceTone || input.tone || 'Professional & Premium';
   const designStyle = context?.brandDna?.designStyle || input.style || 'Minimalist Glassmorphism';
@@ -382,7 +380,6 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
     imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
   }
 
-  // Generate detailed prompt to show to the user
   const { PosterDesignSkill } = await import('@/core/skills/poster-design-skill');
   
   if (!actualPrompt) {
@@ -429,19 +426,14 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
 }
 
 async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
-
-  // Extract HTTP or Data image URL from text output or reference
   const extractUrl = (str: string): string => {
     if (!str) return '';
     const match = str.match(/(https?:\/\/[^\s\n"']+|data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+)/);
     return match ? match[0] : '';
   };
 
-  // ── Extra Robust Content Extraction ──
-  // 1. Try common input key mappings
   let content = input.content_from || input.content || input.message || input.post_content || input.text || '';
   
-  // 2. If it's a short string or empty (meaning it could be an unresolved task ID or placeholder), check all values of the input object
   if ((!content || content.length < 20) && typeof input === 'object') {
     for (const val of Object.values(input)) {
       if (typeof val === 'string' && val.length > 20 && !val.startsWith('http') && !val.startsWith('data:image')) {
@@ -451,7 +443,6 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     }
   }
 
-  // 3. Fallback: search taskOutputs directly for any copywriting text output
   if ((!content || content.length < 20) && taskOutputs) {
     for (const [taskId, output] of Object.entries(taskOutputs)) {
       if (output && output.length > 30 && 
@@ -466,16 +457,13 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     }
   }
 
-  // 4. Ultimate fallback to objective
   if (!content) {
     content = input.objective || '';
   }
 
-  // ── Extra Robust Media/Image Extraction ──
   let mediaRaw = input.media_from || input.media || input.image_url || input.banner_url || input.media_url || '';
   let extractedUrl = extractUrl(mediaRaw);
 
-  // If the directly mapped value didn't yield a valid URL (e.g. it was an unresolved placeholder string), try searching all input values
   if (!extractedUrl && typeof input === 'object') {
     for (const val of Object.values(input)) {
       if (typeof val === 'string') {
@@ -488,7 +476,6 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     }
   }
 
-  // If still no URL, search taskOutputs directly for any output that contains a URL/base64 image
   if (!extractedUrl && taskOutputs) {
     for (const [taskId, output] of Object.entries(taskOutputs)) {
       if (output) {
@@ -508,10 +495,8 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     return { success: false, output: '', error: 'Không có nội dung để đăng. Task này phụ thuộc vào task viết nội dung trước.' };
   }
 
-  // Extract clean Post Body (strip Content Calendar report headers & metadata)
   content = extractSingleSocialPost(content);
 
-  // ── Route via Hermes Social MCP Server Engine ────────────────────────────────
   const mcpResponse = await HermesMcpServerEngine.handleJsonRpcRequest({
     jsonrpc: '2.0',
     id: `mcp_call_${Date.now()}`,
@@ -527,15 +512,12 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     }
   });
 
-  // If content contains scheduled posts or 4-week calendar, build Hermes Schedule Matrix
-  const isMultiPostCalendar = content.includes('TUẦN 1') || content.includes('CONTENT CALENDAR') || content.includes('Lịch đăng bài');
-
   const pubObjective = input.objective || '';
   const weeklyDates = generateWeeklyDates(pubObjective);
 
   const scheduleMatrix = `🚀 [HERMES SOCIAL PUBLISHER] ĐÃ THIẾT LẬP LẬP LỊCH ĐĂNG BÀI TỰ ĐỘNG (HERMES AUTO-PUBLISH SCHEDULE MATRIX):
 
-✅ Đã nhận Bộ Lịch truyền thông 4 Tuần từ EOS Content Worker và Bộ Banner Graphic 4K (${imageUrl}) từ EOS Creative Worker.
+✅ Đã nhận Bộ Lịch bài viết & Banner 4K (${imageUrl}) từ EOS Creative Worker.
 
 | Tuần / Giai đoạn | Ngày & Giờ Lập Lịch Đăng | Trạng Thái Hermes Queue | Kênh Đăng | Banner Attached | Queue / Post ID |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -661,11 +643,32 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const segment = input.target_audience || context?.brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
   const brandName = context?.brandDna?.brandName || 'BELLA EOS';
   
-  // Checking if actual operational metrics were supplied
-  const activeCustomers = context?.activeCustomerCount;
-  const fbReach = context?.fbReachCount;
-  const hasStats = typeof activeCustomers === 'number' && activeCustomers > 0 && typeof fbReach === 'number' && fbReach > 0;
+  // 1. Compile Enterprise Context Contract (ECC) Input
+  const activeCustomers = context?.activeCustomerCount || 0;
+  const fbReach = context?.fbReachCount || 0;
+  const hasStats = activeCustomers > 0 && fbReach > 0;
+  
+  const ecc: import('@/core/contracts/enterprise-context-contract').EnterpriseContextContract = {
+    contextId: `ECC-CTX-2026-${Date.now().toString().substring(8)}`,
+    timestamp: new Date().toISOString(),
+    objective,
+    brandDna: {
+      brandName,
+      voiceTone: tone,
+      designStyle: context?.brandDna?.designStyle || 'Minimalist & Glassmorphism',
+      targetSegment: segment,
+      strategicIntent: objective.toLowerCase().includes('premium') ? 'Become Premium Brand' : 'Acquire Customers'
+    },
+    evidenceIds: hasStats ? ['CRM-1029', 'FB-ANALYTICS-2039'] : ['SYSTEM-DEFAULT-STUB'],
+    coverage: {
+      crmActiveCount: activeCustomers,
+      fbReach24h: fbReach,
+      approvedBudgetLimitVnd: objective.toLowerCase().includes('50 triệu') ? 50000000 : 100000000,
+      piiRedacted: ['email', 'phone']
+    }
+  };
 
+  // Determine dynamic stats message
   const statsText = hasStats
     ? `${brandName} đang phục vụ ${activeCustomers.toLocaleString()}+ cơ sở Spa/TMV trên toàn quốc; lượt tiếp cận 24h đạt ${fbReach.toLocaleString()}+. Hệ thống vận hành tự động định hình vị thế dẫn đầu.`
     : `[Số liệu hiện tại về số lượng cơ sở Spa/TMV và lượt tiếp cận Fanpage chưa được cung cấp. Vui lòng nhập thông tin số liệu trong Company DNA Register ở cột phải để nhận báo cáo chuẩn xác nhất].`;
@@ -678,8 +681,34 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
     ? `Xuất bản bài viết Case Study thực tế từ các cơ sở trong số ${activeCustomers.toLocaleString()}+ Spa đã tự động hóa thành công với Bella EOS.`
     : `Xuất bản bài viết hướng dẫn nghiệp vụ thực tế về cách tự động hóa quy trình vận hành và kiểm soát tài chính tránh thất thoát.`;
 
-  const pastPlansMd = context?.past_plans_md || input?.past_plans_md || '';
+  // 2. Check for pushback condition (unrealistic requests)
+  const isExtremeGrowth = objective.toLowerCase().includes('300%') || objective.toLowerCase().includes('gấp 3') || objective.toLowerCase().includes('gấp ba');
+  const isShortTime = objective.toLowerCase().includes('5 ngày') || objective.toLowerCase().includes('10 ngày') || objective.toLowerCase().includes('15 ngày');
+  const triggerPushback = isExtremeGrowth && isShortTime;
 
+  // 3. Define Reasoning DAG, Confidence, and Fallback EIC JSON contract
+  const overallConfidence = hasStats ? 92 : 45;
+  const cmoConfidence = {
+    overallPercentage: overallConfidence,
+    dimensionConfidence: {
+      crmDataCoverage: hasStats ? 95 : 10,
+      erpDataCoverage: hasStats ? 90 : 20,
+      financeDataCoverage: 95
+    },
+    reasoning: hasStats ? 'Dữ liệu CRM/ERP và tài chính khả dụng đầy đủ.' : 'Thiếu dữ liệu CRM & ERP thực tế. Đang chạy ở chế độ giả lập giả định.'
+  };
+
+  const eicContractId = `EIC-CMO-2026-${Date.now().toString().substring(7)}`;
+
+  // Draft Reasoning Graph Nodes (DAG based dependencies)
+  const reasoningNodes: import('@/core/contracts/executive-intelligence-contract').ReasoningNode[] = [
+    { id: 'GOAL', type: 'GOAL', dependsOn: [], evidence: [], confidence: 100, description: 'Chỉ thị CEO', outcome: objective },
+    { id: 'DIAGNOSIS', type: 'METRIC', dependsOn: ['GOAL'], evidence: ecc.evidenceIds, confidence: cmoConfidence.overallPercentage, description: 'Chuẩn đoán bối cảnh doanh nghiệp', outcome: hasStats ? 'Có số liệu thực tế' : 'Thiếu số liệu, yêu cầu làm rõ' },
+    { id: 'LEAKAGE', type: 'LEAKAGE', dependsOn: ['DIAGNOSIS'], evidence: ['CRM-LEAK-TEST'], confidence: hasStats ? 90 : 30, description: 'Phân tích điểm rò rỉ (Funnels)', outcome: triggerPushback ? 'Hạn chế năng lực cung ứng & Sales chốt kém' : 'Hụt lead đăng ký do thương hiệu mờ nhạt' },
+    { id: 'DECISION', type: 'DECISION', dependsOn: ['LEAKAGE'], evidence: [], confidence: hasStats ? 92 : 45, description: 'Lựa chọn chiến lược tối ưu', outcome: triggerPushback ? 'Bác bỏ mục tiêu 300% & Đề xuất 30% trong 60 ngày' : 'Retention + Upsell tối ưu CRM trước, scale ads sau' }
+  ];
+
+  const pastPlansMd = context?.past_plans_md || input?.past_plans_md || '';
   const mmConfig = clientKeys?.agent_configs?.['marketing_manager'] || clientKeys?.agent_configs?.['eos_marketing_manager'] || {};
   const openaiKey = clientKeys?.openai || mmConfig.apiKey || process.env.OPENAI_API_KEY;
   const geminiKey = clientKeys?.gemini || mmConfig.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -688,102 +717,219 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const learnedLessonsPrompt = LearningCenter.getLearnedLessonsPrompt();
   const memoryContextPrompt = (pastPlansMd ? `\n\nLỊCH SỬ KẾ HOẠCH BÀI HỌC CÁC CHIẾN DỊCH TRƯỚC:\n${pastPlansMd}` : '') + (learnedLessonsPrompt ? `\n${learnedLessonsPrompt}` : '');
 
-  // Dynamic Month Extraction
+  // Month extraction
   let targetMonthStr = 'Tháng 8';
   const monthRegex = /(?:tháng|thang|thg|t|month)\s*(\d{1,2})/i;
   const match = objective.match(monthRegex);
-  if (match) {
-    targetMonthStr = `Tháng ${match[1]}`;
-  } else {
-    const now = new Date();
-    targetMonthStr = `Tháng ${now.getMonth() + 1}`;
-  }
+  if (match) targetMonthStr = `Tháng ${match[1]}`;
+  else targetMonthStr = `Tháng ${new Date().getMonth() + 1}`;
 
-  const defaultTemplate = `# 🎯 [AI MARKETING MANAGER] BẢN PHÂN TÍCH CHIẾN LƯỢC & KẾ HOẠCH TRIỂN KHAI CHI TIẾT
+  // JSON Executive Intelligence Contract Stub
+  const mockEicJson: import('@/core/contracts/executive-intelligence-contract').ExecutiveIntelligenceContract & { confidence: any } = {
+    metadata: {
+      contractId: eicContractId,
+      version: 1,
+      parentContractId: 'CEO-GOAL-ROOT',
+      childContractIds: ['TEC-CREATIVE-002', 'TEC-COPYWRITER-003', 'TEC-HERMES-004'],
+      agentId: 'eos_cmo_agent',
+      role: 'Chief Marketing Officer',
+      timestamp: new Date().toISOString(),
+      status: triggerPushback ? 'BOARD_REVIEW' : 'APPROVED',
+      type: 'DECISION'
+    },
+    strategicIntent: {
+      businessObjective: objective,
+      strategicAlignment: ecc.brandDna.strategicIntent,
+      targetAudience: segment
+    },
+    businessDiagnosis: {
+      swot: {
+        strengths: `Hệ điều hành AI tự động hóa vận hành, kiểm soát dòng tiền EOM chặt chẽ.`,
+        weaknesses: `Dữ liệu phân tích đối thủ cạnh tranh gián tiếp chưa được tích hợp hoàn chỉnh.`,
+        opportunities: `Áp dụng phễu CSKH và SMS/ZNS tự động hóa để nâng cao tỉ lệ giữ chân khách cũ.`,
+        threats: `Chi phí CPC Ads trên nền tảng mạng xã hội gia tăng mạnh.`
+      },
+      currentBottleneck: triggerPushback 
+        ? 'Năng lực vận hành của kỹ thuật viên quá tải, không thể mở rộng quy mô gấp 3 trong thời gian ngắn.' 
+        : 'Tỷ lệ chốt lịch hẹn (Sales Conversion) đang kém, hụt lead do thiếu uy tín xã hội (Social Proof).'
+    },
+    reasoningGraph: { nodes: reasoningNodes },
+    confidence: cmoConfidence,
+    decision: {
+      approvedStrategy: triggerPushback ? 'Tăng trưởng bền vững (30% trong 60 ngày)' : 'Retention & Referral + Social Proof (Tối ưu khách cũ, chứng minh năng lực)',
+      rejectedStrategies: [
+        {
+          strategy: triggerPushback ? 'Tăng trưởng siêu tốc 300% trong 10 ngày' : 'Scale Facebook Ads gấp đôi ngân sách',
+          reason: triggerPushback ? 'Kỹ thuật viên quá tải và hụt dòng tiền tức thời' : 'Tỉ lệ chốt Sale quá thấp, tăng Ads chỉ làm lãng phí CPL',
+          risk: 'Critical'
+        }
+      ],
+      assumptions: [
+        'Hạn mức chi tiêu tối đa được bảo vệ bởi EOM Policy',
+        'Chi phí CPC Facebook Ads không biến động quá 20%',
+        'Công suất Spa hiện tại còn dư 25% trước khi tuyển thêm KTV'
+      ]
+    },
+    expectedOutcomes: [
+      { metric: 'Revenue_Growth', targetValue: triggerPushback ? '+30%' : '+20%', weight: 0.8 },
+      { metric: 'ROAS_Target', targetValue: '> 3.2', weight: 0.9 },
+      { metric: 'CAC_Limit', targetValue: '< 120,000 VND', weight: 0.7 }
+    ],
+    planning: {
+      spendLimitVnd: ecc.coverage.approvedBudgetLimitVnd,
+      delegations: [
+        { department: 'Creative', role: 'Creative Director AI', task: 'Thiết kế Banner thương hiệu Rose & Gold' },
+        { department: 'Copywriter', role: 'Copywriter AI', task: 'Soạn thảo Anchor Hook giải quyết nỗi đau vận hành' },
+        { department: 'Media', role: 'Media Director AI', task: 'Khởi chạy Ads nhắm đối tượng chủ Spa' }
+      ],
+      dependencies: [
+        { task: 'Tối ưu Sales Script chốt Booking', blocking: 'Scale Ads ngân sách lớn' }
+      ],
+      replanningTriggers: [
+        { metric: 'ROAS', condition: '<', value: 1.8 },
+        { metric: 'Lead_Conversion', condition: 'drop', value: '25%' }
+      ],
+      rollbackStrategy: {
+        triggers: ['ROAS < 1.5', 'Ngân sách cạn kiệt'],
+        actions: ['Hạ ngân sách Ads về mức 50%', 'Khôi phục SOP cũ', 'Gửi báo cáo lỗi lên ECR cho CEO']
+      }
+    },
+    execution: {
+      businessImpactForecast: {
+        revenueGrowth: triggerPushback ? '+30% (60 ngày)' : '+18%',
+        cashflowImprovement: '+9%',
+        hrLoadIncrease: triggerPushback ? '+45% (Rất cao)' : '+15%',
+        overallRisk: triggerPushback ? 'Critical' : 'Medium'
+      },
+      taskPipeline: [
+        { taskId: 'TEC-CMO-001', parentContractId: eicContractId, assignedTo: 'eos_marketing_manager', taskType: 'analyze_marketing_strategy', description: 'Phân tích chỉ thị & ký duyệt EDC', kpi: 'EDC Approved', riskOwner: 'CMO', status: 'COMPLETED' },
+        { taskId: 'TEC-CREATIVE-002', parentContractId: eicContractId, assignedTo: 'eos_creative_worker', taskType: 'create_banner_design', description: 'Render Banner 4K phối màu Rose & Gold', kpi: 'Creative banner render complete', riskOwner: 'Creative Director', status: 'PENDING' },
+        { taskId: 'TEC-HERMES-003', parentContractId: eicContractId, assignedTo: 'hermes_social', taskType: 'publish_facebook', description: 'Đăng tải bài viết & Banner lên Facebook Fanpage', kpi: 'Post published', riskOwner: 'Media Director', status: 'PENDING' }
+      ]
+    }
+  };
 
-## 1. 🏢 PHÂN TÍCH HIỆN TRẠNG DOANH NGHIỆP & ĐỊNH VỊ SẢN PHẨM:
-- **Hiện trạng Doanh nghiệp**: ${statsText}
-- **Sản phẩm cốt lõi**: Hệ điều hành Doanh nghiệp AI thông minh Bella EOS & Bella EIP — Quản lý vận hành toàn diện, kiểm soát tài chính EOM, xếp lịch và tiếp thị tự động.
-- **3 Lợi điểm bán hàng độc nhất (USP)**:
-  1. *AI Agent Workforce tự động 100%*: 12+ AI Agent thực thi tự động từ lập kế hoạch, viết bài, thiết kế banner 4K đến chạy Ads.
-  2. *Kiểm soát tài chính & Dòng tiền EOM chống thất thoát*: Kiểm toán minh bạch từng giao dịch dịch vụ Spa.
-  3. *Tự động hóa tiếp thị & Retargeting đa kênh*: Tối ưu chuyển đổi khách hàng từ Facebook, Zalo, TikTok với chi phí CPL thấp nhất.
+  // Human Readable Markdown Report (McKinsey Style)
+  const defaultTemplate = `# 🏛️ EXECUTIVE DECISION PACKAGE (BẢN PHÂN TÍCH ĐIỀU HÀNH)
+*Được chuẩn hóa theo cấu trúc Enterprise Cognitive Layer (EIC v${mockEicJson.metadata.version})*
+*Mã định danh Giao kèo: **${mockEicJson.metadata.contractId}** | Trạng thái: **${mockEicJson.metadata.status}***
 
-## 2. 🎯 PHÂN TÍCH CHỈ THỊ CEO & ĐÁNH GIÁ MỤC TIÊU:
-- **Chỉ thị của CEO**: "${objective}"
-- **Mục tiêu chiến lược**: Xây dựng nhận diện thương hiệu mạnh mẽ, định vị ${brandName} là giải pháp AI số 1 cho ngành Spa & TMV trong ${targetMonthStr}, kích thích hành động đăng ký trải nghiệm Demo trực tiếp.
-- **Đánh giá tính khả thi**: Mức độ ưu tiên cao. Khả thi 100% với sự hỗ trợ của lực lượng AI Agent (Copywriter, Creative Designer, Hermes Publisher, Ares Ads Agent).
+## 1. 🏢 TẦNG EXECUTIVE LAYER (LỚP ĐIỀU HÀNH THAM MƯU)
 
-## 3. 👥 CHÂN DUNG KHÁCH HÀNG MỤC TIÊU & MA TRẬN GÓC TRUYỀN THÔNG (ANGLES):
-- **Phân khúc ưu tiên**: ${segment} (Chủ Spa, Giám đốc Thẩm mỹ viện, Quản lý chuỗi cơ sở làm đẹp).
-- **Pain Points (Nỗi đau)**: Thất thoát doanh thu do quản lý thủ công, tốn chi phí nhân sự tiếp thị, quảng cáo không ra Lead.
-- **Ma trận Góc truyền thông (Angles)**:
-  - *Angle 1 (Giải pháp đột phá)*: "Tự động hóa 100% vận hành Spa — Giải phóng 80% thời gian quản lý cùng ${brandName}".
-  - *Angle 2 (Social Proof & Uy tín)*: "${angle2Text}".
-  - *Angle 3 (Urgency Offer)*: "Tặng bản dùng thử Demo miễn phí cho 50 cơ sở đăng ký sớm nhất trong ${targetMonthStr}".
+### 🎯 Strategic Intent (Mục tiêu & Định hướng Chiến lược)
+- **Mục tiêu kinh doanh của CEO**: "${mockEicJson.strategicIntent.businessObjective}"
+- **Định vị & Hướng thương hiệu**: ${mockEicJson.strategicIntent.strategicAlignment === 'Become Premium Brand' ? 'Xây dựng Định vị Thương hiệu Cao cấp (Premium Brand Alignment)' : 'Tập trung Thu hút Khách hàng Mới (Customer Acquisition Campaign)'}
+- **Phân khúc mục tiêu (Segment)**: ${mockEicJson.strategicIntent.targetAudience}
 
-## 4. 📅 KẾ HOẠCH TRIỂN KHAI CHI TIẾT THEO TUẦN & NGÀY (ROADMAP CHI TIẾT ${targetMonthStr.toUpperCase()}):
-### 📍 TUẦN 1 (W1): KÍCH HOẠT NHẬN DIỆN & ĐÁNH VÀO NỖI ĐAU (BRAND AWARENESS & PAIN POINTS)
-- **Ngày 1 - 2**:
-  - *Task #1 (AI Marketing Manager)*: Phân tích bối cảnh & duyệt kế hoạch tổng thể (AWAITED CEO APPROVAL).
-  - *Task #2 (AI Copywriter)*: Soạn bài viết Anchor Hook đánh vào nỗi đau thất thoát doanh thu & chi phí vận hành Spa.
-- **Ngày 3 - 5**:
-  - *Task #3 (AI Creative Worker)*: Render Banner 4K phối màu thương hiệu (#061E17 / #D4AF37).
-  - *Task #4 (Hermes Publisher)*: Đăng bài xuất bản trên Fanpage Facebook chính thức.
-- **Ngày 6 - 7**:
-  - *Task #5 (Ares Ads Agent)*: Khởi tạo chiến dịch Facebook Ads nhắm tệp Chủ Spa & Thẩm mỹ viện.
+### 📊 Strategic Confidence (Độ tự tin & Bằng chứng dữ liệu)
+- **Độ tự tin chiến lược tổng thể**: **${mockEicJson.confidence.overallPercentage}%**
+- **Độ tin cậy nguồn dữ liệu**:
+  - Dữ liệu CRM (Khách hàng): **${mockEicJson.confidence.dimensionConfidence.crmDataCoverage}%**
+  - Dữ liệu ERP (Hóa đơn/Lịch hẹn): **${mockEicJson.confidence.dimensionConfidence.erpDataCoverage}%**
+  - Dữ liệu tài chính (Finance): **${mockEicJson.confidence.dimensionConfidence.financeDataCoverage}%**
+- **Đánh giá nguồn dữ liệu**: ${mockEicJson.confidence.reasoning}
 
-### 📍 TUẦN 2 (W2): CHỨNG MINH NĂNG LỰC GIẢI PHÁP & USP (SOCIAL PROOF & PRODUCT DEMO)
-- **Ngày 8 - 11**:
-  - ${caseStudyText}
-  - Render Mockup Giao diện trực quan màn hình quản lý lịch hẹn & tài chính EOM.
-- **Ngày 12 - 14**:
-  - Đẩy mạnh truyền thông về 12+ AI Agent Workforce tự động vận hành thay người.
+${!hasStats ? `### ❓ Questions Before Decision (Câu hỏi làm rõ trước khi quyết định)
+> [!WARNING]
+> Do hệ thống chưa nhận được số liệu thực tế về doanh nghiệp của bạn, CMO AI khuyến nghị CEO trả lời các thông tin sau để tăng độ tự tin chiến lược lên >90%:
+> 1. Hiện trạng Spa/Cơ sở của bạn có chính xác bao nhiêu khách hàng đang hoạt động?
+> 2. Lượt tiếp cận Fanpage Facebook trung bình hàng ngày là bao nhiêu?
+> 3. Tỷ lệ kỹ thuật viên đang trống lịch hiện tại tại cơ sở?` : ''}
 
-### 📍 TUẦN 3 (W3): ĐỘT PHÁ ƯU ĐÃI & THÚC ĐẨY CHUYỂN ĐỔI (CONVERSION & DEMO OFFER)
-- **Ngày 15 - 18**:
-  - Tung Offer giới hạn: "Tặng bản dùng thử Demo Bella EOS miễn phí cho 50 cơ sở đăng ký sớm nhất".
-  - Chạy Retargeting Ads nhắm đến toàn bộ người dùng đã tương tác trong W1 & W2.
-- **Ngày 19 - 21**:
-  - Gửi tin nhắn chăm sóc cá nhân hóa qua Zalo OA đến khách hàng tiềm năng trong CRM.
+${triggerPushback ? `### 🚨 CRITICAL PUSHBACK (BÁC BỎ & PHẢN BIỆN CEO)
+> [!CAUTION]
+> **TỪ CHỐI TỰ ĐỘNG THỰC THI**: CMO AI đánh giá mục tiêu tăng trưởng ${objective} là **PHI THỰC TẾ & KHÔNG KHẢ THI** trong thời gian quá ngắn. 
+> - **Lý do**: Năng lực vận hành tối đa của kỹ thuật viên hiện tại và ngân sách tài chính EOM không thể đáp ứng việc tăng trưởng nóng quy mô gấp 3 lần ngay lập tức. Đổ ngân sách chạy Ads dồn dập sẽ gây tắc nghẽn phễu và lãng phí dòng tiền.
+> - **Đề xuất thay đổi**: Điều chỉnh mục tiêu xuống **Tăng 30% trong 60 ngày** để có thời gian tuyển dụng KTV và tối ưu hóa phễu chốt lịch.` : `### 💡 Executive pushback & Critique (Ý kiến phản biện của CMO)
+- **Đánh giá giải pháp**: CMO AI đồng ý với định hướng chung, tuy nhiên phát hiện điểm nghẽn chính nằm ở **Tỷ lệ chốt lịch hẹn (Sales Funnel) kém**, không phải hoàn toàn do Marketing thiếu leads. Do đó, khuyến nghị tối ưu hóa kịch bản chốt đơn trước khi tăng mạnh ngân sách quảng cáo.`}
 
-### 📍 TUẦN 4 (W4): TỔNG KẾT KPI, ĐO LƯỜNG ROI & NÂNG CẤP SOP (AUDIT & LEARNING)
-- **Ngày 22 - 25**:
-  - Athena Analytics tổng hợp dữ liệu Telemetry, đo lường CPL, Reach, Engagement & Số lượt Demo.
-- **Ngày 26 - 31**:
-  - AI Learning Loop phân tích Feedback, tự động đột biến SOP DNA để tối ưu cho chiến dịch tiếp theo.
+### 🧠 Reasoning DAG Graph (Chuỗi Suy Luận Logic - Explainable AI)
+- **Node #1 (GOAL)**: Nhận chỉ thị CEO ➔ Trạng thái: Đạt 100% tự tin.
+- **Node #2 (DIAGNOSIS)**: Đối chiếu CRM & ERP ➔ Trạng thái: Kết quả [${mockEicJson.businessDiagnosis.currentBottleneck}].
+- **Node #3 (LEAKAGE)**: Phân tích điểm rò rỉ ➔ Trạng thái: Phát hiện hụt chốt lịch hẹn tại quầy, mã bằng chứng [CRM-LEAK-TEST].
+- **Node #4 (DECISION)**: Quyết định chiến lược ➔ Trạng thái: Đề xuất chiến lược [${mockEicJson.decision.approvedStrategy}].
 
-## 5. 📊 CHỈ SỐ ĐO LƯỜNG HIỆU SUẤT CỤ THỂ (MEASURABLE KPIS):
-- **Lượt tiếp cận (Target Reach)**: 50,000 - 100,000 người dùng tiếp cận
-- **Lượt tương tác (Target Engagement)**: 3,500 - 7,000 tương tác (Like, Share, Comment)
-- **Số lượng đăng ký Demo (Target Leads)**: 80 - 150 Lead chất lượng cao
-- **Chi phí mỗi Lead (Target CPL)**: < 95,000 VNĐ / Lead đăng ký
-- **Dự báo ROI**: 350% - 480%
+### ⚖️ Strategic Decisions & Options (Lựa chọn & So sánh Chiến lược)
+- **Chiến lược đề xuất (Approved Strategy)**: **${mockEicJson.decision.approvedStrategy}**
+- **Chiến lược bị loại bỏ (Rejected Strategy)**:
+  - *Chiến lược*: "${mockEicJson.decision.rejectedStrategies[0].strategy}"
+  - *Lý do loại bỏ*: ${mockEicJson.decision.rejectedStrategies[0].reason}
+  - *Mức độ rủi ro nếu chạy*: **${mockEicJson.decision.rejectedStrategies[0].risk}**
+- **Các giả định chiến lược (Assumptions)**:
+  1. ${mockEicJson.decision.assumptions[0]}
+  2. ${mockEicJson.decision.assumptions[1]}
+  3. ${mockEicJson.decision.assumptions[2]}
 
-## 6. 🗺️ PHÂN BỔ NHIỆM VỤ CHO AI WORKFORCE:
-- **Task #1 (AI Marketing Manager)**: Phân tích chỉ thị, thiết lập OKR & lập lộ trình chi tiết (AWAITED CEO APPROVAL).
-- **Task #2 (AI Copywriter Worker)**: Soạn thảo bài đăng bán hàng nhắm đúng đối tượng ${segment}.
-- **Task #3 (AI Creative Worker)**: Render Banner 4K chuẩn thiết kế thương hiệu.
-- **Task #4 (Hermes Social Publisher)**: Xuất bản bài viết + Banner lên Fanpage.
-- **Task #5 (Ares Ads Agent)**: Cấu hình chiến dịch quảng cáo Facebook Ads.
-- **Task #6 (Athena Analytics Agent)**: Báo cáo dự báo KPI & ROI 30 ngày.`;
+---
 
-  const systemPrompt = mmConfig.systemPrompt || `Bạn là AI Marketing Manager chiến lược cấp cao của thương hiệu ${brandName}.
-Nhiệm vụ: Phân tích chỉ thị của CEO, đánh giá hiện trạng doanh nghiệp, định vị sản phẩm & 3 điểm USP, lập kế hoạch triển khai chi tiết từng ngày, từng tuần trong tháng, và xác định bộ chỉ số KPI đo lường hiệu suất.
+## 2. 📅 TẦNG PLANNING LAYER (LỚP KẾ HOẠCH PHỐI HỢP)
 
-BẮT BUỘC TRẢ VỀ CẤU TRÚC KẾ HOẠCH MARKETING CHI TIẾT 6 PHẦN ĐẦY ĐỦ NHƯ SAU:
-1. 🏢 PHÂN TÍCH HIỆN TRẠNG DOANH NGHIỆP & ĐỊNH VỊ SẢN PHẨM (Doanh nghiệp, Sản phẩm Bella EOS/EIP, 3 USP).
-2. 🎯 PHÂN TÍCH CHỈ THỊ CEO & ĐÁNH GIÁ MỤC TIÊU.
-3. 👥 CHÂN DUNG KHÁCH HÀNG MỤC TIÊU & MA TRẬN GÓC TRUYỀN THÔNG (3 Angles).
-4. 📅 KẾ HOẠCH TRIỂN KHAI CHI TIẾT THEO TUẦN & NGÀY (W1 - W4, Ngày 1 - 31).
-5. 📊 CHỈ SỐ ĐO LƯỜNG HIỆU SUẤT CỤ THỂ (Reach, Engagement, Leads, CPL, ROI).
-6. 🗺️ PHÂN BỔ NHIỆM VỤ CHO AI WORKFORCE.
+### 👥 Cross-Department Plan (Ủy quyền & Phối hợp đa phòng ban)
+- **Ban Sáng tạo (Creative Director AI)**: Thiết kế banner Rose & Gold chuẩn 4K, truyền tải USP.
+- **Phòng Sales (Sales Director AI)**: Tái đào tạo kỹ thuật chốt booking qua chatbot & trực quầy.
+- **Ban Tài chính (Finance Director AI)**: Cấp ngân sách tối đa **${(mockEicJson.planning.spendLimitVnd).toLocaleString('vi-VN')} VND** cho chiến dịch này.
+
+### ⏳ Timeline & Dependencies (Quan hệ phụ thuộc)
+- **Mốc phụ thuộc**: Bộ phận Sales phải chốt kịch bản tối ưu CRM ➔ Ban Sáng tạo mới tung Banner ➔ Media mới chạy Ads.
+
+### 🛡️ Replanning Triggers & Rollback (Tự động kích hoạt lập lại kế hoạch)
+- **Triggers lập lại chiến dịch**:
+  - Hụt chỉ số ROAS dưới **1.8** trong 7 ngày.
+  - Tỷ lệ chốt Booking giảm quá **25%** so với tuần trước.
+- **Hành động khôi phục (Rollback Strategy)**:
+  - Hạ 50% ngân sách Ads ngay lập tức.
+  - Trở về SOP cơ bản.
+  - Gửi cảnh báo khẩn lên Admin Control Tower.
+
+---
+
+## 3. ⚙️ TẦNG EXECUTION LAYER (LỚP THỰC THI CHI TIẾT)
+
+### 📊 Business Impact Forecast (Dự báo tác động toàn doanh nghiệp)
+- **Doanh thu dự kiến**: **${mockEicJson.execution.businessImpactForecast.revenueGrowth}**
+- **Dòng tiền cải thiện**: **${mockEicJson.execution.businessImpactForecast.cashflowImprovement}**
+- **Tải lượng nhân sự (HR Load)**: **${mockEicJson.execution.businessImpactForecast.hrLoadIncrease}**
+- **Rủi ro chung**: **${mockEicJson.execution.businessImpactForecast.overallRisk}**
+
+### 📋 Task Pipeline & Giao việc (TEC Contracts)
+- **Task #1 [TEC-CMO-001]**: CMO AI phân tích chỉ thị & ký duyệt EDC ➔ Trạng thái: **COMPLETED**.
+- **Task #2 [TEC-CREATIVE-002]**: Creative Director thiết kế banner Rose & Gold ➔ Trạng thái: **PENDING**.
+- **Task #3 [TEC-HERMES-003]**: Hermes Social đăng bài lên Facebook Fanpage ➔ Trạng thái: **PENDING**.
+
+---
+
+## 💾 ENTERPRISE EXECUTIVE INTELLECTUAL CONTRACT JSON (EIC-SOURCE-OF-TRUTH)
+\`\`\`json
+${JSON.stringify(mockEicJson, null, 2)}
+\`\`\`
+`;
+
+  // 4. Setup LLM Call to generate real EIC JSON and Markdown Report if keys are available
+  const systemPrompt = `Bạn là CMO AI (Chief Marketing Officer / Executive Marketing Strategist) của thương hiệu ${brandName}.
+Nhiệm vụ của bạn là đọc Enterprise Context Contract (ECC) đầu vào và trả về một Enterprise Executive Intelligence Contract (EIC) hoàn chỉnh.
+
+Quy định tư duy lãnh đạo bắt buộc:
+1. Bạn phải tư duy phản biện (Executive Reasoning):
+   - Phản biện CEO nếu chỉ thị quá nóng hoặc sai phương án (ví dụ tăng ads khi tỷ lệ chốt sales đang kém).
+   - Từ chối thực thi và cảnh báo mục tiêu phi thực tế (ví dụ tăng doanh thu 300% trong 5-15 ngày), đề xuất mốc thực tế hơn.
+2. Phân tích nguồn doanh thu rõ ràng: Tăng khách cũ, upsell, referral hay ads mới?
+3. Thiết lập đồ thị suy luận DAG (dependsOn, evidence snapshot bằng ID) và độ tự tin chiến lược Node-by-Node.
+4. Triệu tập và phân công đa phòng ban (Cross-department).
+5. Thiết lập điểm kích hoạt lập lại kế hoạch (Replanning Triggers) và kế hoạch Rollback.
+
+BẮT BUỘC TRẢ VỀ kết quả gồm 2 phần rõ rệt:
+Phần 1: Bản Báo cáo Lãnh đạo (Markdown Report) chia làm 3 tầng: Executive Layer (Tóm tắt, Tự tin, Pushback phản biện, SWOT, Giả định, Quyết định chiến lược), Planning Layer (Phối hợp phòng ban, timeline, rollback, trigger), Execution Layer (Dự báo ROI, rủi ro, task pipeline).
+Phần 2: Block JSON EIC hợp lệ bọc trong thẻ codeblock \`\`\`json ... \`\`\` khớp hoàn toàn với interface ExecutiveIntelligenceContract.
+Hợp đồng EIC ID: ${eicContractId} | Parent: CEO-GOAL-ROOT.
+Bằng chứng dữ liệu (Evidence IDs): ${JSON.stringify(ecc.evidenceIds)}.
+Dữ liệu CRM thực tế: ${activeCustomers} | FB Reach: ${fbReach}.
+
 ${memoryContextPrompt}`;
 
-  const userMessage = `Yêu cầu chỉ thị từ CEO: "${objective}"
-Thương hiệu: ${brandName} | Tông giọng: ${tone} | Đối tượng: ${segment}
+  const userMessage = `Enterprise Context Contract (ECC) nhận được:
+${JSON.stringify(ecc, null, 2)}
 
-Hãy xây dựng bản phân tích chiến lược Marketing chi tiết theo đúng cấu trúc chuẩn 6 phần.`;
+Hãy phân tích và xuất bản báo cáo kèm Executive Intelligence Contract (EIC) tương ứng.`;
 
   let content = '';
   let usedModel = mmConfig.model || 'gemini-2.5-flash';
@@ -838,9 +984,24 @@ Hãy xây dựng bản phân tích chiến lược Marketing chi tiết theo đ�
     }
   }
 
-  if (!content) {
+  // Parse structured JSON EIC contract out of output content if possible
+  let finalEicContract = mockEicJson;
+  if (content) {
+    try {
+      const jsonRegex = /```json\s*([\s\S]*?)\s*```/g;
+      const match = jsonRegex.exec(content);
+      if (match && match[1]) {
+        const parsed = JSON.parse(match[1]);
+        if (parsed && parsed.metadata && parsed.strategicIntent) {
+          finalEicContract = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('[tool_analyze_marketing_strategy] Failed to parse EIC JSON codeblock from LLM, using fallback stub:', e);
+    }
+  } else {
     content = defaultTemplate;
-    usedModel = 'rule-based-marketing-manager';
+    usedModel = 'rule-based-cmo-strategist';
     provider = 'bella-eos-kernel';
   }
 
@@ -848,11 +1009,12 @@ Hãy xây dựng bản phân tích chiến lược Marketing chi tiết theo đ�
     success: true,
     output: content,
     meta: {
-      type: 'MARKETING_STRATEGY',
+      type: 'CMO_EXECUTIVE_STRATEGY',
       model: usedModel,
       provider,
       targetSegment: segment,
-      brandName
+      brandName,
+      decisionContract: finalEicContract
     }
   };
 }
@@ -1084,19 +1246,16 @@ function resolveInputReferences(input: Record<string, any>, taskOutputs: Record<
   const resolved: Record<string, any> = {};
   for (const [key, val] of Object.entries(input)) {
     if (typeof val === 'string') {
-      // 1. Exact match priority
       if (taskOutputs[val]) {
         resolved[key] = taskOutputs[val];
         continue;
       }
 
-      // 2. Substring or token match (e.g. "Bài viết từ task_id t1" or "t1")
       const match = val.match(/\b(t\d+)\b/);
       if (match && taskOutputs[match[1]]) {
         const taskId = match[1];
         const outputVal = taskOutputs[taskId];
         
-        // If the key is specifically meant to fetch the source content or media, replace the whole thing with the raw output
         const isDataCarrierKey = [
           'content_from', 'media_from', 'content', 'media', 
           'image_url', 'banner_url', 'media_url', 'ad_content', 
@@ -1106,7 +1265,6 @@ function resolveInputReferences(input: Record<string, any>, taskOutputs: Record<
         if (isDataCarrierKey) {
           resolved[key] = outputVal;
         } else {
-          // Replace only the task ID token in the text
           resolved[key] = val.replace(match[0], outputVal);
         }
       } else {
@@ -1119,19 +1277,13 @@ function resolveInputReferences(input: Record<string, any>, taskOutputs: Record<
   return resolved;
 }
 
-/**
- * Normalizes markdown text by stripping bold/italic syntax and clean bullet points
- * for social media sharing compatibility.
- */
 function cleanMarkdownForSocialMedia(text: string): string {
   if (!text) return '';
 
   let cleaned = text;
 
-  // 1. Remove bold formatting **word** -> word
   cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
 
-  // 2. Normalize list bullet points from markdown style to clean unicode bullet points
   const lines = cleaned.split('\n');
   const normalizedLines = lines.map(line => {
     const trimmed = line.trim();
@@ -1142,39 +1294,30 @@ function cleanMarkdownForSocialMedia(text: string): string {
   });
   cleaned = normalizedLines.join('\n');
 
-  // 3. Remove single * wrappers *italic* -> italic
   cleaned = cleaned.replace(/\*(.*?)\*/g, '$1');
 
-  // 4. Remove markdown headers #, ##, ### at the beginning of lines
   cleaned = cleaned.replace(/^#+\s+/gm, '');
 
   return cleaned;
 }
 
-/**
- * Extracts ONLY the actual Post Body text intended for human readers,
- * stripping internal system headers, metadata, calendar labels, and report titles.
- */
 function extractSingleSocialPost(text: string): string {
   if (!text) return '';
 
   let body = text;
 
-  // 1. Try matching "Nội dung xuất bản" or "Post Body" marker, supporting optional markdown (-, *, •, **)
   const postBodyRegex = /(?:[\-\*•\s]*📝?\s*\**Nội dung xuất bản(?:\s*\(Post Body\))?\**\s*:?\s*)([\s\S]*?)(?=\n[\-\*•\s]*---|$\n[\-\*•\s]*###|\n[\-\*•\s]*📌|\n[\-\*•\s]*📅|\n[\-\*•\s]*###\s*📌|\n[\-\*•\s]*BÀI VIẾT TUẦN)/i;
   const match = text.match(postBodyRegex);
 
   if (match && match[1] && match[1].trim().length > 15) {
     body = match[1].trim();
   } else {
-    // 2. Fallback: strip any report title lines & metadata bullet points
     body = body
       .replace(/^[\s\-*•]*📅[^\n]*\n+/gmi, '')
       .replace(/^[\s\-*•]*###?[^\n]*\n+/gmi, '')
       .replace(/^[\s\-*•]*(?:⏰|🎯|📝|📌|Lịch đăng|Chủ đề|BÀI VIẾT TUẦN)[^\n]*\n+/gmi, '');
   }
 
-  // 3. Strip remaining leading metadata lines if present (e.g. "Lịch đăng bài tự động...", "Chủ đề...")
   const lines = body.split('\n');
   const cleanLines = lines.filter(line => {
     const l = line.trim().toLowerCase();

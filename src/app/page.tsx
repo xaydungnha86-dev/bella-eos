@@ -126,7 +126,7 @@ function safeGet(key: string): string | null {
 const AI_WORKFORCE = [
   { id: 'human_ceo', name: 'CEO / Lãnh Đạo Tối Cao', type: 'Human', role: 'Thẩm Định Executive', avatar: '👑', capability: 'Duyệt ngân sách & phê duyệt bài xuất bản', status: 'idle', prof: 100, color: 'from-amber-600 to-yellow-400' },
   { id: 'coo', name: 'AI COO Orchestrator', type: 'AI', role: 'Điều Phối Vận Hành', avatar: '🤖', capability: 'Lập kế hoạch & phân bổ quy trình tự động', status: 'idle', prof: 98, color: 'from-cyan-500 to-blue-500' },
-  { id: 'marketing_manager', name: 'AI Marketing Manager', type: 'AI', role: 'Quản Lý Marketing & Chiến Lược', avatar: '🎯', capability: 'Phân tích yêu cầu CEO, lập kế hoạch mục tiêu OKR & hoạch định quy trình', status: 'idle', prof: 99, color: 'from-indigo-600 to-violet-500' },
+  { id: 'marketing_manager', name: 'CMO AI (Executive Marketing Strategist)', type: 'AI', role: 'Chief Marketing Officer', avatar: '🎯', capability: 'Phân tích yêu cầu CEO, lập giao kèo EIC, DAG reasoning & phản biện', status: 'idle', prof: 99, color: 'from-indigo-600 to-violet-500' },
   { id: 'assistant', name: 'AI Assistant', type: 'AI', role: 'Trợ Lý Cấp Cao', avatar: '🙋‍♂️', capability: 'Hỗ trợ tổng hợp dữ liệu & báo cáo vận hành', status: 'idle', prof: 96, color: 'from-indigo-400 to-blue-400' },
   { id: 'hermes', name: 'Hermes Social Publisher', type: 'AI', role: 'Xuất Bản Mạng Xã Hội', avatar: '⚡', capability: 'Tự động đăng bài & quản lý Fanpage', status: 'idle', prof: 95, color: 'from-amber-500 to-orange-500' },
   { id: 'creative_designer', name: 'AI Creative Designer Worker', type: 'AI', role: 'Thiết Kế Đồ Họa', avatar: '🎨', capability: 'Thiết kế Poster, Banner PNG & phối cảnh 4K', status: 'idle', prof: 97, color: 'from-pink-500 to-rose-500' },
@@ -975,7 +975,7 @@ export default function Dashboard() {
                                   <span>THẨM ĐỊNH EXECUTIVE: YÊU CẦU CEO PHÊ DUYỆT BẢN KẾ HOẠCH MARKETING</span>
                                 </h4>
                                 <p className="text-[11px] text-amber-800 font-medium mt-1 leading-relaxed">
-                                  AI Marketing Manager đã phân tích chỉ thị, xác định chân dung khách hàng & lập kế hoạch mục tiêu OKR. Vui lòng xem kết quả và bấm phê duyệt để tiếp tục chuyển qua các bước thực thi.
+                                  CMO AI đã phân tích chỉ thị thông qua Enterprise Context Contract (ECC), thiết lập đồ thị suy luận DAG và phát hành dự thảo Executive Decision Package. Vui lòng xem kết quả và bấm phê duyệt để thực thi Task Pipeline.
                                 </p>
                               </div>
                             </div>

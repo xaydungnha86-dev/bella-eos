@@ -47,8 +47,8 @@ function enrichTasksWithScorecard(tasks: any[]) {
 const AGENT_REGISTRY = [
   {
     id: 'eos_marketing_manager',
-    name: 'AI Marketing Manager',
-    description: 'AI Marketing Manager chiến lược chuyên phân tích yêu cầu CEO, lập kế hoạch mục tiêu OKR/KPI, phân tích chân dung đối tượng & hoạch định quy trình thực thi chi tiết cho các Worker',
+    name: 'CMO AI (Executive Marketing Strategist)',
+    description: 'CMO AI chiến lược cấp cao chuyên nhận Enterprise Context Contract (ECC), lập giao kèo EIC, DAG reasoning, phân tích bối cảnh & duyệt Executive Decision Package để phân bổ việc',
     tools: ['analyze_marketing_strategy', 'plan_campaign_roadmap'],
     output_type: 'marketing_strategy'
   },
@@ -145,10 +145,10 @@ Danh sách Agent & Worker có sẵn:
 ${JSON.stringify(AGENT_REGISTRY, null, 2)}
 
 Quy tắc BẮT BUỘC khi lập kế hoạch (Execution Topology Rules):
-1. TASK ĐẦU TIÊN (t1) LUÔN LUÔN VÀ BẮT BUỘC LÀ: "AI Marketing Manager" (agent_id: "eos_marketing_manager", task_type: "analyze_marketing_strategy") với "requires_human_approval": true và "depends_on": []. Nhiệm vụ này phân tích chỉ thị CEO, đặt mục tiêu OKR/KPI, phân tích đối tượng và lập lộ trình triển khai.
+1. TASK ĐẦU TIÊN (t1) LUÔN LUÔN VÀ BẮT BUỘC LÀ: "CMO AI (Executive Marketing Strategist)" (agent_id: "eos_marketing_manager", task_type: "analyze_marketing_strategy") với "requires_human_approval": true và "depends_on": []. Nhiệm vụ này phân tích chỉ thị CEO qua ECC, ký giao kèo EIC, thiết lập đồ thị suy luận DAG và đề xuất kế hoạch triển khai.
 2. Phân định vai trò chuẩn xác cho các bước tiếp theo:
-   - "AI Marketing Manager" (t1): Phân tích chiến lược, lập mục tiêu OKR/KPI & hoạch định lộ trình (depends_on: [], requires_human_approval: true)
-   - "Bella EOS Content Worker" (t2): Soạn thảo bài viết tiếp thị dựa trên chiến lược của Marketing Manager (depends_on: ["t1"])
+   - "CMO AI (Executive Marketing Strategist)" (t1): Phân tích chiến lược cấp C-level, lập đồ thị DAG & duyệt quyết định (depends_on: [], requires_human_approval: true)
+   - "Bella EOS Content Worker" (t2): Soạn thảo bài viết tiếp thị dựa trên chiến lược của CMO (depends_on: ["t1"])
    - "Bella EOS Media & Creative Worker" (t3): Thiết kế Banner hình ảnh thương hiệu / Video Demo (depends_on: ["t2"])
    - "Hermes Social Publisher" (t4): Nhận Bài viết (t2) + Banner (t3) ➔ Thực thi ĐĂNG BÀI HOÀN CHỈNH lên Fanpage Facebook (depends_on: ["t2", "t3"])
    - "Ares Ads Agent" (t5): Cấu hình chiến dịch Facebook Ads (depends_on: ["t2", "t3"])
@@ -162,11 +162,11 @@ Trả về JSON THUẦN TÚY (không có markdown, không có backtick), theo sc
     {
       "task_id": "t1",
       "agent_id": "eos_marketing_manager",
-      "agent_name": "AI Marketing Manager",
+      "agent_name": "CMO AI (Executive Marketing Strategist)",
       "task_type": "analyze_marketing_strategy",
-      "task_description": "Phân tích yêu cầu CEO, lập kế hoạch mục tiêu OKR/KPI & hoạch định quy trình",
+      "task_description": "Phân tích yêu cầu CEO qua ECC, ký giao kèo EIC, thiết lập đồ thị suy luận DAG",
       "input": { "objective": "...", "tone": "...", "target_audience": "..." },
-      "expected_output": "Bản phân tích chiến lược marketing chi tiết, mục tiêu OKR/KPI & lộ trình phân bổ công việc",
+      "expected_output": "Hợp đồng EIC chi tiết, đồ thị suy luận DAG & lộ trình phân bổ công việc cho AI Workforce",
       "depends_on": [],
       "requires_human_approval": true
     },
@@ -324,15 +324,15 @@ function buildFallbackPlan(objective: string, context?: any) {
   const lowerObj = objective.toLowerCase();
   const tasks = [];
 
-  // Task 1: AI Marketing Manager analyzes CEO requirements & plans OKR/roadmap
+  // Task 1: CMO AI (Executive Marketing Strategist) analyzes CEO requirements via ECC and drafts EIC
   tasks.push({
     task_id: 't1',
     agent_id: 'eos_marketing_manager',
-    agent_name: 'AI Marketing Manager',
+    agent_name: 'CMO AI (Executive Marketing Strategist)',
     task_type: 'analyze_marketing_strategy',
-    task_description: `Phân tích yêu cầu CEO, lập kế hoạch mục tiêu OKR/KPI & hoạch định quy trình cho chiến dịch: "${objective}"`,
+    task_description: `Phân tích yêu cầu CEO qua ECC, ký giao kèo EIC, thiết lập đồ thị suy luận DAG cho chiến dịch: "${objective}"`,
     input: { objective, tone, target_audience: segment },
-    expected_output: 'Bản phân tích chiến lược marketing chi tiết, mục tiêu OKR/KPI & lộ trình phân bổ công việc cho AI Workforce',
+    expected_output: 'Giao kèo EIC chi tiết, đồ thị suy luận DAG & lộ trình phân bổ công việc cho AI Workforce',
     depends_on: [],
     requires_human_approval: true
   });
@@ -400,8 +400,8 @@ function buildFallbackPlan(objective: string, context?: any) {
   });
 
   return {
-    plan_title: `Kế hoạch AI COO & Marketing Manager: ${objective.substring(0, 60)}...`,
-    reasoning: 'AI Marketing Manager phân tích chiến lược & mục tiêu OKR ➔ Bella EOS Content Worker soạn bài ➔ Bella EOS Creative Worker tạo Banner ➔ Hermes Social Agent xuất bản ➔ Ares Ads chạy QC ➔ Athena Analytics đo lường KPI.',
+    plan_title: `Kế hoạch AI COO & CMO AI: ${objective.substring(0, 60)}...`,
+    reasoning: 'CMO AI phân tích chiến lược & giao kèo EIC ➔ Bella EOS Content Worker soạn bài ➔ Bella EOS Creative Worker tạo Banner ➔ Hermes Social Agent xuất bản ➔ Ares Ads chạy QC ➔ Athena Analytics đo lường KPI.',
     tasks
   };
 }

@@ -369,9 +369,9 @@ class CampaignExecutionManagerClass {
       if (isPaused) {
         this.state.isProcessing = false;
         this.state.activeStep = 4;
-        this.state.lastApiStatus = '👑 AI Marketing Manager đã hoàn tất lập chiến lược! Đang chờ CEO Phê Duyệt Kế Hoạch.';
+        this.state.lastApiStatus = '👑 CMO AI đã hoàn tất lập chiến lược! Đang chờ CEO Phê Duyệt Kế Hoạch.';
         this.notify();
-        this.addLog('SYSTEM', '👑 Đã tạm dừng quy trình — Chờ CEO Phê Duyệt Kế Hoạch Marketing để chạy tiếp các bước!', 'text-amber-400 font-bold');
+        this.addLog('SYSTEM', '👑 Đã tạm dừng quy trình — Chờ CEO Phê Duyệt Kế Hoạch từ CMO AI để chạy tiếp các bước!', 'text-amber-400 font-bold');
         return;
       }
 
@@ -411,7 +411,7 @@ class CampaignExecutionManagerClass {
     }
   }
 
-  // Human CEO approves a paused task (e.g. Marketing Manager Strategy) and resumes execution for downstream workers
+  // Human CEO approves a paused task (e.g. CMO AI Strategy) and resumes execution for downstream workers
   public async approveTaskAndResume(taskId: string, InternalApiGateway: any) {
     if (this.state.isProcessing && this.state.dynamicTasks.some(t => t.status === 'RUNNING')) {
       console.warn('[CampaignExecutionManager] Resume dispatch already in progress...');
@@ -431,7 +431,7 @@ class CampaignExecutionManagerClass {
     );
     this.notify();
 
-    this.addLog('HUMAN CEO', `👑 CEO ĐÃ PHÊ DUYỆT BẢN KẾ HOẠCH DỰ THẢO CỦA AI MARKETING MANAGER (Task #${targetTaskId})!`, 'text-emerald-400 font-bold');
+    this.addLog('HUMAN CEO', `👑 CEO ĐÃ PHÊ DUYỆT BẢN KẾ HOẠCH DỰ THẢO CỦA CMO AI (Task #${targetTaskId})!`, 'text-emerald-400 font-bold');
     this.addLog('GATEWAY', `⚡ Kích hoạt chạy tiếp 5 AI Agent cho các bước thực thi...`, 'text-indigo-400 font-semibold');
 
     try {
