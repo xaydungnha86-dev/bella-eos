@@ -790,6 +790,42 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   // 5. Invoke Platform Primitive: Enterprise Contract Registry (EIC registration & versioning)
   const eicVersion = ContractRegistry.getInstance().registerEic(proposedEic);
 
+  // 6. Invoke ECOS v22.0 core runtimes: EventStore, MemoryManager, Economics, Explainability, DecisionLifecycle
+  const { EventStore } = await import('@/core/event-sourcing/event-store');
+  const { MemoryManager } = await import('@/core/memory/memory-manager');
+  const { EconomicsRuntime } = await import('@/core/resource/economics-runtime');
+  const { ExplainabilityRuntime } = await import('@/core/decision/explainability-runtime');
+  const { DecisionLifecycleManager } = await import('@/core/decision/decision-lifecycle');
+
+  // Record Domain Event
+  EventStore.getInstance().saveEvents(proposedEic.metadata.contractId, [{
+    eventId: `evt-dec-${Date.now()}`,
+    aggregateId: proposedEic.metadata.contractId,
+    aggregateType: 'EIC_CONTRACT',
+    eventType: 'DecisionGenerated',
+    payload: { objective, budgetVnd: ecc.coverage.approvedBudgetLimitVnd, status: proposedEic.metadata.status },
+    timestamp: new Date().toISOString(),
+    version: eicVersion
+  }], 0);
+
+  // Score memory importance
+  const importanceScore = MemoryManager.getInstance().scoreImportance(objective);
+
+  // Estimate costs & budget ROI
+  const economicsEstimate = EconomicsRuntime.getInstance().estimateCost(objective);
+
+  // Formulate decision explainability
+  const explanation = ExplainabilityRuntime.getInstance().explain({
+    decisionId: proposedEic.metadata.contractId,
+    objective,
+    evidenceIds: ecc.evidenceIds,
+    hasStats
+  });
+
+  // Track decision lifecycle
+  DecisionLifecycleManager.getInstance().transitionDecision(proposedEic.metadata.contractId, proposedEic.metadata.status);
+
+
   // Human Readable Markdown Report (McKinsey Style)
   const defaultTemplate = `# 🏛️ EXECUTIVE DECISION PACKAGE (BẢN PHÂN TÍCH ĐIỀU HÀNH)
 *Được chuẩn hóa theo cấu trúc Enterprise Cognitive Layer (EIC v${eicVersion})*
@@ -869,11 +905,18 @@ ${sharedReasoning.nodes.map(node => `- **Node [${node.id}]** (Tự tin: ${node.c
 
 ## 3. ⚙️ TẦNG EXECUTION LAYER (LỚP THỰC THI CHI TIẾT)
 
-### 📊 Business Impact Forecast (Dự báo tác động toàn doanh nghiệp)
+### 📊 Business Impact & Economics Forecast (Dự báo kinh tế & ROI)
 - **Doanh thu dự kiến**: **${proposedEic.execution.businessImpactForecast.revenueGrowth}**
 - **Dòng tiền cải thiện**: **${proposedEic.execution.businessImpactForecast.cashflowImprovement}**
 - **Tải lượng nhân sự (HR Load)**: **${proposedEic.execution.businessImpactForecast.hrLoadIncrease}**
 - **Rủi ro chung**: **${proposedEic.execution.businessImpactForecast.overallRisk}**
+- **Dự toán chi phí LLM/GPU**: ~**${(economicsEstimate.llmCostVnd + economicsEstimate.gpuCostVnd).toLocaleString('vi-VN')} VND**
+- **Biên lợi nhuận mục tiêu (Net Margin)**: **${economicsEstimate.netMarginImpact}%**
+
+### 🧠 Decision Explainability (Giải trình & Kịch bản phản thực tế)
+- **Giải trình cốt lõi**: *${explanation.rationale}*
+- **Kịch bản phản thực tế (Counterfactual)**: *${explanation.counterfactualScenario}*
+- **Các phương án thay thế đã đánh giá**: ${explanation.alternativesEvaluated.join(', ')}
 
 ### 📋 Task Pipeline & Giao việc (TEC Contracts)
 - **Task #1 [TEC-CMO-001]**: CMO AI phân tích chỉ thị & ký duyệt EDC ➔ Trạng thái: **COMPLETED**.
