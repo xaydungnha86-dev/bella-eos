@@ -62,6 +62,39 @@ export async function POST(request: Request) {
       model?: string;
     };
 
+    // ════════════════════════════════════════════════════════════════════════
+    // CREATIVE INTELLIGENCE ENGINE v3 INTEGRATION
+    // Feature Flag: CREATIVE_INTELLIGENCE_VERSION=v3
+    // ════════════════════════════════════════════════════════════════════════
+    const useV3 = process.env.CREATIVE_INTELLIGENCE_VERSION === 'v3';
+    
+    if (useV3) {
+      console.log('[generate-image] Routing to Creative Intelligence Engine v3...');
+      try {
+        // Delegate to v3 endpoint
+        const v3Response = await fetch(`${getBaseUrl()}/api/ai/generate-image-v3`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        
+        if (v3Response.ok) {
+          const v3Data = await v3Response.json();
+          console.log('[generate-image] v3 succeeded:', v3Data.success);
+          return NextResponse.json(v3Data);
+        } else {
+          console.warn('[generate-image] v3 failed, falling back to v2');
+        }
+      } catch (v3Error) {
+        console.error('[generate-image] v3 error, falling back to v2:', v3Error);
+      }
+    }
+    
+    // ════════════════════════════════════════════════════════════════════════
+    // CREATIVE PLANNING ENGINE v2 (Legacy Template-Based)
+    // ════════════════════════════════════════════════════════════════════════
+    console.log('[generate-image] Using Creative Planning Engine v2 (template-based)...');
+    
     // Extract dynamic headline & offer from Copywriter content if provided
     const lowerObj = objective.toLowerCase();
     const brandName = brandDna?.brandName || 'BELLA EOS';
