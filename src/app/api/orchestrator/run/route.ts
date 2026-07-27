@@ -140,15 +140,40 @@ async function getCopywriterKeys(clientKeys: any) {
 async function tool_write_facebook_post(input: any, clientKeys: any): Promise<ToolResult> {
   const cw = await getCopywriterKeys(clientKeys);
   try {
+    // Detect domain from objective to set appropriate defaults
+    const rawObjective = input.objective || input.goal || 'Tạo nhận diện thương hiệu cho sản phẩm Bella EOS';
+    const lowerObj = rawObjective.toLowerCase();
+    
+    // Smart defaults based on objective content
+    let voiceTone = input.tone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
+    let segment = input.target_audience || 'Chủ Spa & Thẩm mỹ viện cao cấp';
+    
+    // Detect domain
+    if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('beauty') || lowerObj.includes('wellness')) {
+      segment = 'Chủ Spa & Thẩm mỹ viện cao cấp';
+      voiceTone = 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
+    } else if (lowerObj.includes('nhà hàng') || lowerObj.includes('restaurant') || lowerObj.includes('f&b') || lowerObj.includes('food')) {
+      segment = 'Chủ nhà hàng & Chuỗi F&B';
+      voiceTone = 'Gần gũi, Ấm áp, Hấp dẫn';
+    } else if (lowerObj.includes('bất động sản') || lowerObj.includes('real estate') || lowerObj.includes('property')) {
+      segment = 'Nhà đầu tư & Người mua nhà';
+      voiceTone = 'Chuyên nghiệp, Uy tín, Đáng tin cậy';
+    } else if (lowerObj.includes('công nghệ') || lowerObj.includes('tech') || lowerObj.includes('ai') || lowerObj.includes('software')) {
+      segment = 'Doanh nghiệp SME cần chuyển đổi số';
+      voiceTone = 'Sáng tạo, Đột phá, Chuyên nghiệp';
+    }
+    
+    console.log('[tool_write_facebook_post] Detected:', { segment, voiceTone });
+    
     const res = await fetch(`${getBaseUrl()}/api/ai/write-post`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        objective:    input.objective || input.goal || 'Tạo nhận diện thương hiệu cho sản phẩm Bella EOS',
-        voiceTone:    input.tone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế',
+        objective:    rawObjective,
+        voiceTone,
         platform:     'facebook',
-        segment:      input.target_audience || 'Chủ Spa & Thẩm mỹ viện cao cấp',
-        goal:         input.objective || input.goal || 'Tạo nhận diện thương hiệu cho sản phẩm Bella EOS',
+        segment,
+        goal:         rawObjective,
         client_openai_key:    cw.openai,
         client_anthropic_key: cw.anthropic,
         client_gemini_key:    cw.gemini,
@@ -168,75 +193,49 @@ async function tool_write_facebook_post(input: any, clientKeys: any): Promise<To
       }
     }
   } catch (e) {
-    console.warn('[tool_write_facebook_post] Write post fetch failed, using fallback calendar:', e);
+    console.warn('[tool_write_facebook_post] Write post fetch failed:', e);
   }
 
+  // Simple fallback if API fails
   const objective = typeof input === 'string' ? input : input.objective || 'Spa Management Software';
-  const weeklyDates = generateWeeklyDates(objective);
-  const { month } = parseMonthAndYear(objective);
-
-  const fallbackCalendar = `📅 [BELLA EOS CONTENT WORKER] BỘ LỊCH NỘI DUNG TRUYỀN THÔNG CHI TIẾT THEO TUẦN / THEO NGÀY (CONTENT CALENDAR THÁNG ${month})
-
----
-### 📌 BÀI VIẾT TUẦN 1 (W1 - KÍCH HOẠT NHẬN DIỆN & PAIN POINTS)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[0].fullDisplay}
-- 🎯 **Chủ đề**: Giải phóng 80% thời gian vận hành & Thất thoát tài chính Spa.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
+  const lowerObj = objective.toLowerCase();
+  
+  if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('beauty')) {
+    return {
+      success: true,
+      output: `🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
 
 Quản lý lịch hẹn trùng lặp, dòng tiền thất thoát cuối tháng và nhân sự tiếp thị biến động đang là "cơn ác mộng" âm thầm bào mòn lợi nhuận của các chủ cơ sở làm đẹp.
 
-✨ Giải pháp đột phá Bella EOS xuất hiện mang đến Hệ điều hành Doanh nghiệp AI thông minh — Tự động hóa 100% quy trình từ đặt lịch, kiểm toán tài chính EOM chống thất thoát đến điều hành tiếp thị đa kênh.
+✨ Giải pháp đột phá Bella EOS xuất hiện mang đến Hệ điều hành Doanh nghiệp AI thông minh:
+
+✅ Tự động hóa 100% quy trình từ đặt lịch → kiểm toán tài chính → điều phối tiếp thị đa kênh
+✅ Giải phóng 80% thời gian vận hành, tăng 300% hiệu suất quản lý
+✅ Hơn 1,200+ Spa trên toàn quốc đã tin dùng và đạt kết quả vượt trội
 
 👉 Đăng ký trải nghiệm bản Demo miễn phí ngay hôm nay để làm chủ công nghệ AI hàng đầu!
-#BellaEOS #QuanLySpa #TietKiemChiPhi #DemoMienPhi #TuDongHoaSpa
 
----
-### 📌 BÀI VIẾT TUẦN 2 (W2 - SOCIAL PROOF & CASE STUDY 1,200+ SPA)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[1].fullDisplay}
-- 🎯 **Chủ đề**: Chứng minh năng lực thực tế — 1,200+ Spa nâng cao 300% hiệu suất cùng Bella EOS.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🏆 BÍ QUYẾT NÂNG CAO 300% HIỆU SUẤT CỦA HƠN 1,200+ CHỦ SPA TRÊN TOÀN QUỐC!
-
-Không chỉ là lời hứa, Bella EOS đã và đang phục vụ hơn 1,200+ cơ sở Spa/TMV tối ưu hóa vận hành thực tế. Tự động hóa xếp lịch khách hàng, kiểm soát doanh thu minh bạch và giữ chân khách hàng tự động qua Zalo/Facebook.
-
-✨ Bạn muốn chuyển đổi số cho cơ sở của mình mà không cần tốn chi phí phòng tiếp thị?
-
-👉 Trải nghiệm ngay lực lượng 12+ AI Agents tự động vận hành Bella EOS!
-#BellaEOS #CaseStudy #HieuSuatSpa #KiemSoatEOM #SpaManagement
-
----
-### 📌 BÀI VIẾT TUẦN 3 (W3 - URGENCY OFFER DEMO MIỄN PHÍ)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[2].fullDisplay}
-- 🎯 **Chủ đề**: Đặc quyền giới hạn dành riêng cho 50 Spa đăng ký trải nghiệm sớm nhất.
-- 📝 **Nội dung xuất bản (Post Body)**:
-🎁 ĐẶC QUYỀN THÁNG ${month}: TẶNG BẢN DÙNG THỬ DEMO MỞ RỘNG CHO 50 SPA ĐẦU TIÊN!
-
-Nhằm hỗ trợ các chủ Spa gia tăng doanh thu bứt phá trong quý 3, Bella EOS dành tặng 50 suất trải nghiệm toàn bộ tính năng cao cấp của Hệ thống Quản lý AI hoàn toàn miễn phí.
-
-⏳ Số lượng ưu đãi có hạn và chỉ áp dụng đến hết ngày ${month === 2 ? '28' : [4,6,9,11].includes(month) ? '30' : '31'}/${String(month).padStart(2, '0')}/2026.
-
-👉 Bấm vào liên kết bên dưới để nhận suất ưu đãi đặc quyền ngay bây giờ!
-#BellaEOS #UudaiThang${month} #DemoFree #SpaTech #NhanDienThuongHieu
-
----
-### 📌 BÀI VIẾT TUẦN 4 (W4 - RETARGETING & AI WORKFORCE)
-- ⏰ **Lịch đăng bài tự động**: ${weeklyDates[3].fullDisplay}
-- 🎯 **Chủ đề**: Đột phá chuyển đổi & Tự động hóa tiếp thị đa kênh cùng 12+ AI Agents.
-- 📝 **Nội dung xuất bản (Post Body)**:
-⚡ BẠN ĐÃ SẴN SÀNG ĐỂ AI AGENTS TỰ ĐỘNG VẬN HÀNH MARKETING CHO SPA CỦA MÌNH?
-
-Từ phân tích yêu cầu CEO, soạn bài viết tiếp thị, thiết kế Banner 4K đến xuất bản tự động trên Fanpage — Tất cả được thực thi khép kín bởi lực lượng AI Workforce thông minh Bella EOS.
-
-🚀 Hãy bắt đầu hành trình tự động hóa tiếp thị chuẩn doanh nghiệp ngay hôm nay!
-
-👉 Khám phá ngay giải pháp Bella EOS Platform!
-#BellaEOS #AIAgents #TuDongHoaSpa #MarketingTuDong #ChuyenDoiSoSpa`;
+#BellaEOS #QuanLySpa #TietKiemChiPhi #DemoMienPhi #TuDongHoaSpa`,
+      meta: { model: 'fallback-spa-content', provider: 'bella-eos-kernel' }
+    };
+  }
 
   return {
     success: true,
-    output: fallbackCalendar,
-    meta: { model: 'rule-based-content-worker', provider: 'bella-eos-kernel' }
+    output: `🚀 BẠN ĐANG TÌM GIẢI PHÁP ĐỂ TĂNG TRƯỞNG DOANH THU BỀN VỮNG?
+
+Tối ưu hóa quy trình vận hành, tăng năng suất làm việc và kiểm soát chi phí hiệu quả là yếu tố then chốt giúp doanh nghiệp bứt phá trong môi trường cạnh tranh khốc liệt.
+
+✨ Bella EOS - Hệ sinh thái công nghệ quản trị AI-Native mang đến:
+
+✅ Tự động hóa 80% công việc điều phối & lập kế hoạch
+✅ Quản lý dữ liệu tập trung, theo dõi KPI & ROI thời gian thực
+✅ Tối ưu chi phí vận hành & tăng tốc độ thực thi chiến dịch
+
+👉 Đăng ký tư vấn và trải nghiệm giải pháp ngay hôm nay!
+
+#BellaEOS #NenTangVatHanh #ChuyenDoiSo #QuanTriDoanhNghiep`,
+    meta: { model: 'fallback-generic-content', provider: 'bella-eos-kernel' }
   };
 }
 
