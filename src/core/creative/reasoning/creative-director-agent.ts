@@ -250,7 +250,18 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
     let heroSubject = 'premium product showcase with clean surfaces';
     let environmentDescription = 'modern professional setting with soft lighting';
     
-    if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp')) {
+    // Priority 1: Enterprise platform marketing (about BELLA EOS itself)
+    if (lowerObj.includes('bella eos') || lowerObj.includes('platform') || lowerObj.includes('eic') || lowerObj.includes('enterprise ai')) {
+      campaignGoal = 'Position BELLA EOS as the leading AI platform for enterprise operations';
+      targetAudience = 'C-level executives, business owners, decision makers';
+      emotionalTone = 'authoritative, innovative, trustworthy, premium';
+      designDirection = 'enterprise tech showcase with AI elements';
+      posterHeadline = 'AI VẬN HÀNH DOANH NGHIỆP THẾ HỆ MỚI';
+      heroSubject = 'modern AI command center dashboard with holographic displays and data visualization';
+      environmentDescription = 'futuristic enterprise office with glass surfaces, blue ambient lighting, floating UI panels';
+    }
+    // Priority 2: Spa/beauty business
+    else if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp')) {
       campaignGoal = 'Drive demo bookings from premium spa owners for AI management platform';
       targetAudience = 'Premium Spa Owners & Beauty Studio Managers';
       emotionalTone = 'aspirational, serene, trustworthy, sophisticated';

@@ -320,11 +320,15 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   if (!objective && copywriterContent) {
     const contentLower = copywriterContent.toLowerCase();
     
-    // Extract from executive report headers
-    if (contentLower.includes('executive') || contentLower.includes('strategic report')) {
+    // Priority 1: Detect if this is ABOUT Bella EOS platform itself (enterprise software marketing)
+    if (contentLower.includes('bella eos') || contentLower.includes('enterprise') && (contentLower.includes('platform') || contentLower.includes('eic') || contentLower.includes('executive intelligence'))) {
+      objective = 'Enterprise AI Platform Marketing - BELLA EOS Brand Positioning';
+    }
+    // Priority 2: Extract from executive report headers
+    else if (contentLower.includes('executive') || contentLower.includes('strategic report')) {
       objective = 'Executive Strategic Report - Brand Positioning';
     }
-    // Extract from content type indicators
+    // Priority 3: Extract from content type indicators
     else if (contentLower.includes('báo cáo lãnh đạo')) {
       objective = 'Báo cáo chiến lược thương hiệu cho Ban Giám đốc';
     }
