@@ -809,7 +809,7 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   }], 0);
 
   // Score memory importance
-  const importanceScore = MemoryManager.getInstance().scoreImportance(objective);
+  const importanceScore = MemoryManager.getInstance().importance(objective);
 
   // Estimate costs & budget ROI
   const economicsEstimate = EconomicsRuntime.getInstance().estimateCost(objective);

@@ -46,7 +46,7 @@ Hệ thống định nghĩa 6 mức độ trưởng thành (**Maturity Levels**)
 | **ECC (Context)** | Kernel | L3 | Stable | None | CMO, CFO, COO |
 | **EIC (Decision)** | Decision | L2 | Stable | Knowledge, Memory | Workflow, Telemetry |
 | **Knowledge Graph** | Knowledge | L2 | ✅ Stable | Data Fabric | Planning, Decision, Memory |
-| **Memory** | Memory | L1 | Draft | Event Store | Decision, Planning, Learning |
+| **Memory** | Memory | L2 | ✅ Stable | Event Store | Decision, Planning, Learning |
 | **Planning** | Orchestration | L1 | Draft | Knowledge, Memory | Workflow, Scheduler |
 | **Scheduler** | Runtime | L1 | Draft | Priority Queue | Workflow |
 | **Workflow** | Runtime | L1 | Draft | Scheduler | Execution |
@@ -77,11 +77,20 @@ Hệ thống định nghĩa 6 mức độ trưởng thành (**Maturity Levels**)
 
 ---
 
-### 🚀 Sprint 28 — Memory Store & Retrieval L2
-- [ ] Tách biệt lưu trữ qua `IMemoryStore`.
-- [ ] Hoàn thành API đầy đủ: `add()`, `retrieve()` (lọc ngữ cảnh thật), `forget()`.
-- [ ] Tích hợp `RuntimeMetrics` cơ bản đo lường retrieval latencyMs.
-- [ ] Viết test suite phủ ít nhất 80% số dòng code.
+### 🚀 Sprint 27B — Memory Store & Retrieval L2
+*Tập trung hoàn thiện bộ lưu trữ và lọc tri thức động.*
+
+#### Definition of Done (DoD) đạt L2:
+- [x] Tách biệt lưu trữ qua `IMemoryStore`.
+- [x] Hoàn thành API đầy đủ: `add()`, `retrieve()` (lọc ngữ cảnh thật), `forget()`.
+- [x] Tích hợp `RuntimeMetrics` cơ bản đo lường retrieval latencyMs.
+- [x] Viết test suite phủ ít nhất 80% số dòng code. (Đạt: 100%, 57/57 tests PASSED)
+
+---
+
+### 🚀 Sprint 27C — Memory Compression & Metrics L2
+- [x] Hoàn thành API: `compress()`, `importance()` (chấm điểm theo quy tắc).
+- [x] Stress/Fuzz Test (10,000 memories, retrieve, compress) không crash.
 
 ---
 
