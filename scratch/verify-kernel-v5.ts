@@ -63,9 +63,9 @@ async function run() {
   assert('plan.styleId is luxury', plan.styleId === 'luxury');
   assert('plan.luxuryLevel is 5', plan.luxuryLevel === 5);
   assert('plan.palette has colors', !!plan.palette.primary && !!plan.palette.accent);
-  assert('plan.scene environment is set', plan.scene?.environment.includes('spa'));
-  assert('plan.camera lens choice is set', plan.camera.lens === '85mm f/1.4 GM' || plan.camera.lens?.includes('90mm') || plan.camera.lens?.includes('100mm'));
-  assert('plan.lighting keylight is set', plan.lighting.keyLight?.includes('soft') || plan.lighting.keyLight?.includes('Soft'));
+  assert('plan.scene environment is set', !!plan.scene?.environment.includes('spa'));
+  assert('plan.camera lens choice is set', !!(plan.camera.lens === '85mm f/1.4 GM' || plan.camera.lens?.includes('90mm') || plan.camera.lens?.includes('100mm')));
+  assert('plan.lighting keylight is set', !!(plan.lighting.keyLight?.includes('soft') || plan.lighting.keyLight?.includes('Soft')));
   assert('plan.composition copy space is set', (plan.composition.copySpacePercent ?? 0) >= 50);
 
   // Model-specific prompts
