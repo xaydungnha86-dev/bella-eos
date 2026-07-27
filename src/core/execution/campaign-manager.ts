@@ -54,7 +54,15 @@ class CampaignExecutionManagerClass {
       try {
         const saved = localStorage.getItem('bella_eos_campaign_manager_state');
         if (saved) {
-          this.state = { ...this.state, ...JSON.parse(saved), isProcessing: false };
+          const parsed = JSON.parse(saved);
+          // Auto-migrate legacy hardcoded defaults to fresh 0 state
+          if (parsed.activeCustomerCount === 1289) {
+            parsed.activeCustomerCount = 0;
+          }
+          if (parsed.fbReachCount === 14500) {
+            parsed.fbReachCount = 0;
+          }
+          this.state = { ...this.state, ...parsed, isProcessing: false };
         }
       } catch (e) {
         console.warn('Failed to load CampaignExecutionManager state:', e);
