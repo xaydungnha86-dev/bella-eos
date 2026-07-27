@@ -174,10 +174,14 @@ async function run() {
   const scheduler = SchedulerRuntime.getInstance();
   scheduler.scheduleTask({
     taskId: 't-saga-101',
+    name: 'Saga Campaign Execution Task',
     priority: 'HIGH',
     retryLimit: 3,
+    retryCount: 0,
     backoffMs: 1000,
     timeoutMs: 5000,
+    status: 'PENDING',
+    createdAt: new Date().toISOString(),
     deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
   });
   assert('Scheduler queues task by priority weights', scheduler.getQueue().length > 0);

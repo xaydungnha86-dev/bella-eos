@@ -64,44 +64,39 @@ Hệ thống định nghĩa 6 mức độ trưởng thành (**Maturity Levels**)
 
 Để kiểm soát rủi ro và nâng cao tính ổn định, quá trình đưa các primitives từ L1 lên L2 được chia thành các sprint chuyên biệt:
 
-### 🚀 Sprint 27 — Knowledge Graph L2 (Mục tiêu hiện tại)
+### 🚀 Sprint 27 — Knowledge Graph L2 (Đã hoàn thành)
 *Hoàn thiện đồ thị tri thức và quan hệ liên kết thực thể.*
 
-#### Definition of Done (DoD) đạt L2:
-- [x] Tách biệt lưu trữ qua `IGraphStore` (Persistence Abstraction).
-- [x] Hoàn thành API CRUD đầy đủ: `addNode()`, `updateNode()`, `removeNode()`, `link()`, `unlink()`, `traverse()`, `merge()`.
-- [x] Tích hợp `RuntimeMetrics` cơ bản: Đo lường latencyMs và success của các thao tác `traverse`, `merge`, `query`.
-- [x] Không sử dụng mock data trong mã nguồn của runtime.
-- [x] Viết test suite phủ ít nhất 80% số dòng code. (Đạt: 100%, 46/46 tests PASSED)
-- [x] Hoàn thành Stress/Fuzz Test tối giản (100 nodes, 200 links, traverse) không crash.
+---
+
+### 🚀 Sprint 28 — Planning & Scheduler Runtimes ➔ L2 (Mục tiêu hiện tại)
+*Tập trung hoàn thiện hệ thống lập kế hoạch công việc và hàng đợi điều phối.*
+
+#### Definition of Done (DoD) cho Planning Engine (L2):
+- [ ] Tách biệt lưu trữ qua `IPlanStore` (Persistence Abstraction).
+- [ ] Hoàn thành API lập kế hoạch: `plan()`, `solveDependencies()`, `validate()`.
+- [ ] Lập kế hoạch phân rã Goal thành Task Graph động thực tế (không stub).
+- [ ] Tích hợp API `validate(plan)` kiểm tra: thiếu capability, dependency bị mất, cyclic dependency, trùng lặp task ID, orphan task.
+- [ ] Loại bỏ tính toán chi phí (Cost Estimation) khỏi Planning (giao hoàn toàn cho Economics Runtime).
+- [ ] Viết test suite phủ ít nhất 80% số dòng code, có test chuyên biệt cho cycle, duplicate task, orphan task.
+
+#### Definition of Done (DoD) cho Scheduler Runtime (L2):
+- [ ] Tách biệt lưu trữ qua `ISchedulerStore` (Persistence Abstraction).
+- [ ] Sử dụng Binary Heap/Sorted Queue cấu trúc Priority Queue hiệu năng cao (CRITICAL > HIGH > MEDIUM > LOW).
+- [ ] Hoàn thành API: `scheduleTask()`, `failTaskAndRetry()`, `checkSlaViolation()`.
+- [ ] Lập lịch chạy lại Exponential Backoff lũy tiến thực tế, chuyển vào Dead Letter Queue (DLQ) đơn giản (`Map<string, string>`) khi vượt quá retryLimit.
+- [ ] Viết test suite phủ ít nhất 80% số dòng code, có test chuyên biệt cho retry, timeout, deadline, DLQ.
 
 ---
 
-### 🚀 Sprint 27B — Memory Store & Retrieval L2
-*Tập trung hoàn thiện bộ lưu trữ và lọc tri thức động.*
+### 🚀 Sprint 29 — Plugin SDK & Workflow Runtimes ➔ L2
+*Tập trung hoàn thiện cơ chế nạp plugin, sandbox bảo mật và điều phối Saga transaction.*
 
-#### Definition of Done (DoD) đạt L2:
-- [x] Tách biệt lưu trữ qua `IMemoryStore`.
-- [x] Hoàn thành API đầy đủ: `add()`, `retrieve()` (lọc ngữ cảnh thật), `forget()`.
-- [x] Tích hợp `RuntimeMetrics` cơ bản đo lường retrieval latencyMs.
-- [x] Viết test suite phủ ít nhất 80% số dòng code. (Đạt: 100%, 57/57 tests PASSED)
+### 🚀 Sprint 30 — Event Sourcing & Decision Lifecycle Runtimes ➔ L2
+*Tập trung hoàn thiện Event Store và vòng đời quyết định.*
 
----
-
-### 🚀 Sprint 27C — Memory Compression & Metrics L2
-- [x] Hoàn thành API: `compress()`, `importance()` (chấm điểm theo quy tắc).
-- [x] Stress/Fuzz Test (10,000 memories, retrieve, compress) không crash.
-
----
-
-### 🚀 Sprint 29 — Planning Engine L2
-### 🚀 Sprint 30 — Scheduler Runtime L2
-### 🚀 Sprint 31 — Plugin SDK L2
-### 🚀 Sprint 32 — Workflow Runtime L2
-### 🚀 Sprint 33 — Event Sourcing L2
-### 🚀 Sprint 34 — Decision Lifecycle L2
-### 🚀 Sprint 35 — Security & Policy Runtimes L2
-### 🚀 Sprint 36 — Economics & Evolution Runtimes L2
+### 🚀 Sprint 31 — Security & Policy Runtimes ➔ L2
+### 🚀 Sprint 32 — Economics & Evolution Runtimes ➔ L2
 
 ---
 
