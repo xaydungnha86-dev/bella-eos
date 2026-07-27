@@ -21,6 +21,7 @@ import type { PlanningState } from './planning-state';
 import type { KernelEventBus } from './kernel-event-bus';
 import { NULL_BUS } from './kernel-event-bus';
 import type { CreativePlan } from '../creative-plan';
+import { ExecutionPolicy, PolicyConfig } from './execution-policy';
 
 export class PlanningExecutor {
   constructor(private readonly bus: KernelEventBus = NULL_BUS) {}
@@ -82,8 +83,39 @@ export class PlanningExecutor {
     this.bus.emitPlanner('planner:before', planner.meta.plannerName);
     const start = Date.now();
 
+    // Default policy configurations
+    const policy: PolicyConfig = {
+      maxRetries: state.context.constraints?.maxImageTextRatio ? 2 : 1, // dynamically check context or default to 1 retry
+      backoffMs: 5,
+      timeoutMs: 3000,
+      circuitBreakerThreshold: 3,
+      circuitBreakerResetMs: 5000,
+    };
+
     try {
-      await planner.plan(state);
+      await ExecutionPolicy.executeWithPolicy(
+        planner.meta.plannerName,
+        async () => {
+          await planner.plan(state);
+        },
+        policy,
+        (msg) => {
+          // Ingest warning into state & emit warning to event bus
+          state.warnings.push({
+            planner: planner.meta.plannerName,
+            code: 'PLANNER_RETRY_WARNING',
+            message: msg,
+            severity: 'low',
+          });
+          this.bus.emit({
+            type: 'constraint:violated',
+            plannerName: planner.meta.plannerName,
+            data: { message: msg },
+            timestamp: new Date().toISOString()
+          });
+        }
+      );
+
       const elapsed = Date.now() - start;
       state.metrics.plannerTimes[planner.meta.plannerName] = elapsed;
       this.bus.emitPlanner('planner:after', planner.meta.plannerName, { ms: elapsed });

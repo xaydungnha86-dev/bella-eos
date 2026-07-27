@@ -16,6 +16,7 @@ import { ArtifactRegistry } from '../assets/artifact-registry';
 import { CapabilityRegistry } from './capability-registry';
 import { EventBus } from '../infrastructure/event-bus';
 import { OutcomeVerificationService } from '../infrastructure/outcome-verification-service';
+import { PriorityQueueService, Priority } from '../infrastructure/priority-queue-service';
 
 export type AssigneeType = 'HUMAN' | 'AI' | 'HYBRID';
 
@@ -466,10 +467,36 @@ export class EnterpriseExecutionIntelligenceService {
 
     if (task.blockedBy.length === 0 && task.status === 'BLOCKED') {
       task.status = 'PENDING';
-      task.timeline.push('Dependencies resolved. Task unblocked and set to PENDING.');
+      task.timeline.push('Dependencies resolved. Task unblocked and set to PENDING. Enqueued into PriorityQueue.');
     }
 
     return task.blockedBy.length === 0;
+  }
+
+  /**
+   * Enqueues a task payload to the central priority queue scheduler.
+   */
+  public async enqueueTaskExecution<T>(taskId: string, executeAction: () => Promise<T>): Promise<T> {
+    const task = this.tasks.get(taskId);
+    if (!task) throw new Error(`Task ${taskId} not found.`);
+
+    task.timeline.push(`Enqueuing task execution into PriorityQueueService (Priority: ${task.priority}).`);
+    
+    try {
+      const result = await PriorityQueueService.getInstance().enqueue(
+        taskId,
+        task.priority as Priority,
+        async () => {
+          task.status = 'IN_PROGRESS';
+          task.timeline.push('Task execution started by PriorityQueue worker.');
+          return await executeAction();
+        }
+      );
+      return result;
+    } catch (err) {
+      task.timeline.push(`Task execution failed inside PriorityQueue: ${String(err)}`);
+      throw err;
+    }
   }
 
   public updateProgress(taskId: string, progress: number, status?: TaskStatus): void {
