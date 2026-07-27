@@ -47,10 +47,10 @@ Hệ thống định nghĩa 6 mức độ trưởng thành (**Maturity Levels**)
 | **EIC (Decision)** | Decision | L2 | Stable | Knowledge, Memory | Workflow, Telemetry |
 | **Knowledge Graph** | Knowledge | L2 | ✅ Stable | Data Fabric | Planning, Decision, Memory |
 | **Memory** | Memory | L2 | ✅ Stable | Event Store | Decision, Planning, Learning |
-| **Planning** | Orchestration | L1 | Draft | Knowledge, Memory | Workflow, Scheduler |
-| **Scheduler** | Runtime | L1 | Draft | Priority Queue | Workflow |
-| **Workflow** | Runtime | L1 | Draft | Scheduler | Execution |
-| **Plugin SDK** | Runtime | L2 | Stable | Registry | Capability |
+| **Planning** | Orchestration | L2 | ✅ Stable | Knowledge, Memory | Workflow, Scheduler |
+| **Scheduler** | Runtime | L2 | ✅ Stable | Priority Queue | Workflow |
+| **Workflow** | Runtime | L2 | ✅ Stable | Scheduler | Execution |
+| **Plugin SDK** | Runtime | L2 | ✅ Stable | CapabilityRegistry | Verticals, AI Employees |
 
 ---
 
@@ -64,39 +64,58 @@ Hệ thống định nghĩa 6 mức độ trưởng thành (**Maturity Levels**)
 
 Để kiểm soát rủi ro và nâng cao tính ổn định, quá trình đưa các primitives từ L1 lên L2 được chia thành các sprint chuyên biệt:
 
-### 🚀 Sprint 27 — Knowledge Graph L2 (Đã hoàn thành)
-*Hoàn thiện đồ thị tri thức và quan hệ liên kết thực thể.*
+### ✅ Sprint 27 — Knowledge Graph L2 (Hoàn thành)
+*Hoàn thiện đồ thị tri thức và quan hệ liên kết thực thể. 46/46 tests PASSED.*
 
 ---
 
-### 🚀 Sprint 28 — Planning & Scheduler Runtimes ➔ L2 (Mục tiêu hiện tại)
-*Tập trung hoàn thiện hệ thống lập kế hoạch công việc và hàng đợi điều phối.*
-
-#### Definition of Done (DoD) cho Planning Engine (L2):
-- [ ] Tách biệt lưu trữ qua `IPlanStore` (Persistence Abstraction).
-- [ ] Hoàn thành API lập kế hoạch: `plan()`, `solveDependencies()`, `validate()`.
-- [ ] Lập kế hoạch phân rã Goal thành Task Graph động thực tế (không stub).
-- [ ] Tích hợp API `validate(plan)` kiểm tra: thiếu capability, dependency bị mất, cyclic dependency, trùng lặp task ID, orphan task.
-- [ ] Loại bỏ tính toán chi phí (Cost Estimation) khỏi Planning (giao hoàn toàn cho Economics Runtime).
-- [ ] Viết test suite phủ ít nhất 80% số dòng code, có test chuyên biệt cho cycle, duplicate task, orphan task.
-
-#### Definition of Done (DoD) cho Scheduler Runtime (L2):
-- [ ] Tách biệt lưu trữ qua `ISchedulerStore` (Persistence Abstraction).
-- [ ] Sử dụng Binary Heap/Sorted Queue cấu trúc Priority Queue hiệu năng cao (CRITICAL > HIGH > MEDIUM > LOW).
-- [ ] Hoàn thành API: `scheduleTask()`, `failTaskAndRetry()`, `checkSlaViolation()`.
-- [ ] Lập lịch chạy lại Exponential Backoff lũy tiến thực tế, chuyển vào Dead Letter Queue (DLQ) đơn giản (`Map<string, string>`) khi vượt quá retryLimit.
-- [ ] Viết test suite phủ ít nhất 80% số dòng code, có test chuyên biệt cho retry, timeout, deadline, DLQ.
+### ✅ Sprint 28 — Planning & Scheduler Runtimes ➔ L2 (Hoàn thành)
+*Hoàn thiện hệ thống lập kế hoạch công việc và hàng đợi điều phối. 71/71 tests PASSED.*
 
 ---
 
-### 🚀 Sprint 29 — Plugin SDK & Workflow Runtimes ➔ L2
-*Tập trung hoàn thiện cơ chế nạp plugin, sandbox bảo mật và điều phối Saga transaction.*
+### ✅ Sprint 29 — Plugin SDK & Workflow Runtimes ➔ L2 (Hoàn thành)
+*Hoàn thiện cơ chế nạp plugin, sandbox bảo mật và điều phối Saga transaction. 83/83 tests PASSED.*
 
-### 🚀 Sprint 30 — Event Sourcing & Decision Lifecycle Runtimes ➔ L2
-*Tập trung hoàn thiện Event Store và vòng đời quyết định.*
+---
 
-### 🚀 Sprint 31 — Security & Policy Runtimes ➔ L2
-### 🚀 Sprint 32 — Economics & Evolution Runtimes ➔ L2
+## 🏛️ ARCHITECTURE FREEZE — ECOS Core L2 Đã Đóng Băng
+
+> **Hiệu lực từ Sprint 29 (hoàn thành ngày 27/07/2026)**
+
+Toàn bộ 6 Kernel Primitives cốt lõi đã đạt mức trưởng thành **L2 (Functional Runtime)**:
+
+| Runtime | Sprint | Tests | Status |
+|---|---|---|---|
+| Knowledge Graph | Sprint 27 | 46/46 | ✅ L2 Frozen |
+| Memory Manager | Sprint 27 | 57/57 | ✅ L2 Frozen |
+| Planning Engine | Sprint 28 | 71/71 | ✅ L2 Frozen |
+| Scheduler Runtime | Sprint 28 | 71/71 | ✅ L2 Frozen |
+| Plugin SDK | Sprint 29 | 83/83 | ✅ L2 Frozen |
+| Workflow Runtime | Sprint 29 | 83/83 | ✅ L2 Frozen |
+
+**Sau Architecture Freeze, mọi effort chuyển sang:**
+
+```
+ECOS Core L2 (Frozen)
+        │
+        ▼
+Architecture Freeze
+        │
+        ├──────────────────┐
+        ▼                  ▼
+   Verticals           Plugins
+        │                  │
+  Bella Spa           BMAD
+  Bella Clinic        Claude Code
+  Bella Retail        Codex
+  Bella Manufacture   OpenHands
+  AI Employees        Custom Plugins
+  SOP Engine
+  Business DNA
+  Connector Ecosystem
+  Bella EIP Integration
+```
 
 ---
 

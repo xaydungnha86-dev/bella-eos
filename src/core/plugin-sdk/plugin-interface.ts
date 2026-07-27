@@ -24,6 +24,8 @@ export interface PluginMetadata {
   description: string;
   pluginType: PluginType;
   minEcosVersion: string;
+  capabilities?: string[];
+  permissions?: string[];
 }
 
 export interface IExtensionPlugin {

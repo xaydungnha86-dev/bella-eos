@@ -201,7 +201,7 @@ async function run() {
     }
   ];
 
-  const sagaResult = await workflow.executeSaga(sagaSteps);
+  const sagaResult = await workflow.executeSaga('saga-verify-101', 'Verify Core Saga Workflow', sagaSteps);
   assert('Saga Transaction fails as expected', !sagaResult);
   assert('Saga runs backward compensation triggers', !!step1Compensated);
 

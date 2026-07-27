@@ -22,7 +22,7 @@ describe('BELLA EOS v20.0 Enterprise Cognitive Operating System (ECOS) & Plugin 
         author: 'Unit Test',
         description: 'Test Description',
         pluginType: 'SKILL',
-        minEcosVersion: '20.0',
+        minEcosVersion: 'v22.0',
       },
       async initialize() { return true; },
       async execute(input) { return { status: 'OK', ...input }; },
