@@ -7,6 +7,7 @@
  */
 
 import { IEvidence, EvidenceType, IEvidenceAttachment } from '@/types/evidence';
+import { SupabaseMetadataStore, SupabaseBlobStore } from '@/core/storage/storage-services';
 
 export interface RawInputPayload {
   type: EvidenceType;
@@ -55,7 +56,80 @@ export class EvidenceIngestionRuntime {
     };
 
     this.evidenceStore.set(id, evidence);
+
+    // Asynchronously persist to EKR registry (Fire & Forget to preserve synchronous API contract)
+    this.persistToEKR(evidence).catch(err => {
+      console.error(`[EvidenceIngestionRuntime] Failed to persist evidence ${id} to EKR:`, err);
+    });
+
     return evidence;
+  }
+
+  private async persistToEKR(evidence: IEvidence): Promise<void> {
+    const metadataStore = SupabaseMetadataStore.getInstance();
+    const blobStore = SupabaseBlobStore.getInstance();
+
+    const title = evidence.source;
+    const department = evidence.metadata.department || 'GENERAL';
+    const ownerId = evidence.createdBy;
+    const contentStr = typeof evidence.content === 'string'
+      ? evidence.content
+      : JSON.stringify(evidence.content);
+
+    const hash = evidence.metadata.rawHash || `hash-${Date.now()}`;
+    const size = Buffer.byteLength(contentStr);
+    
+    // Determine target storage path
+    const sanitizedTitle = title.replace(/\s+/g, '_').toLowerCase();
+    const storagePath = `documents/${department.toLowerCase()}/${sanitizedTitle}_${evidence.id}.txt`;
+
+    // 1. Upload raw content to Object Storage (BlobStore)
+    await blobStore.uploadBlob(storagePath, contentStr, 'text/plain');
+
+    // 2. Query documents table to see if document already exists
+    const existingDocs = await metadataStore.query('documents', { title, department });
+    let documentId: string;
+    let nextVersionNumber = 1;
+
+    if (existingDocs.length > 0) {
+      // Document exists, get the latest version number
+      const doc = existingDocs[0];
+      documentId = doc.id;
+      
+      const versions = await metadataStore.query('document_versions', { document_id: documentId });
+      if (versions.length > 0) {
+        const maxVer = Math.max(...versions.map(v => v.version_number));
+        nextVersionNumber = maxVer + 1;
+      }
+    } else {
+      // Document does not exist, create document identity
+      documentId = `doc-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      await metadataStore.insert('documents', {
+        id: documentId,
+        title,
+        department,
+        owner_id: ownerId === 'SYSTEM_INGESTION' ? null : ownerId,
+        status: 'APPROVED'
+      });
+    }
+
+    // 3. Create document version record
+    const versionId = `ver-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    await metadataStore.insert('document_versions', {
+      id: versionId,
+      document_id: documentId,
+      version_number: nextVersionNumber,
+      storage_path: storagePath,
+      mime_type: 'text/plain',
+      file_size: size,
+      checksum: hash
+    });
+
+    // 4. Update evidence metadata with registry details
+    evidence.metadata.documentId = documentId;
+    evidence.metadata.versionId = versionId;
+    evidence.metadata.versionNumber = nextVersionNumber;
+    evidence.metadata.storagePath = storagePath;
   }
 
   public getEvidence(id: string): IEvidence | undefined {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PosterDesignSkill, BrandDnaContext } from '@/core/skills/poster-design-skill';
+import { CreativePlanningEngine } from '@/core/creative/creative-planning-engine';
 import fs from 'fs';
 import path from 'path';
 
@@ -138,8 +139,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Build structured 4K Commercial Sales Poster Prompt via PosterDesignSkill
-    const imagePrompt = prompt || PosterDesignSkill.buildSalesPosterPrompt(objective, dynamicHeadline, brandDna);
+    // ── Build CreativePlan via the Creative Planning Engine ──────────────────
+    // The engine runs all 11 pipeline stages and returns a structured plan.
+    // Each AI model gets its own optimized prompt from the plan.
+    const creativePlan = await CreativePlanningEngine.planAsync({
+      objective,
+      copywriterSnippet: dynamicHeadline,
+      brandDna,
+      format: '16:9',
+      medium: 'image',
+    });
+    const imagePrompt   = prompt || creativePlan.imagenPrompt;  // Imagen default
+    const negativePrompt = creativePlan.negativePrompt;
+    console.log(`[Creative Planning Engine] Style: ${creativePlan.styleId} | LuxuryLevel: ${creativePlan.luxuryLevel} | PromptLen: ${imagePrompt.length}ch`);
 
     const buildOverlayUrl = (aiImageUrl: string) => {
       const baseUrl = getBaseUrl();
@@ -153,8 +165,72 @@ export async function POST(request: Request) {
           resolvedBg = localPath;
         }
       }
-      
-      return `${baseUrl}/api/ai/banner-image?bg=${encodeURIComponent(resolvedBg)}&headline=${encodeURIComponent(dynamicHeadline)}&badge=${encodeURIComponent(dynamicBadge)}&cta=${encodeURIComponent(dynamicCta)}&b1=${encodeURIComponent(dynamicBullets[0])}&b2=${encodeURIComponent(dynamicBullets[1])}&b3=${encodeURIComponent(dynamicBullets[2])}&brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${Date.now()}`;
+
+      // ── Derive dynamic iPad mockup content from objective ──────────────────
+      const lo = objective.toLowerCase();
+      let metricTitle = 'TIẾN TRÌNH CHIẾN DỊCH';
+      let metricValue = '+25.8% 📈';
+      let widgetTitle = 'HOẠT ĐỘNG GẦN ĐÂY';
+      let feedLog1 = '🟢 AI Planning: Active';
+      let feedLog2 = '📊 Analytics: Synced';
+      let statusText = 'STATUS: OPERATIONAL 100%';
+
+      if (lo.includes('spa') || lo.includes('thẩm mỹ') || lo.includes('làm đẹp')) {
+        metricTitle = 'DOANH THU SPA THÁNG NÀY';
+        metricValue = '+25.8% 📈';
+        widgetTitle = 'LỊCH KTV SPA REALTIME';
+        feedLog1 = '🌿 Phòng VIP #01 (Chờ KTV)';
+        feedLog2 = '🌿 Thảo Dược #03 (Active)';
+        statusText = 'STATUS: SPA OPERATIONAL 100%';
+      } else if (lo.includes('bất động sản') || lo.includes('căn hộ') || lo.includes('chung cư')) {
+        metricTitle = 'TỶ LỆ LẤY CĂN (BOOKED)';
+        metricValue = '84.2% 🏢';
+        widgetTitle = 'PHÂN KHU ĐANG MỞ BÁN';
+        feedLog1 = '🏢 Phân khu Centric (Còn 15 căn)';
+        feedLog2 = '🏢 Phân khu Premium (Đã khóa cọc)';
+        statusText = 'STATUS: AGENT ACTIVE 100%';
+      } else if (lo.includes('thời trang') || lo.includes('boutique') || lo.includes('shop')) {
+        metricTitle = 'DOANH SỐ ĐƠN HÀNG';
+        metricValue = '1,248 🛍️';
+        widgetTitle = 'TỒN KHO HỆ THỐNG';
+        feedLog1 = '🛍️ Áo Blazer (Sẵn sàng - 42 chiếc)';
+        feedLog2 = '🛍️ Áo Hoodies (Sắp hết - 5 chiếc)';
+        statusText = 'STATUS: SYNCED 100%';
+      } else if (lo.includes('tuyển dụng') || lo.includes('recruitment') || lo.includes('hr')) {
+        metricTitle = 'HỒ SƠ ĐÃ NHẬN';
+        metricValue = '248 🧑‍💼';
+        widgetTitle = 'PIPELINE TUYỂN DỤNG';
+        feedLog1 = '🧑‍💼 Vòng phỏng vấn: 12 ứng viên';
+        feedLog2 = '✅ Đã offer: 3 vị trí';
+        statusText = 'STATUS: HR PIPELINE ACTIVE';
+      } else if (lo.includes('công nghệ') || lo.includes('ai') || lo.includes('software') || lo.includes('digital')) {
+        metricTitle = 'AI PERFORMANCE INDEX';
+        metricValue = '99.2% 🤖';
+        widgetTitle = 'AI SYSTEM MONITOR';
+        feedLog1 = '🤖 LLM Engine: Running';
+        feedLog2 = '📡 Data Pipeline: Synced';
+        statusText = 'STATUS: AI SYSTEM ACTIVE';
+      }
+
+      const params = new URLSearchParams({
+        bg: resolvedBg,
+        headline: dynamicHeadline,
+        badge: dynamicBadge,
+        cta: dynamicCta,
+        b1: dynamicBullets[0],
+        b2: dynamicBullets[1],
+        b3: dynamicBullets[2],
+        brandName,
+        objective,
+        metricTitle,
+        metricValue,
+        widgetTitle,
+        feedLog1,
+        feedLog2,
+        statusText,
+        t: String(Date.now()),
+      });
+      return `${baseUrl}/api/ai/banner-image?${params.toString()}`;
     };
 
     const tryImagen = async () => {
@@ -186,7 +262,8 @@ export async function POST(request: Request) {
               parameters: {
                 sampleCount: 1,
                 aspectRatio: '16:9',
-                outputMimeType: 'image/jpeg'
+                outputMimeType: 'image/jpeg',
+                negativePrompt: negativePrompt
               }
             })
           });
@@ -281,7 +358,8 @@ export async function POST(request: Request) {
           },
           body: JSON.stringify({
             model: 'dall-e-3',
-            prompt: imagePrompt,
+            // DALL-E 3 gets its own model-optimized prompt (descriptive paragraph + avoidance clause)
+            prompt: prompt ? `${imagePrompt}. Avoid: ${negativePrompt}.` : creativePlan.dallePrompt,
             n: 1,
             size: '1792x1024',
             quality: 'standard'
@@ -322,9 +400,11 @@ export async function POST(request: Request) {
             'Authorization': `Key ${falKey}`
           },
           body: JSON.stringify({
-            prompt: imagePrompt,
+            // Flux receives tag-dense keyword prompt optimized by FluxOptimizer
+            prompt: prompt ? imagePrompt : creativePlan.fluxPrompt,
             image_size: 'landscape_16_9',
-            num_inference_steps: 4
+            num_inference_steps: 4,
+            negative_prompt: negativePrompt
           })
         });
 

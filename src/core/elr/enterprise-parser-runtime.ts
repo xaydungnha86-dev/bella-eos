@@ -8,6 +8,7 @@
  */
 
 import { IEvidence } from '@/types/evidence';
+import { SupabaseMetadataStore, SupabaseVectorStore } from '@/core/storage/storage-services';
 
 export interface EnterpriseParsedObject {
   id: string;
@@ -48,7 +49,7 @@ export class EnterpriseParserRuntime {
     const textLower = rawText.toLowerCase();
 
     // Parse Decisions
-    if (textLower.includes('quuyết định') || textLower.includes('decision') || textLower.includes('đã duyệt')) {
+    if (textLower.includes('quyết định') || textLower.includes('quuyết định') || textLower.includes('decision') || textLower.includes('đã duyệt')) {
       parsedObjects.push({
         id: `obj-dec-${Date.now()}-1`,
         evidenceId: evidence.id,
@@ -110,10 +111,94 @@ export class EnterpriseParserRuntime {
     evidence.metadata.parsedObjectsCount = parsedObjects.length;
     evidence.status = 'PARSED';
 
-    return {
+    const result: EnterpriseParserResult = {
       evidenceId: evidence.id,
       parsedObjects,
       extractedMetrics,
     };
+
+    // Asynchronously persist parsed data and generate vector embeddings (Fire & Forget)
+    this.persistParsedData(evidence, result).catch(err => {
+      console.error(`[EnterpriseParserRuntime] Failed to persist parsed data to EKR for evidence ${evidence.id}:`, err);
+    });
+
+    return result;
+  }
+
+  private async persistParsedData(evidence: IEvidence, result: EnterpriseParserResult): Promise<void> {
+    const metadataStore = SupabaseMetadataStore.getInstance();
+    const vectorStore = SupabaseVectorStore.getInstance();
+
+    const documentId = evidence.metadata.documentId || `doc-fallback-${evidence.id}`;
+    const versionId = evidence.metadata.versionId || `ver-fallback-${evidence.id}`;
+
+    // 1. Persist each parsed object to Metadata Store
+    for (const obj of result.parsedObjects) {
+      await metadataStore.insert('parsed_objects', {
+        id: obj.id,
+        evidence_id: obj.evidenceId,
+        document_id: documentId,
+        object_type: obj.type,
+        name: obj.name,
+        details: obj.details,
+        confidence: obj.confidence,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    // 2. Perform chunking & vectorization
+    const rawText = typeof evidence.content === 'string'
+      ? evidence.content
+      : JSON.stringify(evidence.content);
+
+    // Simple chunker: split by sentence boundaries or newlines
+    const sentences = rawText.split(/[.!?\n]+/).map(s => s.trim()).filter(s => s.length > 5);
+    const chunks: string[] = [];
+    
+    // Group sentences into chunks of approx 150-300 characters
+    let currentChunk = '';
+    for (const sentence of sentences) {
+      if (currentChunk.length + sentence.length > 300) {
+        chunks.push(currentChunk.trim());
+        currentChunk = sentence + ' ';
+      } else {
+        currentChunk += sentence + ' ';
+      }
+    }
+    if (currentChunk.trim().length > 0) {
+      chunks.push(currentChunk.trim());
+    }
+
+    // 3. Upsert chunks into Vector Store
+    for (let index = 0; index < chunks.length; index++) {
+      const chunkText = chunks[index];
+      const chunkId = `chk-${evidence.id}-${index}`;
+      const embedding = this.generateMockEmbedding(chunkText);
+      const payload = {
+        document_id: documentId,
+        version_id: versionId,
+        chunk_index: index,
+        content: chunkText,
+        metadata: {
+          evidence_id: evidence.id,
+          source: evidence.source,
+          department: evidence.metadata.department
+        }
+      };
+
+      await vectorStore.upsertVector(chunkId, embedding, payload);
+    }
+  }
+
+  private generateMockEmbedding(text: string): number[] {
+    const vector = new Array(1536).fill(0);
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    for (let i = 0; i < 1536; i++) {
+      vector[i] = Math.sin(hash + i) * 0.1;
+    }
+    return vector;
   }
 }

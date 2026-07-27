@@ -226,6 +226,18 @@ export async function GET(request: Request) {
       metricSub = 'Giảm 90% Lỗi Vận Hành Chuỗi';
     }
 
+    // ── ALLOW CALLER TO OVERRIDE MOCKUP CONTENT VIA QUERY PARAMS ─────────────
+    // These take precedence over all smart-defaults above.
+    // Example: &mockupTitle=CEO+Dashboard&metricValue=+38%25&feedLog1=📊+AI+Planning+Active
+    uiTitle     = searchParams.get('mockupTitle')  || uiTitle;
+    metricTitle = searchParams.get('metricTitle')  || metricTitle;
+    metricValue = searchParams.get('metricValue')  || metricValue;
+    metricSub   = searchParams.get('metricSub')    || metricSub;
+    widgetTitle = searchParams.get('widgetTitle')  || widgetTitle;
+    feed1       = searchParams.get('feedLog1')     || feed1;
+    feed2       = searchParams.get('feedLog2')     || feed2;
+    statusText  = searchParams.get('statusText')   || statusText;
+
     // ── LAYOUT VARIANT 1: MAGAZINE CENTER (Centered Hero + Top Header) ───────
     if (layoutStyle === 'magazine_center') {
       return new ImageResponse(

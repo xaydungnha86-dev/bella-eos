@@ -1,19 +1,22 @@
 /**
  * 🎨 POSTER & BANNER DESIGN SKILL — BELLA EOS CREATIVE WORKER ENGINE
- * Specification: Enterprise Agent Skill v3.0
- * Role: Dynamic Commercial Sales Poster Generator with Business Context & Multi-Task Copy Ingestion
+ * Specification: Enterprise Agent Skill v4.0
+ * Role: Layout renderer, SVG banner assembler, and backward-compat shim.
+ *
+ * IMPORTANT: As of v4.0, prompt generation is FULLY delegated to CreativePlanningEngine.
+ * This class retains:
+ *   - renderDynamicPosterSvg()     — SVG/HTML5 banner layout
+ *   - buildFullDesignSpecPrompt()  — display-only design spec string
+ *   - buildSalesPosterPrompt()     — SHIM → calls CreativePlanningEngine
+ *   - getNegativePrompt()          — SHIM → calls CreativePlanningEngine
+ * Do NOT add new prompt-building logic here.
  */
+import { CreativePlanningEngine } from '@/core/creative/creative-planning-engine';
+export type { BrandDnaContext } from '@/core/creative/creative-plan';
 
-export interface BrandDnaContext {
-  voiceTone?: string;              // e.g. "Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế"
-  brandName?: string;              // e.g. "BELLA EOS"
-  brandColors?: {
-    primary?: string;              // e.g. "#061E17"
-    accent?: string;               // e.g. "#D4AF37"
-  };
-  visualStyle?: string;            // e.g. "Luxury Spa Ambient, 3D Glassmorphism iPad Mockup"
-  targetSegment?: string;          // e.g. "Chủ Spa & Thẩm mỹ viện cao cấp"
-}
+// BrandDnaContext is now defined and exported from @/core/creative/creative-plan
+// The re-export above keeps all existing importers working without changes.
+import type { BrandDnaContext } from '@/core/creative/creative-plan';
 
 export interface PosterDesignSpec {
   headline: string;
@@ -22,14 +25,65 @@ export interface PosterDesignSpec {
   ctaText: string;
   brandDna?: BrandDnaContext;
   bulletPoints?: string[];
-  aspectRatio: '16:9' | '1:1' | '9:16';
   resolution: string;
   objective?: string;
 }
 
+export interface VisualStylePreset {
+  camera: string;
+  lighting: string;
+  environment: string;
+  composition: string;
+  rendering: string;
+  negativePrompt: string;
+}
+
 export class PosterDesignSkill {
   public static readonly SKILL_NAME = 'poster_design_creative';
-  public static readonly SKILL_VERSION = '3.0.0';
+  public static readonly SKILL_VERSION = '4.0.0';
+
+  public static readonly VISUAL_STYLE_PRESETS: Record<string, VisualStylePreset> = {
+    luxury: {
+      camera: "shot on Hasselblad H6D-100c, 85mm lens, f/2.0, shallow depth of field, sharp focus, cinematic photography",
+      lighting: "exquisite volumetric lighting, soft ambient golden hour glow, dramatic shadows, warm studio highlights",
+      environment: "ultra-premium high-end architectural setting with gold trims, polished Italian marble textures, and rich organic elements",
+      composition: "elegant clean balance, hero subject positioned on the right third of the frame, leaving the left 60% of the screen as plain, clean background for copy text",
+      rendering: "unbelievably photorealistic, 8K resolution, raytraced reflections, warm cinematic color grading",
+      negativePrompt: "text, words, letters, typography, logo, watermark, signature, blurry, low resolution, bad proportions"
+    },
+    minimalist: {
+      camera: "shot on Sony A7R V, 50mm prime lens, f/4.0, sharp focus, clean crisp detail, minimalist aesthetic",
+      lighting: "bright natural daylight, soft diffused shadows, high key white light, clean minimal glow",
+      environment: "sterile clean minimalist scandinavian interior, matte plaster walls, light oak wood textures, sleek raw stone",
+      composition: "extreme negative space, clean spacious layout, right-aligned focal elements with a plain, flat wall on the left 60% of the canvas",
+      rendering: "clean photorealistic render, architectural visualization, neutral color palette, Apple-style product aesthetic",
+      negativePrompt: "text, letters, words, messy, cluttered, dark, heavy shadows, gold, luxury, watermark, logo"
+    },
+    cyberpunk: {
+      camera: "shot on Leica SL2, 35mm wide lens, f/1.8, cinematic anamorphic flares, hyper-detailed",
+      lighting: "vibrant neon glow, cybernetic purple and cyan light sources, high contrast cyberpunk dark ambient lighting, backlighting",
+      environment: "futuristic hi-tech corporate lab, glowing server rack arrays, 3D holographic interfaces, dark metallic and glass panels",
+      composition: "dynamic high angle perspective, tech bento layout grid style, left 55% designed as a clean dark space with dim blue grids for copy",
+      rendering: "octane render style, sci-fi futuristic design, sleek neon accents, ultra-high detail, raytraced metal",
+      negativePrompt: "text, logo, brand names, letters, retro, classic, bright daylight, sunny, natural, green, plants"
+    },
+    bento: {
+      camera: "shot on Canon EOS R5, 85mm macro lens, f/2.8, isometric tilt-shift perspective, sharp details",
+      lighting: "modern flat studio lighting, soft 3D ambient occlusion, clean volumetric highlights",
+      environment: "3D abstract tech components, glassmorphism UI tiles, floating neon icons, sleek geometric prisms",
+      composition: "organized grid layout, bento box grid structure, left column space reserved for text alignment, right side featuring complex 3D tech elements",
+      rendering: "premium 3D render, Blender cycles style, glassmorphic refraction, smooth pastel gradients, tech-minimalist",
+      negativePrompt: "text, signature, watermark, photorealistic human, noisy, chaotic, realistic background"
+    },
+    corporate: {
+      camera: "shot on Nikon Z9, 85mm portrait lens, f/2.2, clean depth of field, professional corporate look",
+      lighting: "professional office window daylight, balanced fill light, bright clean corporate studio highlights",
+      environment: "modern executive boardroom background, soft out-of-focus glass walls, sleek wooden tables, clean skyscraper view",
+      composition: "clean corporate balanced layout, copy space on the left 60%, professional corporate elements on the right 40%",
+      rendering: "clean photorealistic business portrait style, professional color grade, corporate aesthetic",
+      negativePrompt: "text, letters, words, logo, blurry background, fantasy, neon, cyberpunk, low quality"
+    }
+  };
 
   /**
    * Helper to resolve dynamic segment parameters based on objective
@@ -187,20 +241,22 @@ export class PosterDesignSkill {
   }
 
   /**
-   * Builds an AI Image Generation Prompt dynamically
+   * @deprecated Prompt generation is now handled by CreativePlanningEngine.
+   * This shim delegates to the engine and returns the Imagen-optimized prompt.
+   * Maintained for backward compatibility with existing callers.
    */
   public static buildSalesPosterPrompt(objective: string, copyHeadline?: string, brandDna?: BrandDnaContext): string {
-    const lowerObj = objective.toLowerCase();
-    
-    if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp') || lowerObj.includes('salon')) {
-      return "A premium clean minimalist treatment room spa background, copy space on the left, photorealistic, NO text, NO writing, NO letters";
-    } else if (lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ') || lowerObj.includes('chung cư') || lowerObj.includes('nhà đất')) {
-      return "A premium modern luxury apartment building background, copy space on the left, photorealistic, NO text, NO writing, NO letters";
-    } else if (lowerObj.includes('thời trang') || lowerObj.includes('quần áo') || lowerObj.includes('boutique') || lowerObj.includes('shop')) {
-      return "A premium clean minimalist luxury fashion boutique store background, copy space on the left, photorealistic, NO text, NO writing, NO letters";
-    } else {
-      return "A premium clean minimalist modern studio background, copy space on the left, photorealistic, NO text, NO writing, NO letters";
-    }
+    const plan = CreativePlanningEngine.plan({ objective, copywriterSnippet: copyHeadline, brandDna });
+    return plan.imagenPrompt;
+  }
+
+  /**
+   * @deprecated Negative prompt generation is now handled by CreativePlanningEngine.
+   * This shim delegates to the engine.
+   */
+  public static getNegativePrompt(objective: string, brandDna?: BrandDnaContext): string {
+    const plan = CreativePlanningEngine.plan({ objective, brandDna });
+    return plan.negativePrompt;
   }
 
   /**
