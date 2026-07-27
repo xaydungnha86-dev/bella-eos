@@ -1,6 +1,7 @@
 # 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA OPERATING SYSTEM (BELLA EOS) & BELLA EIP
-> **STATUS**: `FINAL ARCHITECTURE CONSTITUTION (v20.1 DYNAMIC ENTERPRISE CAPABILITY & POLICY OS)`  
-> **SPECIFICATION VERSION**: `v20.1`  
+> **STATUS**: `FINAL ARCHITECTURE CONSTITUTION (v21.0 CREATIVE PRODUCTION RUNTIME + ENTERPRISE KNOWLEDGE REPOSITORY)`  
+> **SPECIFICATION VERSION**: `v21.0`  
+> **LAST UPDATED**: `2026-07-27`  
 > **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
 ---
@@ -379,6 +380,8 @@ Partitioned Event Bus (Domain Events, Application Events, Integration Events)
 | **Sprint 20** | ECOS Final Freeze & Plugin SDK: Layer 3 Domain Packs (Spa, Clinic, Retail), Layer 4 AI Provider Adapters (OpenAI, Anthropic, Gemini, DeepSeek, Local), Enterprise Plugin SDK, Namespaced Catalog Standardization | ✅ **PASSED 100% (Build PASS)** |
 | **Sprint 21** | Dynamic Capability & Policy OS: Capability Registry Service, Enterprise Resource Manager, Policy-as-Code Engine, Contracts CORE-08 (`ICapabilitySpecification`), CORE-09 (`IEnterpriseResourceBudget`), GOV-01 (`IPolicyDefinition`), Services nomenclature transition | ✅ **PASSED 100% (Build PASS)** |
 | **Sprint 22** | Enterprise Reliability Layer (ERL): 5 Engines (Evaluation, Diagnostics, Governance, Observability, Improvement), 27 Primitives (ERI Index, ECE Calibration, Canary rollout, Error Budget freeze, DevOps incidents, ERI Forecast/Trend, Heatmap matrix) | ✅ **PASSED 100% (Build PASS)** |
+| **Sprint 23** | **Creative Production Runtime Kernel v2** (`src/core/creative/`): DAG-scheduled async Creative Kernel (Kahn's algorithm topological sort), PlanningExecutor (parallel wave execution), PlannerRegistry, KernelEventBus, ConstraintEngine. 9 Planners: `IntentPlanner`, `SemanticPlanner`, `StylePlanner`, `ScenePlanner`, `CompositionPlanner`, `LightingPlanner`, `CameraPlanner`, `NarrativePlanner`, `QualityEvaluator` (final quality-gated wave). 3 AI Provider Adapters: `ImagenAdapter` (Google, natural prose), `FluxAdapter` (Flux, tagged keywords), `DalleAdapter` (DALL-E 3). `CreativePlanningEngine` dual-interface shim (`plan` sync / `planAsync` async) for backward compatibility. `generate-image` API route migrated to async kernel. TypeScript: 0 errors. Tests: 85/85 legacy + 20/20 kernel. | ✅ **PASSED 100% (Build PASS)** |
+| **Sprint 24** | **Enterprise Knowledge Repository (EKR)** (`ADR-0006`): Document versioning & registry pattern (PostgreSQL `document_registry` + `document_versions`), 5-category data segregation (Structured → PostgreSQL, Documents → Object Storage, Knowledge → pgvector/Graph, AI Runtime → Redis, Media → Blob). `IBlobStore` interface, `StorageServices` abstraction, ingestion pipeline (`Evidence Ingestion → Enterprise Parser → Chunker → Embedding → Vector DB`). Supabase migration `002_document_registry.sql`. `EnterpriseParserRuntime` & `EvidenceIngestionRuntime` extended with multi-modal support. | ✅ **PASSED 100% (Build PASS)** |
 
 ---
 
@@ -1112,6 +1115,158 @@ To align with the EECOS platform boundaries, the presentation tier transitions f
 - **Widgets**: Overall Enterprise Reliability Index (ERI), ERI trend history graph, ERI forecast predictor (14-day SLA check), AI safety monitor (prompt injection/PII counts), capability performance heatmap matrix (accuracy, latency, hallucination color-coded grid), reliability incident list, and auto-improvement recommendation card.
 
 ---
+
+## 22. 🎨 CREATIVE PRODUCTION RUNTIME (CPR) ARCHITECTURE (v21.0 — Phase 2)
+
+The **Creative Production Runtime** is Bella EOS's dedicated AI image and visual content engine. It transforms a high-level `CreativeRequest` (brand brief, product, campaign goal) into a fully structured `CreativePlan` ready for multi-model AI generation.
+
+```
+                           CEO / Marketing Brief
+                                    │
+                                    ▼
+                       CreativePlanningEngine
+                      (Dual Interface Shim v2)
+                        plan() ─── planAsync()
+                                    │
+                                    ▼
+             ┌──────────────── Creative Kernel ────────────────┐
+             │                                                  │
+             │  1. PlannerRegistry  ──── Register & Discover    │
+             │  2. PlanningExecutor ──── DAG Wave Scheduler      │
+             │  3. KernelEventBus   ──── Typed Event Emission    │
+             │  4. ConstraintEngine ──── Plan Validation         │
+             └──────────────────────────────────────────────────┘
+                                    │
+             ┌──────────── Execution Waves (Kahn's Algorithm) ──────────┐
+             │  Wave 1 (independent): IntentPlanner, StylePlanner        │
+             │  Wave 2 (depends W1):  SemanticPlanner, ScenePlanner       │
+             │  Wave 3 (depends W2):  CompositionPlanner, LightingPlanner │
+             │  Wave 4 (depends W3):  CameraPlanner, NarrativePlanner     │
+             │  Wave 5 (final):       QualityEvaluator (quality gate)     │
+             └──────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+                      CreativePlan (Structured Output)
+                                    │
+             ┌──────────── AI Provider Adapters ──────────────┐
+             │  ImagenAdapter  → Natural prose prompt (Google) │
+             │  FluxAdapter    → Tagged keyword prompt (Flux)   │
+             │  DalleAdapter   → DALL-E 3 standardized prompt  │
+             └──────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+                    Generated Image / Creative Asset
+```
+
+### 22.1 The 9 Creative Planners (DAG-Scheduled)
+
+| # | Planner | Wave | Responsibility |
+| :--- | :--- | :--- | :--- |
+| 1 | `IntentPlanner` | Wave 1 | Parses creative goal → intent, audience, emotion, action |
+| 2 | `StylePlanner` | Wave 1 | Maps brand DNA to visual style (luxury, editorial, fashion...) |
+| 3 | `SemanticPlanner` | Wave 2 | Enriches concept with semantic keywords & visual metaphors |
+| 4 | `ScenePlanner` | Wave 2 | Constructs environment, backdrop, atmosphere, time-of-day |
+| 5 | `CompositionPlanner` | Wave 3 | Defines subject placement, framing, depth-of-field rules |
+| 6 | `LightingPlanner` | Wave 3 | Specifies lighting type, direction, temperature, mood |
+| 7 | `CameraPlanner` | Wave 4 | Sets focal length, aperture, camera angle, movement |
+| 8 | `NarrativePlanner` | Wave 4 | Synthesizes planners into a coherent visual story |
+| 9 | `QualityEvaluator` | Wave 5 | Evaluates completeness & brand-fit, emits `quality:pass/warn` |
+
+### 22.2 StyleLibrary & Brand DNA Integration
+`StyleLibrary` maps enterprise brand styles to curated palette bundles:
+- `luxury` → Deep navy, champagne gold, soft cream
+- `fashion` → Muted sage, blush rose, soft linen
+- `editorial` → Warm ivory, soft taupe, dusty terracotta
+- `wellness` → Forest green, warm terracotta, oat cream
+- `energy` → Vibrant teal, electric coral, muted yellow
+
+`StylePlanner` reads `CompanyDNA.brandStyle` and merges primary + accent palette colors into the `CreativePlan.styleSpec`.
+
+### 22.3 KernelEventBus — Typed Events
+All kernel lifecycle events are emitted through typed channels:
+```typescript
+kernel:start     // Kernel begins planning
+planner:start    // Individual planner begins execution
+planner:done     // Individual planner completes
+planner:error    // Planner failure captured
+quality:pass     // QualityEvaluator: all dimensions pass
+quality:warn     // QualityEvaluator: warnings detected
+kernel:done      // All waves complete
+```
+
+### 22.4 Phase 3 Roadmap (Post-Production Feedback)
+The following capabilities are **deferred** until real-world telemetry confirms need:
+1. **Execution Policy** (Retry, Fallback, Circuit Breaker between waves)
+2. **StateStore** (Persistent planning checkpoints)
+3. **PlanningGraph** (Visual DAG introspection)
+4. **Quality Gate v2** (Comparative multi-model quality scoring)
+
+---
+
+## 23. 📚 ENTERPRISE KNOWLEDGE REPOSITORY (EKR) ARCHITECTURE (v21.0 — ADR-0006)
+
+EKR defines how Bella EOS stores, versions, indexes, and retrieves all corporate documents, policies, SOPs, meeting records, and media assets in a queryable, AI-ready format.
+
+### 23.1 5-Category Data Segregation Strategy
+
+| Category | Data Types | Storage Target | Rationale |
+| :--- | :--- | :--- | :--- |
+| **Structured Data** | User, Workflow, Task, Approval records | PostgreSQL (schema-enforced) | Transactional integrity & relational joins |
+| **Documents** | SOPs, Policies, Agreements, Meeting Minutes | Object Storage (`IBlobStore`) + PostgreSQL registry | Version control + cheap blob storage |
+| **Knowledge** | Text chunks, vector embeddings, citations | pgvector / Qdrant + Graph DB | Semantic search & AI context retrieval |
+| **AI Runtime** | Reasoning plans, tool logs, session states | PostgreSQL (JSONB) / Redis | Speed for transient cognitive state |
+| **Media** | Images, audio transcripts, training videos | Object Storage (binary) | Binary efficiency at scale |
+
+### 23.2 Document Versioning & Registry
+Every document follows an **immutable version chain** — originals are never overwritten:
+
+```
+ document_registry           document_versions
+ ─────────────────           ─────────────────────────────────────────
+ id (uuid)                   id (uuid)
+ title                       document_id → document_registry.id
+ department                  version_number (integer, increments)
+ owner_id                    storage_path (IBlobStore URI)
+ parent_document_id          mime_type
+ status (draft/active/...)   file_size, checksum (SHA-256)
+                             created_at
+```
+
+### 23.3 EKR Ingestion Pipeline
+```
+[Raw Upload]
+     │
+     ▼
+[IBlobStore] ─── Save original file to Object Storage
+     │
+     ▼
+[Document Registry] ─── Register metadata in PostgreSQL
+     │
+     ▼
+[EnterpriseParserRuntime] ─── Extract: Decisions, Actions, Owners, Deadlines, KPIs
+     │
+     ├──► [PostgreSQL] ─── Structured entities (tasks, decisions)
+     │
+     ▼
+[Chunker] ─── Split extracted text into semantic chunks
+     │
+     ▼
+[Embedding Engine] ─── Generate vector embeddings
+     │
+     ▼
+[pgvector / IVectorStore] ─── Upsert with document_versions.id reference
+```
+
+### 23.4 EKR Interfaces
+- **`IBlobStore`**: `upload(file) → uri`, `download(uri) → Buffer`, `delete(uri)`, `getSignedUrl(uri, ttl)`
+- **`StorageServices`**: Abstraction layer routing to MinIO / AWS S3 / GCS / Azure Blob based on environment config
+- **`IVectorStore`**: `upsert(chunks)`, `search(query, topK, filter)`, `delete(documentVersionId)`
+
+### 23.5 AI Answer Traceability
+When an AI employee answers a question using EKR knowledge, it references the exact `document_versions.id` (e.g., `SOP_v3.pdf`) rather than unverifiable generic knowledge — enabling human supervisors to audit the source document directly.
+
+---
+
 *Archived & Sealed: Q3 2026*
 *Bella EOS Core Architecture Committee*
 
