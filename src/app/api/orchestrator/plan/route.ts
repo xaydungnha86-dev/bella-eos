@@ -324,7 +324,9 @@ function buildFallbackPlan(objective: string, context?: any) {
   const lowerObj = objective.toLowerCase();
   const tasks = [];
 
-  // Task 1: CMO AI (Executive Marketing Strategist) analyzes CEO requirements via ECC and drafts EIC
+  // Task 1: DISABLED - Marketing Strategy Analysis
+  // (Creates markdown report which confuses users - only enable for complex campaigns)
+  /*
   tasks.push({
     task_id: 't1',
     agent_id: 'eos_marketing_manager',
@@ -336,26 +338,49 @@ function buildFallbackPlan(objective: string, context?: any) {
     depends_on: [],
     requires_human_approval: true
   });
+  */
 
-  // Task 2: Bella EOS Content Worker drafts the marketing copy
+  // Task 2 → NOW TASK 1: Content Writing (first visible task)
+  const contentTaskDesc = lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ')
+    ? `Soạn thảo bài viết Marketing cho ngành Spa/Thẩm mỹ: "${objective.substring(0, 60)}"`
+    : lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ')
+    ? `Soạn thảo bài viết Marketing cho dự án Bất động sản: "${objective.substring(0, 60)}"`
+    : lowerObj.includes('bella eos') || lowerObj.includes('platform') || lowerObj.includes('eic')
+    ? `Soạn thảo bài viết Marketing cho Nền tảng AI BELLA EOS: "${objective.substring(0, 60)}"`
+    : `Soạn thảo bài viết truyền thông & Offer trải nghiệm cho: "${objective.substring(0, 60)}"`;
+    
   tasks.push({
     task_id: 't2',
     agent_id: 'eos_content_worker',
-    agent_name: 'Bella EOS Content Worker',
+    agent_name: 'BELLA EOS Content Worker',
     task_type: 'write_facebook_post',
-    task_description: `Soạn thảo bài viết truyền thông & Offer trải nghiệm Demo cho chiến dịch: "${objective}"`,
-    input: { objective, tone, target_audience: segment, platform: 'facebook', strategy_from: 't1' },
+    task_description: contentTaskDesc,
+    input: { 
+      objective: objective, // Use ORIGINAL CEO objective, not t1 output
+      tone, 
+      target_audience: segment, 
+      platform: 'facebook'
+      // Removed strategy_from to prevent markdown report leakage
+    },
     expected_output: 'Bài đăng Facebook hoàn chỉnh từ Bella EOS Worker, có hook, offer và hashtag',
-    depends_on: ['t1']
+    depends_on: [] // Remove t1 dependency to prevent content inheritance
   });
 
   // Task 3: Bella EOS Media & Creative Worker generates visual banner / mockup
+  const creativeTaskDesc = lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ')
+    ? `Thiết kế Banner hình ảnh thương hiệu & Mockup Giao diện cho ngành Spa/Làm đẹp`
+    : lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ')
+    ? `Thiết kế Banner hình ảnh thương hiệu & Mockup cho dự án Bất động sản`
+    : lowerObj.includes('bella eos') || lowerObj.includes('platform') || lowerObj.includes('eic')
+    ? `Thiết kế Banner hình ảnh thương hiệu cho Nền tảng Enterprise AI - BELLA EOS`
+    : `Thiết kế Banner hình ảnh thương hiệu chất lượng cao cho chiến dịch: "${objective.substring(0, 60)}"`;
+  
   tasks.push({
     task_id: 't3',
     agent_id: 'eos_creative_worker',
-    agent_name: 'Bella EOS Media & Creative Worker',
+    agent_name: 'BELLA EOS Media & Creative Worker',
     task_type: 'generate_media_creative',
-    task_description: 'Thiết kế Banner hình ảnh thương hiệu & Mockup Giao diện Demo Spa Bella EOS',
+    task_description: creativeTaskDesc,
     input: { objective, content_from: 't2', format: '1200x630_banner' },
     expected_output: 'File Banner hình ảnh thiết kế 4K chất lượng cao phục vụ đăng bài & chạy ads',
     depends_on: ['t2']
@@ -373,7 +398,7 @@ function buildFallbackPlan(objective: string, context?: any) {
     depends_on: ['t2', 't3']
   });
 
-  // Task 5: Ares Ads Agent sets up ad campaign with the text + banner
+  // Task 5: Ares Ads Agent sets up ad campaign with the text + banner (CONDITIONAL)
   if (lowerObj.includes('quảng cáo') || lowerObj.includes('ads') || lowerObj.includes('ngân sách') || lowerObj.includes('demo') || lowerObj.includes('spa')) {
     tasks.push({
       task_id: 't5',
@@ -387,9 +412,9 @@ function buildFallbackPlan(objective: string, context?: any) {
     });
   }
 
-  // Task 5: Athena Analytics Agent forecasts KPI/ROI
+  // Task 6: Athena Analytics Agent forecasts KPI/ROI (ALWAYS)
   tasks.push({
-    task_id: `t${tasks.length + 1}`,
+    task_id: 't6', // Fixed ID to prevent duplicate with t5
     agent_id: 'athena_analytics',
     agent_name: 'Athena Analytics Agent',
     task_type: 'generate_report',

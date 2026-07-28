@@ -139,9 +139,14 @@ async function getCopywriterKeys(clientKeys: any) {
 
 async function tool_write_facebook_post(input: any, clientKeys: any): Promise<ToolResult> {
   const cw = await getCopywriterKeys(clientKeys);
+  
+  // DEBUG: Log input để kiểm tra
+  console.log('[tool_write_facebook_post] RAW INPUT:', JSON.stringify(input).substring(0, 300));
+  
   try {
     // Detect domain from objective to set appropriate defaults
     const rawObjective = input.objective || input.goal || 'Tạo nhận diện thương hiệu cho sản phẩm Bella EOS';
+    console.log('[tool_write_facebook_post] Raw objective:', rawObjective.substring(0, 200));
     const lowerObj = rawObjective.toLowerCase();
     
     // Smart defaults based on objective content
@@ -396,9 +401,9 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   });
 
   try {
-    // Always use v3 (Creative Intelligence Engine with LLM reasoning)
-    const endpoint = '/api/ai/generate-image-v3';
-    console.log(`[tool_generate_media_creative] Using Creative Intelligence v3`);
+    // Always use v4 (AI renders everything including text - no Canvas overlay)
+    const endpoint = '/api/ai/generate-image-v4';
+    console.log(`[tool_generate_media_creative] Using Creative Intelligence v4 (AI renders text)`);
     console.log(`[tool_generate_media_creative] Passing gemini key: ${geminiKey ? 'YES ✅' : 'NO ❌'}`);
     
     const res = await fetch(`${getBaseUrl()}${endpoint}`, {
@@ -1350,6 +1355,12 @@ function topologicalSort(tasks: any[]): any[] {
 function resolveInputReferences(input: Record<string, any>, taskOutputs: Record<string, string>): Record<string, any> {
   const resolved: Record<string, any> = {};
   for (const [key, val] of Object.entries(input)) {
+    // CRITICAL: Never replace 'objective' with task output to prevent markdown report leakage
+    if (key === 'objective') {
+      resolved[key] = val;
+      continue;
+    }
+    
     if (typeof val === 'string') {
       if (taskOutputs[val]) {
         resolved[key] = taskOutputs[val];
