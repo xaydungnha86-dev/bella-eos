@@ -131,6 +131,8 @@ Create a comprehensive Creative Brief with the following JSON structure:
   "visualStory": "One-sentence visual narrative (what story does the image tell?)",
   "designDirection": "Overall aesthetic direction (e.g., luxury wellness tech, modern editorial, cyberpunk corporate)",
   "posterHeadline": "CRITICAL: Create a NEW headline optimized for POSTER medium. Should be 3-8 words, punchy, visual-first, benefit-driven. NOT the Facebook post headline.",
+  "keyBenefits": ["List exactly 3 key benefits/features for bullet points on the poster. Each should be 4-8 words maximum, action-oriented. Format: 'Verb + outcome' (e.g., 'Tối ưu xếp lịch & phân ca KTV')"],
+  "callToAction": "Action-oriented CTA for button (4-6 words, urgent, specific). NOT generic 'Tìm hiểu thêm'. Examples: 'Đăng ký trải nghiệm ngay', 'Nhận ưu đãi 50%', 'Đặt lịch tư vấn miễn phí'",
   "heroSubject": "Main visual subject that should dominate the image (be specific: e.g., 'premium glass cosmetic jars on polished marble surface' NOT just 'spa products')",
   "environmentDescription": "Setting and background atmosphere (where does this scene take place? what's the mood?)",
   "colorMood": "Color psychology direction (what emotions should colors evoke?)",
@@ -181,11 +183,13 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
       }
       
       // Try multiple Gemini models in order of preference
+      // Updated for 2026: Use latest stable models
       const models = [
-        'gemini-2.0-flash-exp',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro',
-        'gemini-pro'
+        'gemini-2.5-flash',       // Newest stable (2026)
+        'gemini-2.5-pro',         // Pro version
+        'gemini-3-flash-preview', // Experimental 3.x
+        'gemini-flash-latest',    // Always latest stable
+        'gemini-pro-latest'       // Latest Pro
       ];
       
       let lastError: Error | null = null;
@@ -312,6 +316,8 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
       visualStory: `A compelling visual narrative that captures ${campaignGoal}`,
       designDirection,
       posterHeadline,
+      keyBenefits: this.generateDefaultKeyBenefits(lowerObj),
+      callToAction: this.generateDefaultCTA(lowerObj),
       heroSubject,
       environmentDescription,
       colorMood: 'warm, premium, trustworthy',
@@ -371,5 +377,71 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
     if (!Array.isArray(brief.successMetrics) || brief.successMetrics.length === 0) {
       brief.successMetrics = ['CTR > 3%', 'Conversions > 50'];
     }
+    
+    // Ensure keyBenefits array exists
+    if (!Array.isArray(brief.keyBenefits) || brief.keyBenefits.length === 0) {
+      brief.keyBenefits = this.generateDefaultKeyBenefits('');
+    }
+    
+    // Ensure callToAction exists
+    if (!brief.callToAction) {
+      brief.callToAction = 'Đăng ký trải nghiệm ngay';
+    }
+  }
+
+  /**
+   * Generate domain-specific key benefits for fallback
+   */
+  private generateDefaultKeyBenefits(objectiveLower: string): string[] {
+    if (objectiveLower.includes('spa') || objectiveLower.includes('thẩm mỹ') || objectiveLower.includes('làm đẹp')) {
+      return [
+        'Tối ưu xếp lịch & phân ca KTV',
+        'Báo cáo doanh thu thời gian thực',
+        'Giữ chân 95% khách hàng VIP'
+      ];
+    }
+    
+    if (objectiveLower.includes('nhà hàng') || objectiveLower.includes('restaurant') || objectiveLower.includes('f&b')) {
+      return [
+        'Quản lý đặt bàn & thực đơn',
+        'Tối ưu chi phí nguyên liệu',
+        'Tăng 40% hiệu suất phục vụ'
+      ];
+    }
+    
+    if (objectiveLower.includes('bất động sản') || objectiveLower.includes('real estate')) {
+      return [
+        'Quản lý danh mục BĐS toàn diện',
+        'Tự động hóa marketing đa kênh',
+        'Phân tích xu hướng thị trường'
+      ];
+    }
+    
+    // Generic enterprise
+    return [
+      'Tự động hóa 80% vận hành',
+      'Theo dõi KPI thời gian thực',
+      'Tăng 300% hiệu suất làm việc'
+    ];
+  }
+
+  /**
+   * Generate domain-specific CTA for fallback
+   */
+  private generateDefaultCTA(objectiveLower: string): string {
+    if (objectiveLower.includes('demo') || objectiveLower.includes('trải nghiệm')) {
+      return 'Đăng ký trải nghiệm ngay';
+    }
+    
+    if (objectiveLower.includes('ưu đãi') || objectiveLower.includes('giảm giá')) {
+      return 'Nhận ưu đãi đặc biệt';
+    }
+    
+    if (objectiveLower.includes('tư vấn') || objectiveLower.includes('liên hệ')) {
+      return 'Đặt lịch tư vấn miễn phí';
+    }
+    
+    // Default
+    return 'Đăng ký trải nghiệm ngay';
   }
 }

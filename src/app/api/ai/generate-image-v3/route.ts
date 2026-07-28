@@ -79,18 +79,23 @@ export async function POST(request: Request) {
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     // Determine execution order based on preferred model
+    // ENABLED: Imagen 4 image generation (requires paid Gemini API key)
     const tryImagen = async () => {
       const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       if (!geminiKey) return null;
 
       const imagePrompt = modelPrompts.imagen || composedPrompt.basePrompt;
-      const negativePrompt = composedPrompt.negativePrompt;
 
-      const modelsToTry = ['imagen-3.0-generate-002', 'imagen-3.0-fast-generate-001'];
+      // Imagen 4 models (2026 - requires paid API key)
+      const modelsToTry = [
+        'imagen-4.0-generate-001',      // Imagen 4 Standard
+        'imagen-4.0-fast-generate-001', // Imagen 4 Fast
+        'imagen-4.0-ultra-generate-001' // Imagen 4 Ultra (best quality)
+      ];
 
       for (const modelId of modelsToTry) {
         try {
-          console.log(`[API v3] Trying Google Imagen (${modelId})...`);
+          console.log(`[API v3] Trying Imagen 4 (${modelId})...`);
           
           const res = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:predict?key=${geminiKey}`,
@@ -102,8 +107,8 @@ export async function POST(request: Request) {
                 parameters: {
                   sampleCount: 1,
                   aspectRatio: format,
-                  outputMimeType: 'image/jpeg',
-                  negativePrompt: negativePrompt
+                  outputMimeType: 'image/jpeg'
+                  // NOTE: negativePrompt no longer supported in Imagen 4
                 }
               })
             }
@@ -116,11 +121,11 @@ export async function POST(request: Request) {
             const base64Data = data.predictions[0].bytesBase64Encoded;
             const dataUrl = `data:${mimeType};base64,${base64Data}`;
             
-            console.log(`[API v3] ✓ Google Imagen (${modelId}) succeeded`);
+            console.log(`[API v3] ✓ Imagen 4 (${modelId}) succeeded`);
             
             return {
               success: true,
-              provider: 'google-imagen',
+              provider: 'google-imagen-4',
               model: modelId,
               imageUrl: saveBase64ToPublic(dataUrl),
               creativeBrief: {
@@ -135,9 +140,9 @@ export async function POST(request: Request) {
             };
           }
           
-          console.warn(`[API v3] Google Imagen (${modelId}) failed:`, data.error?.message || 'Unknown error');
+          console.warn(`[API v3] Imagen 4 (${modelId}) failed:`, data.error?.message || 'Unknown error');
         } catch (e) {
-          console.warn(`[API v3] Google Imagen (${modelId}) error:`, e);
+          console.warn(`[API v3] Imagen 4 (${modelId}) error:`, e);
         }
       }
       return null;
@@ -149,52 +154,63 @@ export async function POST(request: Request) {
 
       const imagePrompt = modelPrompts.imagen || composedPrompt.basePrompt;
 
-      try {
-        console.log('[API v3] Trying Gemini Native Image...');
-        
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [{
-                  text: `Generate a high quality ${format} marketing banner image: ${imagePrompt}`
-                }]
-              }]
-            })
-          }
-        );
+      // Gemini 3.x image models (2026)
+      const geminiImageModels = [
+        'gemini-3.1-flash-image',       // Nano Banana 2
+        'gemini-3-pro-image',           // Nano Banana Pro
+        'gemini-2.5-flash-image'        // Gemini 2.5 with image
+      ];
 
-        const data = await res.json();
-        const part = data.candidates?.[0]?.content?.parts?.[0];
-        
-        if (res.ok && part?.inlineData?.data) {
-          const mimeType = part.inlineData.mimeType || 'image/png';
-          const base64Data = part.inlineData.data;
-          const dataUrl = `data:${mimeType};base64,${base64Data}`;
+      for (const model of geminiImageModels) {
+        try {
+          console.log(`[API v3] Trying Gemini Image (${model})...`);
           
-          console.log('[API v3] ✓ Gemini Native Image succeeded');
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [{
+                    text: `Generate a high quality ${format} marketing banner image: ${imagePrompt}`
+                  }]
+                }]
+              })
+            }
+          );
+
+          const data = await res.json();
+          const part = data.candidates?.[0]?.content?.parts?.[0];
           
-          return {
-            success: true,
-            provider: 'google-gemini-native',
-            model: 'gemini-2.0-flash-exp',
-            imageUrl: saveBase64ToPublic(dataUrl),
-            creativeBrief: {
-              headline: creativeBrief.posterHeadline,
-              campaignGoal: creativeBrief.campaignGoal,
-              designDirection: creativeBrief.designDirection,
-              confidence: creativeBrief.confidenceScore
-            },
-            reasoning: creativeBrief.reasoningChain,
-            prompt: imagePrompt.substring(0, 200) + '...',
-            pipelineVersion: '3.0.0'
-          };
+          if (res.ok && part?.inlineData?.data) {
+            const mimeType = part.inlineData.mimeType || 'image/png';
+            const base64Data = part.inlineData.data;
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            
+            console.log(`[API v3] ✓ Gemini Image (${model}) succeeded`);
+            
+            return {
+              success: true,
+              provider: 'google-gemini-image',
+              model: model,
+              imageUrl: saveBase64ToPublic(dataUrl),
+              creativeBrief: {
+                headline: creativeBrief.posterHeadline,
+                campaignGoal: creativeBrief.campaignGoal,
+                designDirection: creativeBrief.designDirection,
+                confidence: creativeBrief.confidenceScore
+              },
+              reasoning: creativeBrief.reasoningChain,
+              prompt: imagePrompt.substring(0, 200) + '...',
+              pipelineVersion: '3.0.0'
+            };
+          }
+          
+          console.warn(`[API v3] Gemini Image (${model}) failed:`, data.error?.message || 'Unknown error');
+        } catch (e) {
+          console.warn(`[API v3] Gemini Image (${model}) error:`, e);
         }
-      } catch (e) {
-        console.warn('[API v3] Gemini Native Image error:', e);
       }
       return null;
     };
@@ -314,7 +330,49 @@ export async function POST(request: Request) {
         console.log('[API v3] ═══════════════════════════════════════════');
         console.log(`[API v3] ✓ Success with ${result.provider}`);
         console.log('[API v3] ═══════════════════════════════════════════');
-        return NextResponse.json(result);
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // CANVAS COMPOSITION: Add text overlay to AI-generated background
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        
+        try {
+          console.log('[API v3] Starting Canvas composition...');
+          console.log('[API v3] Background:', result.imageUrl.substring(0, 100));
+          
+          const { CanvasCompositor } = await import('@/core/creative/composition/canvas-compositor');
+          
+          // backgroundImagePath là relative path /temp-banners/xxx.png
+          const composited = await CanvasCompositor.compose({
+            backgroundImagePath: result.imageUrl, // /temp-banners/xxx.png
+            creativeBrief,
+            brandDna: brandDna || {
+              brandName: 'BELLA EOS',
+              brandColors: { primary: '#061E17', accent: '#D4AF37' }
+            },
+            format: format as any
+          });
+          
+          // Save composited image
+          const compositedDataUrl = `data:${composited.format};base64,${composited.imageBuffer.toString('base64')}`;
+          const finalImageUrl = saveBase64ToPublic(compositedDataUrl);
+          
+          console.log('[API v3] ✓ Canvas composition complete');
+          console.log('[API v3] Final banner:', finalImageUrl);
+          
+          return NextResponse.json({
+            ...result,
+            imageUrl: finalImageUrl,
+            model: `${result.model} + canvas-overlay`,
+            pipelineVersion: '3.1.0-canvas',
+            compositionMethod: 'ai-background + canvas-typography'
+          });
+          
+        } catch (e) {
+          console.error('[API v3] Canvas composition failed:', e);
+          console.log('[API v3] Falling back to raw AI image');
+          // Return raw image without overlay
+          return NextResponse.json(result);
+        }
       }
     }
 

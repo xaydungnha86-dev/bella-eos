@@ -320,31 +320,27 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   if (copywriterContent) {
     const contentLower = copywriterContent.toLowerCase();
     
-    // Priority 1: Detect if this is ABOUT Bella EOS platform itself (enterprise software marketing)
-    if (contentLower.includes('bella eos') || contentLower.includes('eic') || (contentLower.includes('enterprise') && (contentLower.includes('platform') || contentLower.includes('executive intelligence')))) {
-      objective = 'Enterprise AI Platform Marketing - BELLA EOS Brand Positioning';
-      console.log('[tool_generate_media_creative] Detected: BELLA EOS platform marketing');
+    // Detect domain from ACTUAL business being marketed (not platform name)
+    if (contentLower.includes('spa') || contentLower.includes('thẩm mỹ') || contentLower.includes('làm đẹp')) {
+      objective = 'Marketing Campaign for Spa & Beauty Industry';
+      console.log('[tool_generate_media_creative] Detected: Spa/Beauty business');
     }
-    // Priority 2: Executive report
+    else if (contentLower.includes('bất động sản') || contentLower.includes('căn hộ') || contentLower.includes('real estate')) {
+      objective = 'Marketing Campaign for Real Estate';
+      console.log('[tool_generate_media_creative] Detected: Real estate');
+    }
+    else if (contentLower.includes('nhà hàng') || contentLower.includes('restaurant') || contentLower.includes('f&b')) {
+      objective = 'Marketing Campaign for Restaurant & F&B';
+      console.log('[tool_generate_media_creative] Detected: Restaurant/F&B');
+    }
+    // Only detect platform marketing if it's clearly ABOUT the platform itself
     else if (contentLower.includes('executive strategic report') || contentLower.includes('báo cáo lãnh đạo')) {
       objective = 'Executive Strategic Report - Brand Positioning';
       console.log('[tool_generate_media_creative] Detected: Executive report');
     }
-    // Priority 3: Domain-specific (only if NOT platform)
-    else if (contentLower.includes('spa') || contentLower.includes('thẩm mỹ')) {
-      // Check if it's platform FOR spa or spa business itself
-      if (!contentLower.includes('bella eos') && !contentLower.includes('platform')) {
-        objective = 'Spa Management Marketing Campaign';
-        console.log('[tool_generate_media_creative] Detected: Spa business');
-      }
-    }
-    else if (contentLower.includes('bất động sản') || contentLower.includes('căn hộ')) {
-      objective = objective || 'Real Estate Marketing Campaign';
-      console.log('[tool_generate_media_creative] Detected: Real estate');
-    }
-    else if (contentLower.includes('thời trang') || contentLower.includes('fashion')) {
-      objective = objective || 'Fashion Retail Marketing Campaign';
-      console.log('[tool_generate_media_creative] Detected: Fashion');
+    else {
+      // Keep original objective if no clear domain
+      console.log('[tool_generate_media_creative] Using original objective');
     }
   }
   
@@ -497,7 +493,8 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
 async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
   const extractUrl = (str: string): string => {
     if (!str) return '';
-    const match = str.match(/(https?:\/\/[^\s\n"']+|data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+)/);
+    // Match full URLs, data URIs, OR relative paths starting with /
+    const match = str.match(/(https?:\/\/[^\s\n"']+|data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+|\/[\w\-\/\.]+\.(?:png|jpg|jpeg|gif|webp))/);
     return match ? match[0] : '';
   };
 
@@ -603,7 +600,7 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: content.substring(0, 500),
+          message: content, // Full content, không cắt ngắn
           image_url: imageUrl,
           client_token: clientKeys.facebook_token,
           client_page_id: clientKeys.facebook_page_id

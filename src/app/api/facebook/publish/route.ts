@@ -91,7 +91,23 @@ export async function POST(request: Request) {
 
     // Dynamic PNG Graphic Banner Generator URL (Logo, Headline, Badge, Spa UI Mockup)
     const defaultBannerUrl = `${getBaseUrl(request)}/api/ai/banner-image`;
-    const photoUrl = (image_url && !image_url.includes('unsplash')) ? image_url : defaultBannerUrl;
+    
+    // Convert relative path to full URL if needed
+    let photoUrl = image_url;
+    if (photoUrl) {
+      // If path starts with /, it's relative - make it absolute
+      if (photoUrl.startsWith('/')) {
+        photoUrl = `${getBaseUrl(request)}${photoUrl}`;
+      }
+      // If it's unsplash stock photo, use our banner generator instead
+      if (photoUrl.includes('unsplash')) {
+        photoUrl = defaultBannerUrl;
+      }
+    } else {
+      photoUrl = defaultBannerUrl;
+    }
+    
+    console.log('[API /facebook/publish] Image URL resolved:', photoUrl);
 
     // ── Try Facebook Graph API Photo Post Endpoint via FormData Binary Upload ─
     const fbPhotoUrl = `https://graph.facebook.com/v18.0/${pageId}/photos`;
