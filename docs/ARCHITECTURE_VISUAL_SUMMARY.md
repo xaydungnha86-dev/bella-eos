@@ -43,6 +43,193 @@
 
 ---
 
+## 🔑 GIẢI THÍCH DỄ HIỂU — DÀNH CHO CEO & NGƯỜI KHÔNG KỸ THUẬT
+
+> Phần này giải thích mỗi thành phần Bella EOS làm gì theo ngôn ngữ kinh doanh thực tế, không cần hiểu code.
+
+---
+
+### 🏢 BA TRỤ CỘT CỦA NỀN TẢNG
+
+| Thành phần | Vai trò trong doanh nghiệp | Ví dụ thực tế |
+|---|---|---|
+| **Bella EOS** | **COO kỹ thuật số** — Nhận lệnh từ CEO, lập kế hoạch, kiểm soát nguồn lực, triển khai, đo kết quả | CEO nói "tăng doanh thu 20%", EOS phân rã thành 15 nhiệm vụ cho từng bộ phận |
+| **Bella EIP** | **McKinsey nội bộ** — Phân tích dữ liệu, trả lời câu hỏi, dự báo xu hướng | CFO hỏi "tháng sau dòng tiền có an toàn không?" — EIP phân tích và báo cáo |
+| **Bella Workers** | **Đội nhân viên AI chuyên ngành** — Mỗi worker chuyên một lĩnh vực | Hermes xử lý tài chính, Apollo làm marketing, Turing viết code |
+
+---
+
+### 🏛️ 5 TẦNG KIẾN TRÚC — HIỂU NHƯ MỘT TÒA NHÀ
+
+Hãy hình dung Bella EOS như một tòa nhà 5 tầng, tầng dưới là nền móng, tầng trên là nơi làm việc:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ TẦNG 5 — Phòng làm việc (Ứng dụng)                                     │
+│   → Nơi CEO và nhân viên nhìn thấy kết quả: Dashboard, bảng điều hợp  │
+│   → Giống như văn phòng CEO có màn hình hiển thị mọi chỉ số           │
+├────────────────────────────────────────────────────────────────────────┤
+│ TẦNG 4 — Bộ phiên dịch AI (Model Adapters)                            │
+│   → Chuyển đổi giữa các nhà cung cấp AI (Google, OpenAI, Anthropic)  │
+│   → Giống như bộ phiên dịch: không phụ thuộc một nhà cung cấp duy nhất│
+├────────────────────────────────────────────────────────────────────────┤
+│ TẦNG 3 — Kho tiện ích mở rộng (Plugin Ecosystem)                      │
+│   → Thêm tính năng chuyên ngành: Spa Pack, Clinic Pack, Retail Pack   │
+│   → Giống như App Store: cài thêm "kỹ năng" cho hệ thống             │
+├────────────────────────────────────────────────────────────────────────┤
+│ TẦNG 2 — Bộ não nhận thức (11 Cognitive Domains)                      │
+│   → Nơi AI suy nghĩ, học hỏi, ra quyết định, kiểm soát               │
+│   → Có thể nâng cấp theo nhu cầu kinh doanh                          │
+├────────────────────────────────────────────────────────────────────────┤
+│ TẦNG 1 — Nền móng bất biến (Frozen Kernel)                            │
+│   → Các quy tắc cốt lõi KHÔNG BAO GIỜ thay đổi đến năm 2046         │
+│   → Giống như Hiến pháp doanh nghiệp: mọi thứ đều phải tuân theo     │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+**Tại sao có tầng "bất biến"?**
+Giống như móng nhà phải ổn định dù bạn sửa sang nội thất bao nhiêu lần. Nếu thay đổi quy tắc cốt lõi mỗi tuần, hệ thống sẽ không ổn định sau 20 năm.
+
+---
+
+### 🧠 11 MIỀN NHẬN THỨC — MỖI MIỀN LÀ MỘT "BỘ PHẬN" CỦA NÃO
+
+Hãy nghĩ đến 11 miền như 11 bộ phận chuyên biệt trong bộ não doanh nghiệp:
+
+#### TẦNG CHIẾN LƯỢC (3-5 năm)
+
+| Miền | Tên đầy đủ | Làm gì? | Ví dụ thực tế |
+|---|---|---|---|
+| **ESR** | Enterprise Strategy Runtime | Lập chiến lược dài hạn, phân bổ nguồn vốn, quản lý OKR cấp công ty | CEO đặt mục tiêu "mở thêm 5 chi nhánh năm 2027" → ESR lập roadmap 3 năm, phân bổ CapEx/OpEx |
+
+#### TẦNG CHIẾN THUẬT (thị trường & phân tích)
+
+| Miền | Tên đầy đủ | Làm gì? | Ví dụ thực tế |
+|---|---|---|---|
+| **EDR** | Enterprise Deliberation Runtime | Tổ chức "hội đồng chuyên gia AI" tranh luận trước khi ra quyết định lớn | Trước khi triển khai chiến dịch 500 triệu, EDR triệu tập AI-Finance, AI-Marketing, AI-Risk để vote; phải đạt 75% đồng thuận mới được chạy |
+| **MIR** | Market Intelligence Runtime | Theo dõi thị trường, đối thủ, xu hướng 24/7 không nghỉ | Tự động cảnh báo khi đối thủ giảm giá 10%, hoặc khi Google Trends cho thấy từ khóa "spa thư giãn" tăng đột biến |
+
+#### TẦNG VẬN HÀNH (thực thi hàng ngày)
+
+| Miền | Tên đầy đủ | Làm gì? | Ví dụ thực tế |
+|---|---|---|---|
+| **ELR** | Enterprise Learning Runtime | Học từ mọi trải nghiệm: thành công lẫn thất bại | Sau chiến dịch TikTok đạt ROAS 3.2, ELR tự động ghi nhận bài học "video 15s hiệu quả hơn video 60s cho khách hàng Spa" vào bộ nhớ dài hạn |
+| **EAH** | Enterprise AI Harness | Bao bọc mọi câu hỏi AI với đầy đủ ngữ cảnh doanh nghiệp trước khi gửi | AI không hỏi ChatGPT bằng câu hỏi trần. EAH tự động đính kèm: lịch sử 6 tháng, quy tắc thương hiệu, bài học cũ, số liệu tài chính → AI trả lời chính xác và đúng với doanh nghiệp cụ thể |
+| **ECR** | Enterprise Cognitive Runtime | Chọn lọc thông tin liên quan nhất (top 0.1%) từ hàng nghìn dữ liệu | Khi CEO hỏi về chiến dịch mới, ECR không dump toàn bộ dữ liệu vào AI — mà chọn đúng 20 thông tin quan trọng nhất để tránh nhiễu |
+| **ERR** | Enterprise Reflection Runtime | Tự đánh giá lại quyết định đã ra, học từ sai lầm, thử nghiệm A/B | Sau khi chiến lược A thất bại, ERR so sánh với chiến lược B đang thử nghiệm, điều chỉnh trọng số confidence, không mắc lỗi tương tự lần sau |
+| **ECH** | Executive Clarification Harness | Phát hiện mục tiêu mơ hồ hoặc bất khả thi, đàm phán điều chỉnh với CEO | CEO nói "tăng doanh thu 200% trong 1 tuần với 0 đồng ngân sách" → ECH không im lặng thực hiện, mà hỏi lại và đề xuất mục tiêu khả thi |
+| **EER** | Enterprise Evaluation Runtime | Đo lường SLA, ngưỡng lỗi, sức khỏe hệ thống | Phát hiện nếu một AI-worker đang chạy chậm hơn tiêu chuẩn 40% → tự động cảnh báo và chuyển sang worker dự phòng |
+
+---
+
+### 🤖 EIR — BỘ NÃO PHÂN TÍCH CHIẾN LƯỢC CẤP CEO
+
+**EIR = Executive Intelligence Runtime** — Hệ thống suy luận chiến lược chuyên sâu.
+
+**Giải thích đơn giản:** EIR như một đội tư vấn chiến lược riêng, làm việc trong vài giây thay vì vài tuần. Khi CEO đưa ra mục tiêu, EIR chạy **7 bài phân tích song song:**
+
+| Graph (Đồ thị) | Câu hỏi EIR tự trả lời |
+|---|---|
+| **1. DiagnosisGraph** | "Tại sao hiện tại chưa đạt mục tiêu? Nguyên nhân gốc rễ là gì?" |
+| **2. OpportunityGraph** | "Có những cơ hội tăng trưởng nào chưa khai thác?" |
+| **3. ConstraintGraph** | "Giới hạn thực tế là gì? (ngân sách, nhân sự, thời gian)" |
+| **4. RiskGraph** | "Nếu làm theo cách này, rủi ro gì có thể xảy ra? Xác suất bao nhiêu?" |
+| **5. StrategyGraph** | "Có bao nhiêu chiến lược khả thi? So sánh chúng." |
+| **6. SimulationGraph** | "Mô phỏng 12 tháng tới: doanh thu, chi phí, ROI dự kiến là bao nhiêu?" |
+| **7. RecommendationGenerator** | "Dựa trên 6 phân tích trên, đề xuất tốt nhất là gì? Độ tin cậy bao nhiêu?" |
+
+**Kết quả:** EIR trả về khuyến nghị có kèm: mức tin cậy, danh sách bằng chứng, phương án thay thế — không phải một câu trả lời chung chung.
+
+---
+
+### 📐 PLR — BỘ MÁY LẬP KẾ HOẠCH THỰC CHIẾN
+
+**PLR = Planning & Learning Runtime** — Biến chiến lược thành kế hoạch có thể thực thi ngay.
+
+**Giải thích đơn giản:** Sau khi EIR nói "nên làm chiến dịch TikTok + SEO", PLR sẽ hỏi: "OK, nhưng cụ thể ai làm gì? Bao giờ xong? Tiền ở đâu?"
+
+| Engine | Làm gì? |
+|---|---|
+| **KpiDecompositionEngine** | Chia mục tiêu 20% doanh thu thành OKR từng phòng: Marketing +25% lead, Sales +8% tỷ lệ chốt, Spa +15% khách quay lại |
+| **BudgetAllocationEngine** | Chia ngân sách 50 triệu: Marketing 30M, Content 10M, Tools 5M, Buffer 5M |
+| **ResourceAllocationEngine** | Gán nhân sự, AI workers, công cụ cho từng nhiệm vụ |
+| **OwnerAssignmentEngine** | Xác định ai chịu trách nhiệm từng deliverable — không có "vùng xám" |
+| **TimelinePlanningEngine** | Vẽ lịch trình: Tuần 1 content, Tuần 2 launch, Tuần 3 optimize, Tuần 4 report |
+
+---
+
+### 🛡️ GOVERNANCE P1 — 3 ĐỘNG CƠ KIỂM SOÁT
+
+Đây là tầng bảo vệ, đảm bảo AI **không bao giờ** làm điều gì ngoài phạm vi được phép:
+
+| Engine | Câu hỏi nó trả lời | Ví dụ |
+|---|---|---|
+| **Policy Engine** | "Hành động này có được phép không?" | Chi 80 triệu cho chiến dịch → Policy phát hiện vượt ngưỡng → yêu cầu CEO duyệt |
+| **Approval Engine** | "Ai cần duyệt? Theo trình tự nào?" | Chiến dịch lớn: Manager → Director → CEO (sequential); Chi phí thường: Manager (single) |
+| **Decision Engine** | "AI có đủ bằng chứng để đề xuất không?" | AI phải trình bày ít nhất 3 bằng chứng + 2 phương án với ưu/nhược điểm trước khi ra quyết định |
+
+**3 Validation Gates** — Cổng kiểm tra trước mỗi bước lớn:
+
+```
+[CEO nói gì?] → IntentGate ✓ → [EIR phân tích] → GoalGate ✓ → [PLR lập kế hoạch] → DecisionGate ✓ → [Thực thi]
+
+Nếu bất kỳ Gate nào FAIL → dừng ngay, báo cáo lý do, không tiếp tục
+```
+
+---
+
+### 🔄 LUỒNG TỔNG THỂ — MỘT CÂU CỦA CEO TẠO RA GÌ?
+
+```
+CEO: "Tháng 8 tôi muốn tăng doanh thu Spa 20%"
+         │
+         ▼ (2 giây)
+   [IntentGate kiểm tra câu có đủ rõ không?]
+         │ ✅ Đạt
+         ▼ (15-30 giây)
+   [EIR chạy 7 phân tích song song]
+   → Chẩn đoán nguyên nhân
+   → Tìm cơ hội
+   → Đánh giá giới hạn
+   → Tính rủi ro
+   → So sánh chiến lược
+   → Mô phỏng 12 tháng
+   → Tổng hợp khuyến nghị: "Chiến dịch TikTok + SEO, ngân sách 45M, ROI dự kiến 280%"
+         │
+         ▼ (CEO xem và bấm Approve)
+   [Human Approval Gate — CEO quyết định cuối]
+         │ ✅ CEO duyệt
+         ▼ (5 giây)
+   [GoalGate kiểm tra mục tiêu có phân rã đủ không?]
+         │ ✅ Đạt
+         ▼ (10 giây)
+   [PLR lập kế hoạch chi tiết]
+   → Chia OKR cho 4 phòng ban
+   → Phân bổ 45M cho từng hạng mục
+   → Gán nhân sự + AI workers
+   → Lập lịch 4 tuần
+         │
+         ▼ (5 giây)
+   [DecisionGate kiểm tra kế hoạch có đủ bằng chứng không?]
+         │ ✅ Đạt
+         ▼
+   [Workflow Runtime bắt đầu thực thi song song]
+   → AI Apollo: Viết script TikTok
+   → AI Apollo: Tạo banner 4K
+   → AI Apollo: Viết bài SEO
+   → Human Task: Manager review content
+         │
+         ▼ (Sau 4 tuần)
+   [ELR thu thập kết quả, học bài học, cập nhật SOP]
+   → "TikTok hiệu quả hơn Facebook 40% với nhóm khách 25-35 tuổi"
+   → Bài học được lưu vào bộ nhớ dài hạn
+   → Lần sau EIR sẽ tự động ưu tiên TikTok hơn
+```
+
+**Tóm lại:** Một câu của CEO kích hoạt hàng chục bước tự động, với AI suy nghĩ thay con người ở những bước lặp đi lặp lại, nhưng **luôn có CEO kiểm soát** ở quyết định quan trọng.
+
+---
+
 ## 🏛️ KIẾN TRÚC 5 TẦNG (5-LAYER ARCHITECTURE)
 
 ```
