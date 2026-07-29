@@ -498,7 +498,7 @@ Mỗi Engine chỉ được phép chuyển giao Contract dữ liệu khi đạt 
     *   [x] Ghi nhận rõ ràng ID người duyệt thực tế và mã Hash chữ ký số.
     *   [x] Bắt buộc có trường `reason` (lý do) đi kèm đối với các quyết định `REJECTED`.
 *   **Workflow Runtime DoD**:
-    *   [x] Tất cả các bước trong Saga hoặc đạt trạng thái `SUCCESS` hoặc đã chạy hoàn tất các bước hoàn tác `COMPENSATED`.
+*   [x] Tất cả các bước trong Saga hoặc đạt trạng thái `SUCCESS` hoặc đã chạy hoàn tất các bước hoàn tác `COMPENSATED`.
     *   [x] Không có trạng thái treo (lửng lơ không chạy tiếp và không rollback).
 
 ### 2. Các Chốt Kiểm Soát Chất Lượng (Quality Validation Gates)
@@ -587,5 +587,119 @@ $$\text{Learning Gain} = \text{KPI}_{\text{Chiến dịch mới}} - \text{KPI}_{
 │  [appr_1785]: Phê duyệt Chiến dịch khuyến mãi Spa Q3 - Ngân sách: 80M | Rủi ro: 45%     │
 │               ➔ [Xem Tờ Trình Chi Tiết]  [Ký Phê Duyệt]  [Bác Bỏ]                      │
 └────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## X. VÍ DỤ THỰC TẾ TRÊN DÒNG VIỆC (REAL-WORLD WORKFLOW WALKTHROUGH)
+
+Để lập trình viên dễ hình dung sự phối hợp giữa 13 Engines, dưới đây là luồng xử lý thực tế của một chỉ thị từ CEO.
+
+### Chỉ thị từ CEO:
+> *"Tháng 8 tôi muốn tăng doanh thu Spa thêm 20%. Ngân sách marketing tối đa 50 triệu. Không được giảm lợi nhuận dưới 30%. Hãy lập kế hoạch và nếu hợp lý thì triển khai."*
+
+---
+
+### 🧠 PHÂN TẦNG SUY NGHĨ (THINK TIER)
+*Nhiệm vụ: Hiểu ý định của lãnh đạo, phân rã công việc và lên phương án.*
+
+#### Bước 1: Intent Engine (Biên dịch ngôn ngữ)
+*   **Hành động**: Nhận câu lệnh thô của CEO và dịch thành cấu trúc dữ liệu máy hiểu được.
+*   **Kết quả đầu ra (`IntentContract`)**:
+    ```json
+    {
+      "objective": "Tăng doanh thu Spa",
+      "target": "+20%",
+      "timeline": "Tháng 8",
+      "budgetLimit": 50000000,
+      "constraints": { "minProfitMargin": 0.30 }
+    }
+    ```
+
+#### Bước 2: Goal Engine (Phân rã mục tiêu)
+*   **Hành động**: Tự động phân chia chỉ tiêu doanh số 20% thành các mục tiêu cụ thể gán cho từng phòng ban.
+*   **Kết quả đầu ra (`GoalTreeContract`)**:
+    *   **Marketing Goal** (`Owner: CMO AI`): Tăng lượng Lead quan tâm lên 25%.
+    *   **Sales Goal** (`Owner: Sales Manager`): Tăng tỷ lệ chốt sales từ 42% lên 50%.
+    *   **Spa Operations Goal** (`Owner: Spa Supervisor`): Tăng tỷ lệ khách quay lại bằng chương trình CSKH.
+    *   **Inventory Goal** (`Owner: Storekeeper`): Đảm bảo tồn kho dầu massage & dược mỹ phẩm đủ đáp ứng.
+
+#### Bước 3: Decision Engine (Lên chiến lược & Chọn phương án)
+*   **Hành động**: Không thực thi ngay lập tức. Chạy mô phỏng Monte Carlo để đề xuất chiến lược tối ưu.
+*   **Kết quả đầu ra (`DecisionContract`)**: Đưa ra 3 phương án lựa chọn:
+    *   *Phương án A (Google Ads)*: ROI dự kiến 3.5 | Độ tự tin 92% | Rủi ro 12%. (Khuyên dùng)
+    *   *Phương án B (Facebook Ads)*: ROI dự kiến 2.8 | Độ tự tin 85% | Rủi ro 25%.
+    *   *Phương án C (Tiktok Ads)*: ROI dự kiến 2.0 | Độ tự tin 70% | Rủi ro 45%.
+
+---
+
+### 🛡️ PHÂN TẦNG QUẢN TRỊ & GIÁM SÁT (GOVERN TIER)
+*Nhiệm vụ: Kiểm soát rủi ro tài chính, bảo mật thông tin và lấy phê duyệt từ CEO.*
+
+#### Bước 4: Policy Engine (Màng lọc quy chế)
+*   **Hành động**: Đối chiếu phương án đề xuất với các luật cứng của doanh nghiệp.
+*   **Kiểm tra điều kiện**:
+    *   *Ngân sách đề xuất: 48M* ➔ Dưới mức trần 50M ➔ **PASS**
+    *   *Quy chế chi tiêu*: Mọi khoản chi ngân sách Marketing > 30M bắt buộc cần CEO duyệt thủ công ➔ **TRIGGER APPROVAL REQUIREMENT**
+    *   *An toàn dữ liệu*: Chạy chiến dịch không vi phạm chính sách bảo mật thông tin khách hàng ➔ **PASS**
+
+#### Bước 5: Approval Engine (Ký duyệt con người)
+*   **Hành động**: Treo quy trình ở trạng thái `WAITING_APPROVAL` và gửi tờ trình đến ứng dụng của CEO.
+*   **Nội dung CEO xem**: Đề xuất chi 48M chạy Ads với ROI dự kiến 3.5, mức độ rủi ro 12%.
+*   **CEO phản hồi**: Bấm **[KÝ PHÊ DUYỆT]** ➔ Chuyển trạng thái sang `APPROVED`, kích hoạt luồng chạy tiếp theo.
+
+---
+
+### ⚡ PHÂN TẦNG THỰC THI (EXECUTE TIER)
+*Nhiệm vụ: Phối hợp AI & Con người chạy việc, ghi vết kiểm toán và học từ thực tế.*
+
+#### Bước 6: Workflow Runtime (Transactional Saga)
+*   **Hành động**: Nhận kế hoạch được duyệt và bắt đầu chạy tuần tự quy trình (SOP) đã đóng gói:
+    *   `Bước 1: Viết content` ➔ `Bước 2: Thiết kế banner` ➔ `Bước 3: Lên chiến dịch Ads` ➔ `Bước 4: Gửi bài báo cáo`.
+
+#### Bước 7: Capability Router (Định tuyến năng lực)
+*   **Hành động**: Ánh xạ kỹ năng của từng bước đến đúng tài nguyên:
+    *   *Tác vụ soạn thảo nội dung* ➔ Giao cho **Athena AI Writer**.
+    *   *Tác vụ thiết kế ảnh nghệ thuật* ➔ Giao cho **Apollo AI Designer**.
+    *   *Tác vụ tối ưu SEO* ➔ Giao cho **Hermes SEO Agent**.
+
+#### Bước 8: Worker Runtime (Thực thi sandbox)
+*   **Hành động**: Khởi tạo phiên làm việc không trạng thái (Stateless Sandbox) cho Agent. Cấp tài nguyên Brand DNA và tài liệu SOP. Agent hoàn thành tác vụ, trả kết quả về bộ nhớ và dữ liệu phiên chạy lập tức được xóa sạch để bảo mật.
+
+#### Bước 9: Audit Center (Nhật ký kiểm toán)
+*   **Hành động**: Ghi lại vết toàn bộ tiến trình lịch sử bất biến:
+    *   `08:21` - CEO phê duyệt tờ trình ngân sách 48M VND.
+    *   `08:22` - Athena AI Writer hoàn thành viết nội dung.
+    *   `08:24` - Apollo AI hoàn thành sinh hình ảnh.
+    *   `08:26` - Ares Ads Agent đẩy chiến dịch lên quảng cáo.
+
+#### Bước 10: Learning Center (Học tập & Đột biến)
+*   **Hành động**: Sau một tháng chạy thực tế, đo lường KPIs thu về tăng trưởng doanh thu 17% (so với mục tiêu CEO đề ra là 20%).
+*   **Đột biến tri thức**: AI phân tích nguyên nhân (kết quả Google Ads đạt hiệu suất cao, Facebook Ads kém hơn dự kiến) ➔ Tự động cập nhật SOP Marketing của doanh nghiệp: *Ưu tiên 70% ngân sách cho Google Ads trong chiến dịch tháng sau*.
+
+---
+
+## XI. TRIẾT LÝ PHÂN TÁCH BA TẦNG CỐT LÕI (THE 3-TIER PLATFORM TAXONOMY)
+
+Lập trình viên khi xây dựng Bella EOS cần ghi nhớ 13 Engines thực chất được gom tụ thành 3 tầng hoạt động mạch lạc:
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                            1. TẦNG SUY NGHĨ (THINK)                      │
+│ - Trách nhiệm: Chuyển ý chí thành hành động, phân rã KPIs và mô phỏng.    │
+│ - Core: Intent ➔ Goal ➔ Decision                                         │
+├──────────────────────────────────────────────────────────────────────────┤
+│                            2. TẦNG QUẢN TRỊ (GOVERN)                     │
+│ - Trách nhiệm: Giám sát rủi ro, kiểm soát chính sách và lưu vết.          │
+│ - Core: Policy ➔ Approval ➔ Audit                                       │
+├──────────────────────────────────────────────────────────────────────────┤
+│                            3. TẦNG THỰC THI (EXECUTE)                    │
+│ - Trách nhiệm: Chạy SOP phân rã, định tuyến năng lực và tự tiến hóa.      │
+│ - Core: Workflow ➔ Capability Router ➔ Worker ➔ Learning                 │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+Mỗi dòng chảy dữ liệu qua Bella EOS bắt buộc phải đi qua trục **Think ➔ Govern ➔ Execute**. Đây chính là trái tim kiến trúc giúp Bella EOS thoát ly khỏi một ứng dụng Chatbot đơn thuần để trở thành một Hệ điều hành Doanh nghiệp thực thụ.
+
 ```
 
