@@ -324,33 +324,70 @@ function buildFallbackPlan(objective: string, context?: any) {
   const lowerObj = objective.toLowerCase();
   const tasks = [];
 
-  // Task 0: AI COO Orchestrator — Holistic System Analysis & OKR Decomposition
+  // PHASE 1: C-SUITE COUNCIL REVIEW & DEBATE TASKS
+  // Task 0: AI COO Orchestrator
   tasks.push({
     task_id: 't0',
     agent_id: 'coo',
     agent_name: 'AI COO Orchestrator',
     task_type: 'orchestrate_enterprise_plan',
-    task_description: `Phân tích bối cảnh hệ thống, lập sơ đồ OKRs phòng ban & mô phỏng Monte Carlo 10,000 lần cho chỉ thị: "${objective}"`,
+    task_description: `Triệu tập Hội đồng Phản biện C-Suite, lập sơ đồ OKRs phòng ban & mô phỏng Monte Carlo 10,000 lần cho chỉ thị: "${objective}"`,
     input: { objective, tone, target_audience: segment },
     expected_output: 'Lộ trình Kế hoạch Điều Phối Tổng Thể (Orchestration Plan) & Sơ đồ phân bổ nhiệm vụ AI Workforce',
     depends_on: [],
     requires_human_approval: false
   });
 
-  // Task 1: CMO AI (Executive Marketing Strategist) — Strategy Analysis & EIC Contract
+  // Task 1: CMO AI (Executive Marketing Strategist)
   tasks.push({
     task_id: 't1',
     agent_id: 'eos_marketing_manager',
     agent_name: 'CMO AI (Executive Marketing Strategist)',
     task_type: 'analyze_marketing_strategy',
-    task_description: `Phân tích chiến lược EIC, thiết lập đồ thị suy luận DAG & trình Tờ trình Phê duyệt C-Suite cho chiến dịch: "${objective}"`,
+    task_description: `Thẩm định Phễu Marketing, thiết lập đồ thị suy luận DAG & trình Tờ trình Phê duyệt C-Suite cho chiến dịch: "${objective}"`,
     input: { objective, tone, target_audience: segment },
     expected_output: 'Giao kèo EIC chi tiết, đồ thị suy luận DAG & Tờ trình Phê duyệt C-Suite',
     depends_on: ['t0'],
     requires_human_approval: true
   });
 
-  // Task 2 → NOW TASK 1: Content Writing (first visible task)
+  // Task 2: Sales Director AI (Sales Council)
+  tasks.push({
+    task_id: 't2',
+    agent_id: 'sales_director',
+    agent_name: 'Sales Director AI',
+    task_type: 'evaluate_sales_funnel',
+    task_description: 'Thẩm định & Chuẩn hóa Kịch bản Chốt Booking trên CRM để phòng chống đứt gãy phễu chuyển đổi',
+    input: { objective, target_audience: segment },
+    expected_output: 'Bản chuẩn hóa kịch bản chốt đơn CRM & Quy trình phản hồi Lead dưới 3 phút',
+    depends_on: ['t0']
+  });
+
+  // Task 3: Demeter HR & Staffing AI (HR Council)
+  tasks.push({
+    task_id: 't3',
+    agent_id: 'demeter_hr',
+    agent_name: 'Demeter HR & Staffing AI',
+    task_type: 'audit_hr_capacity',
+    task_description: 'Thẩm định công suất ca làm của Kỹ thuật viên Spa & Phân bổ nhân sự phục vụ lượt khách tăng trưởng',
+    input: { objective },
+    expected_output: 'Báo cáo tải trọng ca KTV & Kế hoạch phụ cấp OT phục vụ 40 lượt demo',
+    depends_on: ['t0']
+  });
+
+  // Task 4: Themis Legal & Hermes Finance AI (Governance Council)
+  tasks.push({
+    task_id: 't4',
+    agent_id: 'themis_legal',
+    agent_name: 'Themis Legal & Hermes Finance AI',
+    task_type: 'audit_legal_finance',
+    task_description: 'Kiểm toán Policy Guard về Hạn mức Ngân sách, Bản quyền truyền thông & An toàn Pháp lý',
+    input: { objective },
+    expected_output: 'Chứng nhận Policy Guard Audit Pass & Hạn mức chi tiêu tài chính an toàn',
+    depends_on: ['t0']
+  });
+
+  // PHASE 3: AI WORKFORCE EXECUTION TASKS
   const contentTaskDesc = lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ')
     ? `Soạn thảo bài viết Marketing cho ngành Spa/Thẩm mỹ: "${objective.substring(0, 60)}"`
     : lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ')
@@ -360,23 +397,21 @@ function buildFallbackPlan(objective: string, context?: any) {
     : `Soạn thảo bài viết truyền thông & Offer trải nghiệm cho: "${objective.substring(0, 60)}"`;
     
   tasks.push({
-    task_id: 't2',
+    task_id: 't5',
     agent_id: 'eos_content_worker',
     agent_name: 'BELLA EOS Content Worker',
     task_type: 'write_facebook_post',
     task_description: contentTaskDesc,
     input: { 
-      objective: objective, // Use ORIGINAL CEO objective, not t1 output
+      objective: objective,
       tone, 
       target_audience: segment, 
       platform: 'facebook'
-      // Removed strategy_from to prevent markdown report leakage
     },
     expected_output: 'Bài đăng Facebook hoàn chỉnh từ Bella EOS Worker, có hook, offer và hashtag',
-    depends_on: [] // Remove t1 dependency to prevent content inheritance
+    depends_on: ['t1']
   });
 
-  // Task 3: Bella EOS Media & Creative Worker generates visual banner / mockup
   const creativeTaskDesc = lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ')
     ? `Thiết kế Banner hình ảnh thương hiệu & Mockup Giao diện cho ngành Spa/Làm đẹp`
     : lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ')
@@ -386,45 +421,40 @@ function buildFallbackPlan(objective: string, context?: any) {
     : `Thiết kế Banner hình ảnh thương hiệu chất lượng cao cho chiến dịch: "${objective.substring(0, 60)}"`;
   
   tasks.push({
-    task_id: 't3',
+    task_id: 't6',
     agent_id: 'eos_creative_worker',
     agent_name: 'BELLA EOS Media & Creative Worker',
     task_type: 'generate_media_creative',
     task_description: creativeTaskDesc,
-    input: { objective, content_from: 't2', format: '1200x630_banner' },
+    input: { objective, content_from: 't5', format: '1200x630_banner' },
     expected_output: 'File Banner hình ảnh thiết kế 4K chất lượng cao phục vụ đăng bài & chạy ads',
-    depends_on: ['t2']
+    depends_on: ['t5']
   });
 
-  // Task 4: Hermes Social Publisher receives both Post Content (t2) + Visual Banner (t3) and publishes to Facebook
   tasks.push({
-    task_id: 't4',
+    task_id: 't7',
     agent_id: 'hermes_social',
     agent_name: 'Hermes Social Publisher',
     task_type: 'publish_facebook',
-    task_description: 'Nhận Bài viết từ EOS Content Worker & Banner từ EOS Creative Worker để đăng bài hoàn chỉnh lên Fanpage Facebook',
-    input: { content_from: 't2', media_from: 't3', platform: 'facebook' },
+    task_description: 'Nhận Bài viết từ Content Worker & Banner từ Creative Worker để lập lịch & đăng bài tự động lên Fanpage',
+    input: { content_from: 't5', media_from: 't6', platform: 'facebook' },
     expected_output: 'Hermes thực thi đăng bài bài viết + hình ảnh thành công lên Fanpage Facebook, trả về Post ID',
-    depends_on: ['t2', 't3']
+    depends_on: ['t5', 't6']
   });
 
-  // Task 5: Ares Ads Agent sets up ad campaign with the text + banner (CONDITIONAL)
-  if (lowerObj.includes('quảng cáo') || lowerObj.includes('ads') || lowerObj.includes('ngân sách') || lowerObj.includes('demo') || lowerObj.includes('spa')) {
-    tasks.push({
-      task_id: 't5',
-      agent_id: 'ares_ads',
-      agent_name: 'Ares Ads Agent',
-      task_type: 'create_facebook_ad',
-      task_description: 'Nhận bài viết + Banner thiết kế và cấu hình chiến dịch quảng cáo Facebook Ads',
-      input: { objective, budget_hint: objective, content_from: 't2', media_from: 't3' },
-      expected_output: 'Cấu hình chiến dịch quảng cáo Facebook Ads hoàn chỉnh kèm ngân sách',
-      depends_on: ['t2', 't3']
-    });
-  }
-
-  // Task 6: Athena Analytics Agent forecasts KPI/ROI (ALWAYS)
   tasks.push({
-    task_id: 't6', // Fixed ID to prevent duplicate with t5
+    task_id: 't8',
+    agent_id: 'ares_ads',
+    agent_name: 'Ares Ads Agent',
+    task_type: 'create_facebook_ad',
+    task_description: 'Cấu hình chiến dịch quảng cáo Facebook Ads tăng phủ phễu tiếp thị',
+    input: { objective, budget_hint: objective, content_from: 't5', media_from: 't6' },
+    expected_output: 'Cấu hình chiến dịch quảng cáo Facebook Ads hoàn chỉnh kèm ngân sách',
+    depends_on: ['t5', 't6']
+  });
+
+  tasks.push({
+    task_id: 't9',
     agent_id: 'athena_analytics',
     agent_name: 'Athena Analytics Agent',
     task_type: 'generate_report',
@@ -435,8 +465,8 @@ function buildFallbackPlan(objective: string, context?: any) {
   });
 
   return {
-    plan_title: `Kế hoạch AI COO & CMO AI: ${objective.substring(0, 60)}...`,
-    reasoning: 'CMO AI phân tích chiến lược & giao kèo EIC ➔ Bella EOS Content Worker soạn bài ➔ Bella EOS Creative Worker tạo Banner ➔ Hermes Social Agent xuất bản ➔ Ares Ads chạy QC ➔ Athena Analytics đo lường KPI.',
+    plan_title: `Kế hoạch Vận Hành Tổng Thể Bella EOS: ${objective.substring(0, 60)}...`,
+    reasoning: 'Hội đồng C-Suite thẩm định (COO, CMO, Sales, HR, Legal/Finance) ➔ CEO Phê duyệt Tờ trình ➔ Bella EOS AI Workforce thực thi đa kênh (Content, Banner, Hermes, Ares, Athena).',
     tasks
   };
 }

@@ -883,8 +883,61 @@ export default function Dashboard() {
                     </div>
                   </div>
 
+                  {/* ENTERPRISE WORKFLOW TOPOLOGY STEPPER */}
+                  <div className="w-full max-w-2xl bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-3 shrink-0 text-left">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <Network className="w-4 h-4 text-indigo-600" />
+                        <h3 className="font-display font-bold text-xs tracking-wider text-slate-800 uppercase">
+                          Tiến Trình Vận Hành Doanh Nghiệp (Multi-Department Workflow Topology)
+                        </h3>
+                      </div>
+                      <span className="text-[8.5px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono font-bold uppercase">
+                        Bella EOS Core Engine
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                      {/* Step 1: CEO Directive */}
+                      <div className="p-2.5 rounded-xl border bg-slate-50 border-slate-200 space-y-1">
+                        <div className="text-[9px] font-bold uppercase text-slate-400">Bước 1</div>
+                        <div className="font-bold text-[11px] text-slate-800 flex items-center justify-center gap-1">
+                          <span>👑 Chỉ Thị CEO</span>
+                        </div>
+                        <div className="text-[8.5px] text-slate-500">Mục tiêu kinh doanh</div>
+                      </div>
+
+                      {/* Step 2: C-Suite Council Debate */}
+                      <div className="p-2.5 rounded-xl border bg-amber-50/70 border-amber-200/80 space-y-1">
+                        <div className="text-[9px] font-bold uppercase text-amber-700">Bước 2</div>
+                        <div className="font-bold text-[11px] text-amber-900 flex items-center justify-center gap-1">
+                          <span>🏛️ Phản Biện C-Suite</span>
+                        </div>
+                        <div className="text-[8.5px] text-amber-700">MKT, Sales, HR, Legal/TC</div>
+                      </div>
+
+                      {/* Step 3: CEO Approval Gate */}
+                      <div className="p-2.5 rounded-xl border bg-indigo-50/70 border-indigo-200/80 space-y-1">
+                        <div className="text-[9px] font-bold uppercase text-indigo-700">Bước 3</div>
+                        <div className="font-bold text-[11px] text-indigo-900 flex items-center justify-center gap-1">
+                          <span>📜 Phê Duyệt Tờ Trình</span>
+                        </div>
+                        <div className="text-[8.5px] text-indigo-700">EIC & Policy Guard</div>
+                      </div>
+
+                      {/* Step 4: AI Workforce Execution */}
+                      <div className="p-2.5 rounded-xl border bg-emerald-50/70 border-emerald-200/80 space-y-1">
+                        <div className="text-[9px] font-bold uppercase text-emerald-700">Bước 4</div>
+                        <div className="font-bold text-[11px] text-emerald-900 flex items-center justify-center gap-1">
+                          <span>⚡ Thực Thi Đa AI</span>
+                        </div>
+                        <div className="text-[8.5px] text-emerald-700">Content, Banner, Hermes</div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Flow links */}
-                  <div className="w-0.5 h-4 bg-gradient-to-b from-amber-400/50 to-indigo-400/50 shrink-0"></div>
+                  <div className="w-0.5 h-4 bg-gradient-to-b from-indigo-400/50 to-amber-400/50 shrink-0"></div>
 
                   {/* EXECUTIVE AI ADVISORY COUNCIL DEBATE PANEL */}
                   {councilDebate.length > 0 && (
