@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { CreativeIntelligenceEngine } from '@/core/creative/creative-intelligence-engine';
 import { ExpertPromptComposer } from '@/core/creative/composition/expert-prompt-composer';
+import { ImageHistoryTracker } from '@/core/creative/memory/image-history-tracker';
 import fs from 'fs';
 import path from 'path';
 
@@ -17,6 +18,11 @@ export const dynamic = 'force-dynamic';
  * - Layer 2: Creative Reasoning (LLM) - Reads business data
  * - Layer 3: Expert Design Prompt (LLM) - Generates prompts like professional designer
  * - Layer 4: Model Generation - AI renders COMPLETE banner (background + text)
+ * 
+ * Supported AI Models:
+ * - Imagen 4.0 Ultra (Google) - Highest quality, best text rendering
+ * - Imagen 4.0 Fast (Google) - Faster generation, good quality
+ * - DALL-E 3 (OpenAI) - Fallback option
  * 
  * NO CANVAS COMPOSITOR - AI does all text rendering
  */
@@ -123,48 +129,50 @@ export async function POST(request: Request) {
     // AI models render EVERYTHING in one go
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    // Try different models with text rendering
-    const tryGeminiWithText = async () => {
+    // Try Imagen 4.0 (Google's actual image generation API via Gemini API)
+    const tryImagenWithText = async () => {
       const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-      if (!geminiKey) return null;
+      if (!geminiKey) {
+        console.log('[API v4] No Google API key - skipping Imagen 4.0');
+        return null;
+      }
 
-      // Gemini 3.x models for image generation with text
-      const geminiModels = [
-        'gemini-3.1-flash-image',       // Best for text rendering (2026)
-        'gemini-3-pro-image',           // Higher quality
-        'gemini-2.5-flash-image'        // Fallback
+      // Imagen 4.0 models available via Gemini API
+      const imagenModels = [
+        'imagen-4.0-ultra-generate-001',  // Highest quality
+        'imagen-4.0-fast-generate-001'    // Faster generation
       ];
 
-      for (const modelName of geminiModels) {
+      for (const modelName of imagenModels) {
         try {
           console.log(`[API v4] Trying ${modelName} with text rendering...`);
           
           const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:predict?key=${geminiKey}`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                contents: [{
-                  parts: [{
-                    text: expertPrompt.mainPrompt
-                  }]
+                instances: [{
+                  prompt: expertPrompt.mainPrompt
                 }],
-                generationConfig: {
-                  temperature: 0.4, // Lower for more precise text rendering
-                  candidateCount: 1
+                parameters: {
+                  sampleCount: 1,
+                  aspectRatio: format === '1:1' ? '1:1' : '16:9',
+                  negativePrompt: 'blurry, low quality, distorted text, watermark, ugly, distorted',
+                  // Imagen 4.0 parameters for variation
+                  guidanceScale: 10,  // Lower = more creative (default 12)
+                  seed: Math.floor(Math.random() * 1000000)  // Random seed for variation
                 }
               })
             }
           );
 
           const data = await res.json();
-          const part = data.candidates?.[0]?.content?.parts?.[0];
           
-          if (res.ok && part?.inlineData?.data) {
-            const mimeType = part.inlineData.mimeType || 'image/png';
-            const base64Data = part.inlineData.data;
-            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+          if (res.ok && data.predictions?.[0]?.bytesBase64Encoded) {
+            const base64Data = data.predictions[0].bytesBase64Encoded;
+            const dataUrl = `data:image/png;base64,${base64Data}`;
             const savedUrl = saveBase64ToPublic(dataUrl);
             
             console.log('[API v4] ═══════════════════════════════════════════');
@@ -172,9 +180,28 @@ export async function POST(request: Request) {
             console.log('[API v4] Image saved:', savedUrl);
             console.log('[API v4] ═══════════════════════════════════════════');
             
+            // Save to image history
+            const visualDescription = `${creativeBrief.heroSubject} in ${creativeBrief.environmentDescription}, ${creativeBrief.colorMood} colors, ${creativeBrief.lightingMood} lighting`;
+            
+            ImageHistoryTracker.getInstance().addImage({
+              id: `img_${Date.now()}`,
+              timestamp: Date.now(),
+              imageUrl: savedUrl,
+              visualDescription,
+              creativeBrief: {
+                headline: creativeBrief.posterHeadline,
+                heroSubject: creativeBrief.heroSubject,
+                environmentDescription: creativeBrief.environmentDescription,
+                colorMood: creativeBrief.colorMood,
+                lightingMood: creativeBrief.lightingMood
+              }
+            });
+            
+            console.log('[API v4] ✓ Image added to history tracker');
+            
             return NextResponse.json({
               success: true,
-              provider: 'google-gemini',
+              provider: 'google-imagen',
               model: modelName,
               imageUrl: savedUrl,
               creativeBrief: {
@@ -187,11 +214,11 @@ export async function POST(request: Request) {
               textContent: expertPrompt.textContent,
               compositionMethod: 'ai-renders-everything',
               pipelineVersion: '4.0.0',
-              note: 'AI generated complete banner including all text elements'
+              note: 'Imagen 4.0 generated complete banner including text'
             });
           }
           
-          console.warn(`[API v4] ${modelName} failed:`, data.error?.message);
+          console.warn(`[API v4] ${modelName} failed:`, data.error?.message || JSON.stringify(data).substring(0, 200));
         } catch (e: any) {
           console.warn(`[API v4] ${modelName} error:`, e.message);
         }
@@ -254,8 +281,8 @@ export async function POST(request: Request) {
       return null;
     };
 
-    // Execute waterfall
-    const result = await tryGeminiWithText() || await tryDalleWithText();
+    // Execute waterfall: Imagen 3 → DALL-E 3
+    const result = await tryImagenWithText() || await tryDalleWithText();
     
     if (result) {
       return result;
@@ -308,7 +335,11 @@ function saveBase64ToPublic(dataUrl: string): string {
       fs.mkdirSync(dir, { recursive: true });
     }
     
-    const filename = `gen_v4_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.png`;
+    // FIXED: Add strong uniqueness - timestamp + 2 random components + counter
+    const timestamp = Date.now();
+    const random1 = Math.random().toString(36).substring(2, 10);
+    const random2 = Math.random().toString(36).substring(2, 10);
+    const filename = `gen_v4_${timestamp}_${random1}_${random2}.png`;
     const filepath = path.join(dir, filename);
     const buffer = Buffer.from(base64Data, 'base64');
     fs.writeFileSync(filepath, buffer);

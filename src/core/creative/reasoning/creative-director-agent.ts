@@ -542,6 +542,7 @@ REASONING: First I analyzed...
   
   /**
    * Generate fallback with variation (rotate headlines, benefits, CTAs)
+   * IMPROVED: Use content from copywriter post to create contextual variations
    */
   private applyFallbackVariation(brief: CreativeBrief, context: BusinessContextPackage): CreativeBrief {
     const tracker = ContentHistoryTracker.getInstance();
@@ -551,37 +552,91 @@ REASONING: First I analyzed...
     const lowerObj = context.ceoObjective.toLowerCase();
     const isSpaContext = lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp');
     
+    // Extract insights from copywriter content if available
+    const copywriterMessages = context.copywriterContent?.keyMessages || [];
+    const hasCopywriterContent = copywriterMessages.length > 0;
+    
+    console.log('[CreativeDirectorAgent] 🎨 Applying fallback variation #' + variationIndex);
+    console.log('[CreativeDirectorAgent] 📝 Has copywriter content:', hasCopywriterContent);
+    
     if (isSpaContext) {
-      // Rotate headlines for B2B Software (FOCUS: Software/Technology, NOT spa services)
-      const headlineVariants = [
-        'PHẦN MỀM QUẢN TRỊ SPA THÔNG MINH',
-        'HỆ THỐNG BELLA EOS - TỰ ĐỘNG HÓA VẬN HÀNH',
-        'DOANH THU TĂNG 2X NHỜ CÔNG NGHỆ AI',
-        'NỀN TẢNG QUẢN LÝ SPA CHUYÊN NGHIỆP',
-        'ỨNG DỤNG AI CHO CHỦ SPA HIỆN ĐẠI'
-      ];
+      // IMPROVED: Generate headlines dynamically based on copywriter content
+      let headlineVariants: string[];
       
-      // Rotate benefits for SOFTWARE value propositions (NOT service benefits)
-      const benefitSets = [
-        ['⚡ Phần mềm tự động xếp lịch KTV', '📊 Dashboard phân tích thời gian thực', '💰 Tăng doanh thu 150% trong 6 tháng'],
-        ['🖥️ Quản lý đa chi nhánh trên 1 nền tảng', '📱 Ứng dụng mobile quản trị mọi lúc', '🤖 AI dự báo doanh thu chính xác'],
-        ['⏱️ Tiết kiệm 40 giờ/tháng quản lý thủ công', '📈 Báo cáo tự động gửi email hàng ngày', '🎯 Phân tích khách hàng bằng AI'],
-        ['💻 Phần mềm cloud - không cần cài đặt', '🔒 Bảo mật chuẩn enterprise', '🚀 Triển khai trong 1 ngày'],
-        ['📊 Hệ thống CRM tích hợp sẵn', '💳 Thanh toán online tự động', '📞 Hỗ trợ 24/7 bằng tiếng Việt']
-      ];
+      if (hasCopywriterContent) {
+        // Extract key themes from copywriter messages
+        const themes = this.extractThemesFromContent(copywriterMessages);
+        console.log('[CreativeDirectorAgent] 📊 Extracted themes:', themes);
+        
+        // Generate contextual headlines
+        headlineVariants = [
+          this.generateHeadlineFromTheme(themes, 'technology'),
+          this.generateHeadlineFromTheme(themes, 'results'),
+          this.generateHeadlineFromTheme(themes, 'efficiency'),
+          this.generateHeadlineFromTheme(themes, 'growth'),
+          this.generateHeadlineFromTheme(themes, 'innovation')
+        ];
+      } else {
+        // Fallback to generic rotation
+        headlineVariants = [
+          'PHẦN MỀM QUẢN TRỊ SPA THÔNG MINH',
+          'HỆ THỐNG BELLA EOS - TỰ ĐỘNG HÓA VẬN HÀNH',
+          'DOANH THU TĂNG 2X NHỜ CÔNG NGHỆ AI',
+          'NỀN TẢNG QUẢN LÝ SPA CHUYÊN NGHIỆP',
+          'ỨNG DỤNG AI CHO CHỦ SPA HIỆN ĐẠI'
+        ];
+      }
       
-      // Rotate CTAs
+      // Generate benefits dynamically
+      let benefitSets: string[][];
+      
+      if (hasCopywriterContent) {
+        benefitSets = this.generateBenefitsFromContent(copywriterMessages, variationIndex);
+      } else {
+        benefitSets = [
+          ['⚡ Phần mềm tự động xếp lịch KTV', '📊 Dashboard phân tích thời gian thực', '💰 Tăng doanh thu 150% trong 6 tháng'],
+          ['🖥️ Quản lý đa chi nhánh trên 1 nền tảng', '📱 Ứng dụng mobile quản trị mọi lúc', '🤖 AI dự báo doanh thu chính xác'],
+          ['⏱️ Tiết kiệm 40 giờ/tháng quản lý thủ công', '📈 Báo cáo tự động gửi email hàng ngày', '🎯 Phân tích khách hàng bằng AI'],
+          ['💻 Phần mềm cloud - không cần cài đặt', '🔒 Bảo mật chuẩn enterprise', '🚀 Triển khai trong 1 ngày'],
+          ['📊 Hệ thống CRM tích hợp sẵn', '💳 Thanh toán online tự động', '📞 Hỗ trợ 24/7 bằng tiếng Việt']
+        ];
+      }
+      
+      // TRULY RANDOM headline selection (not fixed index)
+      const randomHeadlineIndex = Math.floor(Math.random() * headlineVariants.length);
+      
+      // TRULY RANDOM benefit set selection (not fixed index)
+      const randomBenefitIndex = Math.floor(Math.random() * benefitSets.length);
+      
+      // TRULY RANDOM CTA selection
       const ctaVariants = [
         'Demo phần mềm 15 phút',
         'Dùng thử miễn phí 30 ngày',
         'Xem video giới thiệu',
         'Nhận báo giá chi tiết',
-        'Đặt lịch tư vấn 1-1'
+        'Đặt lịch tư vấn 1-1',
+        'Trải nghiệm ngay hôm nay',
+        'Liên hệ tư vấn miễn phí',
+        'Đăng ký demo online',
+        'Nhận ưu đãi đặc biệt',
+        'Tìm hiểu thêm ngay',
+        'Bắt đầu dùng thử',
+        'Đặt lịch hẹn tư vấn',
+        'Xem case study thực tế',
+        'Tải catalog sản phẩm',
+        'Chat với chuyên viên'
       ];
       
-      brief.posterHeadline = headlineVariants[variationIndex];
-      brief.keyBenefits = benefitSets[variationIndex];
-      brief.callToAction = ctaVariants[variationIndex];
+      const randomCTAIndex = Math.floor(Math.random() * ctaVariants.length);
+      
+      brief.posterHeadline = headlineVariants[randomHeadlineIndex];
+      brief.keyBenefits = benefitSets[randomBenefitIndex];
+      brief.callToAction = ctaVariants[randomCTAIndex];
+      
+      console.log('[CreativeDirectorAgent] ✓ Generated variation:');
+      console.log('[CreativeDirectorAgent]   Headline:', brief.posterHeadline, `[${randomHeadlineIndex + 1}/${headlineVariants.length}]`);
+      console.log('[CreativeDirectorAgent]   Benefits:', brief.keyBenefits.join(' | '));
+      console.log('[CreativeDirectorAgent]   CTA:', brief.callToAction, `[${randomCTAIndex + 1}/${ctaVariants.length}]`);
       
       // Vary hero subject device - ALWAYS show SOFTWARE on screen
       const deviceVariants = [
@@ -596,6 +651,181 @@ REASONING: First I analyzed...
     }
     
     return brief;
+  }
+  
+  /**
+   * Extract themes from copywriter content
+   */
+  private extractThemesFromContent(messages: string[]): {
+    hasTechnology: boolean;
+    hasResults: boolean;
+    hasEfficiency: boolean;
+    hasGrowth: boolean;
+    hasInnovation: boolean;
+    hasCustomer: boolean;
+    specificNumbers: string[];
+  } {
+    const combinedText = messages.join(' ').toLowerCase();
+    
+    return {
+      hasTechnology: /phần mềm|hệ thống|ai|tự động|công nghệ|digital|app|platform/.test(combinedText),
+      hasResults: /tăng|doanh thu|lợi nhuận|hiệu quả|kết quả|đạt được/.test(combinedText),
+      hasEfficiency: /tiết kiệm|nhanh|tối ưu|giảm|hiệu suất|tự động/.test(combinedText),
+      hasGrowth: /phát triển|mở rộng|tăng trưởng|scale|lớn mạnh/.test(combinedText),
+      hasInnovation: /mới|đột phá|tiên tiến|sáng tạo|innovation|hiện đại/.test(combinedText),
+      hasCustomer: /khách hàng|customer|trải nghiệm|hài lòng|chăm sóc/.test(combinedText),
+      specificNumbers: combinedText.match(/\d+[%x×]?/g) || []
+    };
+  }
+  
+  /**
+   * Generate contextual headline based on theme - TRULY RANDOM
+   */
+  private generateHeadlineFromTheme(themes: any, focusTheme: string): string {
+    const { specificNumbers } = themes;
+    
+    // Expanded headline pool - 40+ variations
+    const allHeadlines = {
+      technology: [
+        'PHẦN MỀM AI QUẢN TRỊ SPA',
+        'HỆ THỐNG BELLA EOS',
+        'CÔNG NGHỆ QUẢN LÝ THẾ HỆ MỚI',
+        'GIẢI PHÁP QUẢN TRỊ SPA TOÀN DIỆN',
+        'PHẦN MỀM QUẢN LÝ SPA CHUYÊN NGHIỆP',
+        'NỀN TẢNG ĐIỀU HÀNH SPA THÔNG MINH',
+        'SPA 4.0 VỚI CÔNG NGHỆ AI',
+        'QUẢN TRỊ SPA HIỆN ĐẠI',
+      ],
+      results: [
+        'DOANH THU TĂNG VƯỢT KẾ HOẠCH',
+        'TĂNG DOANH SỐ 150% TRONG 6 THÁNG',
+        'DOANH THU X2 VỚI BELLA EOS',
+        'LỢI NHUẬN TĂNG 3 LẦN',
+        'HIỆU QUẢ KINH DOANH TĂNG CAO',
+        'ROI RÕ RÀNG SAU 3 THÁNG',
+        'DOANH SỐ VƯỢT MỤC TIÊU',
+        'KẾT QUẢ VƯỢT TRỘI',
+      ],
+      efficiency: [
+        'TỐI ƯU VẬN HÀNH SPA TỰ ĐỘNG',
+        'TIẾT KIỆM 40% THỜI GIAN QUẢN LÝ',
+        'QUẢN TRỊ SPA THÔNG MINH HIỆU QUẢ',
+        'TỰ ĐỘNG HÓA TOÀN BỘ WORKFLOW',
+        'VẬN HÀNH ĐƠN GIẢN HƠN BAO GIỜ HẾT',
+        'QUẢN LÝ DỄ DÀNG - CHÍNH XÁC - NHANH',
+        'GIẢM 50% CÔNG VIỆC THỪA',
+        'HIỆU SUẤT VẬN HÀNH TỐI ĐA',
+      ],
+      growth: [
+        'MỞ RỘNG SPA DỄ DÀNG VỚI BELLA',
+        'NỀN TẢNG PHÁT TRIỂN BỀN VỮNG',
+        'SCALE SPA TỪ 1 LÊN 100 CHI NHÁNH',
+        'CHUỖI SPA CHUYÊN NGHIỆP',
+        'TĂNG TRƯỞNG KHÔNG GIỚI HẠN',
+        'PHÁT TRIỂN SPA ĐA CHI NHÁNH',
+        'NÂNG TẦM SPA VIỆT',
+        'MỞ RỘNG QUY MÔ NHANH CHÓNG',
+      ],
+      innovation: [
+        'CHUYỂN ĐỔI SỐ SPA HIỆN ĐẠI',
+        'SPA 4.0 VỚI CÔNG NGHỆ AI',
+        'NÂNG TẦM SPA VIỆT',
+        'ĐỔI MỚI TOÀN DIỆN VỚI BELLA EOS',
+        'SPA THỜI ĐẠI MỚI',
+        'TƯƠNG LAI QUẢN TRỊ SPA ĐÃ ĐẾN',
+        'CÔNG NGHỆ QUẢN TRỊ ĐẲNG CẤP MỚI',
+        'ĐỘT PHÁ VẬN HÀNH SPA',
+      ]
+    };
+    
+    // Get headlines for this theme
+    let headlines = allHeadlines[focusTheme as keyof typeof allHeadlines] || allHeadlines.technology;
+    
+    // If we have numbers in content, add dynamic headlines for results theme
+    if (specificNumbers && specificNumbers.length > 0 && focusTheme === 'results') {
+      const number = specificNumbers[0];
+      headlines = [
+        `TĂNG DOANH THU ${number}% VỚI AI`,
+        `DOANH SỐ TĂNG ${number}% TRONG 6 THÁNG`,
+        `HIỆU QUẢ TĂNG ${number}% CÙNG BELLA`,
+        `${number}% TĂNG TRƯỞNG BỀN VỮNG`,
+        `DOANH THU +${number}% VỚI BELLA EOS`,
+        ...headlines
+      ];
+    }
+    
+    // TRULY RANDOM selection using Math.random()
+    const randomIndex = Math.floor(Math.random() * headlines.length);
+    const selected = headlines[randomIndex];
+    
+    console.log(`[CreativeDirectorAgent] 🎲 Random headline (${focusTheme}): "${selected}" [${randomIndex + 1}/${headlines.length}]`);
+    
+    return selected;
+  }
+  
+  /**
+   * Generate benefits from copywriter content - TRULY RANDOM
+   */
+  private generateBenefitsFromContent(messages: string[], index: number): string[][] {
+    const themes = this.extractThemesFromContent(messages);
+    
+    // All available benefits - 25 items across 5 categories
+    const benefitPool: Record<string, string[]> = {
+      tech: [
+        '⚡ Phần mềm AI tự động xếp lịch',
+        '🖥️ Dashboard quản lý trực quan',
+        '📱 App mobile quản trị mọi lúc',
+        '🤖 Phân tích dự báo bằng AI',
+        '💻 Hệ thống cloud an toàn'
+      ],
+      efficiency: [
+        '⏱️ Tiết kiệm 40 giờ/tháng',
+        '⚡ Tự động hóa 80% công việc',
+        '📊 Báo cáo tức thời không cần Excel',
+        '🎯 Xếp ca KTV tối ưu tự động',
+        '📈 Tracking hiệu suất real-time'
+      ],
+      results: [
+        '💰 Tăng doanh thu 150% trong 6 tháng',
+        '📈 ROI rõ ràng sau 3 tháng',
+        '🎯 Conversion tăng 40%',
+        '💎 Giá trị khách hàng tăng 2X',
+        '🚀 Doanh số tăng ổn định'
+      ],
+      support: [
+        '📞 Hỗ trợ 24/7 tiếng Việt',
+        '🎓 Đào tạo miễn phí nhân viên',
+        '🔧 Cài đặt trong 1 ngày',
+        '🛡️ Bảo mật chuẩn enterprise',
+        '🔄 Cập nhật tính năng liên tục'
+      ],
+      scale: [
+        '🏢 Quản lý đa chi nhánh dễ dàng',
+        '📊 Scale không giới hạn',
+        '🌐 Mở rộng toàn quốc',
+        '💼 Phù hợp từ 1-100 chi nhánh',
+        '🚀 Tăng trưởng bền vững'
+      ]
+    };
+    
+    // TRULY RANDOM category selection
+    const categories = ['tech', 'efficiency', 'results', 'support', 'scale'];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    
+    // TRULY RANDOM benefit selection from that category
+    const categoryBenefits = benefitPool[randomCategory];
+    const shuffled = [...categoryBenefits].sort(() => Math.random() - 0.5);
+    const selectedBenefits = shuffled.slice(0, 3);
+    
+    console.log(`[CreativeDirectorAgent] 🎲 Random benefits (${randomCategory}): ${selectedBenefits.length} selected from ${categoryBenefits.length} available`);
+    
+    // Return 5 DIFFERENT random sets (not fixed rotation)
+    return Array.from({ length: 5 }, () => {
+      const randomCat = categories[Math.floor(Math.random() * categories.length)];
+      const catBenefits = benefitPool[randomCat];
+      const shuffledCat = [...catBenefits].sort(() => Math.random() - 0.5);
+      return shuffledCat.slice(0, 3);
+    });
   }
   
   /**
