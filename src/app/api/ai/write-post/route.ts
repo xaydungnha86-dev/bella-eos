@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
+import type { FacebookBrief } from '@/core/creative/brief-analyzer';
 
 /**
  * POST /api/ai/write-post
  *
- * Takes a CanonicalContextPackage and produces a ready-to-publish
- * Facebook post using the AI model whose key the customer stored in Settings.
+ * Takes a CanonicalContextPackage (or a pre-analyzed FacebookBrief) and produces
+ * a ready-to-publish Facebook post in strict 5-block format:
+ *   1. HOOK — emoji + pain trigger
+ *   2. BODY — benefits + numbers (2-3 short paragraphs)
+ *   3. PROOF — 1 social proof line
+ *   4. CTA — urgency call-to-action
+ *   5. HASHTAGS — 5-8 relevant tags
  *
- * Priority: OpenAI GPT-4o → Anthropic Claude → Gemini → built-in fallback writer
+ * Priority: Gemini → OpenAI GPT-4o → Anthropic Claude → built-in fallback
  */
 export async function POST(request: Request) {
   try {
@@ -15,6 +21,7 @@ export async function POST(request: Request) {
       objective,
       voiceTone,
       brandDna,
+      brief,
       platform = 'facebook',
       segment,
       goal,
@@ -27,6 +34,7 @@ export async function POST(request: Request) {
     } = body as {
       objective: string;
       voiceTone?: string;
+      brief?: FacebookBrief;
       brandDna?: {
         voiceTone?: string;
         targetSegment?: string;
@@ -47,49 +55,66 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'objective is required' }, { status: 400 });
     }
 
-    const effectiveTone = voiceTone || brandDna?.voiceTone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
-    const effectiveSegment = segment || brandDna?.targetSegment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
+    // Resolve effective values — brief takes priority over raw fields
+    const effectiveTone     = brief?.tone     || voiceTone || brandDna?.voiceTone || 'Chuyên nghiệp, tin cậy, kết quả-driven';
+    const effectiveSegment  = brief?.audienceRole || segment || brandDna?.targetSegment || 'Khách hàng mục tiêu';
+    const effectiveBrand    = brief?.brandName || 'Bella EOS';
+    const effectiveUSP      = brief?.usp      || `Giải pháp tối ưu từ ${effectiveBrand}`;
+    const effectivePain     = brief?.painPoint || 'Quy trình thủ công tốn thời gian và chi phí';
+    const effectiveHook     = brief?.emotionalHook || 'Bạn có muốn tối ưu hoàn toàn quy trình vận hành?';
+    const effectiveBenefits = brief?.keyBenefits?.join('\n') || '✅ Tối ưu quy trình\n✅ Tiết kiệm chi phí\n✅ Tăng doanh thu';
+    const effectiveCTA      = brief?.ctaText  || 'Liên hệ tư vấn miễn phí ngay hôm nay';
+    const effectiveHashtags = brief?.primaryHashtags?.join(' ') || `#${effectiveBrand.replace(/\s+/g, '')} #KinhDoanh`;
 
-    const defaultSystemPrompt = `Bạn là AI Copywriter Marketing chuyên nghiệp của Bella EOS.
+    // Void unused vars to avoid lint warnings
+    void platform; void goal;
 
-NHIỆM VỤ: Viết BÀI ĐĂNG FACEBOOK DUY NHẤT (single post) để thu hút khách hàng mục tiêu mua sản phẩm/dịch vụ.
+    const defaultSystemPrompt = `Bạn là AI Copywriter Marketing cao cấp. Bạn viết bài đăng Facebook chuẩn chuyển đổi cao cho doanh nghiệp Việt Nam.
 
-ĐỐI TƯỢNG KHÁCH HÀNG: ${effectiveSegment}
-TONE GIỌNG: ${effectiveTone}
+NHIỆM VỤ: Viết 1 bài đăng Facebook theo đúng 5 KHỐI cấu trúc bắt buộc dưới đây.
 
-CẤU TRÚC BÀI VIẾT (150-250 từ):
+BRIEF:
+- Thương hiệu: ${effectiveBrand}
+- Đối tượng: ${effectiveSegment}
+- Tone: ${effectiveTone}
+- USP: ${effectiveUSP}
+- Nỗi đau: ${effectivePain}
 
-1. **HOOK (Câu mở đầu bắt mắt)**
-   - Sử dụng emoji phù hợp
-   - Đặt câu hỏi hoặc thống kê gây shock
-   - Nêu bật nỗi đau/mong muốn của khách hàng
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▌ KHỐI 1 — HOOK (1-2 dòng)
+  • Bắt đầu bằng emoji phù hợp (🔥 ⚡ 💡 🎯 ...)
+  • Câu gợi ý: "${effectiveHook}"
+  • Mục tiêu: tạo tò mò, đánh thẳng vào nỗi đau — dừng ngón tay cuộn
 
-2. **BODY (Nội dung chính)**
-   - Mô tả vấn đề khách hàng đang gặp phải
-   - Giới thiệu giải pháp (sản phẩm/dịch vụ)
-   - Nhấn mạnh lợi ích cụ thể (dùng số liệu nếu có)
-   - Tạo sự tin tưởng (social proof, case study)
+▌ KHỐI 2 — BODY (2-3 đoạn ngắn, mỗi đoạn ≤3 dòng)
+  • Đoạn 1: Mô tả vấn đề cụ thể bằng con số thực ("8h/ngày", "30%", ...)
+  • Đoạn 2: Giới thiệu ${effectiveBrand} — KỂ KẾT QUẢ, không kể tính năng
+  • Lợi ích cụ thể:
+${effectiveBenefits}
 
-3. **CTA (Kêu gọi hành động)**
-   - Rõ ràng, cụ thể
-   - Tạo tính cấp thiết (FOMO)
-   - Có emoji 👉 hoặc tương tự
+▌ KHỐI 3 — PROOF (1 dòng duy nhất)
+  • Con số thực hoặc testimonial ngắn
+  • Ví dụ: "✅ 1,200+ doanh nghiệp tin dùng — doanh thu tăng bình quân 30%+"
 
-4. **HASHTAGS**
-   - 3-5 hashtags phù hợp với ngành hàng
-   - Không dùng quá nhiều hashtags
+▌ KHỐI 4 — CTA (1-2 dòng)
+  • 👉 ${effectiveCTA}
+  • Tạo urgency nếu phù hợp (số lượng có hạn / thời gian ưu đãi)
 
-QUAN TRỌNG:
-- Viết TỰ NHIÊN, không máy móc
-- Tập trung vào KHÁCH HÀNG, không tự sướng về sản phẩm
-- Sử dụng emoji hợp lý (không lạm dụng)
-- Nội dung NGẮN GỌN, Dễ ĐỌC (chia đoạn)
-- Mục tiêu: CHUYỂN ĐỔI KHÁCH HÀNG (không phải giáo dục hay báo cáo)
+▌ KHỐI 5 — HASHTAGS (tách dòng riêng)
+  ${effectiveHashtags}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-CHỈ TRẢ VỀ NỘI DUNG BÀI ĐĂNG, KHÔNG CẦN TIÊU ĐỀ HAY METADATA.`;
+QUY TẮC BẮT BUỘC:
+✓ Tổng bài: 180-260 từ (không dài hơn)
+✓ Mỗi khối cách nhau 1 dòng trống
+✓ Ngôn ngữ tự nhiên — KHÔNG sáo rỗng, KHÔNG máy móc
+✓ Emoji dùng vừa phải (tối đa 2/đoạn)
+✓ Tập trung vào KẾT QUẢ khách hàng nhận được
+
+CHỈ TRẢ VỀ NỘI DUNG BÀI ĐĂNG. KHÔNG có tiêu đề, KHÔNG có metadata.`;
 
     const effectiveSystemPrompt = systemPrompt ? systemPrompt : defaultSystemPrompt;
-    const effectiveTemperature = temperature !== undefined && temperature !== null ? parseFloat(temperature as any) : 0.75;
+    const effectiveTemperature = temperature !== undefined && temperature !== null ? parseFloat(String(temperature)) : 0.75;
 
     const userMessage = `Mục tiêu chiến dịch: "${objective}"
 
@@ -195,7 +220,8 @@ Hãy viết BÀI ĐĂNG FACEBOOK thu hút khách hàng mục tiêu này.`;
     };
 
     // Determine engine order
-    const order: (() => Promise<any | null>)[] = [];
+    type ProviderResult = { success: boolean; content: string; model: string; provider: string } | null;
+    const order: (() => Promise<ProviderResult>)[] = [];
     if (model === 'gpt-4o') {
       order.push(tryOpenAI, tryAnthropic, tryGemini);
     } else if (model === 'claude-3-5-sonnet') {
@@ -213,7 +239,7 @@ Hãy viết BÀI ĐĂNG FACEBOOK thu hút khách hàng mục tiêu này.`;
 
     // ── Built-in Fallback Writer (no AI key needed) ─────────────────────────
     console.info('[ai/write-post] No AI key available — using built-in fallback writer.');
-    const fallbackContent = generateFallbackPost(objective, voiceTone, segment, goal);
+    const fallbackContent = generateFallbackPost(objective);
     return NextResponse.json({
       success: true,
       content: fallbackContent,
@@ -222,17 +248,16 @@ Hãy viết BÀI ĐĂNG FACEBOOK thu hút khách hàng mục tiêu này.`;
       warning: 'Chưa có AI API Key. Nội dung được tạo bởi engine nội bộ. Cấu hình OpenAI/Claude/Gemini trong Cài đặt để có nội dung chất lượng cao hơn.'
     });
 
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
 // ─── Built-in Fallback Content Writer ────────────────────────────────────────
-function generateFallbackPost(objective: string, tone?: string, segment?: string, goal?: string): string {
+function generateFallbackPost(objective: string): string {
   const lower = objective.toLowerCase();
   const isSpa = lower.includes('spa') || lower.includes('thẩm mỹ') || lower.includes('beauty');
-  const effectiveTone = tone || 'Cao cấp, Sang trọng, Nhẹ nhàng & Tinh tế';
-  const effectiveSegment = segment || 'Chủ Spa & Thẩm mỹ viện cao cấp';
 
   if (isSpa) {
     return `🔥 BẠN ĐANG TỐN 8 GIỜ MỖI NGÀY ĐỂ QUẢN LÝ THỦ CÔNG SPA CỦA MÌNH?
