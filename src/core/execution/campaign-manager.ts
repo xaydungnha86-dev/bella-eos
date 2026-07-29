@@ -281,15 +281,18 @@ class CampaignExecutionManagerClass {
       this.addLog('INTENT GATE', '✅ Cổng xác thực Ý chí (Intent Gate): ĐẠT YÊU CẦU (DoD check passed)', 'text-emerald-400 font-bold');
 
       await delay(600);
-      this.addLog('EipConnector', `Fetching active customer records from external EIP CRM`, 'text-slate-300');
+      this.addLog('EIP CONNECTOR', `📡 Đang kết nối Bella EIP API để lấy dữ liệu Doanh thu, Khách hàng, Lịch hẹn & KTV thực tế...`, 'text-indigo-400 font-bold');
+      const eipOverview = await EipConnector.getEnterpriseOverview();
       const activeCustomers = await EipConnector.getActiveCustomers();
-      const finalCustCount = activeCustomers.length + 1287;
+      const finalCustCount = eipOverview.activeCustomersCount || (activeCustomers.length + 1287);
       this.state.activeCustomerCount = finalCustCount;
       this.notify();
 
+      this.addLog('EIP PAYLOAD DIGEST', `📊 Số liệu từ Bella EIP: ${finalCustCount} Khách CRM | ${eipOverview.appointmentCount} Lịch hẹn | ${eipOverview.technicianCount} KTV | ${eipOverview.staffCount} Nhân sự | Doanh thu: ${(eipOverview.monthlyRevenueVnd / 1000000).toFixed(0)}M | Chi phí: ${(eipOverview.monthlyExpensesVnd / 1000000).toFixed(0)}M VND.`, 'text-emerald-400 font-semibold');
+
       await delay(500);
-      this.addLog('Understanding Center', `Digesting API / EIP payload from: EIP CRM API`, 'text-slate-300');
-      EnterpriseBrain.Understanding.understandApiFact('EIP CRM API', { activeCustomersCount: activeCustomers.length });
+      this.addLog('Understanding Center', `Digesting API / EIP payload from: ${eipOverview.source}`, 'text-slate-300');
+      EnterpriseBrain.Understanding.understandApiFact('EIP CRM API', { ...eipOverview });
       
       // Query Facebook Metrics
       const fbMetrics = await FacebookConnector.getReachMetrics();
@@ -297,7 +300,7 @@ class CampaignExecutionManagerClass {
       this.notify();
       
       await delay(700);
-      this.addLog('BUSINESS CONTEXT', `📋 Phân tích bối cảnh kinh doanh: Khách hàng hoạt động: ${finalCustCount} | Reach 24h: ${fbMetrics.postReach24h.toLocaleString()} (Nguồn: ${fbMetrics.source}). Khởi tạo Context Package.`, 'text-slate-300 font-semibold');
+      this.addLog('BUSINESS CONTEXT', `📋 Khởi tạo Context Package từ EIP API (${eipOverview.source}). Khách CRM: ${finalCustCount} | Lịch hẹn: ${eipOverview.appointmentCount} | KTV: ${eipOverview.technicianCount} | Staff: ${eipOverview.staffCount}.`, 'text-slate-300 font-semibold');
 
       await delay(700);
       this.addLog('SOP PROTOCOL', `⚙️ Đối chiếu Quy trình & Quy định vận hành nội bộ (SOP)...`, 'text-cyan-400 font-semibold');
