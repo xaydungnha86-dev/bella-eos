@@ -246,7 +246,6 @@ class CampaignExecutionManagerClass {
 
       await delay(700);
       this.addLog('FINANCIAL AUDIT', `💰 Kiểm tra Tình hình Tài chính & Chính sách chi tiêu...`, 'text-purple-400 font-semibold');
-      const budgetLimitVal = objective.toLowerCase().includes('50 triệu') ? 50000000 : 100000000;
       const budgetLimitStr = budgetLimitVal.toLocaleString('vi-VN');
       const policyRes = PolicyEngine.getInstance().checkBudgetPolicy(budgetLimitVal);
       if (policyRes.passed) {
