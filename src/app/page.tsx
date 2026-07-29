@@ -811,19 +811,23 @@ export default function Dashboard() {
         <main className="flex-1 flex flex-col overflow-hidden bg-[#f4f5f7]/60">
           
           {/* TOPOLOGY VIEWPORT */}
-          <div className="flex-1 p-6 flex flex-col relative overflow-hidden">
-            <div className="absolute top-4 left-5 z-10 flex items-center gap-2">
-              <Network className="w-3.5 h-3.5 text-slate-500" />
-              <span className="text-[10px] tracking-[0.12em] text-slate-500 font-bold uppercase font-display">SƠ ĐỒ TRUY HỒI & THỰC THI QUYẾT SÁCH • DECISION & GOAL TOPOLOGY</span>
-            </div>
-
+          <div className="flex-1 p-5 flex flex-col relative overflow-hidden">
             {/* Simulated interactive graph topology */}
-            <div className="flex-1 bg-white/70 backdrop-blur-md rounded-2xl border border-slate-200 flex flex-col items-center justify-start p-4 pt-12 relative overflow-hidden shadow-[0_4px_24px_rgba(15,23,42,0.01)]">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.025),transparent)] pointer-events-none"></div>
-              
-              {/* Dynamic node link tree display */}
-              {isProcessing || activeStep >= 0 ? (
-                <div className="flex flex-col items-center gap-5.5 w-full max-w-3xl z-10 transition-all duration-500 overflow-y-auto max-h-[calc(100vh-270px)] px-2 pt-2 pb-8">
+            <div className="flex-1 bg-white/70 backdrop-blur-md rounded-2xl border border-slate-200 flex flex-col relative overflow-hidden shadow-[0_4px_24px_rgba(15,23,42,0.01)]">
+              {/* Topology Title Header */}
+              <div className="px-5 py-3 border-b border-slate-200/60 bg-white/50 backdrop-blur-sm flex items-center justify-between shrink-0 z-20">
+                <div className="flex items-center gap-2">
+                  <Network className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="text-[10px] tracking-[0.12em] text-slate-500 font-bold uppercase font-display">SƠ ĐỒ TRUY HỒI & THỰC THI QUYẾT SÁCH • DECISION & GOAL TOPOLOGY</span>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-5 relative">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.025),transparent)] pointer-events-none"></div>
+                
+                {/* Dynamic node link tree display */}
+                {isProcessing || activeStep >= 0 ? (
+                  <div className="flex flex-col items-center gap-5.5 w-full max-w-3xl mx-auto z-10 transition-all duration-500 pb-8">
                   {/* Root Objective Node */}
                   <div className="flex flex-col items-center shrink-0">
                     <div className="bg-[#faf9f5] px-6 py-4 rounded-xl text-center border luxury-border-glow max-w-md shadow-sm">
@@ -1195,7 +1199,7 @@ export default function Dashboard() {
                   )}
                 </div>
               ) : (
-                <div className="w-full max-w-4xl mx-auto z-10 p-6 flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-190px)]">
+                <div className="w-full max-w-4xl mx-auto z-10 flex flex-col gap-5 pb-6">
                   {/* Executive Header Banner */}
                   <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 rounded-2xl p-6 text-white border border-slate-700/50 shadow-lg relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle,rgba(212,175,55,0.08),transparent)] pointer-events-none"></div>
