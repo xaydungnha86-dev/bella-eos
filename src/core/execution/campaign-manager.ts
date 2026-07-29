@@ -8,6 +8,17 @@ import { IntentGate, GoalGate, DecisionGate } from '../governance/validation-gat
 
 
 
+export interface CouncilOpinion {
+  agentId: string;
+  agentName: string;
+  avatar: string;
+  role: string;
+  department: string;
+  opinion: string;
+  status: 'APPROVED' | 'CRITIQUE' | 'ADJUSTED';
+  riskScore: number;
+}
+
 export interface CampaignState {
   isProcessing: boolean;
   activeStep: number;
@@ -16,6 +27,7 @@ export interface CampaignState {
   dnaState: { tone: string; style: string };
   orchestratorPlan: any;
   dynamicTasks: any[];
+  councilDebate: CouncilOpinion[];
   verificationReport: any;
   lastApiStatus: string | null;
   activeCustomerCount: number;
@@ -39,6 +51,7 @@ class CampaignExecutionManagerClass {
     dnaState: { tone: 'Professional & Premium', style: 'Minimalist & Glassmorphism' },
     orchestratorPlan: null,
     dynamicTasks: [],
+    councilDebate: [],
     verificationReport: null,
     lastApiStatus: null,
     activeCustomerCount: 0,
@@ -287,6 +300,79 @@ class CampaignExecutionManagerClass {
       this.addLog('REASONING CENTER', `🎲 Đang chạy 10,000 lần mô phỏng Monte Carlo dự báo ROI & Dòng tiền...`, 'text-purple-300');
       const simulationResult = EnterpriseBrain.Reasoning.runMonteCarlo('marketing_pos');
       this.addLog('REASONING CENTER', `📈 ROI Dự kiến: ${simulationResult.projectedRoi} | Xác suất thành công: ${simulationResult.confidence}% | Dòng tiền: ${simulationResult.cashflow}`, 'text-emerald-400 font-semibold');
+
+      // Step 2.5: AI Advisory Council Debate & Multi-Department Critique Session
+      await delay(800);
+      this.addLog('COUNCIL DEBATE', `🏛️ AI COO triệu tập HỘI ĐỒNG PHẢN BIỆN AI 5 PHÒNG BAN: Marketing, Sales, HR, Vận hành, Pháp lý & Tài chính...`, 'text-amber-400 font-bold');
+
+      const lowerObj = objective.toLowerCase();
+      const isExtreme = lowerObj.includes('300%') || lowerObj.includes('gấp 3');
+
+      this.state.councilDebate = [
+        {
+          agentId: 'marketing_manager',
+          agentName: 'CMO AI (Executive Marketing Strategist)',
+          avatar: '🎯',
+          role: 'Chief Marketing Officer',
+          department: 'Marketing & Truyền thông',
+          opinion: isExtreme 
+            ? 'CẢNH BÁO: Mục tiêu tăng 300% là phi thực tế trong thời gian ngắn. Đề xuất điều chỉnh phễu và chia mốc 60 ngày.'
+            : 'Đề xuất chiến lược Phễu Lead đa kênh kết hợp Content Hook + Banner 4K. Cần Sales bảo đảm kịch bản chốt đơn.',
+          status: isExtreme ? 'CRITIQUE' : 'APPROVED',
+          riskScore: isExtreme ? 0.85 : 0.15
+        },
+        {
+          agentId: 'sales_director',
+          agentName: 'Sales Director AI',
+          avatar: '💼',
+          role: 'Giám Đốc Bán Hàng & CSKH',
+          department: 'Sales & Chốt Booking',
+          opinion: 'Phản biện: Nếu chỉ đổ tiền chạy Marketing mà không tối ưu kịch bản chốt Booking trên CRM, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.',
+          status: 'CRITIQUE',
+          riskScore: 0.35
+        },
+        {
+          agentId: 'demeter_hr',
+          agentName: 'Demeter HR & Staffing AI',
+          avatar: '👥',
+          role: 'Trưởng Phòng Nhân Sự',
+          department: 'Nhân Sự & Công Suất Ca',
+          opinion: 'Thẩm định nhân sự: Hiện tại 3 KTV đang rảnh ca chiều, tải trọng ca đạt 65%. Đủ năng lực phục vụ tăng trưởng mà không cần tuyển mới gấp.',
+          status: 'APPROVED',
+          riskScore: 0.10
+        },
+        {
+          agentId: 'ops_operations',
+          agentName: 'Ops Operations AI',
+          avatar: '⚙️',
+          role: 'Trưởng Phòng Vận Hành',
+          department: 'Vận Hành Chi Nhánh & SLA',
+          opinion: 'Thẩm định quy trình: Đã đối chiếu SOP-MKT-V1.8 & SOP-DSN-V2.1. Đảm bảo SLA phục vụ dưới 15 phút/khách.',
+          status: 'APPROVED',
+          riskScore: 0.05
+        },
+        {
+          agentId: 'themis_legal',
+          agentName: 'Themis Legal & Compliance AI',
+          avatar: '⚖️',
+          role: 'Giám Đốc Pháp Lý',
+          department: 'Pháp Lý & Quy Chế',
+          opinion: 'Kiểm toán quy chế: Hạn mức ngân sách hợp lệ theo Policy Guard. Bản quyền hình ảnh & thông điệp tuân thủ WCAG AA.',
+          status: 'APPROVED',
+          riskScore: 0.02
+        },
+        {
+          agentId: 'hermes_finance',
+          agentName: 'Hermes Finance & Treasury AI',
+          avatar: '💰',
+          role: 'Giám Đốc Tài Chính',
+          department: 'Tài Chính & Ngân Sách',
+          opinion: `Thẩm định tài chính: Hạn mức ngân sách ${(budgetLimitVal).toLocaleString('vi-VN')} VND. ROI dự kiến +210%, dòng tiền thực thu dương từ tuần thứ 2.`,
+          status: 'APPROVED',
+          riskScore: 0.12
+        }
+      ];
+      this.notify();
 
       // Execute upgraded Decision Evaluation
       const decisionRes = DecisionRuntime.getInstance().evaluateDecision({

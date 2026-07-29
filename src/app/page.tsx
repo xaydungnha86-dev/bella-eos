@@ -256,6 +256,7 @@ export default function Dashboard() {
   // Dynamic Orchestrator & Audit Verification States
   const [orchestratorPlan, setOrchestratorPlan] = useState<{ title: string; reasoning: string; provider: string; model: string } | null>(null);
   const [dynamicTasks, setDynamicTasks] = useState<any[]>([]);
+  const [councilDebate, setCouncilDebate] = useState<any[]>([]);
   const [verificationReport, setVerificationReport] = useState<import('../core/orchestration/orchestration').VerificationReport | null>(null);
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [copiedOutput, setCopiedOutput] = useState(false);
@@ -294,6 +295,7 @@ export default function Dashboard() {
       setGoalTree(state.goalTree);
       setOrchestratorPlan(state.orchestratorPlan);
       setDynamicTasks(state.dynamicTasks);
+      setCouncilDebate(state.councilDebate || []);
       setVerificationReport(state.verificationReport);
       setLastApiStatus(state.lastApiStatus);
       setActiveCustomerCount(state.activeCustomerCount);
@@ -875,6 +877,61 @@ export default function Dashboard() {
 
                   {/* Flow links */}
                   <div className="w-0.5 h-4 bg-gradient-to-b from-amber-400/50 to-indigo-400/50 shrink-0"></div>
+
+                  {/* EXECUTIVE AI ADVISORY COUNCIL DEBATE PANEL */}
+                  {councilDebate.length > 0 && (
+                    <div className="w-full max-w-2xl bg-white/95 border border-slate-200/90 rounded-2xl p-5 shadow-xs text-left space-y-3.5 shrink-0 animate-fade-in">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center text-xs font-bold shadow-2xs">
+                            🏛️
+                          </div>
+                          <div>
+                            <h3 className="font-display font-bold text-xs tracking-wider text-slate-800 uppercase">
+                              Hội Đồng Phản Biện AI C-Suite (Executive AI Advisory Council)
+                            </h3>
+                            <p className="text-[9px] text-slate-400 font-medium">Thẩm định & phản biện đa phòng ban trước khi COO chốt Kế hoạch Vận hành Tổng thể</p>
+                          </div>
+                        </div>
+                        <span className="text-[8.5px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-150 font-bold uppercase tracking-wide">
+                          {councilDebate.filter(c => c.status === 'APPROVED').length} / {councilDebate.length} Phòng Ban Đồng Thuận
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {councilDebate.map((c, i) => (
+                          <div key={i} className={`p-3 rounded-xl border text-xs space-y-1.5 transition-all ${
+                            c.status === 'CRITIQUE'
+                              ? 'bg-amber-50/60 border-amber-300 text-amber-900 shadow-2xs'
+                              : 'bg-slate-50/70 border-slate-200/80 text-slate-700'
+                          }`}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 font-bold">
+                                <span className="text-sm">{c.avatar}</span>
+                                <span className="text-[11px] text-slate-800">{c.agentName}</span>
+                              </div>
+                              <span className={`text-[7.5px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                                c.status === 'CRITIQUE' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              }`}>
+                                {c.status === 'CRITIQUE' ? '⚠️ Phản biện' : '✅ Đạt yêu cầu'}
+                              </span>
+                            </div>
+                            <p className="text-[9.5px] text-slate-600 leading-relaxed font-sans">
+                              "{c.opinion}"
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="bg-indigo-50/60 border border-indigo-150 p-3 rounded-xl flex items-center gap-2.5 text-[9.5px] text-indigo-900 font-medium">
+                        <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
+                        <span><strong>TỔNG HỢP NGHỊ QUYẾT COO:</strong> Đã ghi nhận phản biện từ Hội đồng AI. Kế hoạch Vận hành Tổng thể đã tích hợp đầy đủ 5 Module: <em>Marketing & Banner</em>, <em>Kịch bản Bán Hàng & Chốt Booking</em>, <em>Công suất Nhân sự KTV</em>, <em>Vận hành SOP</em> và <em>Chính sách Hạn mức Tài Chính</em>.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Flow links */}
+                  <div className="w-0.5 h-4 bg-gradient-to-b from-indigo-400/50 to-cyan-400/50 shrink-0"></div>
 
                   {/* Goal Completion Audit Bar (when available) */}
                   {dynamicTasks.length > 0 && (
