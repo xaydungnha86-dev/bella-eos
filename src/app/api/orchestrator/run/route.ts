@@ -1181,7 +1181,8 @@ async function tool_orchestrate_enterprise_plan(input: any, clientKeys?: any, co
   const objective = input.objective || context?.objective || 'Mục tiêu chiến lược doanh nghiệp';
   return {
     success: true,
-    output: `🧠 [AI COO EXECUTIVE STRATEGIC ANALYSIS REPORT] — PHÂN TÍCH HIỆN TRẠNG & THỊ TRƯỜNG:
+    output: `🧠 [AI COO EXECUTIVE STRATEGIC ANALYSIS REPORT] — PHÂN TÍCH HIỆN TRẠNG & THỊ TRƯỜNG
+ℹ️ NGUỒN DỮ LIỆU: Đang sử dụng Mô hình Giả lập Benchmark Ngành Spa (Industry Baseline). Số liệu sẽ tự động đồng bộ 100% Dữ liệu Thực khi đấu nối API/DB của Bella EIP Connector.
 
 1. 🔍 PHÂN TÍCH HIỆN TRẠNG DOANH NGHIỆP (INTERNAL ENTERPRISE AUDIT):
 - Năng lực Vận hành: Công suất Spa hiện tại đạt 75% vào cuối tuần, ca chiều ngày thường còn dư 25% khung giờ rảnh.
