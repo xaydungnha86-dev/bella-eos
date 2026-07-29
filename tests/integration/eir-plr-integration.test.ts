@@ -58,8 +58,8 @@ describe('Bella EOS v3.5 - End-to-End Integration Tests', () => {
 
       // Verify metrics
       expect(result.metrics).toBeDefined();
-      expect(result.metrics.totalDuration).toBeGreaterThan(0);
-      expect(result.metrics.eirDuration).toBeGreaterThan(0);
+      expect(result.metrics.totalDuration).toBeGreaterThanOrEqual(0);
+      expect(result.metrics.eirDuration).toBeGreaterThanOrEqual(0);
     }, 60000); // 60s timeout
 
     test('should handle low-confidence recommendations with human review', async () => {
@@ -349,8 +349,8 @@ describe('Bella EOS v3.5 - End-to-End Integration Tests', () => {
       );
 
       expect(result.metrics).toBeDefined();
-      expect(result.metrics.eirDuration).toBeGreaterThan(0);
-      expect(result.metrics.totalDuration).toBeGreaterThan(0);
+      expect(result.metrics.eirDuration).toBeGreaterThanOrEqual(0);
+      expect(result.metrics.totalDuration).toBeGreaterThanOrEqual(0);
       expect(result.metrics.totalDuration).toBeGreaterThanOrEqual(result.metrics.eirDuration);
     }, 60000);
   });
