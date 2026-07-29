@@ -954,7 +954,9 @@ export default function Dashboard() {
                             <h3 className="font-display font-bold text-xs tracking-wider text-slate-800 uppercase">
                               Hội Đồng Phản Biện AI C-Suite (Executive AI Advisory Council)
                             </h3>
-                            <p className="text-[9px] text-slate-400 font-medium">Thẩm định & phản biện đa phòng ban trước khi COO chốt Kế hoạch Vận hành Tổng thể</p>
+                            <p className="text-[9px] text-slate-400 font-medium">
+                              Thẩm định & phản biện đa phòng ban (được nuôi dưỡng từ 6 dữ liệu thực thời Bella EIP) trước khi COO chốt Kế hoạch Vận hành
+                            </p>
                           </div>
                         </div>
                         <span className="text-[8.5px] bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-150 font-bold uppercase tracking-wide">
