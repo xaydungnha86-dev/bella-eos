@@ -2,6 +2,9 @@ import { CanonicalContextPackage } from '../../types/eom';
 import { EnterpriseBrain } from '../brain';
 import { LearningCenter } from '../brain/learning';
 import { HUMAN_WORKER_REGISTRY, HumanWorker } from '../workforce/human-registry';
+import { PolicyEngine } from '../governance/policy-engine';
+import { DecisionRuntime } from '../decision/decision-runtime';
+
 
 export interface CampaignState {
   isProcessing: boolean;
@@ -226,8 +229,14 @@ class CampaignExecutionManagerClass {
 
       await delay(700);
       this.addLog('FINANCIAL AUDIT', `💰 Kiểm tra Tình hình Tài chính & Chính sách chi tiêu...`, 'text-purple-400 font-semibold');
-      const budgetLimit = objective.toLowerCase().includes('50 triệu') ? '50,000,000' : '100,000,000';
-      this.addLog('FINANCIAL AUDIT', `💰 Ngân sách dự kiến: ${budgetLimit} VND. Trạng thái chính sách: ĐẠT YÊU CẦU (POL-GOV-001).`, 'text-purple-300');
+      const budgetLimitVal = objective.toLowerCase().includes('50 triệu') ? 50000000 : 100000000;
+      const budgetLimitStr = budgetLimitVal.toLocaleString('vi-VN');
+      const policyRes = PolicyEngine.getInstance().checkBudgetPolicy(budgetLimitVal);
+      if (policyRes.passed) {
+        this.addLog('FINANCIAL AUDIT', `💰 Ngân sách dự kiến: ${budgetLimitStr} VND. Trạng thái chính sách: ĐẠT YÊU CẦU (${policyRes.policyId} - ${policyRes.name}).`, 'text-purple-300');
+      } else {
+        this.addLog('FINANCIAL AUDIT', `💰 Ngân sách dự kiến: ${budgetLimitStr} VND. Trạng thái chính sách: CẦN PHÊ DUYỆT (${policyRes.policyId} - ${policyRes.name}). Chi tiết: ${policyRes.reason}`, 'text-amber-300 font-semibold');
+      }
 
       // Step 1: Parse Intent
       await delay(700);
@@ -249,6 +258,22 @@ class CampaignExecutionManagerClass {
       this.addLog('REASONING CENTER', `🎲 Đang chạy 10,000 lần mô phỏng Monte Carlo dự báo ROI & Dòng tiền...`, 'text-purple-300');
       const simulationResult = EnterpriseBrain.Reasoning.runMonteCarlo('marketing_pos');
       this.addLog('REASONING CENTER', `📈 ROI Dự kiến: ${simulationResult.projectedRoi} | Xác suất thành công: ${simulationResult.confidence}% | Dòng tiền: ${simulationResult.cashflow}`, 'text-emerald-400 font-semibold');
+
+      // Execute upgraded Decision Evaluation
+      const decisionRes = DecisionRuntime.getInstance().evaluateDecision({
+        decisionId: 'dec-' + Date.now(),
+        proposedBudgetVnd: budgetLimitVal,
+        objective: objective
+      });
+      await delay(500);
+      this.addLog('DECISION ENGINE', `🧠 Đánh giá quyết sách: Độ tin cậy: ${(decisionRes.confidenceScore * 100).toFixed(0)}% | Chỉ số rủi ro: ${(decisionRes.riskScore * 100).toFixed(0)}%`, 'text-indigo-300 font-medium');
+      this.addLog('DECISION ENGINE', `🧠 Chiến lược tối ưu: "${decisionRes.selectedStrategy}"`, 'text-indigo-400 font-semibold');
+      decisionRes.evidence.forEach(ev => {
+        this.addLog('DECISION EVIDENCE', `📊 Bằng chứng: ${ev}`, 'text-slate-400');
+      });
+      decisionRes.alternatives.forEach(alt => {
+        this.addLog('DECISION ALTERNATIVE', `💡 Phương án khác: [${alt.description}] | Tin cậy: ${alt.confidenceScore * 100}% | Rủi ro: ${alt.riskScore * 100}% | Ưu: ${alt.pros[0]}`, 'text-slate-400');
+      });
 
       // Step 4: Selective Context Builder
       await delay(800);
