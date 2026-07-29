@@ -152,6 +152,9 @@ export default function IntegrationSettingsPage() {
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saveFlash, setSaveFlash] = useState<Record<string, boolean>>({});
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  // EIP connectivity test
+  const [eipTesting, setEipTesting] = useState(false);
+  const [eipTestResult, setEipTestResult] = useState<{success: boolean; status: string; message: string; data?: any; httpStatus?: number; endpoint?: string} | null>(null);
 
   const categories = [...new Set(INTEGRATION_CATALOGUE.map(i => i.category))];
   const storeKey = (provider: string, key_name: string) => `${provider}::${key_name}`;
@@ -206,6 +209,31 @@ export default function IntegrationSettingsPage() {
     setDraft(p => { const n = { ...p }; delete n[sk]; return n; });
     toast('🗑️ Đã xoá API Key.');
   }, []);
+
+  // Test Bella EIP connection (server-side fetch)
+  const handleTestEip = useCallback(async () => {
+    const eipUrl = stored['bella_eip::api_url'] || draft['bella_eip::api_url']?.trim();
+    const eipKey = stored['bella_eip::api_key'] || draft['bella_eip::api_key']?.trim();
+    if (!eipUrl || !eipKey) {
+      setEipTestResult({ success: false, status: 'NO_CREDENTIALS', message: '⚠️ Hãy lưu EIP URL và API Key trước khi kiểm tra kết nối.' });
+      return;
+    }
+    setEipTesting(true);
+    setEipTestResult(null);
+    try {
+      const res = await fetch('/api/eip/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eip_url: eipUrl, eip_api_key: eipKey })
+      });
+      const data = await res.json();
+      setEipTestResult(data);
+    } catch (e: any) {
+      setEipTestResult({ success: false, status: 'NETWORK_ERROR', message: `❌ Không thể kết nối đến test endpoint: ${e.message}` });
+    } finally {
+      setEipTesting(false);
+    }
+  }, [stored, draft]);
 
   const visible = INTEGRATION_CATALOGUE.filter(i => i.category === activeCategory);
 
@@ -372,6 +400,39 @@ export default function IntegrationSettingsPage() {
                     );
                   })}
                 </div>
+                {/* Extra: Test EIP button for Bella EIP provider */}
+                {integration.provider === 'bella_eip' && (
+                  <div className="px-5 pb-5 space-y-3">
+                    <button
+                      onClick={handleTestEip}
+                      disabled={eipTesting}
+                      className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 active:scale-95 disabled:opacity-50 text-white text-[11px] font-bold px-5 h-10 rounded-xl transition-all cursor-pointer shadow-sm"
+                    >
+                      {eipTesting
+                        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang kiểm tra...</>
+                        : <><RefreshCw className="w-3.5 h-3.5" /> Kiểm tra kết nối Bella EIP</>
+                      }
+                    </button>
+
+                    {eipTestResult && (
+                      <div className={`rounded-xl border p-4 text-xs space-y-1.5 ${
+                        eipTestResult.success
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                          : 'bg-red-50 border-red-200 text-red-800'
+                      }`}>
+                        <p className="font-bold text-sm">{eipTestResult.message}</p>
+                        {eipTestResult.endpoint && <p className="text-[10px] opacity-70">Endpoint: <code>{eipTestResult.endpoint}</code></p>}
+                        {eipTestResult.httpStatus !== undefined && <p className="text-[10px] opacity-70">HTTP Status: <code>{eipTestResult.httpStatus}</code></p>}
+                        {eipTestResult.data && (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-[10px] font-semibold opacity-80">Xem dữ liệu trả về từ EIP ▾</summary>
+                            <pre className="mt-2 text-[10px] overflow-auto max-h-40 bg-white/60 rounded-lg p-2 font-mono">{JSON.stringify(eipTestResult.data, null, 2)}</pre>
+                          </details>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
