@@ -516,11 +516,18 @@ export default function Dashboard() {
         {/* Navigation Actions */}
         <div className="flex items-center gap-3">
           <Link
+            href="/matrix"
+            className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-2xs"
+          >
+            <Layers className="w-3.5 h-3.5 text-indigo-600" />
+            <span>📊 Bảng Kết Quả Toàn Cục ({dynamicTasks.filter(t => t.status === 'COMPLETED' || t.isApproved).length}/{dynamicTasks.length})</span>
+          </Link>
+          <Link
             href="/settings"
-            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold px-4.5 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-xs hover:border-slate-300"
+            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-xs hover:border-slate-300"
           >
             <Key className="w-3.5 h-3.5 text-slate-400" />
-            <span>Cài đặt hệ thống</span>
+            <span>Cài đặt</span>
           </Link>
           <Link
             href="/settings/company"
@@ -1190,91 +1197,32 @@ export default function Dashboard() {
                         })}
                       </div>
 
-                      {/* EXECUTIVE GLOBAL TASK OUTPUT MASTER TABLE */}
-                      <div className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs text-left space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      {/* EXECUTIVE GLOBAL TASK MATRIX BANNER LINKING TO DEDICATED PAGE */}
+                      <div className="w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 text-left transition-all">
+                        <div className="space-y-1.5 max-w-2xl">
                           <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
-                              📊
-                            </div>
-                            <div>
-                              <h3 className="font-display font-bold text-xs tracking-wider text-slate-800 uppercase">
-                                Bảng Tổng Hợp Kết Quả Thực Thi Toàn Cục (Executive Global Task Output Matrix)
-                              </h3>
-                              <p className="text-[9px] text-slate-400 font-medium">Tổng hợp toàn bộ nội dung, bài xuất bản & bằng chứng kết quả từ 8 AI Workers</p>
-                            </div>
+                            <span className="text-amber-400 font-bold text-xs uppercase tracking-wider font-display flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                              EXECUTIVE MASTER MATRIX
+                            </span>
+                            <span className="text-[8.5px] bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30 font-bold uppercase">
+                              {dynamicTasks.filter(t => t.status === 'COMPLETED' || t.isApproved).length} / {dynamicTasks.length} Task Hoàn Thành
+                            </span>
                           </div>
-                          <span className="text-[9px] bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 font-bold uppercase tracking-wide">
-                            {dynamicTasks.filter(t => t.status === 'COMPLETED' || t.isApproved).length} / {dynamicTasks.length} Đã Hoàn Thành
-                          </span>
+                          <h4 className="font-display font-bold text-sm text-slate-100">
+                            Bảng Tổng Hợp Kết Quả Thực Thi Toàn Cục (Trang Độc Lập)
+                          </h4>
+                          <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
+                            Toàn bộ bài viết, Banner 4K, kịch bản Sales và kết quả từ AI Workers đã được tách sang trang chuyên biệt để CEO dễ dàng quản trị toàn diện không bị giới hạn chiều dài.
+                          </p>
                         </div>
 
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-[10px] text-left border-collapse">
-                            <thead>
-                              <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[8.5px]">
-                                <th className="py-2.5 px-3">#</th>
-                                <th className="py-2.5 px-3">AI Worker</th>
-                                <th className="py-2.5 px-3">Nhiệm Vụ Đảm Nhận</th>
-                                <th className="py-2.5 px-3">Trạng Thái</th>
-                                <th className="py-2.5 px-3">Kết Quả Trả Về Chi Tiết / Bài Viết / Banner</th>
-                                <th className="py-2.5 px-3 text-right">Thao Tác</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                              {dynamicTasks.map((t: any, idx: number) => {
-                                const isDone = t.status === 'COMPLETED' || t.isApproved || t.success === true;
-                                const isAwaiting = (t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL') && !t.isApproved;
-
-                                return (
-                                  <tr key={t.task_id || idx} className="hover:bg-slate-50/60 transition-colors">
-                                    <td className="py-3 px-3 font-mono font-bold text-slate-400">#{idx + 1}</td>
-                                    <td className="py-3 px-3 font-bold text-slate-800 whitespace-nowrap">
-                                      <span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md border border-indigo-100">
-                                        {t.agent_name || t.agent_id}
-                                      </span>
-                                    </td>
-                                    <td className="py-3 px-3 text-slate-600 max-w-[200px] leading-relaxed">
-                                      {t.task_description}
-                                    </td>
-                                    <td className="py-3 px-3 whitespace-nowrap">
-                                      {isAwaiting ? (
-                                        <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full font-bold text-[8px] animate-pulse">
-                                          👑 CHỜ DUYỆT
-                                        </span>
-                                      ) : isDone ? (
-                                        <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold text-[8px]">
-                                          ✅ HOÀN THÀNH
-                                        </span>
-                                      ) : (
-                                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold text-[8px]">
-                                          ⏳ ĐANG XỬ LÝ
-                                        </span>
-                                      )}
-                                    </td>
-                                    <td className="py-3 px-3 text-slate-700 font-mono text-[9px] max-w-[360px]">
-                                      {t.output ? (
-                                        <div className="bg-slate-50 border border-slate-200/80 p-2 rounded-lg max-h-32 overflow-y-auto whitespace-pre-wrap break-all leading-relaxed">
-                                          {t.output}
-                                        </div>
-                                      ) : (
-                                        <span className="text-slate-400 italic">Chưa có dữ liệu trả về...</span>
-                                      )}
-                                    </td>
-                                    <td className="py-3 px-3 text-right whitespace-nowrap">
-                                      <button
-                                        onClick={() => setSelectedTask(t)}
-                                        className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-md text-[9px] font-bold transition-all shadow-2xs cursor-pointer"
-                                      >
-                                        Xem Chi Tiết ➔
-                                      </button>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
+                        <Link
+                          href="/matrix"
+                          className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer shrink-0 hover:scale-105"
+                        >
+                          <span>📊 Mở Bảng Kết Quả Chi Tiết (Full Page) →</span>
+                        </Link>
                       </div>
                     </div>
                   ) : (
