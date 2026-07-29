@@ -1310,6 +1310,7 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+        </div>
 
           {/* DOCK BAR: CEO COMMAND INPUT CONSOLE */}
           <div className="p-4 border-t border-slate-200 bg-white/80 backdrop-blur-xl shrink-0">
