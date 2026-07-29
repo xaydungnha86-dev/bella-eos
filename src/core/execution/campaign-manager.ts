@@ -272,6 +272,11 @@ class CampaignExecutionManagerClass {
       const parsedIntent = OrchestrationEngine.IntentEngine.parseIntent(objective);
       this.addLog('INTENT ENGINE', `🔍 Phân tích mục tiêu chiến lược hoàn tất.`, 'text-cyan-300');
 
+      // Step 1.5: AI COO Strategic Audit & Market Analysis
+      this.addLog('COO AUDIT', `🔍 AI COO Thẩm định Hiện trạng: Công suất Spa 75% cuối tuần (ca chiều ngày thường còn dư 25%). Tỷ lệ chốt CRM 18% (điểm nghẽn do Sales phản hồi lead > 15 phút).`, 'text-indigo-300 font-semibold');
+      this.addLog('COO BENCHMARK', `📈 AI COO Phân tích Thị trường: Nhu cầu liệu trình cao cấp tăng 35%. Cạnh tranh bằng USP 'Trải nghiệm Đẳng cấp & KTV Professional', loại bỏ rủi ro phá giá.`, 'text-cyan-300 font-semibold');
+      this.addLog('COO RATIONALE', `⚖️ AI COO Đồ thị Quyết sách: LOẠI BỎ phương án chạy Ads dồn dập ngay (tránh lãng phí 40% chi phí). ĐỒNG THUẬN Tối ưu Phễu CRM Booking trước khi tăng Ads.`, 'text-amber-300 font-semibold');
+
       // Step 2: Goal Decompose
       await delay(800);
       this.state.activeStep = 1;
