@@ -1,4 +1,4 @@
-const apiKey = 'AIzaSyDtqU1UQpJZYP4Ez7SRUQDoxrMsNJPF_jU';
+const apiKey = process.env.GEMINI_API_KEY || 'YOUR_API_KEY_HERE'; // Don't hardcode!
 
 async function testModel(modelId, method, body) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:${method}?key=${apiKey}`;
