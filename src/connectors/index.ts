@@ -11,7 +11,7 @@ export class EipConnector {
         const apiUrl = store['bella_eip::api_url'];
         const apiKey = store['bella_eip::api_key'];
         
-        if (apiUrl && apiKey && !apiUrl.includes('eip.bella.vn') && !apiUrl.includes('placeholder')) {
+        if (apiUrl && apiKey && !apiUrl.includes('placeholder')) {
           console.log(`[EipConnector] Connecting to EIP API at: ${apiUrl}`);
           const res = await fetch(`${apiUrl}/customers?status=active`, {
             headers: {
