@@ -324,21 +324,31 @@ function buildFallbackPlan(objective: string, context?: any) {
   const lowerObj = objective.toLowerCase();
   const tasks = [];
 
-  // Task 1: DISABLED - Marketing Strategy Analysis
-  // (Creates markdown report which confuses users - only enable for complex campaigns)
-  /*
+  // Task 0: AI COO Orchestrator — Holistic System Analysis & OKR Decomposition
+  tasks.push({
+    task_id: 't0',
+    agent_id: 'coo',
+    agent_name: 'AI COO Orchestrator',
+    task_type: 'orchestrate_enterprise_plan',
+    task_description: `Phân tích bối cảnh hệ thống, lập sơ đồ OKRs phòng ban & mô phỏng Monte Carlo 10,000 lần cho chỉ thị: "${objective}"`,
+    input: { objective, tone, target_audience: segment },
+    expected_output: 'Lộ trình Kế hoạch Điều Phối Tổng Thể (Orchestration Plan) & Sơ đồ phân bổ nhiệm vụ AI Workforce',
+    depends_on: [],
+    requires_human_approval: false
+  });
+
+  // Task 1: CMO AI (Executive Marketing Strategist) — Strategy Analysis & EIC Contract
   tasks.push({
     task_id: 't1',
     agent_id: 'eos_marketing_manager',
     agent_name: 'CMO AI (Executive Marketing Strategist)',
     task_type: 'analyze_marketing_strategy',
-    task_description: `Phân tích yêu cầu CEO qua ECC, ký giao kèo EIC, thiết lập đồ thị suy luận DAG cho chiến dịch: "${objective}"`,
+    task_description: `Phân tích chiến lược EIC, thiết lập đồ thị suy luận DAG & trình Tờ trình Phê duyệt C-Suite cho chiến dịch: "${objective}"`,
     input: { objective, tone, target_audience: segment },
-    expected_output: 'Giao kèo EIC chi tiết, đồ thị suy luận DAG & lộ trình phân bổ công việc cho AI Workforce',
-    depends_on: [],
+    expected_output: 'Giao kèo EIC chi tiết, đồ thị suy luận DAG & Tờ trình Phê duyệt C-Suite',
+    depends_on: ['t0'],
     requires_human_approval: true
   });
-  */
 
   // Task 2 → NOW TASK 1: Content Writing (first visible task)
   const contentTaskDesc = lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ')
