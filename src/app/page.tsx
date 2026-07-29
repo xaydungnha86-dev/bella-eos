@@ -1132,6 +1132,93 @@ export default function Dashboard() {
                           );
                         })}
                       </div>
+
+                      {/* EXECUTIVE GLOBAL TASK OUTPUT MASTER TABLE */}
+                      <div className="w-full bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs text-left space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+                              📊
+                            </div>
+                            <div>
+                              <h3 className="font-display font-bold text-xs tracking-wider text-slate-800 uppercase">
+                                Bảng Tổng Hợp Kết Quả Thực Thi Toàn Cục (Executive Global Task Output Matrix)
+                              </h3>
+                              <p className="text-[9px] text-slate-400 font-medium">Tổng hợp toàn bộ nội dung, bài xuất bản & bằng chứng kết quả từ 8 AI Workers</p>
+                            </div>
+                          </div>
+                          <span className="text-[9px] bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 font-bold uppercase tracking-wide">
+                            {dynamicTasks.filter(t => t.status === 'COMPLETED' || t.isApproved).length} / {dynamicTasks.length} Đã Hoàn Thành
+                          </span>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-[10px] text-left border-collapse">
+                            <thead>
+                              <tr className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[8.5px]">
+                                <th className="py-2.5 px-3">#</th>
+                                <th className="py-2.5 px-3">AI Worker</th>
+                                <th className="py-2.5 px-3">Nhiệm Vụ Đảm Nhận</th>
+                                <th className="py-2.5 px-3">Trạng Thái</th>
+                                <th className="py-2.5 px-3">Kết Quả Trả Về Chi Tiết / Bài Viết / Banner</th>
+                                <th className="py-2.5 px-3 text-right">Thao Tác</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {dynamicTasks.map((t: any, idx: number) => {
+                                const isDone = t.status === 'COMPLETED' || t.isApproved || t.success === true;
+                                const isAwaiting = (t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL') && !t.isApproved;
+
+                                return (
+                                  <tr key={t.task_id || idx} className="hover:bg-slate-50/60 transition-colors">
+                                    <td className="py-3 px-3 font-mono font-bold text-slate-400">#{idx + 1}</td>
+                                    <td className="py-3 px-3 font-bold text-slate-800 whitespace-nowrap">
+                                      <span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md border border-indigo-100">
+                                        {t.agent_name || t.agent_id}
+                                      </span>
+                                    </td>
+                                    <td className="py-3 px-3 text-slate-600 max-w-[200px] leading-relaxed">
+                                      {t.task_description}
+                                    </td>
+                                    <td className="py-3 px-3 whitespace-nowrap">
+                                      {isAwaiting ? (
+                                        <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full font-bold text-[8px] animate-pulse">
+                                          👑 CHỜ DUYỆT
+                                        </span>
+                                      ) : isDone ? (
+                                        <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold text-[8px]">
+                                          ✅ HOÀN THÀNH
+                                        </span>
+                                      ) : (
+                                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold text-[8px]">
+                                          ⏳ ĐANG XỬ LÝ
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="py-3 px-3 text-slate-700 font-mono text-[9px] max-w-[360px]">
+                                      {t.output ? (
+                                        <div className="bg-slate-50 border border-slate-200/80 p-2 rounded-lg max-h-32 overflow-y-auto whitespace-pre-wrap break-all leading-relaxed">
+                                          {t.output}
+                                        </div>
+                                      ) : (
+                                        <span className="text-slate-400 italic">Chưa có dữ liệu trả về...</span>
+                                      )}
+                                    </td>
+                                    <td className="py-3 px-3 text-right whitespace-nowrap">
+                                      <button
+                                        onClick={() => setSelectedTask(t)}
+                                        className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-md text-[9px] font-bold transition-all shadow-2xs cursor-pointer"
+                                      >
+                                        Xem Chi Tiết ➔
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     /* Fallback department OKR nodes if tasks haven't loaded yet */
