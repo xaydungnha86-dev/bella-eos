@@ -34,8 +34,8 @@ const INTEGRATION_CATALOGUE = [
     description: 'Kết nối đồng bộ thông tin khách hàng, báo cáo tài chính và chỉ thị chiến lược từ Bella EIP.',
     docsUrl: 'https://docs.bella.vn/eip-integration',
     fields: [
-      { key_name: 'api_url', label: 'EIP Endpoint URL', placeholder: 'https://eip.bella.vn/api/v1', type: 'text' as const, help: 'Đường dẫn API của phân hệ Bella EIP doanh nghiệp của bạn' },
-      { key_name: 'api_key', label: 'EIP API Key', placeholder: 'eip_key_...', type: 'password' as const, help: 'API Key được sinh từ Console quản trị của Bella EIP' },
+      { key_name: 'api_url', label: 'EIP Endpoint URL', placeholder: 'https://api.bella.vn/eip/v1', type: 'text' as const, help: '⚠️ Nhập đường dẫn API dạng https://... (không phải email). Ví dụ: https://api.bella.vn/eip/v1 hoặc hỏi quản trị viên hệ thống Bella EIP của bạn.' },
+      { key_name: 'api_key', label: 'EIP API Key', placeholder: 'pk_live_...', type: 'password' as const, help: 'API Key (dạng pk_live_...) được sinh từ Console quản trị của Bella EIP' },
     ]
   },
   {
@@ -171,6 +171,15 @@ export default function IntegrationSettingsPage() {
     setTimeout(() => setToastMsg(null), 3000);
   };
 
+  // Validate EIP URL (must be http/https, not email)
+  const validateEipUrl = (value: string): string | null => {
+    if (!value) return null;
+    if (value.includes('@') || !value.startsWith('http')) {
+      return '❌ Định dạng URL không hợp lệ. EIP Endpoint URL phải bắt đầu bằng https:// hoặc http://, ví dụ: https://api.bella.vn/eip/v1';
+    }
+    try { new URL(value); return null; } catch { return '❌ URL không hợp lệ. Kiểm tra lại định dạng.'; }
+  };
+
   // Save one field
   const handleSave = useCallback(async (provider: string, key_name: string, integrationName: string, label: string) => {
     const sk = storeKey(provider, key_name);
@@ -178,6 +187,11 @@ export default function IntegrationSettingsPage() {
     if (!value) {
       toast('⚠️ Vui lòng nhập giá trị trước khi lưu.');
       return;
+    }
+    // Validate EIP URL field
+    if (provider === 'bella_eip' && key_name === 'api_url') {
+      const urlErr = validateEipUrl(value);
+      if (urlErr) { toast(urlErr); return; }
     }
 
     setSaving(p => ({ ...p, [sk]: true }));
@@ -367,7 +381,11 @@ export default function IntegrationSettingsPage() {
                                 onKeyDown={e => { if (e.key === 'Enter') handleSave(integration.provider, field.key_name, integration.name, field.label); }}
                                 placeholder={field.placeholder}
                                 autoComplete="off"
-                                className="w-full h-10 bg-slate-50 border border-slate-300 hover:border-indigo-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:outline-none rounded-xl pl-3.5 pr-10 text-[12px] font-mono text-slate-800 placeholder-slate-400 transition-all"
+                                className={`w-full h-10 bg-slate-50 border hover:border-indigo-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:outline-none rounded-xl pl-3.5 pr-10 text-[12px] font-mono text-slate-800 placeholder-slate-400 transition-all ${
+                                  integration.provider === 'bella_eip' && field.key_name === 'api_url' && draftVal && validateEipUrl(draftVal)
+                                    ? 'border-red-400 bg-red-50'
+                                    : 'border-slate-300'
+                                }`}
                               />
                               {field.type === 'password' && (
                                 <button
@@ -396,6 +414,22 @@ export default function IntegrationSettingsPage() {
 
                         {/* Help */}
                         <p className="text-[10px] text-slate-400 mt-1.5 pl-0.5">{field.help}</p>
+
+                        {/* Inline URL warning for EIP URL field */}
+                        {integration.provider === 'bella_eip' && field.key_name === 'api_url' && !isSaved && draftVal && validateEipUrl(draftVal) && (
+                          <div className="mt-2 bg-amber-50 border border-amber-300 rounded-xl px-3 py-2 text-[11px] text-amber-800 font-semibold flex items-start gap-2">
+                            <span className="text-base leading-none mt-0.5">⚠️</span>
+                            <span>{validateEipUrl(draftVal)}</span>
+                          </div>
+                        )}
+
+                        {/* Warning if saved EIP URL is wrong */}
+                        {integration.provider === 'bella_eip' && field.key_name === 'api_url' && isSaved && stored[sk] && validateEipUrl(stored[sk]) && (
+                          <div className="mt-2 bg-red-50 border border-red-300 rounded-xl px-3 py-2 text-[11px] text-red-800 font-semibold flex items-start gap-2">
+                            <span className="text-base leading-none mt-0.5">❌</span>
+                            <span>EIP URL đang lưu bị sai định dạng: <code className="bg-red-100 px-1 rounded">{stored[sk]}</code>. Hãy xóa và nhập lại dạng <code>https://...</code></span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
