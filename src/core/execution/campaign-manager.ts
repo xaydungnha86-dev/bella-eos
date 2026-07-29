@@ -4,6 +4,8 @@ import { LearningCenter } from '../brain/learning';
 import { HUMAN_WORKER_REGISTRY, HumanWorker } from '../workforce/human-registry';
 import { PolicyEngine } from '../governance/policy-engine';
 import { DecisionRuntime } from '../decision/decision-runtime';
+import { IntentGate, GoalGate, DecisionGate } from '../governance/validation-gates';
+
 
 
 export interface CampaignState {
@@ -200,6 +202,21 @@ class CampaignExecutionManagerClass {
     this.addLog('AI COO', `🤖 Nhận nhiệm vụ từ CEO. Bắt đầu phân tích tổng thể hệ thống...`, 'text-indigo-400 font-bold');
 
     try {
+      const budgetLimitVal = objective.toLowerCase().includes('50 triệu') ? 50000000 : 100000000;
+      const intentContract = {
+        intentId: 'int-' + Date.now(),
+        tenantId: 'tenant-default',
+        rawText: objective,
+        targetObjective: objective,
+        spendLimitVnd: budgetLimitVal,
+        expectedTimelineDays: 30,
+        timestamp: new Date().toISOString(),
+        parsingConfidence: 0.98
+      };
+
+      IntentGate.validate(intentContract);
+      this.addLog('INTENT GATE', '✅ Cổng xác thực Ý chí (Intent Gate): ĐẠT YÊU CẦU (DoD check passed)', 'text-emerald-400 font-bold');
+
       await delay(600);
       this.addLog('EipConnector', `Fetching active customer records from external EIP CRM`, 'text-slate-300');
       const activeCustomers = await EipConnector.getActiveCustomers();
@@ -251,6 +268,19 @@ class CampaignExecutionManagerClass {
       this.notify();
       this.addLog('GOAL ENGINE', `📊 Phân rã chỉ thị của CEO thành sơ đồ OKRs phòng ban (Mkt, Sales, Finance).`, 'text-indigo-400 font-bold');
 
+      // Validate Goal Tree
+      const goalTreeForGate = {
+        rootGoalId: 'goal-root',
+        parentBudgetVnd: budgetLimitVal,
+        goals: [
+          { goalId: 'goal-mkt', objective: 'Tăng lead 25%', ownerRole: 'CMO', budgetVnd: budgetLimitVal * 0.4 },
+          { goalId: 'goal-sales', objective: 'Tăng tỷ lệ chốt', ownerRole: 'Sales Manager', budgetVnd: budgetLimitVal * 0.4 },
+          { goalId: 'goal-ops', objective: 'CSKH cũ', ownerRole: 'Ops Lead', budgetVnd: budgetLimitVal * 0.2 }
+        ]
+      };
+      GoalGate.validate(goalTreeForGate);
+      this.addLog('GOAL GATE', '✅ Cổng xác thực Mục tiêu (Goal Gate): ĐẠT YÊU CẦU (DoD check passed)', 'text-emerald-400 font-bold');
+
       // Step 3: Run Monte Carlo Simulation
       await delay(1000);
       this.state.activeStep = 2;
@@ -274,6 +304,22 @@ class CampaignExecutionManagerClass {
       decisionRes.alternatives.forEach(alt => {
         this.addLog('DECISION ALTERNATIVE', `💡 Phương án khác: [${alt.description}] | Tin cậy: ${alt.confidenceScore * 100}% | Rủi ro: ${alt.riskScore * 100}% | Ưu: ${alt.pros[0]}`, 'text-slate-400');
       });
+
+      // Validate Decision Contract against DecisionGate
+      const decisionContractForGate = {
+        decisionId: decisionRes.decisionId,
+        goalId: 'goal-root',
+        selectedStrategy: decisionRes.selectedStrategy,
+        confidenceScore: decisionRes.confidenceScore,
+        riskScore: decisionRes.riskScore,
+        evidence: decisionRes.evidence,
+        alternatives: decisionRes.alternatives,
+        requiresApproval: decisionRes.requiresApproval,
+        approvalRoleRequired: decisionRes.approvalRoleRequired,
+        timestamp: new Date().toISOString()
+      };
+      DecisionGate.validate(decisionContractForGate);
+      this.addLog('DECISION GATE', '✅ Cổng xác thực Quyết sách (Decision Gate): ĐẠT YÊU CẦU (DoD check passed)', 'text-emerald-400 font-bold');
 
       // Step 4: Selective Context Builder
       await delay(800);

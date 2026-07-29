@@ -155,7 +155,7 @@ export default function Dashboard() {
   const [leftSidebarTab, setLeftSidebarTab] = useState<'ai' | 'human'>('ai');
   const [objective, setObjective] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'timeline' | 'reasoning'>('timeline');
+  const [activeTab, setActiveTab] = useState<'timeline' | 'reasoning' | 'control'>('control');
   const [brainSubTab, setBrainSubTab] = useState<'memory' | 'knowledge' | 'context' | 'reasoning' | 'learning'>('memory');
   const [isBrainModalOpen, setIsBrainModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -1195,12 +1195,113 @@ export default function Dashboard() {
                   )}
                 </div>
               ) : (
-                <div className="text-center z-10 p-6 flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shadow-sm mb-4 text-slate-400">
-                    <Network className="w-6 h-6 animate-pulse" />
+                <div className="w-full max-w-4xl mx-auto z-10 p-6 flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-190px)]">
+                  {/* Executive Header Banner */}
+                  <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 rounded-2xl p-6 text-white border border-slate-700/50 shadow-lg relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle,rgba(212,175,55,0.08),transparent)] pointer-events-none"></div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+                        <Brain className="text-amber-400 w-6 h-6 animate-pulse" />
+                      </div>
+                      <div>
+                        <h2 className="font-display font-bold text-base uppercase tracking-wider text-amber-400">Executive Boardroom</h2>
+                        <p className="text-xs text-slate-350 mt-1">Hệ điều hành doanh nghiệp Bella EOS đang hoạt động ổn định. Bộ não AI đã sẵn sàng tiếp nhận ý chí định hướng của Lãnh đạo.</p>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-display font-semibold text-sm text-slate-800">Kế Hoạch Rỗng</h3>
-                  <p className="text-xs text-slate-500 max-w-xs mt-1.5">Viết ý chí định hướng của bạn ở bên dưới để hệ thống lập lộ trình OKRs và kích hoạt bộ não.</p>
+
+                  {/* Summary Metric Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-white border border-slate-200 rounded-xl p-4.5 shadow-2xs">
+                      <p className="text-[9px] text-slate-450 uppercase font-bold tracking-wider">Chỉ Số Sức Khỏe Doanh Nghiệp</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-display">96%</p>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span className="text-[9px] text-emerald-700 font-bold uppercase">Tối Ưu (Optimal)</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-4.5 shadow-2xs">
+                      <p className="text-[9px] text-slate-450 uppercase font-bold tracking-wider">Lực Lượng AI Nhân Sự</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-display">4 Hoạt động</p>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                        <span className="text-[9px] text-slate-500 font-medium">3 Nhân viên rỗi</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-4.5 shadow-2xs">
+                      <p className="text-[9px] text-slate-450 uppercase font-bold tracking-wider">Ngân Sách Tổng Thể</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-display">62% Đã Chi</p>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                        <span className="text-[9px] text-indigo-700 font-bold">310M / 500M VND</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-4.5 shadow-2xs">
+                      <p className="text-[9px] text-slate-450 uppercase font-bold tracking-wider">Rủi Ro Chính Sách (Risk Alert)</p>
+                      <p className="text-xl font-bold text-slate-900 mt-1 font-display">0 Phát hiện</p>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span className="text-[9px] text-emerald-700 font-bold uppercase">An Toàn</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Core Panels Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* Active Approvals Queue */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs text-left">
+                      <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3.5 mb-3.5">
+                        <CheckCircle2 className="w-4 h-4 text-indigo-600" />
+                        <span>DANH SÁCH DUYỆT KHẨN CẤP (APPROVAL QUEUE)</span>
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs hover:border-slate-300 transition-colors">
+                          <div>
+                            <p className="font-semibold text-slate-800">Chiến dịch Mkt Spa Q3</p>
+                            <p className="text-[9px] text-slate-500 mt-0.5">Yêu cầu bởi: <span className="font-semibold">CMO AI</span> | Ngân sách: <span className="font-semibold text-slate-700">48M VND</span></p>
+                          </div>
+                          <span className="text-[8px] bg-amber-50 text-amber-700 border border-amber-200 font-bold px-2 py-1 rounded uppercase shrink-0">Chờ duyệt</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 text-center mt-2">Không còn phê duyệt nào khác đang chờ xử lý.</p>
+                      </div>
+                    </div>
+
+                    {/* Policy Compliance Summary */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs text-left">
+                      <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3.5 mb-3.5">
+                        <Shield className="w-4 h-4 text-emerald-600" />
+                        <span>QUY CHẾ DOANH NGHIỆP (COMPLIANCE AUDIT)</span>
+                      </h3>
+                      <div className="space-y-3.5 text-xs text-slate-500">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
+                          <span>Chính sách ngân sách: <strong>Ngưỡng duyệt CEO > 30 triệu VND</strong> đang hoạt động.</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
+                          <span>Chính sách nhân sự: <strong>Quy tắc phân vai vai trò quyết định</strong> đang hoạt động.</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
+                          <span>Chính sách an toàn dữ liệu: <strong>Mã hóa đầu ra Sandbox</strong> đang hoạt động.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Operational Instructions Tip */}
+                  <div className="bg-amber-50/30 border border-amber-200/60 rounded-xl p-4.5 text-xs text-amber-800 text-left">
+                    <p className="font-semibold flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-amber-600" />
+                      <span>Hướng dẫn vận hành nhanh:</span>
+                    </p>
+                    <p className="mt-1 text-slate-600 leading-relaxed">
+                      Để kích hoạt luồng tự động, CEO hãy viết một mệnh lệnh định hướng kinh doanh ở bảng console phía dưới (Ví dụ: <em>"Tháng 8 tôi muốn tăng doanh thu Spa thêm 20% với ngân sách 50 triệu và không làm giảm lợi nhuận dưới 30%"</em>) rồi nhấn <strong>Phân rã Kế hoạch</strong>.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -1252,7 +1353,7 @@ export default function Dashboard() {
         <aside className="w-80 border-l border-slate-200 bg-white/60 backdrop-blur-md flex flex-col shrink-0">
           
           {/* Tab control headers */}
-          <div className="flex border-b border-slate-200 text-[10px] font-semibold uppercase tracking-wider">
+          <div className="flex border-b border-slate-200 text-[9px] font-semibold uppercase tracking-wider">
             <button 
               onClick={() => setActiveTab('timeline')}
               className={`flex-1 py-3 text-center border-b-2 transition ${activeTab === 'timeline' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-400'}`}
@@ -1264,6 +1365,12 @@ export default function Dashboard() {
               className={`flex-1 py-3 text-center border-b-2 transition ${activeTab === 'reasoning' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-400'}`}
             >
               Vết Chạy Telemetry
+            </button>
+            <button 
+              onClick={() => setActiveTab('control')}
+              className={`flex-1 py-3 text-center border-b-2 transition ${activeTab === 'control' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-400'}`}
+            >
+              Giám Sát (DoD)
             </button>
           </div>
 
@@ -1404,6 +1511,117 @@ export default function Dashboard() {
                   </div>
                 ))}
                 <div ref={logsEndRef} />
+              </div>
+            </div>
+          )}
+
+          {/* TAB OPERATIONAL CONTROL */}
+          {activeTab === 'control' && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* Health Score & High-level Status */}
+              <div className="executive-card p-4 rounded-xl border border-slate-200 bg-white">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
+                  <Shield className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                  <span>SỨC KHỎE HỆ THỐNG (SYSTEM HEALTH)</span>
+                </h3>
+                <div className="mt-3 flex items-center justify-between">
+                  <div>
+                    <span className="text-[28px] font-bold text-slate-900 font-display">96%</span>
+                    <span className="text-[10px] text-emerald-600 font-bold ml-1.5 uppercase">Tối Ưu (Optimal)</span>
+                  </div>
+                  <div className="text-right text-[10px] text-slate-500 space-y-0.5">
+                    <div>Độ trễ trung bình: <strong className="text-slate-800">285ms</strong></div>
+                    <div>Tỷ lệ đáp ứng SLA: <strong className="text-slate-800">100%</strong></div>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-3">
+                  <div className="bg-emerald-500 h-full w-[96%] rounded-full animate-pulse-glow"></div>
+                </div>
+              </div>
+
+              {/* Dynamic Engine Health Scores Grid */}
+              <div className="executive-card p-4 rounded-xl border border-slate-200 bg-white">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
+                  <Cpu className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>CHỈ SỐ SỨC KHỎE TỪNG ENGINE</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  {[
+                    { name: 'Intent Engine', score: 98, status: 'Online' },
+                    { name: 'Goal Engine', score: 97, status: 'Online' },
+                    { name: 'Decision Engine', score: 96, status: 'Online' },
+                    { name: 'Policy Engine', score: 99, status: 'Online' },
+                    { name: 'Approval Engine', score: 95, status: 'Online' },
+                    { name: 'Workflow Engine', score: 99, status: 'Online' }
+                  ].map((eng, idx) => (
+                    <div key={idx} className="p-2 bg-slate-50 rounded-lg border border-slate-150 flex flex-col gap-1">
+                      <span className="font-semibold text-slate-700">{eng.name}</span>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-bold text-slate-900">{eng.score}%</span>
+                        <span className="text-[7.5px] bg-emerald-50 text-emerald-700 font-bold px-1 py-0.5 rounded border border-emerald-200 uppercase">{eng.status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Policy Risk Heatmap */}
+              <div className="executive-card p-4 rounded-xl border border-slate-200 bg-white">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                  <span>BẢN ĐỒ RỦI RO CHÍNH SÁCH (RISK HEATMAP)</span>
+                </h3>
+                <div className="space-y-2.5 text-[10px]">
+                  {[
+                    { type: 'Rủi ro Tài chính (Financial)', level: '45% (Trung bình)', color: 'bg-amber-500', width: 'w-[45%]' },
+                    { type: 'Rủi ro Pháp lý (Compliance)', level: '10% (Thấp)', color: 'bg-emerald-500', width: 'w-[10%]' },
+                    { type: 'Rủi ro Bảo mật (Privacy)', level: '0% (An toàn)', color: 'bg-emerald-500', width: 'w-[2%]' },
+                    { type: 'Rủi ro Hệ thống (Security)', level: '15% (Thấp)', color: 'bg-emerald-500', width: 'w-[15%]' }
+                  ].map((risk, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-slate-650">
+                        <span>{risk.type}</span>
+                        <span className="font-semibold text-slate-800">{risk.level}</span>
+                      </div>
+                      <div className="w-full bg-slate-150 h-1.5 rounded-full overflow-hidden">
+                        <div className={`${risk.color} h-full ${risk.width} rounded-full`}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Approval SLA Monitor */}
+              <div className="executive-card p-4 rounded-xl border border-slate-200 bg-white">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
+                  <Terminal className="w-3.5 h-3.5 text-slate-500" />
+                  <span>GIÁM SÁT KÝ DUYỆT (SLA MONITOR)</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                    <div className="text-[14px] font-bold text-slate-900 font-display">25 phút</div>
+                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Thời gian ký duyệt TB</div>
+                  </div>
+                  <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
+                    <div className="text-[14px] font-bold text-slate-900 font-display">2.4%</div>
+                    <div className="text-[8px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Tỷ lệ Chuyển cấp (Escalation)</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Learning Gain & SOP Mutations */}
+              <div className="executive-card p-4 rounded-xl border border-slate-200 bg-white">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2 mb-2">
+                  <TrendingUp className="w-3.5 h-3.5 text-amber-500" />
+                  <span>ROI GAIN (ĐỘT BIẾN SOP)</span>
+                </h3>
+                <div className="mt-2 text-[10px] text-slate-500 leading-relaxed">
+                  <div className="flex justify-between items-center bg-amber-50/50 p-2 rounded-lg border border-amber-100 text-amber-900 mb-2">
+                    <span className="font-semibold">Mức tăng hiệu quả (Gain):</span>
+                    <span className="font-bold text-xs">+6.5% ROI</span>
+                  </div>
+                  <p>Hệ thống tự động học từ phản hồi và tinh chỉnh trọng số kênh quảng cáo (Ưu tiên ngân sách Google Ads tối đa hiệu suất chuyển đổi).</p>
+                </div>
               </div>
             </div>
           )}
