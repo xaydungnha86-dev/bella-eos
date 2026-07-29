@@ -7,6 +7,7 @@ import {
   Copy, Check, Search, Filter, Sparkles, RefreshCw, Key, Shield, Layers
 } from 'lucide-react';
 import { CampaignExecutionManager } from '@/core/execution/campaign-manager';
+import { cleanMarkdownForExecutive } from '@/lib/text-cleaner';
 
 export default function ExecutiveMatrixPage() {
   const [dynamicTasks, setDynamicTasks] = useState<any[]>([]);
@@ -26,7 +27,8 @@ export default function ExecutiveMatrixPage() {
 
   const handleCopyOutput = (taskId: string, text: string) => {
     if (!text) return;
-    navigator.clipboard.writeText(text);
+    const cleanText = cleanMarkdownForExecutive(text);
+    navigator.clipboard.writeText(cleanText);
     setCopiedTaskId(taskId);
     setTimeout(() => setCopiedTaskId(null), 2000);
   };
@@ -236,11 +238,11 @@ export default function ExecutiveMatrixPage() {
                     {t.output ? (
                       <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-4 text-xs font-sans text-slate-800 leading-relaxed space-y-2">
                         <div className="flex items-center justify-between text-[8.5px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200/60 pb-1.5">
-                          <span>Sản phẩm / Bài viết / Bằng chứng Kết quả:</span>
-                          <span className="font-mono text-slate-500">{t.output.length} ký tự</span>
+                          <span>Sản phẩm / Bài viết / Bằng chứng Kết quả (Đã làm sạch định dạng):</span>
+                          <span className="font-mono text-slate-500">{cleanMarkdownForExecutive(t.output).length} ký tự</span>
                         </div>
-                        <div className="whitespace-pre-wrap break-words font-sans text-[11px] leading-relaxed text-slate-750">
-                          {t.output}
+                        <div className="whitespace-pre-wrap break-words font-sans text-[11px] leading-relaxed text-slate-750 font-normal">
+                          {cleanMarkdownForExecutive(t.output)}
                         </div>
                       </div>
                     ) : (

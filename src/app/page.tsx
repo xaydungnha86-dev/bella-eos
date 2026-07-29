@@ -16,6 +16,7 @@ import { CampaignExecutionManager } from '../core/execution/campaign-manager';
 import { FacebookConnector, EipConnector } from '../connectors/index';
 import { ContractRegistry } from '../core/contracts/contract-registry';
 import { PolicyEngine } from '../core/gov/policy-engine';
+import { cleanMarkdownForExecutive } from '../lib/text-cleaner';
 
 
 // ─── Helper: read API keys from localStorage (set by /settings page) ─────────
@@ -2224,7 +2225,7 @@ export default function Dashboard() {
                       {selectedTask.output && (
                         <button
                           onClick={() => {
-                            navigator.clipboard.writeText(selectedTask.output);
+                            navigator.clipboard.writeText(cleanMarkdownForExecutive(selectedTask.output));
                             setCopiedOutput(true);
                             setTimeout(() => setCopiedOutput(false), 2000);
                           }}
@@ -2235,8 +2236,8 @@ export default function Dashboard() {
                         </button>
                       )}
                     </div>
-                    <div className="bg-slate-900 text-emerald-400 font-mono text-xs p-3.5 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner max-h-64 overflow-y-auto">
-                      {selectedTask.output || selectedTask.error || 'Đang chờ cập nhật sản phẩm thực thi.'}
+                    <div className="bg-slate-900 text-slate-100 font-sans text-xs p-3.5 rounded-xl border border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner max-h-64 overflow-y-auto">
+                      {cleanMarkdownForExecutive(selectedTask.output) || selectedTask.error || 'Đang chờ cập nhật sản phẩm thực thi.'}
                     </div>
                   </div>
                 ) : (
