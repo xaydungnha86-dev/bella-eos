@@ -275,12 +275,18 @@ export default function Dashboard() {
     }
   }, [fbToken]);
 
-  // Restore non-manager state on mount (documents)
+  // Restore non-manager state on mount (documents) & clear pre-filled default prompt
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const savedDocs = safeGet('bella_eos_documents');
         if (savedDocs) setDocuments(JSON.parse(savedDocs));
+        const savedObj = safeGet('bella_eos_objective');
+        if (savedObj && (savedObj.includes('Để kích hoạt') || savedObj.includes('Tháng 8 tôi muốn'))) {
+          localStorage.removeItem('bella_eos_objective');
+          setObjective('');
+          CampaignExecutionManager.updateState({ objective: '' });
+        }
       } catch (e) {
         console.warn('Failed to restore documents state:', e);
       }
@@ -1454,7 +1460,7 @@ export default function Dashboard() {
                       <span>Hướng dẫn vận hành nhanh:</span>
                     </p>
                     <p className="mt-1 text-slate-600 leading-relaxed">
-                      Để kích hoạt luồng tự động, CEO hãy viết một mệnh lệnh định hướng kinh doanh ở bảng console phía dưới (Ví dụ: <em>"Tháng 8 tôi muốn tăng doanh thu Spa thêm 20% với ngân sách 50 triệu và không làm giảm lợi nhuận dưới 30%"</em>) rồi nhấn <strong>Phân rã Kế hoạch</strong>.
+                      Để kích hoạt luồng tự động, CEO nhập mệnh lệnh định hướng kinh doanh ở khung bên dưới rồi nhấn <strong>Phân rã Kế hoạch (AI)</strong>.
                     </p>
                   </div>
                 </div>
@@ -1475,7 +1481,7 @@ export default function Dashboard() {
                     CampaignExecutionManager.updateState({ objective: e.target.value });
                   }}
                   onFocus={(e) => e.target.select()}
-                  placeholder="Ví dụ: Tăng 20% Spa demo trong 30 ngày với ngân sách 50 triệu..."
+                  placeholder="Ví dụ: Tháng 8 tôi muốn tăng doanh thu Spa thêm 20% với ngân sách 50 triệu và không làm giảm lợi nhuận dưới 30%..."
                   className="w-full h-12 bg-slate-50 border border-slate-200 hover:border-indigo-400 focus:border-indigo-500 focus:outline-none rounded-xl pl-11 pr-10 text-xs font-sans text-slate-800 placeholder-slate-400 shadow-inner transition-colors"
                 />
                 <Sparkles className="w-4 h-4 text-indigo-500 absolute left-4 top-4" />
