@@ -449,3 +449,143 @@ Tiến trình chạy (Workflow Runtime) được ràng buộc nghiêm ngặt b�
 | | **Escalation Rate**| Tỷ lệ công việc trễ hạn phải chuyển cấp tự động lên CEO. | **< 5%** |
 | **Learning Center** | **Improvement %** | Hiệu quả cải thiện của KPIs quy trình sau khi áp SOP đột biến. | **>= 15% tăng trưởng** |
 | | **Knowledge Growth**| Số lượng bài học/SOP mutations mới được đúc kết. | Tích lũy liên tục |
+
+---
+
+## VIII. TẦNG KIỂM SOÁT VẬN HÀNH (OPERATIONAL CONTROL LAYER)
+
+Tầng kiểm soát vận hành đóng vai trò là "Cơ quan An ninh" giám sát chất lượng và tính đúng đắn của 13 Core Engines, bảo đảm hệ thống vận hành đúng quy chế quản trị doanh nghiệp.
+
+```
+       [Engine Output]
+             │
+             ▼
+┌──────────────────────────┐
+│   Validation Gate check  │ ➔ Failed ➔ [Reject & Return Error]
+└────────────┬─────────────┘
+             │ Passed
+             ▼
+┌──────────────────────────┐
+│  Evaluate Engine Health  │ ➔ Health Score < 90 ➔ [Emit Alert]
+└────────────┬─────────────┘
+             │
+             ▼
+       [Next Engine]
+```
+
+### 1. Tiêu chuẩn Hoàn thành của từng Engine (Definition of Done - DoD)
+Mỗi Engine chỉ được phép chuyển giao Contract dữ liệu khi đạt các tiêu chuẩn kiểm duyệt sau:
+
+*   **Intent Engine DoD**:
+    *   [x] Trường `targetObjective` không được rỗng và phải ánh xạ được tới ít nhất 1 phòng ban cụ thể.
+    *   [x] Trường `spendLimitVnd` phải là số dương (hoặc tự áp giá trị mặc định tối thiểu).
+    *   [x] `expectedTimelineDays` phải nằm trong giới hạn thực tế (từ 1 đến 365 ngày).
+    *   [x] Điểm số tự tin của mô hình ngôn ngữ `confidenceScore` phải lớn hơn **95%**.
+*   **Goal Engine DoD**:
+    *   [x] Cây mục tiêu `GoalTreeContract` phải có duy nhất một đỉnh gốc chiến lược.
+    *   [x] Mỗi mục tiêu con (Leaf Goal) bắt buộc phải có thuộc tính `ownerRole` gán cụ thể cho một vai trò thực tế.
+    *   [x] Tổng ngân sách phân bổ của các mục tiêu con không được vượt quá `spendLimitVnd` của mục tiêu gốc.
+*   **Decision Engine DoD**:
+    *   [x] Kết quả phải đề xuất tối thiểu **2 phương án thay thế** (Alternative Options).
+    *   [x] Mỗi phương án thay thế bắt buộc phải ghi rõ tối thiểu **2 Ưu điểm (Pros)** và **1 Nhược điểm (Cons)**.
+    *   [x] Phải trích xuất ít nhất **3 dẫn chứng lịch sử** (Evidence) từ EOM Data Fabric làm cơ sở lý luận.
+    *   [x] Có chỉ số rủi ro tính toán rõ ràng (`riskScore`).
+*   **Policy Engine DoD**:
+    *   [x] Toàn bộ các quy tắc chính sách (Dynamic Policies) áp dụng cho tác vụ hiện tại phải được duyệt qua.
+    *   [x] Không có bất kỳ vi phạm nào mang cấp độ nghiêm trọng `STRICT_BLOCK` được chấp nhận cho chạy tự động.
+*   **Approval Engine DoD**:
+    *   [x] Trạng thái nhiệm vụ chuyển sang `APPROVED` hoặc `REJECTED`.
+    *   [x] Ghi nhận rõ ràng ID người duyệt thực tế và mã Hash chữ ký số.
+    *   [x] Bắt buộc có trường `reason` (lý do) đi kèm đối với các quyết định `REJECTED`.
+*   **Workflow Runtime DoD**:
+    *   [x] Tất cả các bước trong Saga hoặc đạt trạng thái `SUCCESS` hoặc đã chạy hoàn tất các bước hoàn tác `COMPENSATED`.
+    *   [x] Không có trạng thái treo (lửng lơ không chạy tiếp và không rollback).
+
+### 2. Các Chốt Kiểm Soát Chất Lượng (Quality Validation Gates)
+Giữa hai Engine liên kết bắt buộc phải có một cổng kiểm soát (Gatekeeper) để chặn dữ liệu lỗi:
+*   **Intent Gate**: Chặn đầu vào của Goal Engine. Nếu đầu ra của Intent Engine không đạt tiêu chuẩn DoD ➔ Trả lỗi về giao diện UI CEO và yêu cầu CEO làm rõ mục tiêu.
+*   **Goal Gate**: Chặn đầu vào của Decision Engine. Nếu Goal Tree phân rã không có người gán (Owner) hoặc thiếu chỉ số KPIs đo lường ➔ Từ chối chạy mô phỏng.
+*   **Decision Gate**: Chặn đầu vào của Workflow Runtime. Nếu chiến lược đề xuất có chỉ số rủi ro (`riskScore`) vượt quá trần quy định mà không được đính kèm phê duyệt hợp lệ ➔ Đóng khóa kích hoạt quy trình thực thi.
+
+### 3. Chỉ số Sức Khỏe của từng Engine (Engine Health Score)
+Mỗi Engine tự giám sát chất lượng hoạt động của mình theo thang điểm 100:
+$$\text{Health Score} = 100 - (\text{Tỷ lệ Lỗi} \times 40) - (\text{Tỷ lệ Quá hạn SLA} \times 40) - (\text{Độ lệch hiệu năng} \times 20)$$
+*   **Intent Engine Health**: Dựa trên tỷ lệ CEO phải sửa lại chỉ thị do AI hiểu sai ý định.
+*   **Decision Engine Health**: Dựa trên độ lệch sai số giữa tỷ lệ ROI dự báo và ROI thực tế.
+*   **Workflow Engine Health**: Dựa trên tỷ lệ bước chạy bị lỗi cần phải rollback (Saga compensation rate).
+*   *Nếu Health Score của bất kỳ Engine nào giảm xuống dưới 90, Telemetry Center sẽ tự động phát cảnh báo đỏ (Critical Alert) tới CEO.*
+
+### 4. Đo lường Chất lượng quy trình thực thi (Workflow Quality Score)
+Hệ thống không chỉ quan tâm tới việc quy trình chạy thành công về mặt kỹ thuật, mà phải đo lường chất lượng thực thi nghiệp vụ:
+*   **Workflow Quality Score (WQS) từ 0 - 100**:
+    *   `30%`: Đúng hạn mức tài chính (Không phát sinh chi phí phụ ngoài kế hoạch).
+    *   `30%`: Đúng thời hạn cam kết (SLA thực tế so với Timeline dự kiến).
+    *   `40%`: Đúng chất lượng đầu ra (Được kiểm định qua bộ lọc kiểm toán và điểm đánh giá thực tế của Quản lý / CEO).
+
+### 5. Chỉ số Giải thích của Quyết sách (Explainability Score)
+Để loại bỏ tính chất "hộp đen" của AI, Decision Engine phải chấm điểm khả năng tự giải thích của mình trước khi trình lên CEO:
+$$\text{Explainability Score} = (\text{Mức phủ bằng chứng} \times 40\%) + (\text{Độ tươi của dữ liệu} \times 30\%) + (\text{Tính toàn vẹn lập luận} \times 30\%)$$
+*   **Mức phủ bằng chứng (Evidence Coverage)**: Đạt 100% nếu mọi đề xuất đều dẫn chiếu tới dữ liệu doanh số thực tế thu thập từ POS/CRM.
+*   **Độ tươi của dữ liệu (Data Freshness)**: Đạt 100% nếu dữ liệu sử dụng được cập nhật trong vòng 24h qua.
+*   **Tính toàn vẹn lập luận (Reasoning Completeness)**: Cấu trúc logic lập luận được xác thực không có mâu thuẫn bởi bộ kiểm chứng tri thức (Knowledge Center).
+
+### 6. Bản đồ Nhiệt Rủi ro Chính sách (Policy Risk Heatmap)
+Thay vì chỉ trả về kết quả nhị phân (ĐẠT/HỎNG), Policy Engine phân tích rủi ro theo 4 chiều kích của doanh nghiệp:
+*   **Financial Risk (Rủi ro Tài chính)**: Điểm số rủi ro dựa trên tỷ lệ ngân sách đề xuất so với dòng tiền hiện có.
+*   **Compliance Risk (Rủi ro Hợp quy)**: Mức độ tuân thủ tiêu chuẩn ISO, GDPR và quy chế nội bộ.
+*   **Privacy Risk (Rủi ro Bảo mật)**: Nguy cơ lộ thông tin cá nhân khách hàng (PII) ra môi trường bên ngoài.
+*   **Security Risk (Rủi ro An ninh)**: Nguy cơ bị tấn công, lỗi bảo mật hoặc mất uy tín thương hiệu.
+*   *Các điểm số này được tổng hợp thành sơ đồ ma trận Risk Matrix để CEO đưa ra quyết định duyệt chi chính xác.*
+
+### 7. Giám sát Điểm nghẽn Duyệt (Approval SLA Monitor)
+Theo dõi hiệu năng phê duyệt của con người:
+*   **Average Approval Duration**: Thời gian trung bình để duyệt một yêu cầu (phân tách theo CEO vs Manager).
+*   **Escalation Rate %**: Tỷ lệ các tờ trình bị trễ hạn phải tự động kích hoạt chuyển cấp.
+*   **SLA Bottleneck Index**: Chỉ số xác định xem khâu phê duyệt con người có đang làm chậm tiến độ chung của các chiến dịch hay không.
+
+### 8. Giám sát Trực quan Tiến độ thực thi (Workflow Runtime Visualization Map)
+Mỗi quy trình chạy đều phải cung cấp trạng thái trực quan hóa cho Ban giám đốc, ví dụ:
+*   **Chiến dịch Marketing Spa**: `RUNNING (85% Progress)`
+    *   ➔ Bước 1: Setup chiến dịch `[DONE]`
+    *   ➔ Bước 2: Biên soạn nội dung quảng cáo `[DONE]`
+    *   ➔ Bước 3: Thiết kế ảnh/banner chiến dịch `[RUNNING]`
+    *   ➔ Bước 4: CEO Ký duyệt xuất bản `[WAITING]`
+    *   ➔ Bước 5: Chạy Ads & Gửi mail tự động `[PENDING]`
+
+### 9. Chỉ số Đo lường Hiệu quả Học tập (Learning Gain Metric)
+Learning Center chỉ được tính là học tập hiệu quả nếu các đột biến SOP thực sự đem lại giá trị kinh tế:
+$$\text{Learning Gain} = \text{KPI}_{\text{Chiến dịch mới}} - \text{KPI}_{\text{Chiến dịch cũ}}$$
+*   Nếu hệ thống đề xuất biến đổi cấu trúc SOP (SOP Mutation) nhưng chạy chiến dịch tiếp theo không đem lại chỉ số ROI tăng trưởng hoặc tỷ lệ lỗi tăng lên ➔ Hệ thống tự động phục hồi về phiên bản SOP cũ (Rollback SOP) và gán nhãn đột biến đó là không hiệu quả.
+
+---
+
+## IX. BẢN THÔNG TIN LÃNH ĐẠO CẤP CAO (EXECUTIVE ENTERPRISE DASHBOARD)
+
+Đây là giao diện tối cao dành cho CEO, tổng hợp toàn bộ các chỉ số vận hành logic của 13 Engines và Tầng kiểm soát vận hành thành một Dashboard duy nhất đơn giản, sang trọng và đầy đủ quyền lực:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ 🏛️ BELLA EOS - EXECUTIVE BOARDROOM                                   2026-07-29 21:15  │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                        │
+│  [ SỨC KHỎE DOANH NGHIỆP ]      [ TỶ LỆ AI CHẠY ĐÚNG ]     [ ROI CHIẾN DỊCH TRUNG BÌNH ] │
+│         92 / 100                     98.2%                         4.6 x               │
+│        (Tốt - Đạt SLA)            (Giảm 0.3% lỗi)             (Tăng 12% so với Q1)     │
+│                                                                                        │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  📊 TRẠNG THÁI VẬN HÀNH DÒNG VIỆC (WORKFLOW STATUS)                                    │
+│  - Đang vận hành: 18 quy trình      - Chờ duyệt (Pending): 5 tờ trình                  │
+│  - Rủi ro nghiêm trọng: 1 (Cần xử lý)  - Vi phạm chính sách: 0                         │
+│                                                                                        │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  💰 PHÂN BỔ & CHI PHÍ TÀI NGUYÊN (RESOURCES & COST MONITOR)                           │
+│  - Ngân sách đã chi: 62% (310,000,000 VND / 500,000,000 VND)                           │
+│  - Chi phí Token AI: 3,200,000 VND  | Tỷ lệ tiết kiệm tài nguyên: +15%                 │
+│                                                                                        │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│  👑 DANH SÁCH DUYỆT KHẨN CẤP (ACTION ITEMS FOR CEO)                                    │
+│  [appr_1785]: Phê duyệt Chiến dịch khuyến mãi Spa Q3 - Ngân sách: 80M | Rủi ro: 45%     │
+│               ➔ [Xem Tờ Trình Chi Tiết]  [Ký Phê Duyệt]  [Bác Bỏ]                      │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
