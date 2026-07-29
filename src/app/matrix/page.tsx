@@ -184,31 +184,31 @@ export default function ExecutiveMatrixPage() {
                 return (
                   <div key={t.task_id || idx} className="p-5 hover:bg-slate-50/70 transition-colors space-y-3">
                     {/* TASK HEADER ROW */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <span className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold font-mono text-xs flex items-center justify-center shrink-0">
                           #{idx + 1}
                         </span>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-xs text-slate-800">{t.agent_name || t.agent_id}</h4>
-                            <span className="text-[8px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono uppercase">{t.task_type}</span>
+                            <h4 className="font-bold text-xs text-slate-800 truncate">{t.agent_name || t.agent_id}</h4>
+                            <span className="text-[8px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono uppercase shrink-0 whitespace-nowrap">{t.task_type}</span>
                           </div>
-                          <p className="text-[10px] text-slate-500 font-medium mt-0.5">{t.task_description}</p>
+                          <p className="text-[10px] text-slate-500 font-medium mt-0.5 truncate">{t.task_description}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <div className="flex items-center gap-2 shrink-0 whitespace-nowrap self-start sm:self-auto">
                         {isAwaiting ? (
-                          <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded-full font-bold text-[8px] animate-pulse flex items-center gap-1">
+                          <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded-full font-bold text-[8.5px] animate-pulse flex items-center gap-1 shrink-0 whitespace-nowrap">
                             👑 CHỜ CEO PHÊ DUYỆT
                           </span>
                         ) : isDone ? (
-                          <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-bold text-[8px] flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> HOÀN THÀNH
+                          <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full font-bold text-[8.5px] flex items-center gap-1 shrink-0 whitespace-nowrap">
+                            <CheckCircle2 className="w-3 h-3 shrink-0" /> HOÀN THÀNH
                           </span>
                         ) : (
-                          <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-bold text-[8px]">
+                          <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-bold text-[8.5px] shrink-0 whitespace-nowrap">
                             ⏳ ĐANG XỬ LÝ
                           </span>
                         )}
@@ -216,17 +216,17 @@ export default function ExecutiveMatrixPage() {
                         {t.output && (
                           <button
                             onClick={() => handleCopyOutput(t.task_id || idx.toString(), t.output)}
-                            className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-md text-[9px] font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer"
+                            className="bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
                           >
                             {copiedTaskId === (t.task_id || idx.toString()) ? (
                               <>
-                                <Check className="w-3 h-3 text-emerald-600" />
-                                <span className="text-emerald-700">Đã copy</span>
+                                <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                                <span className="text-emerald-700 whitespace-nowrap">Đã copy</span>
                               </>
                             ) : (
                               <>
-                                <Copy className="w-3 h-3 text-slate-400" />
-                                <span>Copy Nội dung</span>
+                                <Copy className="w-3 h-3 text-slate-400 shrink-0" />
+                                <span className="whitespace-nowrap">Copy Nội dung</span>
                               </>
                             )}
                           </button>
