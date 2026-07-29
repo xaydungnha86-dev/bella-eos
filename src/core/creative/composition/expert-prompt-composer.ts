@@ -138,177 +138,103 @@ export class ExpertPromptComposer {
     // Generate variation modifiers for creative diversity
     const variationModifiers = this.generateVariationModifiers();
     
-    console.log('[ExpertPromptComposer] 🎨 Variation directive:', variationModifiers.directive);
-    console.log('[ExpertPromptComposer] 🎨 Visual treatments applied');
+    console.log('[ExpertPromptComposer] 🎨 Variation applied for natural diversity');
+    console.log('[ExpertPromptComposer] 🎨 AI has creative freedom for layout');
     
-    // Add random creative constraint to force uniqueness
-    const randomConstraints = [
-      'Feature a unique architectural element or background detail that was not in previous designs',
-      'Use a completely different product arrangement or spatial composition from typical spa imagery',
-      'Incorporate an unexpected color accent or material texture (e.g., copper, jade, marble veining)',
-      'Show the scene from an unusual viewpoint that reveals a fresh perspective',
-      'Include a subtle seasonal or time-of-day element (morning dew, evening glow, seasonal flowers)',
-      'Feature different types of spa elements (stones, candles, towels, plants) in a new configuration'
-    ];
-    const randomConstraint = randomConstraints[Math.floor(Math.random() * randomConstraints.length)];
+    // Add strong variation seed for visual diversity
+    const variationSeed = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
     
     return `Create a professional marketing banner for ${brandName} (${businessContext.industry} industry).
 
-**CREATIVE VARIATION DIRECTIVE**: ${variationModifiers.directive}
-
-**UNIQUENESS CONSTRAINT**: ${randomConstraint}
-IMPORTANT: This image MUST look distinctly different from standard spa photography. Apply the variation directive and uniqueness constraint to ensure visual novelty.
+**VARIATION SEED**: ${variationSeed}
+**CREATIVE DIRECTIVE**: Create a unique visual composition that feels fresh and different from previous designs. Use your artistic judgment to arrange elements in an aesthetically pleasing way.
 
 VISUAL SCENE:
-${heroSubject} placed in ${environmentDescription}. The scene should evoke ${emotionalTone} emotions. Lighting: ${lightingMood}. Color mood: ${colorMood} with emphasis on ${primaryColorName} and ${accentColorName} tones.
+${heroSubject} placed in ${environmentDescription}. The scene should evoke ${emotionalTone} emotions. 
+- Lighting: ${lightingMood}
+- Color mood: ${colorMood} with emphasis on ${primaryColorName} and ${accentColorName} tones
+- Visual story: ${creativeBrief.visualStory}
 
 ${variationModifiers.visualGuidance}
 
-LAYOUT & COMPOSITION:
-- Horizontal banner format in 16:9 aspect ratio
-- Rule of thirds composition
-- Main subject positioned on the RIGHT SIDE occupying majority of canvas
-- LEFT SIDE features text overlay with subtle dark gradient
-- Top section includes logo and promotional badge
-- Bottom section has prominent call-to-action button
-
-TEXT CONTENT TO RENDER (IMPORTANT - AI MUST INCLUDE THESE TEXTS):
-
-1. TOP-LEFT LOGO BADGE:
-   Text: "${brandName.toUpperCase()}"
-   Style: Small rounded badge with ${accentColorName} background
-   Typography: Bold sans-serif, white text
-   Position: Upper left corner with comfortable margin
-
-2. TOP-RIGHT PROMOTIONAL BADGE:
-   Text: "${textContent.badge}"
-   Style: Rounded badge with white background
-   Typography: Bold sans-serif, ${primaryColorName} text
-   Position: Upper right corner with comfortable margin
-
-3. MAIN HEADLINE (MOST PROMINENT):
-   Text: "${textContent.headline}"
-   Typography: Extra bold sans-serif (very large size), white color
-   Text effects: Strong drop shadow for readability
-   Position: Left-center area, vertically centered
-   Layout: Allow text wrapping if needed, maximum two lines
-   CRITICAL: This headline must be LARGE, BOLD, and CLEARLY READABLE
-
-4. KEY BENEFITS (THREE BULLET POINTS):
-   Text line 1: "✓ ${textContent.bullets[0]}"
-   Text line 2: "✓ ${textContent.bullets[1]}"
-   Text line 3: "✓ ${textContent.bullets[2]}"
-   Typography: Regular sans-serif (medium size), white color
-   Position: Below headline, left-aligned with comfortable left margin
-   Spacing: Adequate vertical gap between each benefit line
-   Style: Each line starts with checkmark symbol (✓) followed by benefit text
-
-5. CALL-TO-ACTION BUTTON:
-   Text: "${textContent.cta}"
-   Style: Large rounded button with gradient background (vibrant pink to red gradient)
-   Typography: Bold sans-serif (large size), white text, uppercase
-   Position: Bottom center with comfortable bottom margin
-   Effects: Subtle glow to make button stand out
-   Icon: Include right arrow symbol (→) at the end
-
-VISUAL HIERARCHY & SIZING:
-- Headline: Largest and most prominent element (dominant visual weight)
-- Hero subject: Secondary focus (occupies right side of composition)
-- Bullet points: Medium emphasis (supporting details)
-- CTA button: Strong visual call-out (bright colors, clear contrast)
-- Badges: Subtle presence (upper corners, smaller scale)
-
-TECHNICAL REQUIREMENTS:
-- High resolution 4K quality output
-- Professional studio lighting
-- Text rendering: Anti-aliased, crisp, professional quality
-- Contrast: Ensure all text stands out clearly against background (excellent readability)
-- Color depth: Rich 24-bit RGB
-
-COLOR PALETTE:
-- Primary brand color: ${colors.primary} (${primaryColorName} tone)
-- Accent brand color: ${colors.accent} (${accentColorName} tone)
-- Text color: Pure white with dark shadow for contrast
-- Background overlay: Dark gradient for text readability
-
-PHOTOGRAPHY STYLE:
+FORMAT & QUALITY:
+- Horizontal banner in 16:9 aspect ratio (1792x1024px or similar)
+- High resolution 4K quality
 - Professional commercial photography aesthetic
-- Studio quality lighting setup
-- Sharp focus on main subject
-- Shallow depth of field for background elements
-- Clean, uncluttered composition
-- Premium, high-end look matching ${brandName} brand identity
+- Sharp focus with appropriate depth of field
+- Clean, premium composition
 
-ATMOSPHERE & MOOD:
-${creativeBrief.visualStory}. The overall feeling should communicate ${emotionalTone}, with ${colorMood} color atmosphere and ${lightingMood} lighting that creates depth and dimension.
+TEXT CONTENT TO INCLUDE (render these texts clearly and elegantly):
 
-CRITICAL DESIGN PRINCIPLES:
-- ALL TEXT MUST BE CLEARLY RENDERED AND READABLE
-- NO PLACEHOLDER TEXT - use exact text content provided above
-- Maintain brand color scheme throughout
-- Professional graphic design quality expected
-- Text should integrate naturally with visual scene
-- Ensure proper visual hierarchy and contrast
-- DO NOT include dimension annotations, pixel measurements, or technical specifications in the visible image`;
+1. LOGO BADGE: "${brandName.toUpperCase()}"
+   Small badge with ${accentColorName} background, white text
+
+2. PROMOTIONAL BADGE: "${textContent.badge}"
+   Badge with white or accent background
+
+3. MAIN HEADLINE: "${textContent.headline}"
+   Large, bold, dominant text - this is the HERO element
+   White color with shadow for readability
+
+4. KEY BENEFITS:
+   - ✓ ${textContent.bullets[0]}
+   - ✓ ${textContent.bullets[1]}
+   - ✓ ${textContent.bullets[2]}
+   Medium size, clean typography, checkmarks included
+
+5. CALL-TO-ACTION: "${textContent.cta}"
+   Prominent button with vibrant gradient (pink to red)
+   Bold uppercase white text with arrow symbol →
+
+LAYOUT FREEDOM:
+You have complete creative freedom to arrange these elements. Choose text positions (left, right, center, overlay) that create the most beautiful and effective composition. Ensure excellent readability with appropriate contrast, gradients, or overlays as needed.
+
+DESIGN PRINCIPLES:
+- Professional graphic design quality
+- Clear visual hierarchy (headline dominant → benefits → CTA)
+- Excellent text legibility (crisp rendering, strong contrast)
+- Natural integration of text with visual scene
+- Comfortable margins and breathing space
+- Brand colors: ${colors.primary} and ${colors.accent}
+
+IMPORTANT:
+- Render ALL text content clearly (no placeholder text)
+- Create unique composition different from standard layouts
+- Ensure professional quality matching ${brandName} premium brand identity
+- DO NOT show dimension annotations, measurements, or technical specs`;
   }
   
   /**
-   * Build layout instructions with variation
+   * Build layout instructions - simplified to let AI create natural variations
    */
   private static buildLayoutInstructions(brief: CreativeBrief): string {
-    // Rotate through different layout patterns for visual diversity
-    const layoutVariants = [
-      {
-        name: 'split_left_text',
-        description: '40% left side: Text overlay zone (dark gradient), 60% right side: Hero visual',
-        textPosition: 'LEFT',
-        visualRatio: '40/60'
-      },
-      {
-        name: 'split_right_text',
-        description: '60% left side: Hero visual, 40% right side: Text overlay zone (dark gradient)',
-        textPosition: 'RIGHT',
-        visualRatio: '60/40'
-      },
-      {
-        name: 'centered_hero',
-        description: 'Center: Large hero visual, Text overlay bottom 30% with gradient backdrop',
-        textPosition: 'BOTTOM_OVERLAY',
-        visualRatio: 'full_bleed'
-      },
-      {
-        name: 'diagonal_split',
-        description: 'Diagonal divide from top-left to bottom-right, text on lower triangle, visual on upper',
-        textPosition: 'DIAGONAL_LOWER',
-        visualRatio: 'diagonal_45deg'
-      },
-      {
-        name: 'magazine_style',
-        description: 'Full background visual, Text overlay in top-left 40% with strong gradient box',
-        textPosition: 'TOP_LEFT_OVERLAY',
-        visualRatio: 'full_bleed'
-      }
-    ];
+    // Add variation seed to encourage different layouts each time
+    const variationSeed = `${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
     
-    // Use variation seed or time-based index to select layout
-    const layoutIndex = Math.floor(Date.now() / 1000) % layoutVariants.length;
-    const selectedLayout = layoutVariants[layoutIndex];
+    console.log('[ExpertPromptComposer] 🎨 Layout variation seed:', variationSeed);
     
-    return `Layout Style: ${selectedLayout.name} (Composition Rule: ${brief.compositionRule || 'rule_of_thirds'})
+    return `Layout Approach: Natural creative freedom with professional composition rules
 
-**${selectedLayout.description}**
+**VARIATION SEED**: ${variationSeed}
+Use this seed to create a unique layout composition that differs from previous generations.
 
-Layout Structure:
-- ${selectedLayout.textPosition === 'LEFT' ? '40% LEFT: Text overlay zone with dark gradient (rgba(0,0,0,0.7))\n- 60% RIGHT: Hero visual / product showcase' : ''}
-- ${selectedLayout.textPosition === 'RIGHT' ? '60% LEFT: Hero visual / product showcase\n- 40% RIGHT: Text overlay zone with dark gradient (rgba(0,0,0,0.7))' : ''}
-- ${selectedLayout.textPosition === 'BOTTOM_OVERLAY' ? 'Full width hero visual\n- Bottom 30%: Text overlay with gradient backdrop (rgba(0,0,0,0.6) to transparent)' : ''}
-- ${selectedLayout.textPosition === 'DIAGONAL_LOWER' ? 'Diagonal split at 45 degrees\n- Upper triangle: Hero visual\n- Lower triangle: Text overlay with solid background' : ''}
-- ${selectedLayout.textPosition === 'TOP_LEFT_OVERLAY' ? 'Full bleed background visual\n- Top-left 40%: Text overlay in strong gradient box (rgba(0,0,0,0.8))' : ''}
-- Top strip: Logo badge (top-left 20px)
-- Offer badge: Top-right or integrated with headline
-- CTA button: ${selectedLayout.textPosition === 'BOTTOM_OVERLAY' ? 'Centered bottom' : 'Within text zone, visually prominent'}
-- Vertical rhythm: Logo → Headline → Bullets → CTA
-- Breathing space: Minimum 40-60px margins on all sides`;
+Layout Guidelines (AI has creative freedom):
+- Horizontal banner format in 16:9 aspect ratio
+- Professional composition following design best practices
+- Balance between visual elements and text content
+- Clear visual hierarchy with main subject and text overlay areas
+- Text should be clearly readable with appropriate contrast
+- Use dark gradients or overlays where needed for text legibility
+- All required elements must be included: Logo, Offer badge, Headline, Bullets, CTA button
+- Maintain breathing space with comfortable margins
+- Create visual flow guiding eye through: Logo → Headline → Benefits → Call-to-Action
+
+AI Creative Freedom:
+- Choose optimal text positioning (left, right, center, overlay) based on visual composition
+- Arrange text elements in the most aesthetically pleasing way
+- Adjust gradient overlays to ensure text readability while maintaining visual appeal
+- Position hero subject/product to create dynamic and engaging composition
+- Use typography hierarchy to guide viewer attention naturally`;
   }
   
   /**

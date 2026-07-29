@@ -1,11 +1,14 @@
 const apiKey = process.env.GEMINI_API_KEY || 'YOUR_API_KEY_HERE'; // Don't hardcode!
 
 async function testModel(modelId, method, body) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:${method}?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:${method}`;
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey  // Use x-goog-api-key header (official way)
+      },
       body: JSON.stringify(body)
     });
     const text = await res.text();

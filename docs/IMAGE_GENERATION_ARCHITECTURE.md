@@ -849,7 +849,348 @@ const videoUrl = await generateWithVeo(videoPrompt);
 
 ---
 
-## 9. APPENDIX
+## 9. LIMITATIONS & FUTURE ROADMAP
+
+### 9.1. Current Limitations (v4.0.0)
+
+#### ❌ Layer 1: Mock Data Only
+
+**Hiện tại**:
+```typescript
+// Mock data for demo
+enterpriseContext: {
+  erp: { revenue: 500000000, customers: 1289 },
+  crm: { leads: 1000, conversionRate: 0.15 }
+}
+```
+
+**Thiếu**:
+- ❌ Real ERP integration (doanh thu thật, xu hướng tăng/giảm)
+- ❌ Real CRM data (khách VIP, RFM segmentation, churn rate)
+- ❌ Campaign history (Top campaigns by ROI, best performing creatives)
+- ❌ Customer insights (Reviews, sentiment analysis, pain points)
+- ❌ Marketing knowledge (USP, brand positioning, competitor analysis)
+- ❌ Operational data (Giờ đông khách, peak seasons, promotions)
+
+**Impact**: Creative reasoning thiếu context thực tế → output generic
+
+---
+
+#### ❌ Missing Layer 2.5: Creative Strategy Engine
+
+**Vấn đề hiện tại**: Layer 2 (Creative Director) đang làm cả 2 việc:
+1. Quyết định chiến lược (awareness vs conversion?)
+2. Tạo creative brief
+
+**Nên tách thành**:
+
+```
+CEO Goal
+    ↓
+Business Context Engine (Layer 1)
+    ↓
+Creative Strategy Engine (Layer 2.5) ← MISSING!
+    │
+    ├─ Campaign Type: Awareness | Conversion | Remarketing | Branding
+    ├─ Funnel Stage: TOFU | MOFU | BOFU
+    ├─ Messaging Strategy: Problem-Solution | Social Proof | FOMO
+    ├─ Visual Strategy: Product-focused | Lifestyle | Benefit-driven
+    └─ Channel Strategy: Facebook | Instagram | LinkedIn | Google Display
+    ↓
+Creative Brief Engine (Layer 2)
+    ↓
+[...rest of pipeline...]
+```
+
+**Benefit**: 
+- Clear separation of concerns
+- Easier to customize strategy per campaign type
+- Better scaling when adding new campaign types
+
+---
+
+#### ❌ No Feedback Loop
+
+**Hiện tại**: One-way pipeline
+```
+Generate → Done
+```
+
+**Cần**: Closed-loop learning system
+```
+Generate
+    ↓
+CEO Review & Select
+    ↓
+Publish
+    ↓
+Track Performance (CTR, Conversions, ROI)
+    ↓
+Learning Engine
+    ↓
+Update Knowledge Base
+    │
+    ├─ Successful Patterns (store in DB)
+    ├─ Failed Patterns (avoid in future)
+    └─ Winning Headlines/Visuals
+    ↓
+Improve Future Generations
+```
+
+**Implementation Plan**:
+```typescript
+interface PerformanceData {
+  imageId: string;
+  creativeBrief: CreativeBrief;
+  metrics: {
+    impressions: number;
+    ctr: number;
+    conversions: number;
+    roi: number;
+  };
+  timestamp: string;
+}
+
+// After campaign runs
+async function learnFromPerformance(data: PerformanceData) {
+  if (data.metrics.ctr > 0.05) {
+    // High performing
+    await db.patterns.insert({
+      type: 'successful_headline',
+      content: data.creativeBrief.posterHeadline,
+      industry: data.industry,
+      successRate: data.metrics.ctr
+    });
+  }
+  
+  // Update Creative Director's knowledge
+  await updateCampaignMemory(data);
+}
+```
+
+---
+
+#### ❌ No Image Quality Evaluation
+
+**Vấn đề**: AI generates once → accept blindly
+
+**Nên có**: Generator + Critic architecture
+
+```
+AI Generate Image
+    ↓
+Vision Model Evaluation (GPT-4V or Gemini Pro Vision)
+    │
+    ├─ Headline readable? (OCR check)
+    ├─ Logo correct? (brand recognition)
+    ├─ Contrast sufficient? (WCAG AAA check)
+    ├─ Brand colors used? (color analysis)
+    ├─ Typography appropriate? (font detection)
+    ├─ Composition balanced? (rule of thirds check)
+    └─ Overall aesthetic score
+    ↓
+If Score < 90 → Regenerate with feedback
+If Score >= 90 → Accept
+```
+
+**Implementation**:
+```typescript
+async function evaluateImage(imageUrl: string, expectedContent: ExpertDesignPrompt) {
+  const visionModel = await callGeminiVision(imageUrl, `
+    Evaluate this marketing banner:
+    
+    Expected headline: "${expectedContent.textContent.headline}"
+    Expected bullets: ${expectedContent.textContent.bullets}
+    Expected brand colors: ${brandColors}
+    
+    Score (0-100):
+    - Headline readability: __/20
+    - Text accuracy: __/20
+    - Brand color adherence: __/20
+    - Visual balance: __/20
+    - Professional quality: __/20
+    
+    Total: __/100
+    
+    If score < 90, suggest improvements.
+  `);
+  
+  return visionModel.score;
+}
+```
+
+---
+
+#### ❌ No Brand Compliance Engine
+
+**Hiện tại**: Brand DNA là object đơn giản
+```typescript
+brandDna: {
+  colors: { primary, accent },
+  style: "Minimalist Glassmorphism"
+}
+```
+
+**Cần**: Comprehensive brand rules engine
+
+```typescript
+interface BrandComplianceRules {
+  // Visual Identity
+  logo: {
+    variants: LogoFile[];          // Logo chính, logo phụ, favicon
+    clearSpace: string;            // Minimum spacing around logo
+    minSize: string;               // Kích thước tối thiểu
+    placement: string[];           // Allowed placements
+  };
+  
+  // Typography
+  typography: {
+    headlineFont: Font;
+    bodyFont: Font;
+    minSize: number;
+    maxSize: number;
+    lineHeight: number;
+    letterSpacing: number;
+  };
+  
+  // Colors
+  colors: {
+    primary: Color[];
+    secondary: Color[];
+    forbidden: Color[];            // Colors to NEVER use
+    contrastRatio: number;         // WCAG compliance
+  };
+  
+  // Visual Language
+  photography: {
+    style: string[];               // "studio", "lifestyle", "editorial"
+    mood: string[];                // "warm", "professional", "energetic"
+    forbidden: string[];           // "stock photos", "generic backgrounds"
+  };
+  
+  // Composition Rules
+  composition: {
+    allowedRules: CompositionRuleType[];
+    textZonePercent: number;       // % of canvas for text
+    whitespaceMin: number;         // Minimum breathing room
+  };
+  
+  // Compliance
+  legal: {
+    disclaimers: string[];
+    regulatoryText: string[];
+  };
+}
+```
+
+**Usage**:
+```typescript
+// Before generating
+const complianceCheck = validateAgainstBrandRules(creativeBrief, brandRules);
+if (!complianceCheck.passed) {
+  throw new BrandComplianceError(complianceCheck.violations);
+}
+
+// After generating
+const imageCompliance = evaluateImageCompliance(imageUrl, brandRules);
+```
+
+---
+
+#### ❌ No Asset Retrieval System
+
+**Vấn đề**: AI imagines everything from scratch
+
+**Cần**: RAG-based asset management
+
+```
+Enterprise Assets Database
+    │
+    ├─ Logos (uploaded by client)
+    ├─ Product photos (real products)
+    ├─ Team photos (actual employees)
+    ├─ Store photos (actual locations)
+    ├─ Mascots/Characters
+    └─ Marketing materials (past campaigns)
+    ↓
+Vector Embeddings
+    ↓
+Semantic Search
+    ↓
+Retrieve Relevant Assets
+    ↓
+Compose with AI-generated elements
+```
+
+**Implementation**:
+```typescript
+// Upload assets
+await assetManager.upload({
+  type: 'logo',
+  file: logoFile,
+  metadata: { brandName, variant: 'primary' }
+});
+
+// Retrieve for generation
+const relevantAssets = await assetManager.search({
+  query: 'spa product photos luxury',
+  limit: 5
+});
+
+// Include in prompt
+prompt += `
+Use the following real product images from client's database:
+${relevantAssets.map(a => a.url).join('\n')}
+`;
+```
+
+---
+
+#### ❌ Hardcoded Design Knowledge
+
+**Vấn đề**: Prompt Composer có hardcoded design rules
+
+**Nên**: Design Knowledge Base
+
+```typescript
+interface DesignKnowledge {
+  styles: {
+    luxury: DesignSystemRules;
+    minimal: DesignSystemRules;
+    medical: DesignSystemRules;
+    finance: DesignSystemRules;
+    // ... more
+  };
+  
+  industryBestPractices: {
+    spa: DesignGuidelines;
+    restaurant: DesignGuidelines;
+    // ...
+  };
+  
+  inspirationLibrary: {
+    applestyle: VisualReference[];
+    nikestyle: VisualReference[];
+    // ...
+  };
+}
+
+// Usage
+const designRules = await designKnowledge.getStyle('luxury');
+const industryGuidelines = await designKnowledge.getIndustry('spa');
+const inspiration = await designKnowledge.getInspiration('applestyle');
+
+const prompt = assemblePrompt({
+  designRules,
+  industryGuidelines,
+  inspiration,
+  creativeBrief
+});
+```
+
+---
+
+### 9.2. Enterprise-Grade Architecture (Future)
 
 ### 9.1. TypeScript Interfaces
 
@@ -873,7 +1214,350 @@ Key interfaces:
 
 
 
-### 9.3. Version History
+### 9.2. Enterprise-Grade Architecture (Future)
+
+#### Target Architecture for Bella EOS v5.0+
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                          CEO GOAL INPUT                            │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 1: Business Context Engine                                   │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Real ERP Integration (Revenue, Costs, Profit Trends)             │
+│ • Real CRM Integration (Customer Segments, RFM, Churn)             │
+│ • Campaign History (Top ROI campaigns, Winning creatives)          │
+│ • Customer Voice (Reviews, Surveys, Support tickets)               │
+│ • Market Intelligence (Competitor analysis, Industry trends)       │
+│ • Operational Data (Peak hours, Seasonal patterns, Inventory)      │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 2: Creative Strategy Engine ✨ NEW                           │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Campaign Type Classifier                                          │
+│   └─ Awareness | Consideration | Conversion | Retention            │
+│ • Funnel Stage Analyzer                                             │
+│   └─ TOFU (Awareness) | MOFU (Consideration) | BOFU (Purchase)     │
+│ • Messaging Strategy Selector                                       │
+│   └─ Problem-Solution | Social Proof | FOMO | Educational          │
+│ • Visual Strategy Planner                                           │
+│   └─ Product-Hero | Lifestyle | Benefit-Driven | User-Generated    │
+│ • Channel Optimizer                                                 │
+│   └─ Facebook | Instagram | LinkedIn | Google Display | TikTok     │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 3: Creative Brief Engine (Enhanced)                          │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Strategic Brief (from Layer 2)                                    │
+│ • Tactical Brief (execution details)                                │
+│ • Brand Voice Synthesis                                             │
+│ • Competitive Differentiation                                       │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 4: Brand Compliance Engine ✨ NEW                            │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Logo Rules Validator                                              │
+│ • Typography Compliance Checker                                     │
+│ • Color Palette Enforcer                                            │
+│ • Visual Language Guardrails                                        │
+│ • Legal/Regulatory Compliance                                       │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 5: Asset Retrieval Engine ✨ NEW                             │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Enterprise Asset Database (Vector DB)                             │
+│ • Semantic Search (find relevant logos, products, photos)           │
+│ • Asset Version Management                                          │
+│ • Rights & Permissions Check                                        │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 6: Creative Assembly Engine ✨ NEW                           │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Layout Planner                                                    │
+│   └─ Grid system, Composition rules, Text zones                     │
+│ • Typography Planner                                                │
+│   └─ Font selection, Hierarchy, Sizing system                       │
+│ • Color Planner                                                     │
+│   └─ Palette generation, Contrast optimization                      │
+│ • Visual Planner                                                    │
+│   └─ Hero subject, Background, Props, Lighting                      │
+│ • Emotion Planner                                                   │
+│   └─ Mood, Atmosphere, Storytelling elements                        │
+│ • Asset Integration Planner                                         │
+│   └─ Where to place logos, products, team photos                    │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 7: Expert Prompt Composer (Current Layer 3)                  │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Assemble all above layers into coherent prompt                    │
+│ • Natural language synthesis                                        │
+│ • Model-specific adaptation                                         │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 8: Multi-Model Router ✨ NEW                                 │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Model Selection Strategy                                          │
+│   ├─ Gemini 3.1 Flash Image (fast, good text)                       │
+│   ├─ Gemini 3 Pro Image (quality, complex scenes)                   │
+│   ├─ DALL-E 3 (photorealism, English text)                          │
+│   ├─ Flux.1 Pro (artistic, illustration)                            │
+│   ├─ Ideogram v2 (text rendering specialist)                        │
+│   └─ Stable Diffusion XL (custom fine-tuned models)                 │
+│ • Cost Optimization (cheapest model meeting quality threshold)      │
+│ • Parallel Generation (A/B variants)                                │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 9: Image Evaluation Engine ✨ NEW                            │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Vision Model Critic (GPT-4V, Gemini Pro Vision)                   │
+│   ├─ Text Readability Score (OCR verification)                      │
+│   ├─ Brand Recognition Score (logo detection)                       │
+│   ├─ Color Compliance Score (palette analysis)                      │
+│   ├─ Composition Score (rule of thirds, balance)                    │
+│   ├─ Accessibility Score (WCAG contrast ratio)                      │
+│   └─ Professional Quality Score (aesthetic judgment)                │
+│ • Overall Score: Σ(scores) / 6                                      │
+│ • Decision:                                                         │
+│   └─ If score >= 90: Accept                                         │
+│   └─ If score < 90: Regenerate with feedback                        │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+                          [ACCEPTED IMAGE]
+                                  ↓
+                          [PUBLISH & TRACK]
+                                  ↓
+┌────────────────────────────────────────────────────────────────────┐
+│ Layer 10: Feedback Learning Engine ✨ NEW                          │
+│ ─────────────────────────────────────────────────────────────────  │
+│ • Performance Tracking                                              │
+│   ├─ Impressions, CTR, Conversions, ROI                             │
+│   ├─ A/B test results                                                │
+│   └─ User engagement metrics                                         │
+│ • Pattern Recognition                                                │
+│   ├─ Winning headlines (store in DB)                                │
+│   ├─ Successful visual patterns                                     │
+│   ├─ High-converting CTAs                                           │
+│   └─ Optimal posting times                                          │
+│ • Knowledge Update                                                  │
+│   ├─ Update Creative Strategy rules                                 │
+│   ├─ Update Design Knowledge Base                                   │
+│   ├─ Update Campaign Memory                                         │
+│   └─ Fine-tune prompts based on feedback                            │
+└────────────────────────────────────────────────────────────────────┘
+                                  ↓
+                    [ENTERPRISE KNOWLEDGE BASE]
+                    (Feeds back to Layer 1)
+```
+
+---
+
+### 9.3. Implementation Roadmap
+
+#### Phase 1: Foundation (v4.0 - Current ✅)
+- ✅ 4-layer basic pipeline
+- ✅ LLM creative reasoning
+- ✅ Expert prompt composition
+- ✅ Multi-model generation (Gemini, DALL-E)
+
+#### Phase 2: Data Integration (v4.5 - Q2 2026)
+- [ ] Real ERP/CRM connectors
+- [ ] Campaign history database
+- [ ] Customer voice aggregation
+- [ ] Business Context Engine v2
+
+#### Phase 3: Strategy Layer (v5.0 - Q3 2026)
+- [ ] Creative Strategy Engine
+- [ ] Campaign type classifier
+- [ ] Funnel stage analyzer
+- [ ] Channel optimizer
+
+#### Phase 4: Compliance & Assets (v5.5 - Q4 2026)
+- [ ] Brand Compliance Engine
+- [ ] Asset Retrieval System (Vector DB)
+- [ ] Rights management
+- [ ] Legal compliance checker
+
+#### Phase 5: Assembly & Evaluation (v6.0 - Q1 2027)
+- [ ] Creative Assembly Engine
+- [ ] Multi-Model Router with cost optimization
+- [ ] Image Evaluation Engine (Vision critic)
+- [ ] Auto-regeneration with feedback
+
+#### Phase 6: Learning Loop (v6.5 - Q2 2027)
+- [ ] Performance tracking integration
+- [ ] Pattern recognition ML
+- [ ] Knowledge base updates
+- [ ] Automated prompt optimization
+
+---
+
+### 9.4. Technical Specifications (Future Layers)
+
+#### Creative Strategy Engine API
+
+```typescript
+interface CreativeStrategyRequest {
+  businessContext: BusinessContextPackage;
+  campaignGoal: string;
+}
+
+interface CreativeStrategyResponse {
+  campaignType: 'awareness' | 'consideration' | 'conversion' | 'retention';
+  funnelStage: 'TOFU' | 'MOFU' | 'BOFU';
+  messagingStrategy: {
+    primary: 'problem_solution' | 'social_proof' | 'fomo' | 'educational';
+    secondary?: string[];
+    tone: string;
+  };
+  visualStrategy: {
+    approach: 'product_hero' | 'lifestyle' | 'benefit_driven' | 'ugc';
+    composition: CompositionRuleType;
+    emotionalDirection: string;
+  };
+  channels: {
+    primary: Channel;
+    secondary: Channel[];
+    formatRecommendations: Record<Channel, ImageFormat[]>;
+  };
+  confidence: number;
+  reasoning: string[];
+}
+
+// Usage
+const strategy = await CreativeStrategyEngine.analyze({
+  businessContext,
+  campaignGoal: "Increase Q1 spa bookings by 30%"
+});
+
+// Output example:
+{
+  campaignType: 'conversion',
+  funnelStage: 'BOFU',
+  messagingStrategy: {
+    primary: 'fomo',
+    tone: 'urgent but premium'
+  },
+  visualStrategy: {
+    approach: 'benefit_driven',
+    emotionalDirection: 'aspirational, exclusive'
+  },
+  channels: {
+    primary: 'facebook',
+    formatRecommendations: {
+      facebook: ['16:9', '1:1'],
+      instagram: ['1:1', '4:5']
+    }
+  }
+}
+```
+
+#### Image Evaluation Engine API
+
+```typescript
+interface ImageEvaluationRequest {
+  imageUrl: string;
+  expectedContent: {
+    headline: string;
+    bullets: string[];
+    cta: string;
+    brandColors: Color[];
+  };
+  brandRules: BrandComplianceRules;
+}
+
+interface ImageEvaluationResponse {
+  overallScore: number;  // 0-100
+  subscores: {
+    textReadability: number;      // 0-20
+    brandRecognition: number;     // 0-20
+    colorCompliance: number;      // 0-20
+    composition: number;          // 0-20
+    professionalQuality: number;  // 0-20
+  };
+  issues: Issue[];
+  suggestions: string[];
+  decision: 'accept' | 'regenerate';
+  regenerationPrompt?: string;  // If decision = regenerate
+}
+
+interface Issue {
+  severity: 'critical' | 'major' | 'minor';
+  category: 'text' | 'brand' | 'color' | 'composition' | 'quality';
+  description: string;
+  suggestion: string;
+}
+
+// Usage
+const evaluation = await ImageEvaluationEngine.evaluate({
+  imageUrl: '/temp-banners/gen_v4_xxx.png',
+  expectedContent: expertPrompt.textContent,
+  brandRules
+});
+
+if (evaluation.decision === 'regenerate') {
+  // Regenerate with feedback
+  const newImage = await generate(evaluation.regenerationPrompt);
+}
+```
+
+#### Feedback Learning Engine API
+
+```typescript
+interface CampaignPerformance {
+  imageId: string;
+  creativeBrief: CreativeBrief;
+  strategy: CreativeStrategyResponse;
+  metrics: {
+    impressions: number;
+    clicks: number;
+    conversions: number;
+    ctr: number;
+    conversionRate: number;
+    roi: number;
+    costPerConversion: number;
+  };
+  userFeedback?: {
+    ceoRating: number;  // 1-5
+    comments: string;
+  };
+  duration: {
+    startDate: string;
+    endDate: string;
+  };
+}
+
+interface LearningInsights {
+  winningPatterns: Pattern[];
+  failedPatterns: Pattern[];
+  recommendations: Recommendation[];
+  knowledgeUpdates: KnowledgeUpdate[];
+}
+
+// Usage
+const insights = await FeedbackLearningEngine.learn(performanceData);
+
+// Automatically update knowledge base
+await enterpriseKnowledge.update(insights.knowledgeUpdates);
+
+// Next generation uses learned insights
+const newBrief = await CreativeDirectorAgent.reason(context, {
+  historicalInsights: insights
+});
+```
+
+---
+
+### 9.5. Database Schema (Future)
 
 | Version | Date | Changes |
 |---------|------|---------|
@@ -883,7 +1567,104 @@ Key interfaces:
 | 3.1.0 | 2026-01-25 | Fixed Canvas XML parse errors, removed emojis from SVG |
 | **4.0.0** | **2026-01-26** | **AI renders everything (no Canvas), Expert Prompt Composer** |
 
-### 9.4. Contributors
+### 9.5. Database Schema (Future)
+
+```sql
+-- Enterprise Knowledge Base
+CREATE TABLE enterprise_knowledge (
+  id UUID PRIMARY KEY,
+  tenant_id VARCHAR(255),
+  category VARCHAR(100),  -- 'campaign_pattern', 'design_rule', 'customer_insight'
+  content JSONB,
+  confidence_score FLOAT,
+  source VARCHAR(255),    -- 'performance_data', 'user_feedback', 'market_research'
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+-- Campaign Performance
+CREATE TABLE campaign_performance (
+  id UUID PRIMARY KEY,
+  tenant_id VARCHAR(255),
+  image_id VARCHAR(255),
+  creative_brief JSONB,
+  strategy JSONB,
+  metrics JSONB,
+  user_feedback JSONB,
+  start_date TIMESTAMP,
+  end_date TIMESTAMP,
+  roi FLOAT,
+  INDEX idx_roi (roi DESC),
+  INDEX idx_tenant_date (tenant_id, start_date DESC)
+);
+
+-- Successful Patterns
+CREATE TABLE successful_patterns (
+  id UUID PRIMARY KEY,
+  tenant_id VARCHAR(255),
+  pattern_type VARCHAR(100),  -- 'headline', 'visual', 'color_scheme', 'layout'
+  pattern_content JSONB,
+  success_rate FLOAT,
+  sample_size INT,
+  industry VARCHAR(100),
+  updated_at TIMESTAMP
+);
+
+-- Brand Assets
+CREATE TABLE brand_assets (
+  id UUID PRIMARY KEY,
+  tenant_id VARCHAR(255),
+  asset_type VARCHAR(100),  -- 'logo', 'product', 'team', 'location'
+  file_url VARCHAR(500),
+  embedding VECTOR(1536),   -- For semantic search
+  metadata JSONB,
+  rights_info JSONB,
+  created_at TIMESTAMP
+);
+
+-- Design Knowledge
+CREATE TABLE design_knowledge (
+  id UUID PRIMARY KEY,
+  style_name VARCHAR(100),  -- 'luxury', 'minimal', 'medical'
+  industry VARCHAR(100),
+  rules JSONB,
+  examples JSONB,
+  updated_at TIMESTAMP
+);
+```
+
+---
+
+### 9.6. Why This Matters for Bella EOS
+
+**Current v4**: Tạo ảnh đẹp, nhanh, đúng brand
+
+**Future v6+**: Hệ thống tự học, tự tối ưu, enterprise-grade
+
+**Key Differences**:
+
+| Aspect | v4.0 (Current) | v6.0 (Target) |
+|--------|----------------|---------------|
+| **Decision Making** | Prompt hardcoded | Strategy Engine reasoning |
+| **Brand Control** | Basic colors/style | Full compliance engine |
+| **Learning** | None | Feedback loop with ML |
+| **Assets** | AI imagines | Real enterprise assets |
+| **Quality** | Single generation | Multi-generation with critic |
+| **Scaling** | Per-client manual | Auto-adapt per industry |
+| **ROI Tracking** | Manual | Automated with insights |
+
+**Why this architecture fits "Enterprise OS"**:
+
+1. **Separation of Concerns**: Mỗi engine có responsibility rõ ràng
+2. **Scalability**: Thêm industry/channel mới không cần rewrite
+3. **Learning**: System gets smarter over time
+4. **Compliance**: Built-in brand/legal guardrails
+5. **Integration**: Plugs into real ERP/CRM/Asset systems
+6. **Optimization**: Auto-selects best model/strategy per case
+
+---
+
+## 10. APPENDIX
 
 - **AI Architecture**: Bella EOS AI Team
 - **Implementation**: Kiro AI Assistant

@@ -13,6 +13,8 @@
  */
 
 import { RuntimeMetrics, createMetric } from '@/types/runtime-metrics';
+import { TurnRuntime, TurnTelemetry } from '../execution/turn-runtime';
+import { PolicyEngine } from '../governance/policy-engine';
 
 const RUNTIME_NAME = 'WorkflowRuntime';
 
@@ -24,6 +26,7 @@ export interface SagaStep {
   stepId: string;
   action: () => Promise<boolean>;
   compensate: () => Promise<void>;
+  budgetVnd?: number;
 }
 
 export type WorkflowStatus = 'PENDING' | 'RUNNING' | 'SUCCESS' | 'FAILED' | 'COMPENSATING' | 'COMPENSATED';
@@ -81,6 +84,7 @@ export class WorkflowRuntime {
   private static instance: WorkflowRuntime;
   private store: IWorkflowStore;
   private metricsLog: RuntimeMetrics[] = [];
+  private turnTelemetries: TurnTelemetry[] = [];
 
   private constructor(store?: IWorkflowStore) {
     this.store = store ?? new InMemoryWorkflowStore();
@@ -141,6 +145,14 @@ export class WorkflowRuntime {
     this.metricsLog = [];
   }
 
+  public getTurnTelemetries(): TurnTelemetry[] {
+    return [...this.turnTelemetries];
+  }
+
+  public clearTurnTelemetries(): void {
+    this.turnTelemetries = [];
+  }
+
   // ── Core API ──
 
   /**
@@ -179,7 +191,23 @@ export class WorkflowRuntime {
         stepState.status = 'RUNNING';
         this.store.saveState(state);
 
+        const turn = new TurnRuntime({
+          tenantId: 'tenant-default',
+          userId: 'user-default',
+          workflowId: workflowId,
+          taskId: step.stepId,
+          provider: 'openai',
+          model: 'gpt-4o'
+        });
+
         try {
+          if (step.budgetVnd !== undefined) {
+            const policyResult = PolicyEngine.getInstance().checkBudgetPolicy(step.budgetVnd);
+            if (!policyResult.passed) {
+              throw new Error(`Policy violation: ${policyResult.reason}`);
+            }
+          }
+
           const ok = await step.action();
           if (!ok) {
             throw new Error(`Saga step "${step.stepId}" action returned false`);
@@ -187,12 +215,18 @@ export class WorkflowRuntime {
           stepState.status = 'SUCCESS';
           executedSteps.push(step);
           this.store.saveState(state);
+
+          const telemetry = turn.endTurn('COMPLETED');
+          this.turnTelemetries.push(telemetry);
         } catch (err: any) {
           executionFailed = true;
           failureError = err.message ?? 'Unknown execution error';
           stepState.status = 'FAILED';
           stepState.error = failureError;
           this.store.saveState(state);
+
+          const telemetry = turn.endTurn('FAILED', failureError);
+          this.turnTelemetries.push(telemetry);
           break;
         }
       }

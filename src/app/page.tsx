@@ -494,73 +494,46 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50 text-slate-800">
-      {/* HEADER STATUS BAR */}
-      <header className="h-14 border-b border-slate-200 bg-white/85 backdrop-blur-xl px-6 flex items-center justify-between z-30 shrink-0 select-none shadow-sm">
+      {/* SIMPLIFIED HEADER */}
+      <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
+        {/* Logo & Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center shadow-md shrink-0">
-            <Brain className="text-white w-4 h-4" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-md">
+            <Brain className="text-white w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-display font-bold text-sm tracking-wider text-slate-900">BELLA EOS</h1>
-              <span className="bg-indigo-50 text-indigo-600 border border-indigo-100 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">v1.0 REAL API</span>
-            </div>
-            <p className="text-[10px] text-slate-500 font-sans hidden sm:block">Enterprise Operating System (Enterprise Brain)</p>
+            <h1 className="font-display font-bold text-lg text-slate-900">BELLA EOS</h1>
+            <p className="text-xs text-slate-500">Hệ thống điều hành doanh nghiệp</p>
           </div>
         </div>
 
-        {/* Real-time Indicators */}
-        <div className="hidden lg:flex items-center gap-4 bg-slate-100/60 border border-slate-200/80 px-4 py-1.5 rounded-full text-xs font-sans">
-          <div className="flex items-center gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-slate-500 font-medium">Supabase:</span>
-            <span className="text-emerald-600 font-bold uppercase">Connected</span>
-          </div>
-          <div className="h-3 w-px bg-slate-200"></div>
-          <div className="flex items-center gap-1.5 text-indigo-600">
-            <Globe className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="text-slate-500">API Dispatcher:</span>
-            <span className="font-semibold">{fbToken ? 'REAL API READY' : 'CONFIG MODE'}</span>
-          </div>
-        </div>
-
-        {/* Action Triggers */}
-        <div className="flex items-center gap-3">
+        {/* Navigation Actions */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
+            className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+          >
+            <Key className="w-4 h-4" />
+            <span>Cài đặt</span>
+          </Link>
+          <Link
+            href="/settings/company"
+            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-sm font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Company DNA</span>
+          </Link>
           <button
             onClick={() => {
-              if (confirm('Bạn có chắc chắn muốn reset toàn bộ trạng thái về 0% (Nạp mới hoàn toàn)?')) {
+              if (confirm('Bạn có chắc chắn muốn reset toàn bộ trạng thái?')) {
                 CampaignExecutionManager.hardReset();
               }
             }}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm cursor-pointer"
-            title="Xóa toàn bộ dữ liệu tạm & nạp mới 100%"
+            className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+            title="Reset hệ thống"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-slate-600" />
-            <span>Reset (Nạp Mới 100%)</span>
-          </button>
-          <Link
-            href="/settings"
-            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
-          >
-            <Key className="w-3.5 h-3.5 text-amber-600" />
-            <span>Cài đặt Tích hợp</span>
-          </Link>
-          <Link
-            href="/executive"
-            className="bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 active:scale-95 shadow-sm"
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>Executive Control Room</span>
-          </Link>
-          <button 
-            onClick={() => setIsBrainModalOpen(true)}
-            className="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 active:scale-95 shadow-sm cursor-pointer"
-          >
-            <Brain className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Enterprise Brain Console</span>
+            <RotateCcw className="w-4 h-4" />
+            <span>Reset</span>
           </button>
         </div>
       </header>

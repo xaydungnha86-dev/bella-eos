@@ -12,6 +12,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { BriefAnalyzer, type FacebookBrief } from '@/core/creative/brief-analyzer';
+import fs from 'fs';
+import path from 'path';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -126,13 +128,41 @@ no text, no letters, no words, no watermark, no logo anywhere in the image. \
 Color palette: ${brief.colorMood}. Shot on Sony A7R V, 50mm f/1.8 lens, shallow depth of field.`;
 }
 
-/** Call Gemini Imagen3 to generate an image and return public URL */
+function saveBase64ToPublic(dataUrl: string): string {
+  try {
+    if (!dataUrl.startsWith('data:image')) return dataUrl;
+
+    const base64Data = dataUrl.split(',')[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    const filename = `gen_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.png`;
+    const publicDir = path.join(process.cwd(), 'public', 'temp-banners');
+    
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir, { recursive: true });
+    }
+    
+    const filepath = path.join(publicDir, filename);
+    fs.writeFileSync(filepath, buffer);
+    
+    return `/temp-banners/${filename}`;
+  } catch (e: any) {
+    console.error('[saveBase64ToPublic] Error:', e.message);
+    return dataUrl;
+  }
+}
+
+/** Call Gemini Imagen to generate an image and return saved relative public URL */
 async function generateImageWithGemini(
   imagePrompt: string,
-  apiKey: string
+  apiKey: string,
+  format: string = '1:1'
 ): Promise<string> {
   const models = [
-    'imagen-3.0-generate-001',
+    'imagen-4.0-ultra-generate-001',
+    'imagen-4.0-generate-001',
+    'imagen-4.0-fast-generate-001',
+    'imagen-3.0-generate-002',
     'imagen-3.0-fast-generate-001',
   ];
 
@@ -147,9 +177,8 @@ async function generateImageWithGemini(
             instances: [{ prompt: imagePrompt }],
             parameters: {
               sampleCount:  1,
-              aspectRatio:  '1:1',
-              safetySetting: 'block_only_high',
-              personGeneration: 'dont_allow',
+              aspectRatio:  format,
+              outputMimeType: 'image/png'
             },
           }),
           signal: AbortSignal.timeout(28_000),
@@ -167,8 +196,8 @@ async function generateImageWithGemini(
       const mime = data.predictions?.[0]?.mimeType || 'image/png';
 
       if (b64) {
-        // Return as data URI — frontend can display directly or upload to storage
-        return `data:${mime};base64,${b64}`;
+        const dataUrl = `data:${mime};base64,${b64}`;
+        return saveBase64ToPublic(dataUrl);
       }
     } catch (e) {
       console.warn(`[content-pipeline] ${model} exception:`, e);
@@ -176,6 +205,77 @@ async function generateImageWithGemini(
   }
 
   throw new Error('All Imagen models failed or timed out');
+}
+
+/** Call OpenAI DALL-E 3 to generate an image and return absolute URL */
+async function generateImageWithDallE(
+  imagePrompt: string,
+  apiKey: string,
+  format: string = '1:1'
+): Promise<string> {
+  try {
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'dall-e-3',
+        prompt: imagePrompt,
+        n: 1,
+        size: format === '1:1' ? '1024x1024' : '1792x1024',
+        quality: 'standard'
+      }),
+      signal: AbortSignal.timeout(28_000),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`DALL-E failed (${response.status}): ${err.substring(0, 200)}`);
+    }
+
+    const data = await response.json();
+    const url = data.data?.[0]?.url;
+    if (url) {
+      return url;
+    }
+    throw new Error('No image URL in DALL-E response');
+  } catch (e: any) {
+    throw e;
+  }
+}
+
+/** Generate a local SVG fallback banner URL */
+function getLocalSvgFallbackUrl(
+  brief: FacebookBrief,
+  rawRequest: string,
+  baseUrl: string
+): string {
+  const params = new URLSearchParams({
+    headline: brief.usp || 'BELLA EOS - GIẢI PHÁP QUẢN LÝ TỰ ĐỘNG',
+    badge: brief.ctaText || '🎁 DEMO 1-1 MIỄN PHÍ CÙNG CHUYÊN GIA',
+    cta: 'ĐĂNG KÝ TRẢI NGHIỆM NGAY',
+    brandName: brief.brandName || 'BELLA EOS',
+    objective: rawRequest,
+    t: String(Date.now())
+  });
+
+  if (brief.keyBenefits && brief.keyBenefits[0]) params.set('b1', brief.keyBenefits[0]);
+  if (brief.keyBenefits && brief.keyBenefits[1]) params.set('b2', brief.keyBenefits[1]);
+  if (brief.keyBenefits && brief.keyBenefits[2]) params.set('b3', brief.keyBenefits[2]);
+
+  return `${baseUrl}/api/ai/banner-image?${params.toString()}`;
+}
+
+function getBaseUrl(req?: NextRequest): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (req) {
+    const host = req.headers.get('host');
+    if (host) return `http://${host}`;
+  }
+  return 'http://localhost:3000';
 }
 
 /** Call the existing write-post route internally (or inline logic for speed) */
@@ -334,16 +434,36 @@ export async function POST(req: NextRequest) {
     let imageError: string | undefined;
     const imageStart = Date.now();
 
-    if (!body.skipImage && keys.gemini) {
-      try {
-        imageUrl = await generateImageWithGemini(imagePrompt, keys.gemini);
-        console.log(`[content-pipeline] Image generated in ${Date.now() - imageStart}ms`);
-      } catch (e) {
-        imageError = e instanceof Error ? e.message : 'Image generation failed';
-        console.warn('[content-pipeline] Image generation error:', imageError);
+    if (!body.skipImage) {
+      // 1. Try Gemini Imagen
+      if (keys.gemini) {
+        try {
+          console.log('[content-pipeline] Attempting Gemini Imagen...');
+          imageUrl = await generateImageWithGemini(imagePrompt, keys.gemini, brief.imageFormat);
+          console.log(`[content-pipeline] ✓ Gemini Imagen succeeded in ${Date.now() - imageStart}ms`);
+        } catch (e: any) {
+          console.warn('[content-pipeline] Gemini Imagen failed:', e.message);
+        }
       }
-    } else if (!keys.gemini) {
-      imageError = 'GEMINI_API_KEY not configured — image generation skipped';
+
+      // 2. Try OpenAI DALL-E 3 fallback
+      if (!imageUrl && keys.openai) {
+        try {
+          console.log('[content-pipeline] Attempting OpenAI DALL-E 3 fallback...');
+          imageUrl = await generateImageWithDallE(imagePrompt, keys.openai, brief.imageFormat);
+          console.log(`[content-pipeline] ✓ OpenAI DALL-E succeeded in ${Date.now() - imageStart}ms`);
+        } catch (e: any) {
+          console.warn('[content-pipeline] OpenAI DALL-E failed:', e.message);
+        }
+      }
+
+      // 3. Fallback to local SVG generator
+      if (!imageUrl) {
+        const baseUrl = getBaseUrl(req);
+        imageUrl = getLocalSvgFallbackUrl(brief, body.request, baseUrl);
+        imageError = 'AI generation failed, fell back to local SVG graphic';
+        console.log('[content-pipeline] ✓ Fell back to local SVG graphic:', imageUrl);
+      }
     }
 
     const imageMs  = Date.now() - imageStart;

@@ -1,9 +1,18 @@
+import { DecisionEvaluationResult } from './decision-runtime';
+
 export interface DecisionExplanation {
   decisionId: string;
   evidenceIds: string[];
   rationale: string;
   alternativesEvaluated: string[];
   counterfactualScenario: string;
+}
+
+export interface DetailedExplanation extends DecisionExplanation {
+  confidenceScore: number;
+  requiresApproval: boolean;
+  approvalRoleRequired: string;
+  generatedAt: string;
 }
 
 export class ExplainabilityRuntime {
@@ -45,4 +54,26 @@ export class ExplainabilityRuntime {
       counterfactualScenario: counterfactual
     };
   }
+
+  public explainEvaluation(
+    evaluation: DecisionEvaluationResult,
+    objective: string,
+    evidenceIds: string[]
+  ): DetailedExplanation {
+    const baseExplanation = this.explain({
+      decisionId: evaluation.decisionId,
+      objective,
+      evidenceIds,
+      hasStats: true
+    });
+
+    return {
+      ...baseExplanation,
+      confidenceScore: evaluation.confidenceScore,
+      requiresApproval: evaluation.requiresApproval,
+      approvalRoleRequired: evaluation.approvalRoleRequired,
+      generatedAt: new Date().toISOString()
+    };
+  }
 }
+

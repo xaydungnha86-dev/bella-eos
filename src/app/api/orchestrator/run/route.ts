@@ -403,8 +403,12 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
   try {
     // Always use v4 (AI renders everything including text - no Canvas overlay)
     const endpoint = '/api/ai/generate-image-v4';
+    console.log(`[tool_generate_media_creative] ═══════════════════════════════════`);
     console.log(`[tool_generate_media_creative] Using Creative Intelligence v4 (AI renders text)`);
-    console.log(`[tool_generate_media_creative] Passing gemini key: ${geminiKey ? 'YES ✅' : 'NO ❌'}`);
+    console.log(`[tool_generate_media_creative] Endpoint: ${endpoint}`);
+    console.log(`[tool_generate_media_creative] Passing gemini key: ${geminiKey ? `YES ✅ (${geminiKey.substring(0, 20)}...)` : 'NO ❌'}`);
+    console.log(`[tool_generate_media_creative] Passing openai key: ${openaiKey ? `YES ✅ (${openaiKey.substring(0, 20)}...)` : 'NO ❌'}`);
+    console.log(`[tool_generate_media_creative] ═══════════════════════════════════`);
     
     const res = await fetch(`${getBaseUrl()}${endpoint}`, {
       method: 'POST',
@@ -504,9 +508,31 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
 async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: Record<string, string>): Promise<ToolResult> {
   const extractUrl = (str: string): string => {
     if (!str) return '';
-    // Match full URLs, data URIs, OR relative paths starting with /
-    const match = str.match(/(https?:\/\/[^\s\n"']+|data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+|\/[\w\-\/\.]+\.(?:png|jpg|jpeg|gif|webp))/);
-    return match ? match[0] : '';
+    
+    // CRITICAL FIX: Prioritize image paths over generic URLs
+    // Priority 1: Try relative image paths first (e.g., /temp-banners/*.png)
+    const imagePath = str.match(/\/temp-banners\/[^\s"']+\.(?:png|jpg|jpeg|gif|webp)/);
+    if (imagePath) {
+      console.log('[extractUrl] ✓ Found image path:', imagePath[0]);
+      return imagePath[0];
+    }
+    
+    // Priority 2: Try data URIs
+    const dataUri = str.match(/data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+/);
+    if (dataUri) {
+      console.log('[extractUrl] ✓ Found data URI');
+      return dataUri[0];
+    }
+    
+    // Priority 3: Try full image URLs (but MUST end with image extension to avoid schema URLs)
+    const fullImageUrl = str.match(/https?:\/\/[^\s\n"']+\.(?:png|jpg|jpeg|gif|webp)/);
+    if (fullImageUrl) {
+      console.log('[extractUrl] ✓ Found full image URL:', fullImageUrl[0]);
+      return fullImageUrl[0];
+    }
+    
+    console.log('[extractUrl] ⚠️ No image URL found in:', str.substring(0, 100));
+    return '';
   };
 
   let content = input.content_from || input.content || input.message || input.post_content || input.text || '';
@@ -1234,12 +1260,19 @@ export async function POST(request: Request) {
 
     // Sort by dependency (simple topological sort)
     const ordered = topologicalSort(tasks);
+    
+    console.log(`[AgentRunner] 📋 Topological sort result: ${ordered.length} tasks`);
+    ordered.forEach((t, i) => {
+      console.log(`[AgentRunner]   ${i + 1}. ${t.task_id} (${t.task_type}) - depends_on: [${(t.depends_on || []).join(', ')}]`);
+    });
 
     const approvedSet = new Set<string>(approved_tasks || []);
     let isPausedForApproval = false;
     let awaitingTaskId = '';
 
     for (const task of ordered) {
+      console.log(`[AgentRunner] 🔍 Processing task ${task.task_id}: ${task.task_type} (${task.agent_name})`);
+      
       const isApproved = approvedSet.has(task.task_id) || 
                          approvedSet.has(task.agent_id) || 
                          approvedSet.has('t1') || 
@@ -1252,7 +1285,7 @@ export async function POST(request: Request) {
       // Resolve input: if any field value is a reference to prior task output, inject it
       const resolvedInput = resolveInputReferences(task.input || {}, taskOutputs);
       
-      console.log(`[AgentRunner] Task ${task.task_id} [${task.agent_name}]: isApproved=${isApproved}`);
+      console.log(`[AgentRunner] Task ${task.task_id} [${task.agent_name}]: isApproved=${isApproved}, tool=${task.task_type}`);
 
       const toolFn = TOOL_REGISTRY[task.task_type];
       let result: ToolResult;

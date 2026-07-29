@@ -33,9 +33,43 @@ export class BusinessContextAggregator {
     const enterpriseContext = await this.gatherEnterpriseContext(tenantId, ceoObjective);
     
     // 3. Copywriter Content (if exists from Task #1)
-    const copywriterContent = request.copywriterSnippet 
-      ? await this.parseCopywriterOutput(request.copywriterSnippet)
-      : null;
+    let copywriterContent = null;
+    if (request.copywriterSnippet) {
+      // Handle both string (raw text) and object (structured data) formats
+      if (typeof request.copywriterSnippet === 'string') {
+        copywriterContent = await this.parseCopywriterOutput(request.copywriterSnippet);
+      } else if (typeof request.copywriterSnippet === 'object') {
+        // Already structured format - use directly
+        copywriterContent = {
+          rawText: JSON.stringify(request.copywriterSnippet),
+          extractedEntities: [
+            ...(request.copywriterSnippet.headline ? [{
+              type: 'headline' as const,
+              text: request.copywriterSnippet.headline,
+              confidence: 1.0,
+              position: 0
+            }] : []),
+            ...(request.copywriterSnippet.benefits || []).map((benefit: string, i: number) => ({
+              type: 'bullet' as const,
+              text: benefit,
+              confidence: 1.0,
+              position: i + 1
+            })),
+            ...(request.copywriterSnippet.cta ? [{
+              type: 'cta' as const,
+              text: request.copywriterSnippet.cta,
+              confidence: 1.0,
+              position: 99
+            }] : [])
+          ],
+          tone: 'professional',
+          keyMessages: [
+            request.copywriterSnippet.headline,
+            ...(request.copywriterSnippet.benefits || [])
+          ].filter(Boolean)
+        };
+      }
+    }
     
     // 4. Brand DNA
     const brandDNA = await this.resolveBrandDNA(request.brandDna, tenantId);

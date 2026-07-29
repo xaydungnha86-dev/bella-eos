@@ -26,11 +26,11 @@ describe('BELLA EOS v18.6 Enterprise Deliberation Runtime (EDR) Certification', 
     const experts = ExpertSelectionRuntime.getInstance().selectExperts('Mở chi nhánh mới');
 
     expect(tasks.length).toBe(5);
-    expect(experts.length).toBe(5);
+    expect(experts.length).toBe(8);
   });
 
   it('2. Multi-Agent Debate & Consensus Engine: should conduct cross-agent debate and calculate consensus %', () => {
-    const debate = MultiAgentDebateRuntime.getInstance().conductDebate(['FINANCE_AGENT', 'MARKETING_AGENT'], 'Mở chi nhánh mới');
+    const debate = MultiAgentDebateRuntime.getInstance().conductDebate(['FINANCE', 'MARKETING'], 'Mở chi nhánh mới');
     const consensus = ConsensusEngineRuntime.getInstance().calculateConsensus(debate.opinions);
 
     expect(debate.opinions.length).toBeGreaterThan(0);

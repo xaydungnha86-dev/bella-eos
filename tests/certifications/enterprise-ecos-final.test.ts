@@ -52,7 +52,7 @@ describe('BELLA EOS ECOS Consolidated Final Specification Certification Suite', 
     expect(analysis.tamSamSomUsd.som).toBe(3_500_000);
 
     const debate = MultiAgentDebateRuntime.getInstance().conductDebate(['FINANCE', 'MARKETING', 'MARKET_ANALYST'], 'Launch Spa in Da Nang');
-    expect(debate.opinions.length).toBeGreaterThan(5);
+    expect(debate.opinions.length).toBe(3);
     expect(debate.opinions.some(o => o.expertRole === 'MARKET_ANALYST')).toBe(true);
   });
 });

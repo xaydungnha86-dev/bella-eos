@@ -177,39 +177,39 @@ export default function CompanySettingsPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Company DNA Settings</h1>
-          <p className="text-gray-600">
-            Nhập thông tin doanh nghiệp để AI agents hiểu rõ công ty và tạo content chính xác
+          <h1 className="text-4xl font-bold text-gray-900 mb-3 flex items-center gap-3">
+            ✨ Company DNA
+          </h1>
+          <p className="text-lg text-gray-600">
+            Thông tin công ty giúp AI tạo content chính xác và phù hợp với thương hiệu
           </p>
+          <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-blue-800">
+              <strong>💡 Mẹo:</strong> Điền đầy đủ 4 phần. Càng chi tiết, AI tạo content càng chuẩn xác.
+            </p>
+          </div>
         </div>
 
-        {/* Progress Steps */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
+        {/* Simple Tabs */}
+        <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
+          <div className="flex border-b">
             {[
-              { num: 1, name: 'Basic Info' },
-              { num: 2, name: 'Products' },
-              { num: 3, name: 'Audience' },
-              { num: 4, name: 'Brand' }
-            ].map((step, idx) => (
-              <div key={step.num} className="flex items-center">
-                <button
-                  onClick={() => setCurrentStep(step.num)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                    currentStep >= step.num
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {step.num}
-                </button>
-                <span className={`ml-2 text-sm ${currentStep >= step.num ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
-                  {step.name}
-                </span>
-                {idx < 3 && (
-                  <div className={`w-16 h-1 mx-4 ${currentStep > step.num ? 'bg-blue-600' : 'bg-gray-200'}`} />
-                )}
-              </div>
+              { num: 1, name: '📋 Cơ bản' },
+              { num: 2, name: '📦 Sản phẩm' },
+              { num: 3, name: '👥 Khách hàng' },
+              { num: 4, name: '🎨 Thương hiệu' }
+            ].map((tab) => (
+              <button
+                key={tab.num}
+                onClick={() => setCurrentStep(tab.num)}
+                className={`flex-1 py-4 px-6 text-sm font-medium transition-colors ${
+                  currentStep === tab.num
+                    ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {tab.name}
+              </button>
             ))}
           </div>
         </div>
@@ -219,74 +219,77 @@ export default function CompanySettingsPage() {
           {/* Step 1: Basic Information */}
           {currentStep === 1 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">1. Basic Information</h2>
-              
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Tip:</strong> Thông tin cơ bản giúp AI hiểu công ty bạn làm gì
+                </p>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Company Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Tên công ty <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={companyDNA.identity?.companyName || ''}
                   onChange={(e) => updateField('identity.companyName', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Bella EOS Technology JSC"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: Bella EOS Technology JSC"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Brand Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Tên thương hiệu (Brand name) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={companyDNA.identity?.brandName || ''}
                   onChange={(e) => updateField('identity.brandName', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., BELLA EOS"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: BELLA EOS"
                 />
+                <p className="mt-1 text-xs text-gray-500">Tên này sẽ xuất hiện trên banner, logo badge</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Founded Year <span className="text-red-500">*</span>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Năm thành lập
                   </label>
                   <input
                     type="number"
                     value={companyDNA.identity?.foundedYear || new Date().getFullYear()}
                     onChange={(e) => updateField('identity.foundedYear', parseInt(e.target.value))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Business Model <span className="text-red-500">*</span>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Loại hình <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={companyDNA.identity?.businessModel || 'B2B'}
                     onChange={(e) => updateField('identity.businessModel', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                   >
-                    <option value="B2B">B2B (Business to Business)</option>
-                    <option value="B2C">B2C (Business to Consumer)</option>
-                    <option value="B2B2C">B2B2C (Hybrid)</option>
-                    <option value="B2G">B2G (Business to Government)</option>
+                    <option value="B2B">B2B (Bán cho doanh nghiệp)</option>
+                    <option value="B2C">B2C (Bán cho người tiêu dùng)</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Primary Industry <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Ngành nghề <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={companyDNA.industry?.primaryIndustry || ''}
                   onChange={(e) => updateField('industry.primaryIndustry', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Enterprise Software (B2B SaaS)"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: Phần mềm quản lý spa"
                 />
               </div>
             </div>
@@ -295,60 +298,86 @@ export default function CompanySettingsPage() {
           {/* Step 2: Products & Services */}
           {currentStep === 2 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">2. Products & Services</h2>
-              
+              <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6">
+                <p className="text-sm text-amber-900">
+                  <strong>⚠️ Quan trọng:</strong> Chọn đúng loại sản phẩm để AI render đúng hình ảnh
+                </p>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Type <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Loại sản phẩm <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={companyDNA.products?.type || 'software'}
                   onChange={(e) => updateField('products.type', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                 >
-                  <option value="software">Software/SaaS</option>
-                  <option value="hardware">Hardware</option>
-                  <option value="service">Service</option>
-                  <option value="product">Physical Product</option>
+                  <option value="software">💻 Phần mềm (Software/SaaS)</option>
+                  <option value="service">🤝 Dịch vụ (Service)</option>
+                  <option value="product">📦 Hàng hóa (Physical Product)</option>
                 </select>
+                <div className="mt-2 text-xs bg-gray-50 p-3 rounded border border-gray-200">
+                  <p className="font-medium text-gray-700 mb-1">Ví dụ:</p>
+                  <p className="text-gray-600">• <strong>Phần mềm:</strong> AI tạo hình dashboard, UI, laptop</p>
+                  <p className="text-gray-600">• <strong>Dịch vụ:</strong> AI tạo hình người thực hiện dịch vụ</p>
+                  <p className="text-gray-600">• <strong>Hàng hóa:</strong> AI tạo hình sản phẩm vật chất</p>
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Main Product Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Tên sản phẩm chính <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={companyDNA.products?.offerings?.[0]?.name || ''}
                   onChange={(e) => updateField('products.offerings.0.name', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="e.g., Bella EOS Platform"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: Phần mềm Bella EOS"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Description <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Mô tả sản phẩm <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={companyDNA.products?.offerings?.[0]?.description || ''}
                   onChange={(e) => updateField('products.offerings.0.description', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                   rows={3}
-                  placeholder="Brief description of what your product does"
+                  placeholder="VD: Phần mềm quản lý spa toàn diện, tự động hóa xếp lịch và doanh thu"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Target Customer <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Tính năng nổi bật (mỗi dòng 1 tính năng) <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={(companyDNA.products?.offerings?.[0]?.keyFeatures || ['']).join('\n')}
+                  onChange={(e) => {
+                    const features = e.target.value.split('\n').filter(f => f.trim());
+                    updateField('products.offerings.0.keyFeatures', features.length > 0 ? features : ['']);
+                  }}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base font-mono"
+                  rows={4}
+                  placeholder={"VD:\nTự động xếp lịch KTV\nBáo cáo doanh thu realtime\nQuản lý khách VIP"}
+                />
+                <p className="mt-1 text-xs text-gray-500">AI sẽ dùng những tính năng này để viết benefits</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Điểm khác biệt độc đáo <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={companyDNA.products?.offerings?.[0]?.targetCustomer || ''}
-                  onChange={(e) => updateField('products.offerings.0.targetCustomer', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="e.g., Spa owners, salon managers"
+                  value={companyDNA.products?.offerings?.[0]?.uniqueValue || ''}
+                  onChange={(e) => updateField('products.offerings.0.uniqueValue', e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: Phần mềm quản lý spa đầu tiên có AI tại Việt Nam"
                 />
               </div>
             </div>
@@ -357,44 +386,68 @@ export default function CompanySettingsPage() {
           {/* Step 3: Target Audience */}
           {currentStep === 3 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">3. Target Audience</h2>
-              
+              <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-6">
+                <p className="text-sm text-purple-900">
+                  <strong>💡 Tip:</strong> Vấn đề cụ thể (có số liệu) giúp AI viết content hiệu quả hơn
+                </p>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Primary Persona Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Khách hàng chính của bạn là ai? <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={companyDNA.targetAudience?.primaryPersona?.name || ''}
                   onChange={(e) => updateField('targetAudience.primaryPersona.name', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="e.g., Chủ Spa Cao Cấp"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: Chủ spa cao cấp"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Persona Description <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Mô tả chi tiết
                 </label>
                 <textarea
                   value={companyDNA.targetAudience?.primaryPersona?.description || ''}
                   onChange={(e) => updateField('targetAudience.primaryPersona.description', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                   rows={2}
-                  placeholder="Who are they? What do they do?"
+                  placeholder="VD: Chủ sở hữu spa/thẩm mỹ viện cao cấp, 1-5 chi nhánh, độ tuổi 28-50"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Key Pain Points (comma separated) <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Vấn đề họ gặp phải (mỗi dòng 1 vấn đề) <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  value={companyDNA.targetAudience?.primaryPersona?.painPoints?.join(', ') || ''}
-                  onChange={(e) => updateField('targetAudience.primaryPersona.painPoints', e.target.value.split(',').map(s => s.trim()))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  value={(companyDNA.targetAudience?.primaryPersona?.painPoints || ['']).join('\n')}
+                  onChange={(e) => {
+                    const pains = e.target.value.split('\n').filter(p => p.trim());
+                    updateField('targetAudience.primaryPersona.painPoints', pains.length > 0 ? pains : ['']);
+                  }}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base font-mono"
+                  rows={4}
+                  placeholder={"VD:\nMất 8-12 giờ mỗi tuần cho quản lý thủ công\nKhó kiểm soát doanh thu realtime\nPhân ca KTV không tối ưu"}
+                />
+                <p className="mt-1 text-xs text-gray-500">⚠️ Càng cụ thể càng tốt (có số liệu, thời gian)</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Mục tiêu của họ (mỗi dòng 1 mục tiêu)
+                </label>
+                <textarea
+                  value={(companyDNA.targetAudience?.primaryPersona?.goals || ['']).join('\n')}
+                  onChange={(e) => {
+                    const goals = e.target.value.split('\n').filter(g => g.trim());
+                    updateField('targetAudience.primaryPersona.goals', goals.length > 0 ? goals : ['']);
+                  }}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base font-mono"
                   rows={3}
-                  placeholder="What problems do they face?"
+                  placeholder={"VD:\nTăng doanh thu gấp 2-3 lần trong 12-24 tháng\nGiảm thời gian quản lý"}
                 />
               </div>
             </div>
@@ -403,121 +456,145 @@ export default function CompanySettingsPage() {
           {/* Step 4: Brand */}
           {currentStep === 4 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold mb-4">4. Brand Identity</h2>
-              
+              <div className="bg-pink-50 border-l-4 border-pink-400 p-4 mb-6">
+                <p className="text-sm text-pink-900">
+                  <strong>🎨 Quan trọng:</strong> Màu sắc phải chính xác để AI render đúng thương hiệu
+                </p>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mission Statement <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Sứ mệnh công ty (Mission) <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={companyDNA.vision?.mission || ''}
                   onChange={(e) => updateField('vision.mission', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
                   rows={2}
-                  placeholder="What is your company's purpose?"
+                  placeholder="VD: Giải phóng thời gian vận hành cho chủ spa"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Brand Tone <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Giọng điệu thương hiệu (Brand Tone) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={companyDNA.brandVoice?.tone || ''}
                   onChange={(e) => updateField('brandVoice.tone', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="e.g., Professional, Trustworthy, Results-Driven"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: Chuyên nghiệp, Đáng tin cậy, Hướng kết quả"
                 />
+                <p className="mt-1 text-xs text-gray-500">AI sẽ viết content theo giọng điệu này</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Visual Style <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Phong cách thiết kế <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={companyDNA.brandVisual?.style || ''}
                   onChange={(e) => updateField('brandVisual.style', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  placeholder="e.g., Modern Minimalist, Luxury Premium"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
+                  placeholder="VD: Modern Minimalist, Luxury Premium"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Primary Color <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="color"
-                    value={companyDNA.brandVisual?.colors?.primary || '#000000'}
-                    onChange={(e) => updateField('brandVisual.colors.primary', e.target.value)}
-                    className="w-full h-12 border border-gray-300 rounded-lg"
-                  />
-                </div>
+              <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-3">Màu sắc thương hiệu</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Màu chính (Primary) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="color"
+                        value={companyDNA.brandVisual?.colors?.primary || '#000000'}
+                        onChange={(e) => updateField('brandVisual.colors.primary', e.target.value)}
+                        className="w-20 h-12 border-2 border-gray-300 rounded-lg cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={companyDNA.brandVisual?.colors?.primary || '#000000'}
+                        onChange={(e) => updateField('brandVisual.colors.primary', e.target.value)}
+                        className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg font-mono text-sm"
+                        placeholder="#000000"
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Dùng cho: Logo, tiêu đề</p>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Accent Color
-                  </label>
-                  <input
-                    type="color"
-                    value={companyDNA.brandVisual?.colors?.accent || '#FFD700'}
-                    onChange={(e) => updateField('brandVisual.colors.accent', e.target.value)}
-                    className="w-full h-12 border border-gray-300 rounded-lg"
-                  />
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Màu nhấn (Accent) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="color"
+                        value={companyDNA.brandVisual?.colors?.accent || '#FFD700'}
+                        onChange={(e) => updateField('brandVisual.colors.accent', e.target.value)}
+                        className="w-20 h-12 border-2 border-gray-300 rounded-lg cursor-pointer"
+                      />
+                      <input
+                        type="text"
+                        value={companyDNA.brandVisual?.colors?.accent || '#FFD700'}
+                        onChange={(e) => updateField('brandVisual.colors.accent', e.target.value)}
+                        className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg font-mono text-sm"
+                        placeholder="#FFD700"
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Dùng cho: Nút CTA, badges</p>
+                  </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Key Differentiators (comma separated) <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Điểm khác biệt (mỗi dòng 1 điểm) <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  value={companyDNA.competitive?.differentiators?.join(', ') || ''}
-                  onChange={(e) => updateField('competitive.differentiators', e.target.value.split(',').map(s => s.trim()))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  rows={2}
-                  placeholder="What makes you unique?"
+                  value={(companyDNA.competitive?.differentiators || ['']).join('\n')}
+                  onChange={(e) => {
+                    const diffs = e.target.value.split('\n').filter(d => d.trim());
+                    updateField('competitive.differentiators', diffs.length > 0 ? diffs : ['']);
+                  }}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base font-mono"
+                  rows={3}
+                  placeholder={"VD:\nPhần mềm spa duy nhất có AI tại VN\nHỗ trợ tiếng Việt 24/7"}
                 />
               </div>
             </div>
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-6 border-t">
+          <div className="flex justify-between mt-8 pt-6 border-t-2">
             <button
               onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
               disabled={currentStep === 1}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed font-medium transition-colors"
             >
-              ← Back
+              ← Quay lại
             </button>
 
             <div className="flex gap-3">
-              <button
-                onClick={() => handleSave('draft')}
-                disabled={saving}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-              >
-                {saving ? 'Saving...' : 'Save Draft'}
-              </button>
-
               {currentStep < 4 ? (
                 <button
                   onClick={() => setCurrentStep(currentStep + 1)}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-md transition-all hover:shadow-lg"
                 >
-                  Next →
+                  Tiếp theo →
                 </button>
               ) : (
                 <button
                   onClick={() => handleSave('active')}
                   disabled={saving}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold shadow-md transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {saving ? 'Saving...' : 'Save & Activate'}
+                  {saving ? '⏳ Đang lưu...' : '✅ Lưu Company DNA'}
                 </button>
               )}
             </div>
