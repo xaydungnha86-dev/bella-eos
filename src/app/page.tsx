@@ -493,35 +493,39 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50 text-slate-800">
-      {/* SIMPLIFIED HEADER */}
-      <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#fafafb] text-[#1e293b]">
+      {/* LUXURY EXECUTIVE HEADER */}
+      <header className="bg-white/85 backdrop-blur-md border-b border-slate-200/60 px-8 py-3.5 flex items-center justify-between shadow-[0_2px_12px_rgba(15,23,42,0.015)] relative z-30">
         {/* Logo & Brand */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-md">
-            <Brain className="text-white w-5 h-5" />
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shadow-lg relative luxury-border-glow">
+            <Brain className="text-amber-400 w-5 h-5 animate-pulse-glow" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-lg text-slate-900">BELLA EOS</h1>
-            <p className="text-xs text-slate-500">Hệ thống điều hành doanh nghiệp</p>
+            <h1 className="font-display font-bold text-[15px] tracking-[0.2em] text-slate-900 uppercase">BELLA EOS</h1>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[8px] tracking-[0.1em] text-amber-600 font-bold uppercase">Enterprise Intelligence Platform</span>
+              <span className="text-slate-300 text-[8px]">•</span>
+              <span className="text-[9px] text-slate-500 font-medium">Hệ thống Điều hành Trí tuệ Doanh nghiệp</span>
+            </div>
           </div>
         </div>
 
         {/* Navigation Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link
             href="/settings"
-            className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold px-4.5 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-xs hover:border-slate-300"
           >
-            <Key className="w-4 h-4" />
-            <span>Cài đặt</span>
+            <Key className="w-3.5 h-3.5 text-slate-400" />
+            <span>Cài đặt hệ thống</span>
           </Link>
           <Link
             href="/settings/company"
-            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-sm font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+            className="bg-amber-50/50 hover:bg-amber-50 text-amber-800 border border-amber-200/80 text-xs font-semibold px-4.5 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-xs"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Company DNA</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+            <span>Hồ sơ DNA Doanh nghiệp</span>
           </Link>
           <button
             onClick={() => {
@@ -529,48 +533,48 @@ export default function Dashboard() {
                 CampaignExecutionManager.hardReset();
               }
             }}
-            className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+            className="bg-white hover:bg-slate-50 text-slate-650 border border-slate-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer hover:border-slate-300"
             title="Reset hệ thống"
           >
-            <RotateCcw className="w-4 h-4" />
-            <span>Reset</span>
+            <RotateCcw className="w-3.5 h-3.5 text-slate-450 text-slate-400" />
+            <span>Khởi động lại</span>
           </button>
         </div>
       </header>
 
       {/* DASHBOARD BODY */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* LEFT COLUMN: ENTERPRISE WORKFORCE MATRIX */}
-        <aside className="w-80 border-r border-slate-200 bg-white/60 backdrop-blur-md flex flex-col shrink-0">
-          <div className="p-3 border-b border-slate-200 flex flex-col gap-2">
+         {/* LEFT COLUMN: ENTERPRISE WORKFORCE MATRIX */}
+        <aside className="w-80 border-r border-slate-200/60 bg-[#f8fafc]/90 backdrop-blur-xl flex flex-col shrink-0 executive-sidebar">
+          <div className="p-4.5 border-b border-slate-200/60 flex flex-col gap-3">
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-indigo-500" />
-                <h2 className="font-display font-semibold text-xs text-slate-700 uppercase tracking-wider">Workforce Matrix</h2>
+                <Cpu className="w-3.5 h-3.5 text-slate-700" />
+                <h2 className="font-display font-semibold text-[10px] tracking-[0.15em] text-slate-500 uppercase">Ma Trận Nhân Sự</h2>
               </div>
-              <span className="text-[9px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 font-bold">
-                {leftSidebarTab === 'ai' ? `${AI_WORKFORCE.length} Agents` : `${humanWorkers.length} Humans`}
+              <span className="text-[9px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/50 font-bold">
+                {leftSidebarTab === 'ai' ? `${AI_WORKFORCE.length} Agents` : `${humanWorkers.length} Personnel`}
               </span>
             </div>
             
             {/* Sidebar Tab Switcher */}
-            <div className="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-semibold">
+            <div className="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-semibold border border-slate-200/30">
               <button
                 onClick={() => setLeftSidebarTab('ai')}
-                className={`flex-1 py-1.5 rounded-md text-center transition-all cursor-pointer ${leftSidebarTab === 'ai' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-505 text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1.5 rounded-md text-center transition-all cursor-pointer ${leftSidebarTab === 'ai' ? 'bg-white text-slate-900 shadow-xs border border-slate-200/20' : 'text-slate-500 hover:text-slate-800'}`}
               >
-                🤖 AI Agents ({AI_WORKFORCE.length})
+                🤖 Lực lượng AI ({AI_WORKFORCE.length})
               </button>
               <button
                 onClick={() => setLeftSidebarTab('human')}
-                className={`flex-1 py-1.5 rounded-md text-center transition-all cursor-pointer ${leftSidebarTab === 'human' ? 'bg-white text-slate-800 shadow-xs' : 'text-slate-550 text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1.5 rounded-md text-center transition-all cursor-pointer ${leftSidebarTab === 'human' ? 'bg-white text-slate-900 shadow-xs border border-slate-200/20' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 👥 Nhân Sự ({humanWorkers.length})
               </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5">
             {leftSidebarTab === 'human' ? (
               <div className="space-y-3">
                 {humanWorkers.map(w => {
@@ -580,19 +584,19 @@ export default function Dashboard() {
                   return (
                     <div 
                       key={w.id} 
-                      className="glass-panel p-3 rounded-xl border border-slate-150 bg-white hover:border-indigo-400 hover:bg-slate-50/50 transition-all flex flex-col gap-2 shadow-sm"
+                      className="executive-card p-3.5 rounded-xl border border-slate-200 bg-white hover:border-slate-350 flex flex-col gap-2.5 shadow-xs"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg shadow-xs shrink-0 bg-gradient-to-tr from-slate-100 to-slate-200">
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg shadow-2xs shrink-0 bg-gradient-to-tr from-slate-50 to-slate-100 border border-slate-200/50">
                           {w.avatar}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-semibold text-xs text-slate-800 truncate">{w.name}</h4>
+                            <h4 className="font-bold text-xs text-slate-800 truncate">{w.name}</h4>
                             <span className="text-[7px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{w.timezone}</span>
                           </div>
-                          <p className="text-[9px] text-indigo-600 font-medium mt-0.5 truncate">{w.role}</p>
-                          <p className="text-[8px] text-slate-400 mt-0.5 truncate">{w.department}</p>
+                          <p className="text-[9px] text-amber-700 font-semibold mt-0.5 truncate uppercase tracking-wider">{w.role}</p>
+                          <p className="text-[8.5px] text-slate-400 mt-0.5 truncate">{w.department}</p>
                         </div>
                       </div>
                       
@@ -612,7 +616,7 @@ export default function Dashboard() {
                       {/* Skills list */}
                       <div className="flex flex-wrap gap-1">
                         {w.skills.filter(s => !s.includes('_')).map(s => (
-                          <span key={s} className="text-[8px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                          <span key={s} className="text-[8px] bg-slate-50 border border-slate-200/60 hover:bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
                             {s}
                           </span>
                         ))}
@@ -639,36 +643,46 @@ export default function Dashboard() {
                   {coreAgents.map(ai => {
                     const isRealApi = (ai.id === 'gpt4' && hasOpenAI) || (ai.id === 'claude' && hasClaude) || (ai.id === 'gemini' && hasGemini) || (ai.id === 'hermes' && hasFacebook);
                     const statusLabel = ai.id === 'human_ceo' 
-                      ? 'Human Authority' 
+                      ? 'Quyền hạn Lãnh đạo' 
                       : ai.id === 'coo' 
-                      ? 'EOS Kernel Active' 
+                      ? 'Lõi Nhân Kế hoạch' 
                       : ai.id === 'marketing_manager'
-                      ? 'Strategy Active'
+                      ? 'Đang chạy Phân tích'
                       : ai.id === 'assistant'
-                      ? (isProcessing ? 'Synthesizing Reports' : 'Ready for CEO')
+                      ? (isProcessing ? 'Đang soạn Báo cáo' : 'Trợ lý sẵn sàng')
                       : isRealApi 
-                      ? 'Real API Online' 
-                      : 'Rule Engine Ready';
+                      ? 'Real API Connect' 
+                      : 'Mô phỏng Sẵn sàng';
 
                     return (
                       <div 
                         key={ai.id} 
-                        className="glass-panel p-2.5 rounded-xl border border-slate-150 bg-white hover:border-indigo-400 hover:bg-slate-50/50 transition-all group flex items-start gap-3 shadow-sm"
+                        className={`executive-card p-3.5 rounded-xl flex items-start gap-3.5 relative overflow-hidden ${
+                          ai.id === 'human_ceo' 
+                            ? 'luxury-border-glow bg-gradient-to-r from-amber-500/5 to-yellow-500/5' 
+                            : ai.id === 'coo'
+                            ? 'border-indigo-200/60 bg-indigo-50/5'
+                            : ''
+                        }`}
                       >
-                        <div className={`w-9 h-9 rounded-lg bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0 group-hover:scale-105 transition-transform`}>
+                        <div className={`w-9.5 h-9.5 rounded-xl bg-gradient-to-tr ${ai.color} flex items-center justify-center text-lg shadow-sm shrink-0`}>
                           {ai.avatar}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-semibold text-xs text-slate-800 group-hover:text-indigo-600 transition-colors truncate">{ai.name}</h3>
-                            <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold uppercase">{ai.type}</span>
+                            <h3 className="font-bold text-xs text-slate-800">{ai.name}</h3>
+                            <span className={`text-[7px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                              ai.id === 'human_ceo'
+                                ? 'bg-amber-100 text-amber-800 border border-amber-200/50'
+                                : 'bg-slate-100 text-slate-650 border border-slate-200/50'
+                            }`}>{ai.type}</span>
                           </div>
-                          <p className="text-[9px] text-slate-500 mt-0.5 font-medium truncate">Role: {ai.role}</p>
-                          <p className="text-[9px] text-slate-600 italic mt-0.5 truncate">{ai.capability}</p>
-                          <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-105 text-[8px]">
+                          <p className="text-[9px] text-amber-700 font-semibold mt-0.5 uppercase tracking-wide truncate">{ai.role}</p>
+                          <p className="text-[9px] text-slate-500 mt-1 leading-snug">{ai.capability}</p>
+                          <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-100 text-[8px]">
                             <span className="flex items-center gap-1 font-bold">
-                              <span className={`w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse`}></span> 
-                              <span className="text-emerald-700 font-semibold">{statusLabel}</span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 
+                              <span className="text-emerald-700 font-semibold uppercase tracking-wider">{statusLabel}</span>
                             </span>
                             <button
                               onClick={(e) => {
@@ -676,9 +690,9 @@ export default function Dashboard() {
                                 setSelectedAgentForConfig(ai);
                                 setIsAgentConfigModalOpen(true);
                               }}
-                              className="text-[9px] bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold px-2 py-0.5 rounded transition-colors flex items-center gap-1 cursor-pointer border border-indigo-100 shadow-2xs"
+                              className="text-[9px] bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded transition-all flex items-center gap-1 cursor-pointer border border-slate-200 shadow-2xs"
                             >
-                              <Settings className="w-2.5 h-2.5" /> Cấu hình
+                              <Settings className="w-2.5 h-2.5 animate-spin-hover" /> Cấu hình
                             </button>
                           </div>
                         </div>
@@ -778,11 +792,11 @@ export default function Dashboard() {
                     <div className="p-2 border-t border-slate-100 space-y-1.5 bg-white max-h-48 overflow-y-auto">
                       {operationalAgents.filter(ai => !activeAgents.includes(ai)).map(ai => (
                         <div key={ai.id} className="flex items-center justify-between p-1.5 rounded bg-slate-50/70 border border-slate-100 text-[9px] hover:bg-slate-50 hover:border-slate-200 transition-all">
-                          <span className="flex items-center gap-1.5 text-slate-600">
+                          <span className="flex items-center gap-1.5 text-slate-650">
                             <span>{ai.avatar}</span>
                             <span className="font-semibold truncate max-w-[130px]">{ai.name}</span>
                           </span>
-                          <span className="text-[7px] bg-slate-100 px-1 py-0.5 rounded text-slate-400 font-bold uppercase">IDLE</span>
+                          <span className="text-[7px] bg-slate-150 text-slate-400 px-1 py-0.5 rounded font-bold uppercase">IDLE</span>
                         </div>
                       ))}
                     </div>
@@ -794,36 +808,36 @@ export default function Dashboard() {
         </aside>
 
         {/* CENTER COLUMN: INTERACTIVE GOAL TOPOLOGY & INPUTS */}
-        <main className="flex-1 flex flex-col overflow-hidden bg-slate-100/40">
+        <main className="flex-1 flex flex-col overflow-hidden bg-[#f4f5f7]/60">
           
           {/* TOPOLOGY VIEWPORT */}
           <div className="flex-1 p-6 flex flex-col relative overflow-hidden">
-            <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-              <Network className="w-4 h-4 text-indigo-500" />
-              <span className="text-xs text-slate-500 font-medium">Interactive Goal & Execution Topology (Realtime)</span>
+            <div className="absolute top-4 left-5 z-10 flex items-center gap-2">
+              <Network className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-[10px] tracking-[0.12em] text-slate-500 font-bold uppercase font-display">SƠ ĐỒ TRUY HỒI & THỰC THI QUYẾT SÁCH • DECISION & GOAL TOPOLOGY</span>
             </div>
 
             {/* Simulated interactive graph topology */}
-            <div className="flex-1 glass-panel rounded-2xl border border-slate-200/80 flex flex-col items-center justify-start p-4 pt-12 relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.04),transparent)] pointer-events-none"></div>
+            <div className="flex-1 bg-white/70 backdrop-blur-md rounded-2xl border border-slate-200 flex flex-col items-center justify-start p-4 pt-12 relative overflow-hidden shadow-[0_4px_24px_rgba(15,23,42,0.01)]">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.025),transparent)] pointer-events-none"></div>
               
               {/* Dynamic node link tree display */}
               {isProcessing || activeStep >= 0 ? (
-                <div className="flex flex-col items-center gap-5 w-full max-w-3xl z-10 transition-all duration-500 overflow-y-auto max-h-[calc(100vh-270px)] px-2 pt-2 pb-8">
+                <div className="flex flex-col items-center gap-5.5 w-full max-w-3xl z-10 transition-all duration-500 overflow-y-auto max-h-[calc(100vh-270px)] px-2 pt-2 pb-8">
                   {/* Root Objective Node */}
                   <div className="flex flex-col items-center shrink-0">
-                    <div className="glass-panel-glow px-4 py-2.5 rounded-xl text-center border-indigo-400 text-xs font-semibold max-w-md shadow-sm">
-                      <p className="text-[9px] text-indigo-600 uppercase tracking-widest font-bold">Root Intent (CEO)</p>
-                      <p className="text-slate-800 mt-1">{objective}</p>
+                    <div className="bg-[#faf9f5] px-6 py-4 rounded-xl text-center border luxury-border-glow max-w-md shadow-sm">
+                      <p className="text-[8.5px] text-amber-700 tracking-[0.2em] font-bold uppercase font-display">Ý Chí Chiến Lược (Root Strategic Intent)</p>
+                      <p className="text-slate-800 mt-2 font-display font-semibold text-xs leading-relaxed">"{objective}"</p>
                     </div>
                   </div>
 
                   {/* Visual Step-by-Step Execution Tracker */}
-                  <div className="w-full max-w-2xl bg-white/95 border border-slate-200 rounded-xl p-3.5 shadow-sm text-xs space-y-2">
-                    <p className="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">Lộ Trình Xử Lý Chiến Dịch (Step-by-Step Telemetry)</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px]">
+                  <div className="w-full max-w-2xl bg-white/95 border border-slate-200/80 rounded-xl p-4.5 shadow-xs text-xs space-y-3.5">
+                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider font-display">Lộ Trình Thực Thi Chỉ Thị (Step-by-Step Pathway)</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 text-[10px]">
                       {[
-                        { step: 0, name: '1. Phân Tích Chỉ Thị' },
+                        { step: 0, name: '1. Phân Tích Chỉ Chỉ' },
                         { step: 1, name: '2. Phân Rã OKRs' },
                         { step: 2, name: '3. Mô Phỏng ROI' },
                         { step: 3, name: '4. Dựng Ngữ Cảnh' },
@@ -837,18 +851,18 @@ export default function Dashboard() {
                         return (
                           <div
                             key={s.step}
-                            className={`p-2 rounded-lg border flex items-center gap-1.5 transition-all duration-300 ${
+                            className={`p-2.5 rounded-lg border flex items-center gap-2 transition-all duration-300 ${
                               isActive
-                                ? 'bg-indigo-50/70 border-indigo-400 text-indigo-700 font-bold ring-2 ring-indigo-100 shadow-2xs'
+                                ? 'bg-amber-50/40 border-amber-400/80 text-amber-900 font-bold ring-2 ring-amber-200/20 shadow-2xs'
                                 : isPast
-                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                ? 'bg-emerald-50/40 border-emerald-200 text-emerald-800'
                                 : 'bg-slate-50 border-slate-200 text-slate-400'
                             }`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${
-                              isActive ? 'bg-indigo-500 animate-ping' : isPast ? 'bg-emerald-500' : 'bg-slate-300'
+                              isActive ? 'bg-amber-500 animate-ping' : isPast ? 'bg-emerald-500' : 'bg-slate-300'
                             }`} />
-                            <span className="truncate">{s.name}</span>
+                            <span className="truncate font-medium">{s.name}</span>
                           </div>
                         );
                       })}
@@ -856,7 +870,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Flow links */}
-                  <div className="w-0.5 h-4 bg-gradient-to-b from-indigo-400 to-cyan-400 shrink-0"></div>
+                  <div className="w-0.5 h-4 bg-gradient-to-b from-amber-400/50 to-indigo-400/50 shrink-0"></div>
 
                   {/* Goal Completion Audit Bar (when available) */}
                   {dynamicTasks.length > 0 && (
@@ -942,26 +956,66 @@ export default function Dashboard() {
 
                       {/* CEO HUMAN APPROVAL BANNER GATE */}
                         {dynamicTasks.some(t => (t.status === 'AWAITING_APPROVAL' || t.meta?.status === 'AWAITING_APPROVAL') && !t.isApproved && t.status !== 'COMPLETED') && (
-                          <div className="w-full bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-yellow-500/10 border-2 border-amber-400/60 rounded-2xl p-4 text-left shadow-lg flex items-center justify-between gap-4 animate-fade-in">
-                            <div className="flex items-start gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-white font-bold flex items-center justify-center text-xl shadow-md shrink-0 animate-bounce">
-                                👑
+                          <div className="w-full bg-[#fdfdfd] border luxury-border-glow rounded-2xl p-6 text-left shadow-[0_12px_40px_rgba(212,175,55,0.06)] flex flex-col gap-5 animate-fade-in">
+                            <div className="flex items-start justify-between border-b border-slate-200/60 pb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm shadow-md shrink-0">
+                                  👑
+                                </div>
+                                <div>
+                                  <h4 className="font-display font-bold text-xs tracking-wider text-slate-800 uppercase">
+                                    Tờ Trình Phê Duyệt Phương Án Thực Thi (Strategic Executive Brief)
+                                  </h4>
+                                  <p className="text-[9px] text-slate-400 font-medium">Phát hành bởi CMO AI & COO Orchestrator thông qua Context Contract (ECC)</p>
+                                </div>
                               </div>
-                              <div>
-                                <h4 className="font-bold text-xs text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
-                                  <span>THẨM ĐỊNH EXECUTIVE: YÊU CẦU CEO PHÊ DUYỆT BẢN KẾ HOẠCH MARKETING</span>
-                                </h4>
-                                <p className="text-[11px] text-amber-800 font-medium mt-1 leading-relaxed">
-                                  CMO AI đã phân tích chỉ thị thông qua Enterprise Context Contract (ECC), thiết lập đồ thị suy luận DAG và phát hành dự thảo Executive Decision Package. Vui lòng xem kết quả và bấm phê duyệt để thực thi Task Pipeline.
-                                </p>
+                              <span className="text-[8px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200/60 font-bold uppercase tracking-wider">Đang chờ Quyết sách</span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[10px] text-slate-650">
+                              <div className="space-y-2">
+                                <div>
+                                  <span className="font-bold text-slate-800 uppercase text-[8px] tracking-wider block">1. Ý chí Lãnh đạo (Core Intent):</span>
+                                  <p className="text-slate-600 italic mt-0.5">"{objective}"</p>
+                                </div>
+                                <div>
+                                  <span className="font-bold text-slate-800 uppercase text-[8px] tracking-wider block">2. Đánh giá Chính sách (Governance & Policy Check):</span>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[8px] font-bold border border-emerald-200/50">Hạn mức Ngân sách: PASS (Policy Guard)</span>
+                                    <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-[8px] font-bold border border-indigo-200/50">Bảo mật dữ liệu: SECURE</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-2 border-t md:border-t-0 md:border-l border-slate-200/65 pt-2.5 md:pt-0 md:pl-4">
+                                <div>
+                                  <span className="font-bold text-slate-800 uppercase text-[8px] tracking-wider block">3. Các Kịch Bản Đã Mô Phỏng (Alternatives Evaluated):</span>
+                                  <ul className="mt-1 space-y-1 text-[9.5px]">
+                                    <li className="flex items-center justify-between text-slate-800 font-medium">
+                                      <span>• Phương án Alpha (Tập trung phễu Lead Spa)</span>
+                                      <span className="text-emerald-600 font-bold bg-emerald-50 px-1 rounded text-[8px]">96% Khả thi</span>
+                                    </li>
+                                    <li className="flex items-center justify-between text-slate-400">
+                                      <span>• Phương án Beta (Phân phối diện rộng Facebook)</span>
+                                      <span className="text-slate-400 font-bold bg-slate-100 px-1 rounded text-[8px]">74% Rủi ro</span>
+                                    </li>
+                                  </ul>
+                                </div>
                               </div>
                             </div>
-                            <button
-                              onClick={() => handleCeoApprove('t1')}
-                              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer hover:scale-105 shrink-0"
-                            >
-                              <span>👑 CEO Phê Duyệt Kế Hoạch & Cho Phép Chạy Tiếp →</span>
-                            </button>
+
+                            <div className="flex items-center justify-between bg-slate-50 p-3.5 rounded-xl border border-slate-200/60 mt-1">
+                              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                                <Shield className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                <span>Ủy thác thực thi sang trạng thái <strong>Active</strong> và phân bổ 8 AI Workers.</span>
+                              </div>
+                              <button
+                                onClick={() => handleCeoApprove('t1')}
+                                className="bg-slate-900 hover:bg-slate-850 text-white hover:text-amber-400 font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer hover:scale-105 shrink-0 border border-slate-800"
+                              >
+                                <span>👑 Ký Phê Duyệt & Thực Thi Workflow →</span>
+                              </button>
+                            </div>
                           </div>
                         )}
 
@@ -1217,32 +1271,32 @@ export default function Dashboard() {
           {activeTab === 'timeline' && (
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {/* BRAND DNA */}
-              <div className="glass-panel p-3.5 rounded-xl border border-slate-200">
-                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+              <div className="executive-card p-4 rounded-xl border border-slate-200 bg-white">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Company DNA Register</span>
+                  <span>RÀNG BUỘC PHONG CÁCH & DNA DOANH NGHIỆP</span>
                 </h3>
-                <div className="mt-3 space-y-3 text-[10px] text-slate-600">
+                <div className="mt-3.5 space-y-3.5 text-[10px] text-slate-500">
                   <div className="flex flex-col gap-1">
-                    <span className="text-slate-550 font-medium text-slate-500">Voice Tone:</span>
+                    <span className="font-bold uppercase tracking-wider text-[8px] text-slate-400">Giọng điệu thương hiệu (Voice Tone):</span>
                     <input
                       type="text"
                       value={dnaState.tone}
                       onChange={(e) => handleDnaChange('tone', e.target.value)}
-                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1.5 text-slate-800 font-semibold transition-all outline-none"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-slate-550 font-medium text-slate-500">UI Style Class:</span>
+                    <span className="font-bold uppercase tracking-wider text-[8px] text-slate-400">Phong cách hiển thị (UI Style Class):</span>
                     <input
                       type="text"
                       value={dnaState.style}
                       onChange={(e) => handleDnaChange('style', e.target.value)}
-                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 rounded-lg px-2.5 py-1.5 text-slate-800 font-semibold transition-all outline-none"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-slate-550 font-medium text-slate-500">Active Customers (Spa/TMV):</span>
+                    <span className="font-bold uppercase tracking-wider text-[8px] text-slate-400">Khách hàng kích hoạt (Active TMVs):</span>
                     <input
                       type="number"
                       value={activeCustomerCount || ''}
@@ -1252,11 +1306,11 @@ export default function Dashboard() {
                         CampaignExecutionManager.updateState({ activeCustomerCount: val });
                       }}
                       placeholder="Ví dụ: 120 (Mặc định: 0)"
-                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1.5 text-slate-800 font-semibold transition-all outline-none"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-slate-550 font-medium text-slate-500">24h Facebook Reach:</span>
+                    <span className="font-bold uppercase tracking-wider text-[8px] text-slate-400">Lượt tiếp cận 24h (24h FB Reach):</span>
                     <input
                       type="number"
                       value={fbReachCount || ''}
@@ -1266,21 +1320,21 @@ export default function Dashboard() {
                         CampaignExecutionManager.updateState({ fbReachCount: val });
                       }}
                       placeholder="Ví dụ: 5000 (Mặc định: 0)"
-                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1 text-slate-800 font-semibold transition-all outline-none"
+                      className="w-full bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/20 rounded-lg px-2.5 py-1.5 text-slate-800 font-semibold transition-all outline-none"
                     />
                   </div>
                 </div>
               </div>
 
               {/* UPLOAD ZONE */}
-              <div className="glass-panel p-3.5 rounded-xl border border-slate-200">
-                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-1.5 mb-3">
-                  <UploadCloud className="w-3.5 h-3.5 text-cyan-500" />
-                  <span>Nạp Tri Thức Vào Bộ Não</span>
+              <div className="executive-card p-4 rounded-xl border border-slate-200 bg-white">
+                <h3 className="font-display font-semibold text-xs text-slate-800 flex items-center gap-2 mb-3">
+                  <UploadCloud className="w-3.5 h-3.5 text-slate-700" />
+                  <span>NẠP TÀI LIỆU TRÍ THỨC (INGESTION)</span>
                 </h3>
                 
                 <label 
-                  className="border border-dashed border-slate-200 hover:border-cyan-400 bg-slate-50/50 hover:bg-cyan-50/10 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all group relative"
+                  className="border border-dashed border-slate-200 hover:border-slate-350 bg-slate-50/50 hover:bg-slate-100/20 rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all group relative"
                   onDragOver={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1300,26 +1354,26 @@ export default function Dashboard() {
                       if (file) handleFileChange(file);
                     }}
                   />
-                  <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-cyan-500 group-hover:scale-105 transition-all mb-2" />
-                  <span className="text-[10px] font-semibold text-slate-700 text-center">Kéo & thả file hoặc click để tải lên</span>
-                  <span className="text-[8px] text-slate-400 mt-1">Hỗ trợ PDF, Word, TXT, CSV, MD</span>
+                  <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-slate-600 transition-all mb-2" />
+                  <span className="text-[10px] font-semibold text-slate-700 text-center">Kéo & thả tài liệu hoặc nhấp để tải</span>
+                  <span className="text-[8px] text-slate-450 mt-1">Hỗ trợ PDF, Word, TXT, CSV, MD</span>
                 </label>
               </div>
 
               {/* INGESTED DOCUMENTS */}
-              <div className="space-y-2">
-                <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Danh sách tri thức đã nạp</p>
+              <div className="space-y-2.5">
+                <p className="text-[9px] uppercase font-bold tracking-wider text-slate-400 px-1">Danh sách tài liệu đã index</p>
                 {documents.map((doc, idx) => (
-                  <div key={idx} className="glass-panel p-3 rounded-lg border border-slate-100 text-[10px]">
+                  <div key={idx} className="executive-card p-3 rounded-xl border border-slate-200 text-[10px] bg-white">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-slate-800 truncate pr-2 max-w-[150px]">{doc.name}</span>
-                      <span className="text-[8px] bg-slate-100 px-1 rounded text-slate-500">{doc.size}</span>
+                      <span className="font-bold text-slate-800 truncate pr-2 max-w-[150px]">{doc.name}</span>
+                      <span className="text-[8px] bg-slate-100 border border-slate-200/60 px-1.5 rounded text-slate-500">{doc.size}</span>
                     </div>
-                    <p className="text-slate-500 mt-1 italic text-[9px] line-clamp-2">{doc.rule}</p>
+                    <p className="text-slate-500 mt-1.5 italic text-[9px] line-clamp-2 leading-relaxed">{doc.rule}</p>
                     
                     {doc.status === 'PROCESSING' && (
-                      <span className="text-[8px] text-cyan-600 flex items-center gap-1 mt-2 animate-pulse font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-ping"></span> Đang nạp tri thức...
+                      <span className="text-[8px] text-amber-700 flex items-center gap-1 mt-2.5 animate-pulse font-semibold uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> Đang nạp tri thức...
                       </span>
                     )}
                     {doc.status === 'FAILED' && (

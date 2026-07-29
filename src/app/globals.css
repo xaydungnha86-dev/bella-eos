@@ -61,3 +61,60 @@ body {
 .animate-neon-glow {
   animation: neonGlow 3s infinite ease-in-out;
 }
+
+/* Luxury & Executive Accent System */
+.luxury-border {
+  border: 1px solid rgba(212, 175, 55, 0.2); /* Soft Champagne Gold */
+}
+
+.luxury-border-glow {
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.1);
+}
+
+.luxury-text-gold {
+  color: #b59445; /* Refined Muted Gold */
+}
+
+.luxury-bg-gold {
+  background: linear-gradient(135deg, #c5a85c 0%, #a48135 100%);
+}
+
+.executive-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02);
+}
+
+.executive-card {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.01);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.executive-card:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.04);
+  transform: translateY(-1px);
+}
+
+.executive-sidebar {
+  background: rgba(250, 250, 252, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.05);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s infinite ease-in-out;
+}
+
