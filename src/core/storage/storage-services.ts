@@ -337,11 +337,94 @@ export class SupabaseVectorStore implements IVectorStore {
 // =========================================================================
 // 4. ICacheStore Implementation
 // =========================================================================
-export class LocalCacheStore implements ICacheStore {
-  private static instance: LocalCacheStore;
-  private cache: Map<string, { value: any; expiresAt?: number }> = new Map();
+export class SupabaseCacheStore implements ICacheStore {
+  private static instance: SupabaseCacheStore;
+  private memoryFallback: Map<string, { value: any; expiresAt?: number }> = new Map();
 
   private constructor() {}
+
+  public static getInstance(): SupabaseCacheStore {
+    if (!SupabaseCacheStore.instance) {
+      SupabaseCacheStore.instance = new SupabaseCacheStore();
+    }
+    return SupabaseCacheStore.instance;
+  }
+
+  public async get<T>(key: string): Promise<T | null> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('cache_records')
+          .select('*')
+          .eq('key', key)
+          .single();
+        if (!error && data) {
+          const expiresAt = data.expires_at ? new Date(data.expires_at).getTime() : undefined;
+          if (expiresAt && expiresAt < Date.now()) {
+            await this.del(key);
+            return null;
+          }
+          return typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+        }
+      } catch (err: any) {
+        console.warn(`[SupabaseCacheStore] get failed: ${err.message || err}`);
+      }
+    }
+    
+    const entry = this.memoryFallback.get(key);
+    if (!entry) return null;
+    if (entry.expiresAt && entry.expiresAt < Date.now()) {
+      this.memoryFallback.delete(key);
+      return null;
+    }
+    return entry.value as T;
+  }
+
+  public async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
+    const expiresAtMs = ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined;
+    this.memoryFallback.set(key, { value, expiresAt: expiresAtMs });
+
+    if (isSupabaseConfigured()) {
+      try {
+        const dbRecord = {
+          key,
+          value,
+          expires_at: expiresAtMs ? new Date(expiresAtMs).toISOString() : null,
+          created_at: new Date().toISOString()
+        };
+        const { error } = await supabase.from('cache_records').upsert(dbRecord);
+        if (error) {
+          console.warn(`[SupabaseCacheStore] set failed: ${error.message}`);
+        }
+      } catch (err: any) {
+        console.warn(`[SupabaseCacheStore] set exception: ${err.message || err}`);
+      }
+    }
+  }
+
+  public async del(key: string): Promise<void> {
+    this.memoryFallback.delete(key);
+
+    if (isSupabaseConfigured()) {
+      try {
+        const { error } = await supabase.from('cache_records').delete().eq('key', key);
+        if (error) {
+          console.warn(`[SupabaseCacheStore] del failed: ${error.message}`);
+        }
+      } catch (err: any) {
+        console.warn(`[SupabaseCacheStore] del exception: ${err.message || err}`);
+      }
+    }
+  }
+}
+
+export class LocalCacheStore implements ICacheStore {
+  private static instance: LocalCacheStore;
+  private impl: ICacheStore;
+
+  private constructor() {
+    this.impl = SupabaseCacheStore.getInstance();
+  }
 
   public static getInstance(): LocalCacheStore {
     if (!LocalCacheStore.instance) {
@@ -351,22 +434,15 @@ export class LocalCacheStore implements ICacheStore {
   }
 
   public async get<T>(key: string): Promise<T | null> {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-    if (entry.expiresAt && entry.expiresAt < Date.now()) {
-      this.cache.delete(key);
-      return null;
-    }
-    return entry.value as T;
+    return this.impl.get<T>(key);
   }
 
   public async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
-    const expiresAt = ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined;
-    this.cache.set(key, { value, expiresAt });
+    return this.impl.set<T>(key, value, ttlSeconds);
   }
 
   public async del(key: string): Promise<void> {
-    this.cache.delete(key);
+    return this.impl.del(key);
   }
 }
 

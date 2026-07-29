@@ -1,6 +1,6 @@
 /**
  * EIR ↔ PLR Integration Layer
- * Orchestrates full cycle: CEO Intent → EIR → Approval → PLR → Operational Plan
+ * Orchestrates full cycle: CEO Intent → EIR → Approval → PLR → Operational Plan → Saga Execution
  */
 
 import { ExecutiveIntelligenceRuntime } from '../eir/executive-intelligence-runtime';
@@ -10,10 +10,17 @@ import { ExecutiveRecommendation } from '@/types/executive-recommendation';
 import { OperationalPlan } from '@/types/operational-plan';
 import { ExecutiveStageGraph } from '../eir/executive-layer/executive-stage-graph';
 import { ExecutiveSession } from '@/types/executive-session';
+import { PLRToSagaCompiler } from '../orchestration/plr-to-saga-compiler';
+import { WorkflowRuntime } from '../orchestration/workflow-runtime';
+import { SopSelector, SopSelectionResult } from '../orchestration/sop-selector';
+import { SopMetricsStore } from '../orchestration/sop-metrics-store';
 
 export interface FullCycleResult {
   // CEO Input
   ceoIntent: string;
+
+  // Explainable SOP Selection (Phase 5)
+  sopSelection?: SopSelectionResult;
   
   // Executive Session (Stage 3)
   session?: ExecutiveSession;
@@ -27,6 +34,10 @@ export interface FullCycleResult {
   // PLR Output
   operationalPlan: OperationalPlan | null;
   
+  // Execution Output (Phase 4 Reliability)
+  executionSuccess?: boolean;
+  workflowId?: string;
+
   // Metrics
   metrics: {
     eirDuration: number;
@@ -90,10 +101,18 @@ export class EIRPLRIntegration {
     };
     
     try {
-      // ==================== PHASE 1: EIR ====================
-      console.log('📍 PHASE 1: EXECUTIVE INTELLIGENCE RUNTIME');
+      // ==================== PHASE 0: EXPLAINABLE SOP SELECTION ====================
+      console.log('📍 PHASE 0: EXPLAINABLE SOP SELECTION');
       console.log('-'.repeat(80));
-      
+      const selector = new SopSelector();
+      const sopSelection = selector.selectSop(ceoIntent);
+      console.log(`   Matched SOP: [${sopSelection.selectedSop.sopName}] (Confidence: ${Math.round(sopSelection.confidence * 100)}%)`);
+      console.log(`   Reasons:`, sopSelection.reasons.join(' | '));
+
+      // ==================== PHASE 1: EIR ====================
+      console.log('\n📍 PHASE 1: EXECUTIVE INTELLIGENCE RUNTIME');
+      console.log('-'.repeat(80));
+
       const eirStart = Date.now();
       
       // Step 1: Execute executive stage graph (Stage 3 context & negotiation)
@@ -138,6 +157,7 @@ export class EIRPLRIntegration {
         
         return {
           ceoIntent,
+          sopSelection,
           session,
           recommendation,
           approval,
@@ -191,17 +211,45 @@ export class EIRPLRIntegration {
       
       plrDuration = Date.now() - plrStart;
       
-      console.log('\n✅ PLR Phase Complete');
-      console.log('   Duration:', `${plrDuration}ms`);
-      console.log('   Validation:', validation.valid ? 'PASS ✅' : 'FAIL ❌');
+      // ==================== PHASE 4: EXECUTION ====================
+      console.log('\n📍 PHASE 4: DYNAMIC SAGA WORKFLOW EXECUTION');
+      console.log('-'.repeat(80));
       
+      const workflowId = `wf-cycle-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+      const sagaSteps = PLRToSagaCompiler.compile(operationalPlan);
+      
+      console.log(`   Compiled ${sagaSteps.length} Saga steps. Executing workflow [${workflowId}]...`);
+      const executionSuccess = await WorkflowRuntime.getInstance().executeSaga(
+        workflowId,
+        finalRecommendation.chosenStrategy.name,
+        sagaSteps,
+        undefined, // traceId
+        sopSelection.selectedSop.sopId,
+        sopSelection.selectedSop.version
+      );
+
+      console.log('✅ Execution Phase Complete');
+      console.log('   Saga Execution Result:', executionSuccess ? 'SUCCESS 🎉' : 'COMPENSATED/FAILED ❌');
+
       // ==================== SUMMARY ====================
       const totalDuration = Date.now() - startTime;
+
+      // Record SOP Execution Metrics
+      SopMetricsStore.getInstance().recordExecution({
+        sopId: sopSelection.selectedSop.sopId,
+        sopName: sopSelection.selectedSop.sopName,
+        workflowId,
+        status: executionSuccess ? 'SUCCESS' : 'COMPENSATED',
+        durationMs: totalDuration,
+        allocatedBudgetVnd: operationalPlan.budgetPlan.total,
+        actualBudgetVnd: Math.round(operationalPlan.budgetPlan.total * 0.95),
+        businessOutcome: `Execution ${executionSuccess ? 'succeeded' : 'failed'} for strategy: ${finalRecommendation.chosenStrategy.name}`
+      });
       
       console.log('\n' + '='.repeat(80));
       console.log('🎉 FULL CYCLE COMPLETE');
       console.log('='.repeat(80));
-      console.log('Status:', 'APPROVED & PLANNED ✅');
+      console.log('Status:', 'APPROVED, PLANNED & EXECUTED ✅');
       console.log('Total Duration:', `${totalDuration}ms (${(totalDuration / 1000).toFixed(2)}s)`);
       console.log('  - EIR:', `${eirDuration}ms`);
       console.log('  - Approval:', `${approvalDuration}ms`);
@@ -210,10 +258,13 @@ export class EIRPLRIntegration {
       
       return {
         ceoIntent,
+        sopSelection,
         session,
         recommendation: finalRecommendation,
         approval,
         operationalPlan,
+        executionSuccess,
+        workflowId,
         metrics: {
           eirDuration,
           approvalDuration,

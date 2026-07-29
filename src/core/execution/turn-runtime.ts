@@ -13,6 +13,7 @@ export interface TurnTelemetry {
   userId: string;
   workflowId?: string;
   taskId?: string;
+  traceId?: string;
   startTime: number;
   endTime?: number;
   latencyMs?: number;
@@ -38,6 +39,7 @@ export class TurnRuntime {
     userId: string;
     workflowId?: string;
     taskId?: string;
+    traceId?: string;
     provider: string;
     model: string;
   }) {
@@ -47,6 +49,7 @@ export class TurnRuntime {
       userId: params.userId,
       workflowId: params.workflowId,
       taskId: params.taskId,
+      traceId: params.traceId,
       startTime: Date.now(),
       apiCallsCount: 0,
       toolCalls: [],

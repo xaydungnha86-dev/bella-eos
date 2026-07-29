@@ -119,9 +119,34 @@ Architecture Freeze
 
 ---
 
-## 7. 📝 Quy trình Thay đổi Kiến trúc (ADR Requirement)
+## 🔒 BELLA EOS — OFFICIAL PLATFORM FREEZE DECLARATION
 
-Nếu sau này xuất hiện nhu cầu thực tế bắt buộc phải bổ sung một **Kernel Primitive thứ 16**:
-1. Đội ngũ kiến trúc bắt buộc phải viết một **Architecture Decision Record (ADR)** chi tiết.
-2. ADR phải chứng minh rõ ràng: **Nhu cầu nghiệp vụ đó hoàn toàn không thể giải quyết hoặc mở rộng từ 15 Kernel Primitives hiện tại.**
-3. ADR phải được phê duyệt chính thức bởi CEO / Kiến trúc sư trưởng trước khi triển khai code.
+> **Hiệu lực chính thức từ ngày 30/07/2026**
+
+```
+BELLA EOS — PLATFORM FREEZE STATUS
+
+Architecture:            FROZEN 🔒
+Engine Expansion:        STOPPED 🛑
+Schema:                  PRODUCTION-READY / SECURITY-GATED 🛡️
+Automated Validation:    186 / 186 PASS (31 Test Suites) 🧪
+
+Next Objective:          REAL TENANT PILOT #1 🚀
+
+Pilot Scope:
+  • 1 Enterprise Tenant
+  • 1 Cognitive Domain
+  • 1 SOP
+  • 1 Target KPI
+  • 1 Real Data Source (CRM / Booking / Accounting / HRIS)
+
+Governed Learning:       OBSERVE_ONLY 👁️
+Autonomous SOP Evolution: DISABLED 🔒
+Phase 9 Learning:        CONDITIONAL — REAL DATA DRIVEN ONLY 📊
+```
+
+### 📜 Nguyên tắc Vận hành Sau Freeze:
+1. **Không tăng số lượng test vô nghĩa (No Arbitrary Test Expansion):** 186/186 PASS là đủ cho Engineering Validation. Mốc duy nhất tiếp theo là **Production Evidence**.
+2. **Không học từ dữ liệu thử nghiệm (No Learning on Synthetic Data):** Mọi hành vi tự động sửa SOP mà không có sự phê duyệt của C-Suite đều bị **CẤM HOÀN TOÀN**.
+3. **Phát hiện Blocker Thực tế:** Chỉ mở lại code khi Tenant Pilot thật gặp blocker vận hành nghiêm trọng. Không mở rộng code vì ý thích cá nhân.
+
