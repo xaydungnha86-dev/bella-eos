@@ -21,6 +21,8 @@ export interface CouncilOpinion {
 
 export interface CampaignState {
   isProcessing: boolean;
+  isPaused: boolean;
+  stopRequested: boolean;
   activeStep: number;
   telemetryLogs: any[];
   goalTree: any;
@@ -45,6 +47,8 @@ export type Listener = (state: CampaignState) => void;
 class CampaignExecutionManagerClass {
   private state: CampaignState = {
     isProcessing: false,
+    isPaused: false,
+    stopRequested: false,
     activeStep: -1,
     telemetryLogs: [],
     goalTree: null,
@@ -65,6 +69,50 @@ class CampaignExecutionManagerClass {
   };
 
   private listeners = new Set<Listener>();
+
+  public pauseCampaign() {
+    if (this.state.isProcessing && !this.state.isPaused) {
+      this.state.isPaused = true;
+      this.addLog('EXECUTIVE CONTROL', `⏸️ [CEO CONTROL] ĐÃ TẠM DỪNG LUỒNG THỰC THI TẠI BƯỚC #${this.state.activeStep + 1}. Đã ghi nhớ Checkpoint.`, 'text-amber-400 font-bold');
+      this.notify();
+    }
+  }
+
+  public resumeCampaign() {
+    if (this.state.isPaused) {
+      this.state.isPaused = false;
+      this.addLog('EXECUTIVE CONTROL', `▶️ [CEO CONTROL] KHÔI PHỤC THỰC THI LUỒNG TỪ CHECKPOINT BƯỚC #${this.state.activeStep + 1}...`, 'text-emerald-400 font-bold');
+      this.notify();
+    }
+  }
+
+  public stopCampaign() {
+    this.state.isProcessing = false;
+    this.state.isPaused = false;
+    this.state.stopRequested = true;
+    this.addLog('EXECUTIVE CONTROL', '🛑 [CEO CONTROL] ĐÃ DỪNG HẲN LUỒNG THỰC THI THEO YÊU CẦU CEO.', 'text-rose-400 font-bold');
+    this.notify();
+  }
+
+  private async checkPauseOrStop(): Promise<boolean> {
+    if (this.state.stopRequested) {
+      this.state.isProcessing = false;
+      this.state.isPaused = false;
+      this.notify();
+      return true;
+    }
+    while (this.state.isPaused) {
+      const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+      await delay(300);
+      if (this.state.stopRequested) {
+        this.state.isProcessing = false;
+        this.state.isPaused = false;
+        this.notify();
+        return true;
+      }
+    }
+    return false;
+  }
 
   constructor() {
     // Rehydrate state from localStorage/sessionStorage if possible, ALWAYS forcing isProcessing to false
@@ -187,6 +235,8 @@ class CampaignExecutionManagerClass {
   ) {
     this.state = {
       isProcessing: true,
+      isPaused: false,
+      stopRequested: false,
       activeStep: 0,
       telemetryLogs: [],
       goalTree: null,

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
-  Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, 
+  Brain, Cpu, Layers, Zap, Settings, Database, Network, Play, Pause, Square,
   RefreshCw, FileText, CheckCircle2, AlertTriangle, TrendingUp, 
   Send, Terminal, User, Plus, Search, Sparkles, UploadCloud, ChevronRight, Key, Globe, MessageSquare,
   X, Copy, Check, Code, Download, RotateCcw, Shield
@@ -287,10 +287,13 @@ export default function Dashboard() {
     }
   }, []);
 
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+
   // Synchronize state with global CampaignExecutionManager to support background execution and tab preservation
   useEffect(() => {
     const unsubscribe = CampaignExecutionManager.subscribe((state) => {
       setIsProcessing(state.isProcessing);
+      setIsPaused(Boolean(state.isPaused));
       setActiveStep(state.activeStep);
       setTelemetryLogs(state.telemetryLogs);
       setGoalTree(state.goalTree);
@@ -1490,11 +1493,49 @@ export default function Dashboard() {
               </div>
               <button 
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-xs px-5 h-12 rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer shrink-0"
+                disabled={isProcessing}
+                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-75 text-white font-semibold text-xs px-5 h-12 rounded-xl transition-all flex items-center gap-2 shadow-md cursor-pointer shrink-0"
               >
-                <span>{isProcessing ? '⚡ Đang Phân Rã & Thực Thi...' : 'Phân rã Kế hoạch (AI)'}</span>
+                <span>{isProcessing ? (isPaused ? '⏸️ Tạm Dừng Luồng' : '⚡ Đang Phân Rã...') : 'Phân rã Kế hoạch (AI)'}</span>
                 <Send className="w-4 h-4" />
               </button>
+
+              {/* CEO EXECUTION CONTROL BUTTONS (PAUSE / RESUME / STOP) */}
+              {isProcessing && (
+                <div className="flex items-center gap-2 shrink-0 animate-fade-in">
+                  {!isPaused ? (
+                    <button
+                      type="button"
+                      onClick={() => CampaignExecutionManager.pauseCampaign()}
+                      className="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs px-4 h-12 rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer shrink-0"
+                      title="Tạm dừng luồng thực thi ngay tại checkpoint hiện tại"
+                    >
+                      <Pause className="w-4 h-4" />
+                      <span>Tạm Dừng</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => CampaignExecutionManager.resumeCampaign()}
+                      className="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs px-4 h-12 rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer shrink-0 animate-pulse"
+                      title="Tiếp tục thực thi luồng từ đúng vị trí checkpoint đã dừng"
+                    >
+                      <Play className="w-4 h-4" />
+                      <span>Tiếp Tục từ Checkpoint</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => CampaignExecutionManager.stopCampaign()}
+                    className="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold text-xs px-4 h-12 rounded-xl transition-all flex items-center gap-1.5 shadow-md cursor-pointer shrink-0"
+                    title="Dừng hẳn toàn bộ luồng thực thi lập tức"
+                  >
+                    <Square className="w-4 h-4" />
+                    <span>Dừng Hẳn</span>
+                  </button>
+                </div>
+              )}
             </form>
           </div>
 
