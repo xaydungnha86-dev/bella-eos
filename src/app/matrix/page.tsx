@@ -190,15 +190,15 @@ export default function ExecutiveMatrixPage() {
                           #{idx + 1}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-xs text-slate-800 truncate">{t.agent_name || t.agent_id}</h4>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="font-bold text-xs text-slate-800">{t.agent_name || t.agent_id}</h4>
                             <span className="text-[8px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono uppercase shrink-0 whitespace-nowrap">{t.task_type}</span>
                           </div>
-                          <p className="text-[10px] text-slate-500 font-medium mt-0.5 truncate">{t.task_description}</p>
+                          <p className="text-[10.5px] text-slate-600 font-medium mt-1 whitespace-normal break-words leading-relaxed">{t.task_description}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0 whitespace-nowrap self-start sm:self-auto">
+                      <div className="flex items-center gap-2 shrink-0 whitespace-nowrap self-start">
                         {isAwaiting ? (
                           <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2.5 py-1 rounded-full font-bold text-[8.5px] animate-pulse flex items-center gap-1 shrink-0 whitespace-nowrap">
                             👑 CHỜ CEO PHÊ DUYỆT
