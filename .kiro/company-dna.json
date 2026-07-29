@@ -1,0 +1,127 @@
+{
+  "identity": {
+    "companyName": "Bella EOS Technology JSC",
+    "brandName": "BELLA EOS",
+    "shortName": "Bella",
+    "tagline": "AI-Powered Enterprise Operations",
+    "foundedYear": 2025,
+    "yearsInBusiness": 1,
+    "businessModel": "B2B",
+    "website": "https://bellaeos.com",
+    "contactEmail": "contact@bellaeos.com",
+    "hotline": "1900 xxxx"
+  },
+  "industry": {
+    "primaryIndustry": "Enterprise Software (B2B SaaS)",
+    "secondaryIndustries": [
+      "AI & Automation",
+      "Wellness Technology"
+    ],
+    "geographicMarkets": [
+      "Vietnam",
+      "Southeast Asia"
+    ],
+    "marketSegment": "SMB to Mid-Market",
+    "marketPosition": "Emerging Leader in Vietnam Wellness Tech"
+  },
+  "products": {
+    "type": "software",
+    "offerings": [
+      {
+        "name": "Bella EOS Platform",
+        "description": "AI-powered operations management platform for spa and wellness businesses",
+        "category": "core",
+        "keyFeatures": [
+          "Intelligent staff scheduling & workload optimization",
+          "Real-time revenue analytics & forecasting",
+          "Customer relationship management with AI insights",
+          "Multi-location management",
+          "Automated inventory tracking"
+        ],
+        "uniqueValue": "Only AI-powered platform specifically built for Vietnamese wellness industry",
+        "targetCustomer": "Spa owners, salon managers, wellness center directors"
+      }
+    ],
+    "technologies": [
+      "AI",
+      "Cloud",
+      "Mobile",
+      "Analytics"
+    ]
+  },
+  "vision": {
+    "statement": "Empower every wellness business in Vietnam to operate at enterprise-level efficiency",
+    "mission": "Giải phóng thời gian vận hành cho chủ spa, để họ tập trung vào phát triển dịch vụ và khách hàng",
+    "longTermGoals": [
+      "Trở thành nền tảng quản lý spa #1 tại Việt Nam",
+      "Phục vụ 10,000+ cơ sở spa/thẩm mỹ trong 3 năm"
+    ],
+    "coreValues": [
+      "Customer Success First",
+      "Continuous Innovation",
+      "Operational Excellence"
+    ]
+  },
+  "targetAudience": {
+    "primaryPersona": {
+      "name": "Chủ Spa Cao Cấp",
+      "description": "Chủ sở hữu hoặc giám đốc điều hành spa/thẩm mỹ viện cao cấp, 1-5 chi nhánh",
+      "ageRange": "28-50",
+      "role": "Business Owner / Director",
+      "painPoints": [
+        "Mất quá nhiều thời gian cho công việc quản lý thủ công (8-12 giờ/tuần)",
+        "Khó kiểm soát doanh thu và chi phí real-time",
+        "Phân ca KTV không tối ưu, gây lãng phí nhân lực"
+      ],
+      "goals": [
+        "Tăng doanh thu 2-3x trong 12-24 tháng",
+        "Giảm thời gian quản lý, tập trung phát triển dịch vụ"
+      ]
+    }
+  },
+  "brandVoice": {
+    "tone": "Professional, Trustworthy, Results-Driven",
+    "personality": [
+      "Innovative",
+      "Reliable",
+      "Empowering"
+    ],
+    "writingStyle": "Clear, benefit-focused, backed by data",
+    "keyPhrases": [
+      "AI vận hành tự động",
+      "Chuyên nghiệp",
+      "Nâng tầm spa Việt"
+    ]
+  },
+  "brandVisual": {
+    "style": "Modern Tech Minimalism with Wellness Touch",
+    "colors": {
+      "primary": "#061E17",
+      "secondary": "#FFFFFF",
+      "accent": "#D4AF37"
+    },
+    "typography": {
+      "primaryFont": "Montserrat",
+      "style": "Clean Sans-serif"
+    },
+    "imageryStyle": "Software UI mockups, professional business context"
+  },
+  "competitive": {
+    "advantages": [
+      "AI-powered automation",
+      "Industry-specific features for Vietnamese wellness market"
+    ],
+    "differentiators": [
+      "Only platform built specifically for Vietnam spa industry",
+      "AI scheduling optimization (competitors only have manual calendar)",
+      "Localized customer support in Vietnamese"
+    ]
+  },
+  "metadata": {
+    "workspaceId": "default",
+    "createdAt": "2025-01-27T00:00:00.000Z",
+    "updatedAt": "2026-07-29T02:08:25.779Z",
+    "version": 5,
+    "status": "active"
+  }
+}

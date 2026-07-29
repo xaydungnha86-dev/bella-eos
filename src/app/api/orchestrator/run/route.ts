@@ -441,13 +441,19 @@ async function tool_generate_media_creative(input: any, clientKeys?: any, taskOu
       console.log(`[tool_generate_media_creative] ✓ v3 generated image: ${imageUrl.substring(0, 150)}`);
     } else {
       console.warn('[tool_generate_media_creative] v3 returned no imageUrl, using fallback');
+      // FIXED: Strong uniqueness for fallback URL - multiple random components
       const ts = Date.now();
-      imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
+      const rand1 = Math.random().toString(36).substring(2, 10);
+      const rand2 = Math.random().toString(36).substring(2, 10);
+      imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}&r1=${rand1}&r2=${rand2}`;
     }
   } catch (e) {
     console.error('[tool_generate_media_creative] v3 API call failed:', e);
+    // FIXED: Strong uniqueness for error fallback
     const ts = Date.now();
-    imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}`;
+    const rand1 = Math.random().toString(36).substring(2, 10);
+    const rand2 = Math.random().toString(36).substring(2, 10);
+    imageUrl = `${getBaseUrl()}/api/ai/banner-image?brandName=${encodeURIComponent(brandName)}&objective=${encodeURIComponent(objective)}&t=${ts}&r1=${rand1}&r2=${rand2}`;
   }
 
   const { PosterDesignSkill } = await import('@/core/skills/poster-design-skill');
@@ -514,16 +520,30 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     }
   }
 
+  // FIXED: Better content extraction - prioritize content worker output and skip markdown reports
   if ((!content || content.length < 20) && taskOutputs) {
-    for (const [taskId, output] of Object.entries(taskOutputs)) {
-      if (output && output.length > 30 && 
-          !output.startsWith('http') && 
-          !output.startsWith('data:image') && 
-          !output.includes('MASTER AI DESIGN') &&
-          !output.includes('Báo cáo') &&
-          !output.includes('Athena Analytics')) {
-        content = output;
-        break;
+    // First priority: Find output from eos_content_worker (Facebook post writer)
+    const contentWorkerTask = Object.entries(taskOutputs).find(([taskId, output]) => 
+      taskId.includes('content') || taskId.includes('t2') || taskId === 'write_facebook_post'
+    );
+    
+    if (contentWorkerTask) {
+      content = contentWorkerTask[1];
+      console.log('[tool_publish_facebook] Found content from content worker');
+    } else {
+      // Fallback: Find ANY valid content but skip reports/analysis
+      for (const [taskId, output] of Object.entries(taskOutputs)) {
+        if (output && output.length > 30 && 
+            !output.startsWith('http') && 
+            !output.startsWith('data:image') && 
+            !output.includes('MASTER AI DESIGN') &&
+            !output.includes('Báo cáo') &&
+            !output.includes('PHẦN 1:') &&  // FIXED: Skip markdown section headers
+            !output.includes('MARKDOWN REPORT') &&  // FIXED: Skip markdown reports
+            !output.includes('Athena Analytics')) {
+          content = output;
+          break;
+        }
       }
     }
   }
@@ -559,7 +579,7 @@ async function tool_publish_facebook(input: any, clientKeys: any, taskOutputs: R
     }
   }
 
-  const defaultBannerUrl = `${getBaseUrl()}/api/ai/banner-image?t=${Date.now()}`;
+  const defaultBannerUrl = `${getBaseUrl()}/api/ai/banner-image?t=${Date.now()}&r1=${Math.random().toString(36).substring(2, 10)}&r2=${Math.random().toString(36).substring(2, 10)}`;
   const imageUrl = extractedUrl || defaultBannerUrl;
 
   if (!content) {
@@ -1124,7 +1144,9 @@ Hãy phân tích và xuất bản báo cáo kèm Executive Intelligence Contract
       provider,
       targetSegment: segment,
       brandName,
-      decisionContract: finalEicContract
+      decisionContract: finalEicContract,
+      requiresHumanApproval: true, // FIXED: Add flag for CEO approval gate
+      status: 'AWAITING_APPROVAL'  // FIXED: Set initial status for UI
     }
   };
 }
@@ -1226,14 +1248,11 @@ export async function POST(request: Request) {
                          task.isApproved === true || 
                          task.status === 'APPROVED' || 
                          task.status === 'COMPLETED';
-      const requiresApproval = task.agent_id === 'eos_marketing_manager' || 
-                               task.task_type === 'analyze_marketing_strategy' || 
-                               task.requires_human_approval === true;
 
       // Resolve input: if any field value is a reference to prior task output, inject it
       const resolvedInput = resolveInputReferences(task.input || {}, taskOutputs);
       
-      console.log(`[AgentRunner] Task ${task.task_id} [${task.agent_name}]: requiresApproval=${requiresApproval}, isApproved=${isApproved}`);
+      console.log(`[AgentRunner] Task ${task.task_id} [${task.agent_name}]: isApproved=${isApproved}`);
 
       const toolFn = TOOL_REGISTRY[task.task_type];
       let result: ToolResult;
@@ -1257,6 +1276,12 @@ export async function POST(request: Request) {
 
       // Store output for downstream tasks
       if (result.output) taskOutputs[task.task_id] = result.output;
+
+      // Check if result requires approval (either from task definition or from tool result meta)
+      const requiresApproval = task.agent_id === 'eos_marketing_manager' || 
+                               task.task_type === 'analyze_marketing_strategy' || 
+                               task.requires_human_approval === true ||
+                               result.meta?.requiresHumanApproval === true;
 
       if (requiresApproval && !isApproved) {
         // Task completed its AI analysis, but must pause for Human CEO Approval before proceeding
@@ -1420,6 +1445,12 @@ function cleanMarkdownForSocialMedia(text: string): string {
 function extractSingleSocialPost(text: string): string {
   if (!text) return '';
 
+  // Skip markdown reports and strategic analysis documents
+  if (text.includes('PHẦN 1:') || text.includes('MARKDOWN REPORT') || text.includes('BẢN BÁO CÁO LÃNH ĐẠO')) {
+    console.warn('[extractSingleSocialPost] Skipping markdown report format');
+    return '';
+  }
+
   let body = text;
 
   const postBodyRegex = /(?:[\-\*•\s]*📝?\s*\**Nội dung xuất bản(?:\s*\(Post Body\))?\**\s*:?\s*)([\s\S]*?)(?=\n[\-\*•\s]*---|$\n[\-\*•\s]*###|\n[\-\*•\s]*📌|\n[\-\*•\s]*📅|\n[\-\*•\s]*###\s*📌|\n[\-\*•\s]*BÀI VIẾT TUẦN)/i;
@@ -1441,6 +1472,7 @@ function extractSingleSocialPost(text: string): string {
            !l.startsWith('chủ đề truyền thông') &&
            !l.startsWith('chủ đề:') &&
            !l.startsWith('nội dung xuất bản') &&
+           !l.startsWith('phần 1:') &&
            !l.includes('content calendar') &&
            !l.includes('content worker');
   });

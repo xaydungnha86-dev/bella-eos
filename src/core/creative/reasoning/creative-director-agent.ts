@@ -10,6 +10,9 @@ import type {
   BusinessContextPackage, 
   CreativeBrief 
 } from '@/types/creative-intelligence';
+import { ImageHistoryTracker } from '../memory/image-history-tracker';
+import { ContentHistoryTracker } from '../memory/content-history-tracker';
+import { getCompanyDNASnippet } from '@/core/company/company-dna-loader';
 
 export class CreativeDirectorAgent {
   
@@ -19,25 +22,94 @@ export class CreativeDirectorAgent {
   async reason(context: BusinessContextPackage, clientKeys?: { gemini?: string; openai?: string; anthropic?: string }): Promise<CreativeBrief> {
     
     console.log('[CreativeDirectorAgent] Starting creative reasoning...');
+    console.log('[CreativeDirectorAgent] 📊 Input context received:', {
+      ceoObjective: context.ceoObjective?.substring(0, 100) || 'N/A',
+      brandName: context.brandDNA?.identity?.brandName || 'N/A',
+      hasCopywriterContent: !!context.copywriterContent,
+      industryCategory: context.knowledgeContext?.domainFacts?.[0]?.category || 'N/A'
+    });
     
-    // Compose LLM reasoning prompt
-    const reasoningPrompt = this.composeReasoningPrompt(context);
+    // Check content history before generating prompt
+    const contentTracker = ContentHistoryTracker.getInstance();
+    const contentStats = contentTracker.getStats();
+    console.log('[CreativeDirectorAgent] Content history stats:', contentStats);
+    
+    if (contentStats.total > 0) {
+      const recentHeadlines = contentTracker.getRecentHeadlines(3);
+      console.log('[CreativeDirectorAgent] 📝 Previous headlines:', recentHeadlines);
+    }
+    
+    // Compose LLM reasoning prompt (with auto-injected Company DNA)
+    const reasoningPrompt = await this.composeReasoningPrompt(context);
+    
+    // Debug: Check if content constraints are in prompt
+    if (reasoningPrompt.includes('CONTENT HISTORY')) {
+      console.log('[CreativeDirectorAgent] ✓ Content constraints injected into prompt');
+    } else {
+      console.warn('[CreativeDirectorAgent] ⚠️ Content constraints NOT found in prompt!');
+    }
+    
+    // Debug: Check if contextual understanding is in prompt
+    if (reasoningPrompt.includes('CRITICAL CONTEXT UNDERSTANDING')) {
+      console.log('[CreativeDirectorAgent] ✓ Contextual understanding section present');
+    } else {
+      console.error('[CreativeDirectorAgent] ❌ Contextual understanding section MISSING!');
+    }
+    
+    // Log prompt snippet for verification
+    const promptPreview = reasoningPrompt.substring(0, 500);
+    console.log('[CreativeDirectorAgent] 📄 Prompt preview (first 500 chars):', promptPreview);
+    
+    // FIXED: Add variability seed to ensure different outputs each time
+    const variabilitySeed = Date.now() + Math.random() * 1000000;
+    const reasoningPromptWithVariability = reasoningPrompt + `\n\n## VARIABILITY REQUIREMENT
+CRITICAL: This generation must be UNIQUE. Use seed: ${variabilitySeed}
+- Do NOT generate identical headlines/visuals to previous runs
+- Explore DIFFERENT angles, metaphors, and visual stories each time
+- Be creative and diverse in your approach`;
     
     // Call LLM for creative reasoning
-    const reasoning = await this.callLLMReasoning(reasoningPrompt, clientKeys);
+    const reasoning = await this.callLLMReasoning(reasoningPromptWithVariability, clientKeys);
     
     // Parse structured output
     let brief: CreativeBrief;
     try {
-      brief = JSON.parse(reasoning.structuredOutput);
+      let jsonString = reasoning.structuredOutput;
+      
+      // FIXED: Handle LLM responses that include "REASONING:" prefix
+      if (jsonString.includes('REASONING:')) {
+        console.log('[CreativeDirectorAgent] Detected REASONING prefix, extracting JSON...');
+        // Find JSON block after REASONING
+        const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          jsonString = jsonMatch[0];
+          console.log('[CreativeDirectorAgent] ✓ Extracted JSON from response');
+        }
+      }
+      
+      // Try to extract JSON from markdown code blocks
+      if (jsonString.includes('```')) {
+        const codeBlockMatch = jsonString.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeBlockMatch) {
+          jsonString = codeBlockMatch[1].trim();
+          console.log('[CreativeDirectorAgent] ✓ Extracted JSON from code block');
+        }
+      }
+      
+      brief = JSON.parse(jsonString);
+      
       // Check if the parsed result is empty or missing required fields
       if (!brief.campaignGoal || !brief.posterHeadline) {
         throw new Error('Parsed brief is incomplete');
       }
+      
+      console.log('[CreativeDirectorAgent] ✓ Successfully parsed LLM response');
     } catch (parseError) {
       console.error('[CreativeDirectorAgent] Failed to parse LLM response:', parseError);
-      // Fallback to rule-based brief
+      console.warn('[CreativeDirectorAgent] Using fallback brief generation...');
+      // Fallback to rule-based brief with variation
       brief = this.generateFallbackBrief(context);
+      brief = this.applyFallbackVariation(brief, context);
     }
     
     // Add metadata
@@ -48,21 +120,43 @@ export class CreativeDirectorAgent {
     // Validate brief
     this.validateBrief(brief);
     
+    // Save to content history for future variation
+    ContentHistoryTracker.getInstance().addContent({
+      id: `content_${Date.now()}`,
+      timestamp: Date.now(),
+      campaignGoal: brief.campaignGoal,
+      headline: brief.posterHeadline,
+      keyBenefits: brief.keyBenefits || [],
+      callToAction: brief.callToAction || ''
+    });
+    
     console.log('[CreativeDirectorAgent] Creative Brief generated:', {
       goal: brief.campaignGoal,
       headline: brief.posterHeadline,
       confidence: brief.confidenceScore
     });
+    console.log('[CreativeDirectorAgent] ✓ Content saved to history tracker');
     
     return brief;
   }
   
   /**
    * Compose comprehensive reasoning prompt for LLM
+   * (AUTO-INJECTS COMPANY DNA)
    */
-  private composeReasoningPrompt(context: BusinessContextPackage): string {
+  private async composeReasoningPrompt(context: BusinessContextPackage): Promise<string> {
     
     const { ceoObjective, enterpriseContext, copywriterContent, brandDNA, campaignMemory, knowledgeContext } = context;
+    
+    // AUTO-LOAD COMPANY DNA
+    const companyDNASnippet = await getCompanyDNASnippet().catch(err => {
+      console.warn('[CreativeDirectorAgent] Failed to load Company DNA:', err);
+      return ''; // Fallback to empty if load fails
+    });
+    
+    if (companyDNASnippet) {
+      console.log('[CreativeDirectorAgent] ✓ Company DNA loaded and injected into prompt');
+    }
     
     // Extract key info
     const industryCategory = knowledgeContext.domainFacts[0]?.category || 'general_business';
@@ -73,6 +167,8 @@ export class CreativeDirectorAgent {
     return `You are a Senior Creative Director at an enterprise marketing agency with 15+ years of experience.
 
 Your task is to deeply understand the business objective and create a strategic creative brief for an image campaign banner.
+
+${companyDNASnippet ? `${companyDNASnippet}\n\n` : ''}
 
 ## CEO OBJECTIVE
 ${ceoObjective}
@@ -121,27 +217,106 @@ ${knowledgeContext.domainFacts.map(f => `- ${f.statement}`).join('\n')}
 ### Industry Trends:
 ${knowledgeContext.industryTrends.map(t => `- ${t.name} (${t.direction}, relevance: ${(t.relevance * 100).toFixed(0)}%)`).join('\n')}
 
+## IMAGE HISTORY - MUST BE DIFFERENT FROM THESE
+${this.getImageHistoryConstraints()}
+
+## CONTENT HISTORY - VARY YOUR MESSAGING
+${this.getContentHistoryConstraints()}
+
 ## YOUR TASK
 Create a comprehensive Creative Brief with the following JSON structure:
 
+**CRITICAL CONTEXT UNDERSTANDING**:
+Before creating the brief, ANALYZE the business objective deeply:
+
+1. **Product Type Detection**:
+   - If objective mentions "Bella EOS", "phần mềm", "hệ thống", "platform", "AI" → This is SOFTWARE/SaaS product
+   - If software for spa/salon → MUST show software interface, dashboard, or screen mockup
+   - If software for retail → MUST show POS system, inventory screens
+   - If software for any industry → MUST include product demonstration visuals
+
+2. **Visual Strategy Based on Product**:
+   - Software products: Show UI mockup, dashboard screenshots, app interface on devices
+   - Physical products: Show actual product in lifestyle context
+   - Services: Show results/outcomes, before-after, customer satisfaction
+
+3. **Creative Variation Mandate**:
+   - Each generation MUST explore DIFFERENT marketing angles
+   - Rotate through: feature-focused, benefit-focused, transformation-focused, social proof-focused
+   - Vary emotional appeals: aspiration, urgency, trust, innovation, growth
+
 {
   "campaignGoal": "Clear, specific goal statement (what business outcome are we driving?)",
+  "productType": "software | physical_product | service (detect based on objective)",
+  "visualStrategy": "Specific strategy: 'software_demo_ui', 'product_lifestyle', 'transformation_story', etc.",
   "targetAudience": "Detailed audience profile (who are we talking to? what do they care about?)",
   "emotionalTone": "Desired emotional response (comma-separated keywords: e.g., aspirational, trustworthy, innovative)",
   "visualStory": "One-sentence visual narrative (what story does the image tell?)",
   "designDirection": "Overall aesthetic direction (e.g., luxury wellness tech, modern editorial, cyberpunk corporate)",
-  "posterHeadline": "CRITICAL: Create a NEW headline optimized for POSTER medium. Should be 3-8 words, punchy, visual-first, benefit-driven. NOT the Facebook post headline.",
-  "keyBenefits": ["List exactly 3 key benefits/features for bullet points on the poster. Each should be 4-8 words maximum, action-oriented. Format: 'Verb + outcome' (e.g., 'Tối ưu xếp lịch & phân ca KTV')"],
-  "callToAction": "Action-oriented CTA for button (4-6 words, urgent, specific). NOT generic 'Tìm hiểu thêm'. Examples: 'Đăng ký trải nghiệm ngay', 'Nhận ưu đãi 50%', 'Đặt lịch tư vấn miễn phí'",
-  "heroSubject": "Main visual subject that should dominate the image (be specific: e.g., 'premium glass cosmetic jars on polished marble surface' NOT just 'spa products')",
-  "environmentDescription": "Setting and background atmosphere (where does this scene take place? what's the mood?)",
+  "posterHeadline": "CRITICAL: Create a COMPLETELY NEW headline. NOT 'AI VẬN HÀNH SPA' anymore! Try: 'QUẢN TRỊ SPA CHUYÊN NGHIỆP', 'HỆ THỐNG BELLA EOS', 'NÂNG TẦM SPA VIỆT', 'DOANH THU X2 VỚI AI', etc. 3-8 words, punchy, visual-first, benefit-driven.",
+  "keyBenefits": ["List exactly 3 DIFFERENT benefits each time. Rotate through: operational efficiency, revenue growth, customer experience, staff productivity, competitive advantage, cost reduction, scalability, insights & analytics. Each 4-8 words maximum, action-oriented."],
+  "callToAction": "VARY the CTA! Rotate: 'Nhận tư vấn miễn phí', 'Demo trực tiếp 15 phút', 'Dùng thử 30 ngày', 'Xem case study', 'Tải brochure', 'Đặt lịch gặp', 'Nhận báo giá', 'Tham quan showroom'",
+  "heroSubject": "CRITICAL FOR SOFTWARE: If this is software (Bella EOS), MUST include: 'laptop/tablet/phone screen displaying [software name] dashboard interface with [specific features visible: analytics charts, booking calendar, customer data, revenue reports]'. Be VERY specific about what's on screen. If physical product, describe the product itself.",
+  "environmentDescription": "Setting and background atmosphere. For software: modern office, co-working space, spa reception with computer. For products: lifestyle setting matching target audience.",
   "colorMood": "Color psychology direction (what emotions should colors evoke?)",
   "lightingMood": "Lighting atmosphere (e.g., golden hour warmth, soft studio glow, dramatic shadows)",
   "compositionRule": "Layout strategy - choose ONE: rule_of_thirds, golden_ratio, centered, asymmetric, diagonal, frame_within_frame",
   "keyMessage": "Single most important message to communicate (if viewer remembers only ONE thing, what should it be?)",
-  "avoidances": ["List 3-5 specific things to avoid in the visual (e.g., 'generic stock photos of people', 'too much text overlay', 'clinical sterile atmosphere')"],
-  "successMetrics": ["List 3-5 ways to measure if this creative is successful (e.g., 'CTR > 3%', 'Demo bookings > 50', 'Brand recall improvement')"]
+  "avoidances": ["List 3-5 specific things to avoid in the visual"],
+  "successMetrics": ["List 3-5 ways to measure if this creative is successful"]
 }
+
+**EXAMPLES OF GOOD vs BAD heroSubject**:
+
+❌ BAD (generic spa imagery):
+"premium glass cosmetic jars on polished marble surface"
+→ This shows products, NOT software!
+
+✅ GOOD (software demo):
+"MacBook Pro displaying Bella EOS dashboard with colorful analytics charts showing revenue growth, appointment calendar filled with bookings, and customer satisfaction metrics, placed on modern spa reception desk"
+
+❌ BAD (too vague):
+"spa products with orchids"
+
+✅ GOOD (specific software context):
+"iPad showing Bella EOS booking interface with drag-and-drop staff scheduling, held by spa manager in modern wellness center, background shows happy customers"
+
+## CREATIVE VARIATION SEED
+Variation ID: ${this.generateVariationSeed()}
+Generation timestamp: ${Date.now()}
+
+**CRITICAL DIRECTIVE FOR THIS SPECIFIC GENERATION:**
+To ensure visual AND messaging uniqueness, you MUST incorporate these variation strategies:
+
+### Visual Variation:
+- **Perspective Shift**: Try unusual camera angles (bird's eye, extreme close-up, dutch angle, worm's eye view)
+- **Time of Day**: Vary lighting (golden hour, blue hour, midday brightness, twilight glow, nighttime ambiance)
+- **Style Variation**: Experiment with visual styles (photorealistic, minimalist flat design, cinematic drama, editorial magazine, tech-forward gradient)
+- **Subject Variation**: If showing software, vary the device (laptop, tablet, phone, large monitor) and what's visible on screen
+- **Color Temperature**: Shift warm vs cool tones (warm golden, cool blue-teal, neutral balanced, vibrant saturated, muted pastel)
+- **Depth of Field**: Vary focus (shallow depth with blur, deep focus, selective focus on key element)
+
+### Messaging Variation (CRITICAL - MUST CHANGE!):
+- **Headline Angle**: Rotate through different value propositions:
+  - Generation 1: Technology/Innovation focus ("AI VẬN HÀNH...")
+  - Generation 2: Business Results focus ("DOANH THU TĂNG 2X...", "TIẾT KIỆM 40% CHI PHÍ...")
+  - Generation 3: Customer Experience focus ("KHÁCH HÀNG TRUNG THÀNH HƠN...")
+  - Generation 4: Competitive Advantage ("DẪN ĐẦU THỊ TRƯỜNG SPA...")
+  - Generation 5: Transformation story ("CHUYỂN ĐỔI SỐ TOÀN DIỆN...")
+
+- **Benefit Angles**: Rotate through value dimensions:
+  - Operations: scheduling, automation, efficiency
+  - Finance: revenue, cost savings, ROI
+  - Customer: satisfaction, retention, experience
+  - Staff: productivity, engagement, communication
+  - Growth: scalability, expansion, market share
+  - Insights: analytics, reporting, forecasting
+
+**CRITICAL RULES**:
+1. If objective mentions "Bella EOS" or any software → heroSubject MUST include device screen showing software interface
+2. Each headline MUST use DIFFERENT opening words (not just "AI VẬN HÀNH" every time)
+3. Each set of benefits MUST highlight DIFFERENT business outcomes
+4. Each CTA MUST offer DIFFERENT value (not always "đăng ký trải nghiệm")
 
 ## CRITICAL RULES FOR YOU:
 1. **POSTER HEADLINE IS NOT FACEBOOK HEADLINE**: Do NOT copy headlines from the Facebook post. Create a completely NEW headline optimized for visual poster format.
@@ -150,6 +325,7 @@ Create a comprehensive Creative Brief with the following JSON structure:
 4. **CONSIDER PAST PERFORMANCE**: Learn from successful and failed patterns mentioned above.
 5. **BALANCE BRAND DNA WITH INNOVATION**: Respect brand guidelines but don't be afraid to innovate if needed for impact.
 6. **THINK ABOUT COMPOSITION**: Remember that 60% of the left side will have text overlay - plan the visual accordingly.
+7. **ENSURE VISUAL UNIQUENESS**: Each generation MUST look distinctly different from previous ones. Use the variation seed above to inject creative diversity while maintaining brand consistency.
 
 ## REASONING PROCESS (Internal - explain your thinking):
 Before generating the JSON output, think through:
@@ -159,9 +335,30 @@ Before generating the JSON output, think through:
 4. What VISUAL STORY supports the business goal?
 5. How can we be DIFFERENT from competitors while staying true to brand?
 
-Output format:
-First, explain your reasoning in 3-5 bullet points starting with "REASONING:".
-Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
+## OUTPUT FORMAT - CRITICAL!
+
+**YOU MUST OUTPUT ONLY PURE JSON. NO OTHER TEXT.**
+
+Do NOT include:
+- ❌ "REASONING:" prefix
+- ❌ Markdown code blocks
+- ❌ Explanatory text before or after JSON
+- ❌ Comments inside JSON
+
+Just output the raw JSON object directly, starting with { and ending with }.
+
+Example of CORRECT output:
+{
+  "campaignGoal": "...",
+  "productType": "...",
+  ...
+}
+
+Example of WRONG output (DO NOT DO THIS):
+REASONING: First I analyzed...
+(with markdown code fencing around the JSON)
+
+**START YOUR RESPONSE WITH { AND END WITH }**`;
   }
   
   /**
@@ -206,8 +403,10 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
                   parts: [{ text: prompt }]
                 }],
                 generationConfig: {
-                  temperature: 0.7,
+                  temperature: 0.8, // INCREASED from 0.7 for more variability
                   maxOutputTokens: 2048,
+                  topP: 0.95,       // Add nucleus sampling for diversity
+                  topK: 40,         // Add top-k sampling for diversity
                 }
               })
             }
@@ -290,15 +489,15 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
       heroSubject = 'modern AI command center dashboard with holographic displays and data visualization';
       environmentDescription = 'futuristic enterprise office with glass surfaces, blue ambient lighting, floating UI panels';
     }
-    // Priority 2: Spa/beauty business
-    else if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp')) {
-      campaignGoal = 'Drive demo bookings from premium spa owners for AI management platform';
-      targetAudience = 'Premium Spa Owners & Beauty Studio Managers';
-      emotionalTone = 'aspirational, serene, trustworthy, sophisticated';
-      designDirection = 'luxury wellness tech aesthetic';
-      posterHeadline = 'AI VẬN HÀNH SPA THẾ HỆ MỚI';
-      heroSubject = 'premium glass cosmetic jars on polished marble surface with soft orchid flowers';
-      environmentDescription = 'luxury spa wellness room with frosted glass, warm ambient lighting, natural stone accent wall';
+    // Priority 2: B2B Software for Spa/beauty business (BELLA EOS selling TO spas)
+    else if (lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp') || lowerObj.includes('salon')) {
+      campaignGoal = 'Drive demo bookings from spa owners for Bella EOS management software platform';
+      targetAudience = 'Premium Spa Owners, Beauty Studio Managers, Wellness Center Directors';
+      emotionalTone = 'professional, innovative, results-driven, empowering';
+      designDirection = 'modern B2B software showcase - technology enabling business success';
+      posterHeadline = 'PHẦN MỀM QUẢN TRỊ SPA THÔNG MINH';
+      heroSubject = 'modern MacBook Pro displaying Bella EOS software dashboard with revenue analytics charts, appointment scheduling interface, and customer management data, placed on professional spa reception desk';
+      environmentDescription = 'contemporary spa business office setting with computer workstation, natural lighting, minimal professional decor, subtle wellness elements (plants, clean aesthetic) in soft focus background';
     } else if (lowerObj.includes('bất động sản') || lowerObj.includes('căn hộ')) {
       campaignGoal = 'Drive qualified property investor leads for premium residential project';
       targetAudience = 'High-net-worth property investors and home buyers';
@@ -341,6 +540,159 @@ Then output ONLY valid JSON. No markdown, no code blocks, just raw JSON.`;
     };
   }
   
+  /**
+   * Generate fallback with variation (rotate headlines, benefits, CTAs)
+   */
+  private applyFallbackVariation(brief: CreativeBrief, context: BusinessContextPackage): CreativeBrief {
+    const tracker = ContentHistoryTracker.getInstance();
+    const history = tracker.getStats();
+    const variationIndex = history.total % 5; // Rotate through 5 variants
+    
+    const lowerObj = context.ceoObjective.toLowerCase();
+    const isSpaContext = lowerObj.includes('spa') || lowerObj.includes('thẩm mỹ') || lowerObj.includes('làm đẹp');
+    
+    if (isSpaContext) {
+      // Rotate headlines for B2B Software (FOCUS: Software/Technology, NOT spa services)
+      const headlineVariants = [
+        'PHẦN MỀM QUẢN TRỊ SPA THÔNG MINH',
+        'HỆ THỐNG BELLA EOS - TỰ ĐỘNG HÓA VẬN HÀNH',
+        'DOANH THU TĂNG 2X NHỜ CÔNG NGHỆ AI',
+        'NỀN TẢNG QUẢN LÝ SPA CHUYÊN NGHIỆP',
+        'ỨNG DỤNG AI CHO CHỦ SPA HIỆN ĐẠI'
+      ];
+      
+      // Rotate benefits for SOFTWARE value propositions (NOT service benefits)
+      const benefitSets = [
+        ['⚡ Phần mềm tự động xếp lịch KTV', '📊 Dashboard phân tích thời gian thực', '💰 Tăng doanh thu 150% trong 6 tháng'],
+        ['🖥️ Quản lý đa chi nhánh trên 1 nền tảng', '📱 Ứng dụng mobile quản trị mọi lúc', '🤖 AI dự báo doanh thu chính xác'],
+        ['⏱️ Tiết kiệm 40 giờ/tháng quản lý thủ công', '📈 Báo cáo tự động gửi email hàng ngày', '🎯 Phân tích khách hàng bằng AI'],
+        ['💻 Phần mềm cloud - không cần cài đặt', '🔒 Bảo mật chuẩn enterprise', '🚀 Triển khai trong 1 ngày'],
+        ['📊 Hệ thống CRM tích hợp sẵn', '💳 Thanh toán online tự động', '📞 Hỗ trợ 24/7 bằng tiếng Việt']
+      ];
+      
+      // Rotate CTAs
+      const ctaVariants = [
+        'Demo phần mềm 15 phút',
+        'Dùng thử miễn phí 30 ngày',
+        'Xem video giới thiệu',
+        'Nhận báo giá chi tiết',
+        'Đặt lịch tư vấn 1-1'
+      ];
+      
+      brief.posterHeadline = headlineVariants[variationIndex];
+      brief.keyBenefits = benefitSets[variationIndex];
+      brief.callToAction = ctaVariants[variationIndex];
+      
+      // Vary hero subject device - ALWAYS show SOFTWARE on screen
+      const deviceVariants = [
+        'MacBook Pro displaying Bella EOS dashboard',
+        'iPad Pro showing Bella EOS mobile app interface',
+        'dual monitor setup displaying Bella EOS analytics platform',
+        'laptop computer with Bella EOS scheduling system visible',
+        'tablet device showing Bella EOS revenue reporting dashboard'
+      ];
+      
+      brief.heroSubject = `${deviceVariants[variationIndex]} with colorful data visualizations, business intelligence charts, and management interface clearly visible, positioned on modern spa business office desk`;
+    }
+    
+    return brief;
+  }
+  
+  /**
+   * Get content history constraints for messaging variation
+   */
+  private getContentHistoryConstraints(): string {
+    const tracker = ContentHistoryTracker.getInstance();
+    const constraints = tracker.generateContentConstraints();
+    
+    if (constraints.headlineConstraints.length === 0) {
+      return 'No previous content - you have full creative freedom for messaging.';
+    }
+    
+    console.log('[CreativeDirectorAgent] 📝 Applying content variation constraints');
+    console.log('[CreativeDirectorAgent] 📝 Previous headlines:', constraints.headlineConstraints.length);
+    console.log('[CreativeDirectorAgent] 📝 Previous CTAs:', constraints.ctaConstraints.length);
+    
+    return `
+${constraints.overallGuidance}
+
+### HEADLINE CONSTRAINTS:
+${constraints.headlineConstraints.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+
+### KEY BENEFITS CONSTRAINTS:
+${constraints.benefitConstraints.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+
+### CALL-TO-ACTION CONSTRAINTS:
+${constraints.ctaConstraints.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+
+**CRITICAL**: Your posterHeadline, keyBenefits, and callToAction MUST be fresh and different from all previous versions listed above.
+`;
+  }
+
+  /**
+   * Get image history constraints to avoid repetition
+   */
+  private getImageHistoryConstraints(): string {
+    const tracker = ImageHistoryTracker.getInstance();
+    const constraints = tracker.generateAvoidConstraints();
+    
+    if (constraints.length === 0) {
+      return 'No previous images yet - you have full creative freedom for the first generation.';
+    }
+    
+    console.log('[CreativeDirectorAgent] 🚫 Applying', constraints.length, 'avoid constraints from history');
+    
+    return `
+**CRITICAL: These are RECENT images we've already created. Your new design MUST be visually different:**
+
+${constraints.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+
+**Your creative brief MUST result in an image that looks distinctly different from the above.**
+Think: different subject arrangement, different environment, different color palette, different lighting style.
+`;
+  }
+
+  /**
+   * Generate variation seed for creative diversity
+   */
+  private generateVariationSeed(): string {
+    const strategies = [
+      'bird-eye-aerial-view',
+      'extreme-macro-closeup', 
+      'dutch-angle-dynamic',
+      'worm-eye-upward',
+      'golden-hour-warmth',
+      'blue-hour-coolness',
+      'midday-brightness',
+      'twilight-ambiance',
+      'photorealistic-detail',
+      'minimalist-flat',
+      'cinematic-drama',
+      'editorial-magazine',
+      'tech-gradient',
+      'hero-single-focus',
+      'cluster-arrangement',
+      'lifestyle-in-use',
+      'detail-texture-shot',
+      'warm-golden-tone',
+      'cool-blue-teal',
+      'vibrant-saturated',
+      'muted-pastel',
+      'shallow-depth-blur',
+      'deep-focus-sharp'
+    ];
+    
+    const randomIndex = Math.floor(Math.random() * strategies.length);
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    
+    const seed = `${strategies[randomIndex]}_${timestamp}_${randomSuffix}`;
+    console.log('[CreativeDirectorAgent] 🎨 Variation seed generated:', seed);
+    console.log('[CreativeDirectorAgent] 🎨 Selected strategy:', strategies[randomIndex]);
+    
+    return seed;
+  }
+
   /**
    * Validate brief completeness and quality
    */
