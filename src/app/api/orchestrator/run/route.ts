@@ -1346,6 +1346,8 @@ export async function POST(request: Request) {
       client_gemini_key,
       client_facebook_token,
       client_facebook_page_id,
+      client_eip_api_url,
+      client_eip_api_key,
       agent_configs,
       approved_tasks
     } = body as {
@@ -1356,6 +1358,8 @@ export async function POST(request: Request) {
       client_gemini_key?: string;
       client_facebook_token?: string;
       client_facebook_page_id?: string;
+      client_eip_api_url?: string;
+      client_eip_api_key?: string;
       agent_configs?: Record<string, any>;
       approved_tasks?: string[];
     };
@@ -1370,7 +1374,50 @@ export async function POST(request: Request) {
       gemini:              client_gemini_key,
       facebook_token:      client_facebook_token,
       facebook_page_id:    client_facebook_page_id,
+      eip_url:             client_eip_api_url,
+      eip_api_key:         client_eip_api_key,
       agent_configs:       agent_configs
+    };
+
+    // ── Fetch live data from Bella EIP API (server-side) ─────────────────────
+    let liveEipData: Record<string, any> = {};
+    if (client_eip_api_url && client_eip_api_key && !client_eip_api_url.includes('placeholder')) {
+      try {
+        console.log(`[AgentRunner] 📡 Calling Bella EIP API: ${client_eip_api_url}/overview`);
+        const eipRes = await fetch(`${client_eip_api_url}/overview`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${client_eip_api_key}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        if (eipRes.ok) {
+          const eipJson = await eipRes.json();
+          liveEipData = eipJson;
+          console.log('[AgentRunner] ✅ Bella EIP live data received:', JSON.stringify(eipJson).substring(0, 200));
+        } else {
+          console.warn(`[AgentRunner] ⚠️ Bella EIP responded ${eipRes.status}. Proceeding with context data.`);
+        }
+      } catch (eipErr) {
+        console.warn('[AgentRunner] ⚠️ Bella EIP call failed:', eipErr);
+      }
+    } else {
+      console.log('[AgentRunner] ℹ️ No EIP credentials provided — skipping live EIP fetch.');
+    }
+
+    // Merge live EIP data into context so tools can read real numbers
+    const enrichedContext = {
+      ...context,
+      eip_url: client_eip_api_url,
+      eip_api_key: client_eip_api_key,
+      activeCustomerCount:  liveEipData.customer_count  ?? liveEipData.customers  ?? context?.activeCustomerCount,
+      appointmentCount:     liveEipData.appointment_count ?? liveEipData.appointments ?? context?.appointmentCount,
+      technicianCount:      liveEipData.technician_count  ?? liveEipData.technicians  ?? context?.technicianCount,
+      staffCount:           liveEipData.staff_count        ?? liveEipData.staff        ?? context?.staffCount,
+      monthlyRevenueVnd:    liveEipData.monthly_revenue    ?? liveEipData.revenue      ?? context?.monthlyRevenueVnd,
+      monthlyExpensesVnd:   liveEipData.monthly_expenses   ?? liveEipData.expenses     ?? context?.monthlyExpensesVnd,
+      eipIsLive:            Object.keys(liveEipData).length > 0
     };
 
     // Execute tasks in dependency order, tracking outputs
@@ -1412,7 +1459,7 @@ export async function POST(request: Request) {
       try {
         if (toolFn) {
           console.log(`[AgentRunner] Executing: [${task.agent_name}] → ${task.task_type}`);
-          result = await toolFn(resolvedInput, clientKeys, taskOutputs, context);
+          result = await toolFn(resolvedInput, clientKeys, taskOutputs, enrichedContext);
         } else {
           console.warn(`[AgentRunner] Unknown tool: ${task.task_type} — using default`);
           result = await tool_default(task);

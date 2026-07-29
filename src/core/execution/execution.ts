@@ -22,10 +22,15 @@ function getClientKeys() {
     gemini:              getStoredKey('gemini',    'api_key')    || undefined,
     facebook_token:      getStoredKey('facebook',  'page_access_token') || undefined,
     facebook_page_id:    getStoredKey('facebook',  'page_id')   || undefined,
+    // Bella EIP CRM credentials — forwarded to server so it can call Bella EIP directly
+    eip_api_url:         getStoredKey('bella_eip', 'api_url')   || undefined,
+    eip_api_key:         getStoredKey('bella_eip', 'api_key')   || undefined,
   };
   
   console.log('[getClientKeys] Parsed keys:');
   console.log('[getClientKeys]   - gemini:', keys.gemini ? `YES (${keys.gemini.substring(0, 20)}...)` : 'NO');
+  console.log('[getClientKeys]   - bella_eip_url:', keys.eip_api_url ? `YES (${keys.eip_api_url})` : 'NO ❌');
+  console.log('[getClientKeys]   - bella_eip_key:', keys.eip_api_key ? `YES (${keys.eip_api_key.substring(0, 15)}...)` : 'NO ❌');
   
   return keys;
 }
@@ -98,6 +103,9 @@ async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPac
       client_gemini_key:     keys.gemini,
       client_facebook_token: keys.facebook_token,
       client_facebook_page_id: keys.facebook_page_id,
+      // Bella EIP CRM — server uses these to make real HTTP calls to eip.bella.vn
+      client_eip_api_url:    keys.eip_api_url,
+      client_eip_api_key:    keys.eip_api_key,
       agent_configs:         agentConfigs,
       approved_tasks:        approvedTasks
     })
