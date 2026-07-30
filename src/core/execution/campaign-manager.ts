@@ -404,7 +404,7 @@ class CampaignExecutionManagerClass {
           avatar: '💼',
           role: 'Giám Đốc Bán Hàng & CSKH',
           department: 'Sales & Chốt Booking',
-          opinion: 'Phản biện: Nếu chỉ đổ tiền chạy Marketing mà không tối ưu kịch bản chốt Booking trên CRM, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.',
+          opinion: `Phản biện: Với cơ sở dữ liệu hiện tại là ${finalCustCount} khách hàng CRM đồng bộ từ EIP, nếu không tối ưu kịch bản chốt Booking, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.`,
           status: 'CRITIQUE',
           riskScore: 0.35
         },
@@ -414,7 +414,7 @@ class CampaignExecutionManagerClass {
           avatar: '👥',
           role: 'Trưởng Phòng Nhân Sự',
           department: 'Nhân Sự & Công Suất Ca',
-          opinion: 'Thẩm định nhân sự: Hiện tại 3 KTV đang rảnh ca chiều, tải trọng ca đạt 65%. Đủ năng lực phục vụ tăng trưởng mà không cần tuyển mới gấp.',
+          opinion: `Thẩm định nhân sự: Hiện tại có ${eipOverview.technicianCount} KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV đạt mức ${eipOverview.technicianCount > 0 ? ((eipOverview.appointmentCount / (eipOverview.technicianCount * 8)) * 100).toFixed(0) : '65'}%, đủ năng lực vận hành chiến dịch mà không cần tuyển mới gấp.`,
           status: 'APPROVED',
           riskScore: 0.10
         },
@@ -424,7 +424,7 @@ class CampaignExecutionManagerClass {
           avatar: '⚙️',
           role: 'Trưởng Phòng Vận Hành',
           department: 'Vận Hành Chi Nhánh & SLA',
-          opinion: 'Thẩm định quy trình: Đã đối chiếu SOP-MKT-V1.8 & SOP-DSN-V2.1. Đảm bảo SLA phục vụ dưới 15 phút/khách.',
+          opinion: `Thẩm định quy trình: Đã đối chiếu quy trình phục vụ cho ${eipOverview.appointmentCount} lịch hẹn hiện tại dựa trên SOP-MKT-V1.8 & SOP-DSN-V2.1. Đảm bảo SLA phục vụ dưới 15 phút/khách.`,
           status: 'APPROVED',
           riskScore: 0.05
         },
@@ -444,7 +444,7 @@ class CampaignExecutionManagerClass {
           avatar: '💰',
           role: 'Giám Đốc Tài Chính',
           department: 'Tài Chính & Ngân Sách',
-          opinion: `Thẩm định tài chính: Hạn mức ngân sách ${(budgetLimitVal).toLocaleString('vi-VN')} VND. ROI dự kiến +210%, dòng tiền thực thu dương từ tuần thứ 2.`,
+          opinion: `Thẩm định tài chính: Doanh thu tháng hiện tại của EIP đạt ${(eipOverview.monthlyRevenueVnd).toLocaleString('vi-VN')} VND, chi phí vận hành ${(eipOverview.monthlyExpensesVnd).toLocaleString('vi-VN')} VND. Ngân sách đề xuất ${(budgetLimitVal).toLocaleString('vi-VN')} VND nằm trong vùng an toàn dòng tiền.`,
           status: 'APPROVED',
           riskScore: 0.12
         }
