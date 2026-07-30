@@ -526,6 +526,13 @@ export default function Dashboard() {
         {/* Navigation Actions */}
         <div className="flex items-center gap-3">
           <Link
+            href="/tasks"
+            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-2xs"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>📋 Quản lý tác vụ & tiến độ</span>
+          </Link>
+          <Link
             href="/matrix"
             className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-2xs"
           >

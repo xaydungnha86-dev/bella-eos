@@ -19,7 +19,7 @@ export interface ApprovalStage {
 
 export interface ApprovalWorkflow {
   workflowId: string;
-  targetType: 'TASK' | 'INVOICE' | 'CONTRACT' | 'LEAVE_REQUEST' | 'DEPLOYMENT';
+  aggregateType: 'TASK' | 'WORKFLOW' | 'INVOICE' | 'CONTRACT' | 'LEAVE_REQUEST' | 'DEPLOYMENT' | 'SOP' | 'PAYMENT' | 'FORECAST';
   targetId: string;
   stages: ApprovalStage[];
   currentStageIndex: number;
@@ -41,7 +41,7 @@ export class ApprovalService {
   }
 
   public createWorkflow(
-    targetType: ApprovalWorkflow['targetType'],
+    aggregateType: ApprovalWorkflow['aggregateType'],
     targetId: string,
     stagesConfig: Array<{ stageName: string; approverRole: string; }>
   ): ApprovalWorkflow {
@@ -55,7 +55,7 @@ export class ApprovalService {
 
     const wf: ApprovalWorkflow = {
       workflowId,
-      targetType,
+      aggregateType,
       targetId,
       stages,
       currentStageIndex: 0,

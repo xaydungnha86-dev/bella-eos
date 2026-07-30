@@ -133,6 +133,21 @@ class CampaignExecutionManagerClass {
       } catch (e) {
         console.warn('Failed to load CampaignExecutionManager state:', e);
       }
+
+      // Bootstrap Task Governance Bounded Context services
+      try {
+        const { bootstrapEosExecutionServices } = require('./bootstrap');
+        const container = bootstrapEosExecutionServices();
+        container.eventBus.subscribe('OutcomeCalculated', (event: any) => {
+          this.addLog('PILOT LEDGER', `📈 Ghi nhận hiệu suất tích cực từ sự kiện OutcomeCalculated: ROI cải thiện +${event.payload.relativeImprovementPercent}%, quy mô khách CRM tăng ${event.payload.absoluteVariance}.`, 'text-emerald-400 font-bold');
+          this.updateState({
+            activeCustomerCount: this.state.activeCustomerCount + event.payload.absoluteVariance,
+            fbReachCount: this.state.fbReachCount + Math.round(event.payload.absoluteVariance * 12.5)
+          });
+        });
+      } catch (e) {
+        console.warn('Failed to bootstrap Eos Execution Services:', e);
+      }
     }
   }
 

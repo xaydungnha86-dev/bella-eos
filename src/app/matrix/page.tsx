@@ -85,6 +85,13 @@ export default function ExecutiveMatrixPage() {
             <span>Tiến độ: {completedCount} / {dynamicTasks.length} Task Hoàn Thành</span>
           </div>
           <Link
+            href="/tasks"
+            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>📋 Quản lý tác vụ</span>
+          </Link>
+          <Link
             href="/settings"
             className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow-2xs"
           >

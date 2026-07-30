@@ -282,6 +282,13 @@ export default function ExecutiveControlRoom() {
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-slate-200 bg-white/40 flex flex-col gap-2">
           <Link
+            href="/tasks"
+            className="w-full text-center py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-800 transition-all border border-emerald-250 active:scale-98 flex items-center justify-center gap-1.5"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>📋 Quản lý tác vụ & tiến độ</span>
+          </Link>
+          <Link
             href="/"
             className="w-full text-center py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition-all border border-slate-200 active:scale-98"
           >
