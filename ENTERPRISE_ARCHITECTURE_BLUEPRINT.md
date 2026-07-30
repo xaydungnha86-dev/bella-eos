@@ -1,7 +1,7 @@
 # 🏛️ MASTER ENTERPRISE BLUEPRINT: BELLA OPERATING SYSTEM (BELLA EOS) & BELLA EIP
-> **STATUS**: `FINAL ARCHITECTURE CONSTITUTION (v21.0 CREATIVE PRODUCTION RUNTIME + ENTERPRISE KNOWLEDGE REPOSITORY)`  
-> **SPECIFICATION VERSION**: `v21.0`  
-> **LAST UPDATED**: `2026-07-27`  
+> **STATUS**: `FINAL ARCHITECTURE CONSTITUTION (v21.1 CREATIVE PRODUCTION RUNTIME + WORK GOVERNANCE)`  
+> **SPECIFICATION VERSION**: `v21.1`  
+> **LAST UPDATED**: `2026-07-30`  
 > **ENTERPRISE TARGET LIFESPAN**: `2026 - 2046 (20-YEAR ENTERPRISE OPERATING STANDARD)`
 
 ---
@@ -383,6 +383,7 @@ Partitioned Event Bus (Domain Events, Application Events, Integration Events)
 | **Sprint 23** | **Creative Production Runtime Kernel v2** (`src/core/creative/`): DAG-scheduled async Creative Kernel (Kahn's algorithm topological sort), PlanningExecutor (parallel wave execution), PlannerRegistry, KernelEventBus, ConstraintEngine. 9 Planners: `IntentPlanner`, `SemanticPlanner`, `StylePlanner`, `ScenePlanner`, `CompositionPlanner`, `LightingPlanner`, `CameraPlanner`, `NarrativePlanner`, `QualityEvaluator` (final quality-gated wave). 3 AI Provider Adapters: `ImagenAdapter` (Google, natural prose), `FluxAdapter` (Flux, tagged keywords), `DalleAdapter` (DALL-E 3). `CreativePlanningEngine` dual-interface shim (`plan` sync / `planAsync` async) for backward compatibility. `generate-image` API route migrated to async kernel. TypeScript: 0 errors. Tests: 85/85 legacy + 20/20 kernel. | ✅ **PASSED 100% (Build PASS)** |
 | **Sprint 24** | **Enterprise Knowledge Repository (EKR)** (`ADR-0006`): Document versioning & registry pattern (PostgreSQL `document_registry` + `document_versions`), 5-category data segregation (Structured → PostgreSQL, Documents → Object Storage, Knowledge → pgvector/Graph, AI Runtime → Redis, Media → Blob). `IBlobStore` interface, `StorageServices` abstraction, ingestion pipeline (`Evidence Ingestion → Enterprise Parser → Chunker → Embedding → Vector DB`). Supabase migration `002_document_registry.sql`. `EnterpriseParserRuntime` & `EvidenceIngestionRuntime` extended with multi-modal support. | ✅ **PASSED 100% (Build PASS)** |
 | **Sprint 25** | **C-Level CMO AI & ECOS Core Platform Primitives**: Decentralized 4 core platform primitives: `EnterpriseContextBuilder` (aggregates, deduplicates & sanitizes CRM/ERP inputs to create ECC), `EnterpriseReasoningEngine` (computes Shared Reasoning Graph DAG nodes independently from Executives), `PolicyEngine` (validates EIC proposal constraints on budget & segments), `ContractRegistry` (Git-like registry versioning, auditing & lineage for ECC, EIC, TEC). Integrated into API orchestrator run/plan routes & Client UI. | ✅ **PASSED 100% (Build PASS)** |
+| **Sprint 26** | **Work Governance Bounded Context** (`v5.4`): Complete execution baseline separating WorkAssignment from Workflow Aggregate Root. Introduced `PersistenceAdapter` (LocalStorage/Supabase abstractions), class-based `DomainEvent` classes, query-side projections, and append-only `SubmissionStore` (immutable task history, machine validations, and CEO approvals). Visual C-Suite control dashboard (`/tasks`) integrated. Next.js type safety verified. | ✅ **PASSED 100% (Build PASS)** |
 
 ---
 
