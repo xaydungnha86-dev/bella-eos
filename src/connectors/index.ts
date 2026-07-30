@@ -22,25 +22,32 @@ export class EipConnector {
         const apiKey = store['bella_eip::api_key'];
         
         if (apiUrl && apiKey && !apiUrl.includes('placeholder')) {
-          console.log(`[EipConnector] Synchronizing full enterprise payload from EIP API: ${apiUrl}`);
-          const res = await fetch(`${apiUrl}/overview`, {
+          console.log(`[EipConnector] Fetching overview via server proxy to bypass CORS: ${apiUrl}`);
+          const res = await fetch('/api/eip/overview', {
+            method: 'POST',
             headers: {
-              'Authorization': `Bearer ${apiKey}`,
               'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+              eip_url: apiUrl,
+              eip_api_key: apiKey
+            })
           });
           if (res.ok) {
-            const data = await res.json();
-            return {
-              activeCustomersCount: data.customer_count || data.customers || 1287,
-              appointmentCount: data.appointment_count || data.appointments || 450,
-              technicianCount: data.technician_count || data.technicians || 12,
-              staffCount: data.staff_count || data.staff || 25,
-              monthlyRevenueVnd: data.monthly_revenue || data.revenue || 450000000,
-              monthlyExpensesVnd: data.monthly_expenses || data.expenses || 280000000,
-              isConnected: true,
-              source: `Bella EIP API (${apiUrl})`
-            };
+            const result = await res.json();
+            if (result.success && result.data) {
+              const data = result.data;
+              return {
+                activeCustomersCount: data.customer_count || data.customers || 1287,
+                appointmentCount: data.appointment_count || data.appointments || 450,
+                technicianCount: data.technician_count || data.technicians || 12,
+                staffCount: data.staff_count || data.staff || 25,
+                monthlyRevenueVnd: data.monthly_revenue || data.revenue || 450000000,
+                monthlyExpensesVnd: data.monthly_expenses || data.expenses || 280000000,
+                isConnected: true,
+                source: `Bella EIP API (${apiUrl})`
+              };
+            }
           }
         }
       } catch (err) {
@@ -68,16 +75,21 @@ export class EipConnector {
         const apiKey = store['bella_eip::api_key'];
         
         if (apiUrl && apiKey && !apiUrl.includes('placeholder')) {
-          console.log(`[EipConnector] Connecting to EIP API at: ${apiUrl}`);
-          const res = await fetch(`${apiUrl}/customers?status=active`, {
+          console.log(`[EipConnector] Fetching active customers via server proxy to bypass CORS: ${apiUrl}`);
+          const res = await fetch('/api/eip/customers', {
+            method: 'POST',
             headers: {
-              'Authorization': `Bearer ${apiKey}`,
               'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+              eip_url: apiUrl,
+              eip_api_key: apiKey
+            })
           });
           if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data)) {
+            const result = await res.json();
+            if (result.success && Array.isArray(result.data)) {
+              const data = result.data;
               console.log(`[EipConnector] Successfully pulled ${data.length} active customers from EIP API`);
               return data.map((c: any) => EnterpriseObjectModel.createObject<Customer>('Customer', {
                 id: c.id || c.customer_id || `cust_${Date.now()}`,

@@ -1393,9 +1393,14 @@ export async function POST(request: Request) {
           }
         });
         if (eipRes.ok) {
-          const eipJson = await eipRes.json();
-          liveEipData = eipJson;
-          console.log('[AgentRunner] ✅ Bella EIP live data received:', JSON.stringify(eipJson).substring(0, 200));
+          const contentType = eipRes.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const eipJson = await eipRes.json();
+            liveEipData = eipJson;
+            console.log('[AgentRunner] ✅ Bella EIP live data received:', JSON.stringify(eipJson).substring(0, 200));
+          } else {
+            console.warn('[AgentRunner] ⚠️ Bella EIP returned non-JSON response (likely HTML landing page or rewrite fallback).');
+          }
         } else {
           console.warn(`[AgentRunner] ⚠️ Bella EIP responded ${eipRes.status}. Proceeding with context data.`);
         }
