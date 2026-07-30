@@ -104,17 +104,18 @@ Architecture Freeze
         │
         ├──────────────────┐
         ▼                  ▼
-   Verticals           Plugins
-        │                  │
-  Bella Spa           BMAD
-  Bella Clinic        Claude Code
-  Bella Retail        Codex
-  Bella Manufacture   OpenHands
-  AI Employees        Custom Plugins
-  SOP Engine
-  Business DNA
-  Connector Ecosystem
-  Bella EIP Integration
+    Verticals           Plugins
+         │                  │
+   Bella Spa           BMAD
+   Bella Clinic        Claude Code
+   Bella Retail        Codex
+   Bella Manufacture   OpenHands
+   AI Employees        Custom Plugins
+   SOP Engine
+   Work Governance (v5.4)
+   Business DNA
+   Connector Ecosystem
+   Bella EIP Integration
 ```
 
 ---

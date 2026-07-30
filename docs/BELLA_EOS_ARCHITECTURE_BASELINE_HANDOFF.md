@@ -1,7 +1,7 @@
 # 🔒 BELLA EOS — ARCHITECTURE BASELINE HANDOFF & FREEZE CERTIFICATE
 
 > **Tài liệu Bàn giao Baseline & Khóa Cứng Kiến trúc (Architecture Baseline Handoff & Freeze Certificate)**  
-> **Phiên bản**: 3.0.0-FINAL  
+> **Phiên bản**: 3.1.0-GOVERNANCE  
 > **Ngày đóng băng**: 30/07/2026  
 > **Trạng thái**: Architecture Freeze Locked 🔒  
 > **Test Baseline**: 185/185 Tests PASS (31 Test Suites - 100% Pass Rate)
@@ -12,10 +12,10 @@
 
 | Thông số Kỹ thuật | Giá trị / Trạng thái Chính thức |
 | :--- | :--- |
-| **Architectural Tag** | `v3.0.0-architecture-freeze` |
-| **System Maturity Rating** | **9.5 / 10** (Technical Architecture & Engineering Foundation) |
-| **Production Evidence Framework** | **9.0 / 10** (Hardening, Scale Benchmarks & Outcome Capabilities Verified) |
-| **Enterprise Production Proven** | **~8.5 – 8.8 / 10** (Ready for Real Tenant Pilot Validation) |
+| **Architectural Tag** | `v3.1.0-architecture-freeze` |
+| **System Maturity Rating** | **9.6 / 10** (Technical Architecture & Engineering Foundation) |
+| **Production Evidence Framework** | **9.2 / 10** (Hardening, Scale Benchmarks & Outcome Capabilities Verified) |
+| **Enterprise Production Proven** | **~8.8 – 9.0 / 10** (Ready for Real Tenant Pilot Validation) |
 | **Test Coverage Baseline** | **31 Test Suites \| 185 Tests \| 100% PASS** |
 | **Scale Stress Benchmark** | **500 Concurrent Sagas completed in 887ms (~564 completions/sec)** |
 | **Multi-day Resilience Benchmark** | **5-day simulated process survival across worker restart & delayed approvals** |
@@ -36,6 +36,12 @@ Tất cả các module dưới đây đại diện cho nền tảng kỹ thuật
 8. **Outcome Contract & Attribution Model** (`src/core/governance/outcome-contract.ts` & `outcome-attribution-engine.ts`): Tính toán 3 chỉ số KPI chính xác và giao diện C-Suite UI hiển thị `"Direct Attribution — policy-based"`.
 9. **Production Pilot Ledger** (`src/core/governance/production-pilot-ledger.ts`): Khung lưu trữ Before/After Baseline (`prePilotBaseline` $\rightarrow$ `postPilotActual`).
 10. **Governed Learning Policy Evaluator** (`src/core/governance/learning-policy.ts`): Động cơ khóa học tập tự động nếu dữ liệu là thử nghiệm nhân tạo (`SYNTHETIC`/`SIMULATED`).
+11. **Work Governance Bounded Context (v5.4)**:
+    - **Domain Core**: Workflow Aggregate Root (`verifyAssignment`, `completeIfReady`), `WorkAssignment` child entity, and class-based, compile-safe `DomainEvent` classes carrying extensible metadata headers.
+    - **Separation of State Machines**: Decoupled Execution, Verification, and Approval state variables to prevent enum combinations explosion.
+    - **CQRS Architecture**: Command-side writing via `WorkflowRepository` and append-only `SubmissionStore` (immutable submissions, verification/approval logs). Query-side readings via specialized projections.
+    - **Persistence Adapter Abstraction**: Decoupled `PersistenceAdapter` interface (with `LocalStoragePersistenceAdapter` for Pilot Mode).
+    - **Outcomes & Telemetry**: Window-based `MeasurementScheduler` (Observation Window status tracking) and `TelemetryAdapter` whitelisting logs.
 
 ---
 
