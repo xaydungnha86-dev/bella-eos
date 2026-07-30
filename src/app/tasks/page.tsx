@@ -640,8 +640,8 @@ export default function WorkAssignmentsPage() {
                 ) : (
                   [...telemetryLogs].reverse().map((log) => (
                     <div key={log.logId} className="bg-[#03120E] border border-emerald-950/40 p-2.5 rounded-lg flex flex-col gap-1 shadow-2xs">
-                      <div className="flex justify-between items-center text-slate-500 font-semibold">
-                        <span>[{log.timestamp.split('T')[1].substring(0, 8)}]</span>
+                      <div className="flex justify-between items-center text-slate-505 font-semibold">
+                        <span>[{log.timestamp && log.timestamp.includes('T') ? log.timestamp.split('T')[1].substring(0, 8) : (log.timestamp || '00:00:00')}]</span>
                         <span className="text-emerald-500 font-bold uppercase tracking-wider">{log.eventType}</span>
                       </div>
                       <p className="text-slate-200 mt-1 font-sans text-[10px] break-words">{log.payloadSummary}</p>
