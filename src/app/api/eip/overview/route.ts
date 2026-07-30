@@ -52,7 +52,8 @@ export async function POST(request: Request) {
             'Accept': 'application/json',
             'X-Client': 'bella-eos-platform'
           },
-          signal: AbortSignal.timeout(8000)
+          signal: AbortSignal.timeout(8000),
+          cache: 'no-store'
         });
 
         lastStatus = res.status;
@@ -89,10 +90,14 @@ export async function POST(request: Request) {
     }
 
     if (responseData) {
+      const unwrappedData = (responseData && typeof responseData === 'object' && 'data' in responseData)
+        ? responseData.data
+        : responseData;
+
       return NextResponse.json({
         success: true,
         endpoint: successfulEndpoint,
-        data: responseData
+        data: unwrappedData
       });
     }
 

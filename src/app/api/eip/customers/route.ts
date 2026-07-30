@@ -20,7 +20,9 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    const baseUrl = eip_url.replace(/\/$/, '');
+    const rawUrl = eip_url.trim().replace(/\/$/, '');
+    const cleanBase = rawUrl.replace(/\/overview$/, '').replace(/\/$/, '');
+    const baseUrl = cleanBase;
     
     // Candidate endpoints for EIP customers
     const candidateEndpoints = [
@@ -50,7 +52,8 @@ export async function POST(request: Request) {
             'Accept': 'application/json',
             'X-Client': 'bella-eos-platform'
           },
-          signal: AbortSignal.timeout(8000)
+          signal: AbortSignal.timeout(8000),
+          cache: 'no-store'
         });
 
         lastStatus = res.status;

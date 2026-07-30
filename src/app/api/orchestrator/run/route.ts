@@ -765,6 +765,17 @@ async function tool_analyze_marketing_strategy(input: any, clientKeys?: any, con
   const fbReach = context?.fbReachCount || 0;
   const hasStats = activeCustomers > 0 && fbReach > 0;
   
+  const eipAnalytics = context?.eipAnalytics || {};
+  let analyticsContext = '';
+  if (Object.keys(eipAnalytics).length > 0) {
+    analyticsContext = `\nDự báo & Phân tích Nâng cao từ EIP Intelligence:
+- Doanh thu: ${JSON.stringify(eipAnalytics.revenue || {})}
+- Hiệu suất Vận hành (KTV): ${JSON.stringify(eipAnalytics.efficiency || {})}
+- Khách hàng (Tỷ lệ churn): ${JSON.stringify(eipAnalytics.customer || {})}
+- Sức khỏe tài chính: ${JSON.stringify(eipAnalytics.financial || {})}
+- Chỉ số Tăng trưởng: ${JSON.stringify(eipAnalytics.growth || {})}`;
+  }
+  
   const { EnterpriseContextBuilder } = await import('@/core/brain/context-builder');
   const ecc = EnterpriseContextBuilder.getInstance().buildContext({
     objective,
@@ -1065,7 +1076,7 @@ Phần 1: Bản Báo cáo Lãnh đạo (Markdown Report) chia làm 3 tầng: Exe
 Phần 2: Block JSON EIC hợp lệ bọc trong thẻ codeblock \`\`\`json ... \`\`\` khớp hoàn toàn với interface ExecutiveIntelligenceContract.
 Hợp đồng EIC ID: ${eicContractId} | Parent: CEO-GOAL-ROOT.
 Bằng chứng dữ liệu (Evidence IDs): ${JSON.stringify(ecc.evidenceIds)}.
-Dữ liệu CRM thực tế: ${activeCustomers} | FB Reach: ${fbReach}.
+Dữ liệu CRM thực tế: ${activeCustomers} | FB Reach: ${fbReach}.${analyticsContext}
 
 ${memoryContextPrompt}`;
 
@@ -1192,6 +1203,17 @@ async function tool_orchestrate_enterprise_plan(input: any, clientKeys?: any, co
   const monthlyRevenue = context?.monthlyRevenueVnd ? `${(context.monthlyRevenueVnd / 1000000).toFixed(0)}M` : '0M';
   const monthlyExpenses = context?.monthlyExpensesVnd ? `${(context.monthlyExpensesVnd / 1000000).toFixed(0)}M` : '0M';
 
+  const eipAnalytics = context?.eipAnalytics || {};
+  let analyticsPrompt = '';
+  if (Object.keys(eipAnalytics).length > 0) {
+    analyticsPrompt = `\nDữ liệu Dự báo & Phân tích Nâng cao từ EIP Intelligence:
+- Doanh thu (Revenue Summary): ${JSON.stringify(eipAnalytics.revenue || {})}
+- Hiệu suất Vận hành (Operational Efficiency): ${JSON.stringify(eipAnalytics.efficiency || {})}
+- Khách hàng & Tỷ lệ rời bỏ (Customer Insights): ${JSON.stringify(eipAnalytics.customer || {})}
+- Sức khỏe tài chính (Financial Health): ${JSON.stringify(eipAnalytics.financial || {})}
+- Chỉ số Tăng trưởng (Growth Indicators): ${JSON.stringify(eipAnalytics.growth || {})}`;
+  }
+
   // If Gemini API Key is available, invoke Gemini 1.5 Flash in real-time
   if (geminiKey) {
     try {
@@ -1201,6 +1223,7 @@ Thông tin doanh nghiệp thực tế từ Bella EIP CRM:
 - Số khách hàng CRM: ${activeCustomers} | Số lịch hẹn: ${appointmentCount}
 - Số KTV: ${technicianCount} | Nhân sự: ${staffCount}
 - Doanh thu: ${monthlyRevenue} VND | Chi phí: ${monthlyExpenses} VND
+${analyticsPrompt}
 
 Yêu cầu xuất ra Báo cáo COO dạng văn bản ngắn gọn, chuyên nghiệp gồm 4 mục:
 1. PHÂN TÍCH HIỆN TRẠNG DOANH NGHIỆP (Công suất KTV, CRM, Dòng tiền)
@@ -1271,12 +1294,40 @@ async function tool_evaluate_sales_funnel(input: any, clientKeys?: any, context?
 }
 
 async function tool_audit_hr_capacity(input: any, clientKeys?: any, context?: any): Promise<ToolResult> {
+  const technicianCount = context?.technicianCount ?? 0;
+  const appointmentCount = context?.appointmentCount ?? 0;
+  const eipIsLive = context?.eipIsLive ?? false;
+
+  const hrWorkload = technicianCount > 0 
+    ? Math.round((appointmentCount / (technicianCount * 8)) * 100)
+    : 0;
+
+  let report = '';
+  if (!eipIsLive) {
+    report = `👥 [Demeter HR & Staffing AI] ĐÃ THẨM ĐỊNH CÔNG SUẤT CA KĨ THUẬT VIÊN:
+• Năng suất hiện tại: 3 KTV ca chiều khả dụng. Tải trọng tăng ca đạt 65% (Dữ liệu dự báo do chưa kết nối EIP)
+• Khả năng phục vụ: Đủ năng suất đáp ứng 40 lượt demo mới không hụt ca
+• Chính sách nhân sự: Đã duyệt hạn mức phụ cấp OT 15% cho ca cuối tuần`;
+  } else if (technicianCount === 0) {
+    report = `👥 [Demeter HR & Staffing AI] ĐÃ THẨM ĐỊNH CÔNG SUẤT CA KĨ THUẬT VIÊN:
+• CẢNH BÁO KHẨN CẤP: Hiện tại có 0 KTV hoạt động tại chi nhánh. Lượng đặt lịch là ${appointmentCount} cuộc hẹn.
+• Tải trọng ca: Quá tải nghiêm trọng (Không khả dụng).
+• Đề xuất bắt buộc: YÊU CẦU TUYỂN DỤNG THÊM KTV GẤP HOẶC ĐIỀU ĐỘNG NHÂN SỰ TỪ CHI NHÁNH KHÁC. Không thể chạy chiến dịch khi không có nhân sự phục vụ.`;
+  } else if (hrWorkload > 90) {
+    report = `👥 [Demeter HR & Staffing AI] ĐÃ THẨM ĐỊNH CÔNG SUẤT CA KĨ THUẬT VIÊN:
+• Năng suất hiện tại: Có ${technicianCount} KTV hoạt động. Tải trọng ca rất cao đạt mức ${hrWorkload}%.
+• Khả năng phục vụ: Nguy cơ thiếu hụt ca phục vụ khi số lượng đặt lịch tăng.
+• Đề xuất bắt buộc: Cần lập tức tuyển dụng thêm KTV hoặc tuyển cộng tác viên thời vụ hỗ trợ.`;
+  } else {
+    report = `👥 [Demeter HR & Staffing AI] ĐÃ THẨM ĐỊNH CÔNG SUẤT CA KĨ THUẬT VIÊN:
+• Năng suất hiện tại: Có ${technicianCount} KTV hoạt động. Tải trọng ca đạt mức ${hrWorkload}%.
+• Khả năng phục vụ: Đủ năng suất đáp ứng các lượt phục vụ mới, không cần tuyển mới gấp.
+• Chính sách nhân sự: Đã duyệt hạn mức phụ cấp OT 15% cho ca cuối tuần`;
+  }
+
   return {
     success: true,
-    output: `👥 [Demeter HR & Staffing AI] ĐÃ THẨM ĐỊNH CÔNG SUẤT CA KĨ THUẬT VIÊN:
-• Năng suất hiện tại: 3 KTV ca chiều khả dụng. Tải trọng tăng ca đạt 65%
-• Khả năng phục vụ: Đủ năng suất đáp ứng 40 lượt demo mới không hụt ca
-• Chính sách nhân sự: Đã duyệt hạn mức phụ cấp OT 15% cho ca cuối tuần`,
+    output: report,
     meta: { status: 'COMPLETED', type: 'HR_CAPACITY_AUDIT' }
   };
 }
@@ -1381,12 +1432,14 @@ export async function POST(request: Request) {
 
     // ── Fetch live data from Bella EIP API (server-side) ─────────────────────
     let liveEipData: Record<string, any> = {};
+    let liveEipAnalytics: Record<string, any> = {};
     if (client_eip_api_url && client_eip_api_key && !client_eip_api_url.includes('placeholder')) {
       try {
         const eipBaseUrl = client_eip_api_url.trim().replace(/\/$/, '');
         const targetEipUrl = eipBaseUrl.endsWith('/overview') ? eipBaseUrl : `${eipBaseUrl}/overview`;
-        console.log(`[AgentRunner] 📡 Calling Bella EIP API: ${targetEipUrl}`);
-        const eipRes = await fetch(targetEipUrl, {
+        const targetAnalyticsUrl = eipBaseUrl.replace(/\/overview$/, '') + '/analytics';
+        console.log(`[AgentRunner] 📡 Calling Bella EIP APIs: ${targetEipUrl} & ${targetAnalyticsUrl}`);
+        const fetchOptions = {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${client_eip_api_key}`,
@@ -1396,22 +1449,35 @@ export async function POST(request: Request) {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'X-Client': 'bella-eos-platform'
-          }
-        });
-        if (eipRes.ok) {
-          const contentType = eipRes.headers.get('content-type') || '';
+          },
+          cache: 'no-store' as RequestCache
+        };
+
+        const [resOverview, resAnalytics] = await Promise.all([
+          fetch(targetEipUrl, fetchOptions).catch(err => { console.warn('Overview fetch error:', err); return null; }),
+          fetch(targetAnalyticsUrl, fetchOptions).catch(err => { console.warn('Analytics fetch error:', err); return null; })
+        ]);
+
+        if (resOverview && resOverview.ok) {
+          const contentType = resOverview.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
-            const eipJson = await eipRes.json();
-            liveEipData = eipJson;
-            console.log('[AgentRunner] ✅ Bella EIP live data received:', JSON.stringify(eipJson).substring(0, 200));
-          } else {
-            console.warn('[AgentRunner] ⚠️ Bella EIP returned non-JSON response (likely HTML landing page or rewrite fallback).');
+            const eipJson = await resOverview.json();
+            liveEipData = (eipJson && typeof eipJson === 'object' && 'data' in eipJson) ? eipJson.data : eipJson;
+            console.log('[AgentRunner] ✅ Bella EIP live data received:', JSON.stringify(liveEipData).substring(0, 200));
           }
-        } else {
-          console.warn(`[AgentRunner] ⚠️ Bella EIP responded ${eipRes.status}. Proceeding with context data.`);
+        }
+        
+        if (resAnalytics && resAnalytics.ok) {
+          const contentType = resAnalytics.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const analyticsJson = await resAnalytics.json();
+            const unwrapped = (analyticsJson && typeof analyticsJson === 'object' && 'data' in analyticsJson) ? analyticsJson.data : analyticsJson;
+            liveEipAnalytics = unwrapped?.analytics_data || unwrapped || {};
+            console.log('[AgentRunner] ✅ Bella EIP live analytics received:', JSON.stringify(liveEipAnalytics).substring(0, 200));
+          }
         }
       } catch (eipErr) {
-        console.warn('[AgentRunner] ⚠️ Bella EIP call failed:', eipErr);
+        console.warn('[AgentRunner] ⚠️ Bella EIP calls failed:', eipErr);
       }
     } else {
       console.log('[AgentRunner] ℹ️ No EIP credentials provided — skipping live EIP fetch.');
@@ -1428,7 +1494,8 @@ export async function POST(request: Request) {
       staffCount:           liveEipData.staff_count        ?? liveEipData.staff        ?? context?.staffCount,
       monthlyRevenueVnd:    liveEipData.monthly_revenue    ?? liveEipData.revenue      ?? context?.monthlyRevenueVnd,
       monthlyExpensesVnd:   liveEipData.monthly_expenses   ?? liveEipData.expenses     ?? context?.monthlyExpensesVnd,
-      eipIsLive:            Object.keys(liveEipData).length > 0
+      eipIsLive:            Object.keys(liveEipData).length > 0,
+      eipAnalytics:         liveEipAnalytics
     };
 
     // Execute tasks in dependency order, tracking outputs

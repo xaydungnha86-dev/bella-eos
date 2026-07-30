@@ -54,7 +54,8 @@ export async function POST(request: Request) {
             'X-Client': 'bella-eos-platform'
           },
           // 10s timeout
-          signal: AbortSignal.timeout(10000)
+          signal: AbortSignal.timeout(10000),
+          cache: 'no-store'
         });
 
         lastStatus = res.status;

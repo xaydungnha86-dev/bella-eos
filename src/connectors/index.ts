@@ -36,7 +36,9 @@ export class EipConnector {
           if (res.ok) {
             const result = await res.json();
             if (result.success && result.data) {
-              const data = result.data;
+              const rawData = result.data;
+              // Handle potential double-wrapping from legacy or nested API envelopes
+              const data = (rawData && typeof rawData === 'object' && 'data' in rawData) ? rawData.data : rawData;
               return {
                 activeCustomersCount: data.customer_count ?? data.customers ?? data.activeCustomersCount ?? data.total_customers ?? data.count ?? 0,
                 appointmentCount: data.appointment_count ?? data.appointments ?? data.appointmentCount ?? data.total_appointments ?? 0,

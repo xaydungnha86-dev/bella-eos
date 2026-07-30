@@ -387,6 +387,29 @@ class CampaignExecutionManagerClass {
       const lowerObj = objective.toLowerCase();
       const isExtreme = lowerObj.includes('300%') || lowerObj.includes('gấp 3');
 
+      // Calculate HR Capacity metrics dynamically based on EIP data
+      const hrWorkload = eipOverview.technicianCount > 0 
+        ? Math.round((eipOverview.appointmentCount / (eipOverview.technicianCount * 8)) * 100)
+        : 0;
+      
+      let hrOpinion = '';
+      let hrStatus: 'APPROVED' | 'CRITIQUE' | 'ADJUSTED' = 'APPROVED';
+      let hrRisk = 0.10;
+
+      if (!eipOverview.isConnected) {
+        hrOpinion = `Thẩm định nhân sự: Hệ thống chưa kết nối EIP. Ước tính có 3 KTV khả dụng. Tải trọng ca đạt mức 65%, đủ năng lực vận hành chiến dịch mà không cần tuyển mới gấp.`;
+      } else if (eipOverview.technicianCount === 0) {
+        hrOpinion = `Thẩm định nhân sự: CẢNH BÁO: Hiện tại có 0 KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV quá tải nghiêm trọng (Không khả dụng). Không thể vận hành chiến dịch mà không có kỹ thuật viên. Đề xuất bắt buộc: Cần lập tức tuyển dụng hoặc điều động thêm KTV gấp.`;
+        hrStatus = 'CRITIQUE';
+        hrRisk = 0.95;
+      } else if (hrWorkload > 90) {
+        hrOpinion = `Thẩm định nhân sự: CẢNH BÁO: Hiện tại có ${eipOverview.technicianCount} KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV quá tải đạt mức ${hrWorkload}%, vượt ngưỡng an toàn. Đề xuất: Cần bổ sung hoặc tuyển dụng thêm KTV mới trước khi khởi chạy chiến dịch.`;
+        hrStatus = 'CRITIQUE';
+        hrRisk = 0.65;
+      } else {
+        hrOpinion = `Thẩm định nhân sự: Hiện tại có ${eipOverview.technicianCount} KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV đạt mức ${hrWorkload}%, đủ năng lực vận hành chiến dịch mà không cần tuyển mới gấp.`;
+      }
+
       this.state.councilDebate = [
         {
           agentId: 'marketing_manager',
@@ -418,9 +441,9 @@ class CampaignExecutionManagerClass {
           avatar: '👥',
           role: 'Trưởng Phòng Nhân Sự',
           department: 'Nhân Sự & Công Suất Ca',
-          opinion: `Thẩm định nhân sự: Hiện tại có ${eipOverview.technicianCount} KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV đạt mức ${eipOverview.technicianCount > 0 ? ((eipOverview.appointmentCount / (eipOverview.technicianCount * 8)) * 100).toFixed(0) : '65'}%, đủ năng lực vận hành chiến dịch mà không cần tuyển mới gấp.`,
-          status: 'APPROVED',
-          riskScore: 0.10
+          opinion: hrOpinion,
+          status: hrStatus,
+          riskScore: hrRisk
         },
         {
           agentId: 'ops_operations',
