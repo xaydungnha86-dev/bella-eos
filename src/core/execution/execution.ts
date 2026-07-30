@@ -12,10 +12,6 @@ function getStoredKey(provider: string, key_name: string): string {
 }
 
 function getClientKeys() {
-  console.log('[getClientKeys] Reading from localStorage...');
-  const rawStorage = typeof window !== 'undefined' ? localStorage.getItem('bella_eos_integrations') : null;
-  console.log('[getClientKeys] Raw storage:', rawStorage?.substring(0, 100));
-  
   const keys = {
     openai:              getStoredKey('openai',    'api_key')    || undefined,
     anthropic:           getStoredKey('anthropic', 'api_key')    || undefined,
@@ -26,11 +22,6 @@ function getClientKeys() {
     eip_api_url:         getStoredKey('bella_eip', 'api_url')   || undefined,
     eip_api_key:         getStoredKey('bella_eip', 'api_key')   || undefined,
   };
-  
-  console.log('[getClientKeys] Parsed keys:');
-  console.log('[getClientKeys]   - gemini:', keys.gemini ? `YES (${keys.gemini.substring(0, 20)}...)` : 'NO');
-  console.log('[getClientKeys]   - bella_eip_url:', keys.eip_api_url ? `YES (${keys.eip_api_url})` : 'NO ❌');
-  console.log('[getClientKeys]   - bella_eip_key:', keys.eip_api_key ? `YES (${keys.eip_api_key.substring(0, 15)}...)` : 'NO ❌');
   
   return keys;
 }
@@ -78,11 +69,9 @@ async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPac
   // Use passed clientKeys instead of localStorage
   const keys = clientKeys || getClientKeys();
   
-  // DEBUG: Log keys
-  console.log('[AgentRunner] 🔑 Client Keys Check:');
-  console.log('[AgentRunner]   - OpenAI:', keys.openai ? `YES (${keys.openai.substring(0, 15)}...)` : 'NO ❌');
-  console.log('[AgentRunner]   - Gemini:', keys.gemini ? `YES (${keys.gemini.substring(0, 15)}...)` : 'NO ❌');
-  console.log('[AgentRunner]   - Anthropic:', keys.anthropic ? `YES (${keys.anthropic.substring(0, 15)}...)` : 'NO ❌');
+  // Use passed clientKeys instead of localStorage
+  const keys = clientKeys || getClientKeys();
+
   
   let agentConfigs = {};
   if (typeof window !== 'undefined') {
@@ -191,11 +180,7 @@ export class InternalApiGateway {
 
     // Get client keys from localStorage (browser-side)
     const clientKeys = getClientKeys();
-    
-    console.log('[InternalApiGateway] 🔑 Passing keys to Agent Runner:');
-    console.log('[InternalApiGateway]   - OpenAI:', clientKeys.openai ? 'YES ✅' : 'NO ❌');
-    console.log('[InternalApiGateway]   - Gemini:', clientKeys.gemini ? 'YES ✅' : 'NO ❌');
-    console.log('[InternalApiGateway]   - Anthropic:', clientKeys.anthropic ? 'YES ✅' : 'NO ❌');
+
 
     let runnerResult: Awaited<ReturnType<typeof callAgentRunner>>;
     try {

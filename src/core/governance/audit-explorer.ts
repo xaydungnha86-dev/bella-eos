@@ -52,6 +52,7 @@ export interface AuditExplorerRecord {
     isTargetAchieved: boolean;
     attributionConfidence: number;
     attributionType: string;
+    displayWording: string;            // Precise policy-based UI label for C-Suite Dashboard
     attributionReasoning: string[];
     dataSource?: string;
     measurementWindow?: { startDate: string; endDate: string };
@@ -120,6 +121,7 @@ export class AuditExplorer {
         isTargetAchieved: outcomeContract.metrics.isTargetAchieved,
         attributionConfidence: attribution.attributionConfidence,
         attributionType: attribution.attributionType,
+        displayWording: attribution.displayWording,
         attributionReasoning: attribution.reasoning,
         dataSource: outcomeContract.dataSource,
         measurementWindow: outcomeContract.measurementWindow,
