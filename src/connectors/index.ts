@@ -38,12 +38,12 @@ export class EipConnector {
             if (result.success && result.data) {
               const data = result.data;
               return {
-                activeCustomersCount: data.customer_count || data.customers || 1287,
-                appointmentCount: data.appointment_count || data.appointments || 450,
-                technicianCount: data.technician_count || data.technicians || 12,
-                staffCount: data.staff_count || data.staff || 25,
-                monthlyRevenueVnd: data.monthly_revenue || data.revenue || 450000000,
-                monthlyExpensesVnd: data.monthly_expenses || data.expenses || 280000000,
+                activeCustomersCount: data.customer_count ?? data.customers ?? data.activeCustomersCount ?? data.total_customers ?? 1287,
+                appointmentCount: data.appointment_count ?? data.appointments ?? data.appointmentCount ?? data.total_appointments ?? 450,
+                technicianCount: data.technician_count ?? data.technicians ?? data.technicianCount ?? data.active_technicians ?? 12,
+                staffCount: data.staff_count ?? data.staff ?? data.staffCount ?? data.total_staff ?? 25,
+                monthlyRevenueVnd: data.monthly_revenue ?? data.revenue ?? data.monthlyRevenue ?? data.revenueVnd ?? 450000000,
+                monthlyExpensesVnd: data.monthly_expenses ?? data.expenses ?? data.monthlyExpenses ?? data.expensesVnd ?? 280000000,
                 isConnected: true,
                 source: `Bella EIP API (${apiUrl})`
               };

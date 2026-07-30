@@ -21,43 +21,85 @@ export async function POST(request: Request) {
     }
 
     const baseUrl = eip_url.replace(/\/$/, '');
-    const targetUrl = `${baseUrl}/overview`;
-
-    console.log(`[EIP Proxy] Fetching EIP overview from: ${targetUrl}`);
     
-    const res = await fetch(targetUrl, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${eip_api_key}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Client': 'bella-eos-platform'
-      },
-      signal: AbortSignal.timeout(10000)
-    });
+    // Candidate endpoints for EIP overview
+    const candidateEndpoints = [
+      `${baseUrl}/overview`,
+      `${baseUrl}/dashboard`,
+      `${baseUrl}/stats`,
+      `${baseUrl}/metrics`,
+      `${baseUrl}/`
+    ];
 
-    if (!res.ok) {
-      console.warn(`[EIP Proxy] Remote server returned HTTP ${res.status}`);
-      return NextResponse.json({
-        success: false,
-        error: `Remote server returned HTTP ${res.status}`
-      }, { status: res.status });
+    console.log(`[EIP Overview Proxy] Querying EIP server base URL: ${baseUrl}`);
+    
+    let lastStatus = 500;
+    let lastError = 'No endpoint responded';
+    let responseData: any = null;
+    let successfulEndpoint = '';
+
+    for (const targetUrl of candidateEndpoints) {
+      try {
+        console.log(`[EIP Overview Proxy] Trying: GET ${targetUrl}`);
+        const res = await fetch(targetUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${eip_api_key}`,
+            'X-API-Key': eip_api_key,
+            'api-key': eip_api_key,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Client': 'bella-eos-platform'
+          },
+          signal: AbortSignal.timeout(8000)
+        });
+
+        lastStatus = res.status;
+
+        if (res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (!contentType.includes('application/json')) {
+            console.warn(`[EIP Overview Proxy] ${targetUrl} returned non-JSON content-type: ${contentType}`);
+            return NextResponse.json({
+              success: false,
+              error: 'Remote server did not return JSON'
+            }, { status: 406 });
+          }
+
+          responseData = await res.json();
+          successfulEndpoint = targetUrl;
+          console.log(`[EIP Overview Proxy] ✅ Success from: ${targetUrl}`);
+          break;
+        } else if (res.status === 401 || res.status === 403) {
+          lastError = `Xác thực thất bại (HTTP ${res.status})`;
+          // Don't try other endpoints if auth is rejected
+          return NextResponse.json({
+            success: false,
+            error: lastError,
+            httpStatus: res.status
+          }, { status: res.status });
+        } else {
+          lastError = `HTTP ${res.status}`;
+        }
+      } catch (err: any) {
+        lastError = err.message || String(err);
+        console.warn(`[EIP Overview Proxy] Failed fetching ${targetUrl}: ${lastError}`);
+      }
     }
 
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      console.warn('[EIP Proxy] Remote server did not return JSON');
+    if (responseData) {
       return NextResponse.json({
-        success: false,
-        error: 'Remote server did not return JSON'
-      }, { status: 406 });
+        success: true,
+        endpoint: successfulEndpoint,
+        data: responseData
+      });
     }
 
-    const data = await res.json();
     return NextResponse.json({
-      success: true,
-      data
-    });
+      success: false,
+      error: `Không thể kết nối đến EIP server. Lỗi: ${lastError}`,
+      httpStatus: lastStatus
+    }, { status: lastStatus || 502 });
 
   } catch (err: any) {
     console.error('[EIP Proxy] Exception:', err);
