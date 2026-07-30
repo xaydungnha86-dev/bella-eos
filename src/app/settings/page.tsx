@@ -226,8 +226,10 @@ export default function IntegrationSettingsPage() {
 
   // Test Bella EIP connection (server-side fetch)
   const handleTestEip = useCallback(async () => {
-    const eipUrl = stored['bella_eip::api_url'] || draft['bella_eip::api_url']?.trim();
-    const eipKey = stored['bella_eip::api_key'] || draft['bella_eip::api_key']?.trim();
+    const draftUrl = draft['bella_eip::api_url']?.trim();
+    const draftKey = draft['bella_eip::api_key']?.trim();
+    const eipUrl = draftUrl || stored['bella_eip::api_url'];
+    const eipKey = draftKey || stored['bella_eip::api_key'];
     if (!eipUrl || !eipKey) {
       setEipTestResult({ success: false, status: 'NO_CREDENTIALS', message: '⚠️ Hãy lưu EIP URL và API Key trước khi kiểm tra kết nối.' });
       return;
@@ -242,6 +244,21 @@ export default function IntegrationSettingsPage() {
       });
       const data = await res.json();
       setEipTestResult(data);
+
+      if (data.success) {
+        // Auto-save verified draft credentials to localStorage
+        const current = lsRead();
+        if (draftUrl) current['bella_eip::api_url'] = draftUrl;
+        if (draftKey) current['bella_eip::api_key'] = draftKey;
+        lsWrite(current);
+        setStored(current);
+        setDraft(p => {
+          const n = { ...p };
+          if (draftUrl) delete n['bella_eip::api_url'];
+          if (draftKey) delete n['bella_eip::api_key'];
+          return n;
+        });
+      }
     } catch (e: any) {
       setEipTestResult({ success: false, status: 'NETWORK_ERROR', message: `❌ Không thể kết nối đến test endpoint: ${e.message}` });
     } finally {

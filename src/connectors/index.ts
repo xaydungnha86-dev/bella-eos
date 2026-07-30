@@ -38,12 +38,12 @@ export class EipConnector {
             if (result.success && result.data) {
               const data = result.data;
               return {
-                activeCustomersCount: data.customer_count ?? data.customers ?? data.activeCustomersCount ?? data.total_customers ?? 1287,
-                appointmentCount: data.appointment_count ?? data.appointments ?? data.appointmentCount ?? data.total_appointments ?? 450,
-                technicianCount: data.technician_count ?? data.technicians ?? data.technicianCount ?? data.active_technicians ?? 12,
-                staffCount: data.staff_count ?? data.staff ?? data.staffCount ?? data.total_staff ?? 25,
-                monthlyRevenueVnd: data.monthly_revenue ?? data.revenue ?? data.monthlyRevenue ?? data.revenueVnd ?? 450000000,
-                monthlyExpensesVnd: data.monthly_expenses ?? data.expenses ?? data.monthlyExpenses ?? data.expensesVnd ?? 280000000,
+                activeCustomersCount: data.customer_count ?? data.customers ?? data.activeCustomersCount ?? data.total_customers ?? data.count ?? 0,
+                appointmentCount: data.appointment_count ?? data.appointments ?? data.appointmentCount ?? data.total_appointments ?? 0,
+                technicianCount: data.technician_count ?? data.technicians ?? data.technicianCount ?? data.active_technicians ?? 0,
+                staffCount: data.staff_count ?? data.staff ?? data.staffCount ?? data.total_staff ?? 0,
+                monthlyRevenueVnd: data.monthly_revenue ?? data.revenue ?? data.monthlyRevenue ?? data.revenueVnd ?? 0,
+                monthlyExpensesVnd: data.monthly_expenses ?? data.expenses ?? data.monthlyExpenses ?? data.expensesVnd ?? 0,
                 isConnected: true,
                 source: `Bella EIP API (${apiUrl})`
               };
@@ -55,14 +55,14 @@ export class EipConnector {
       }
     }
     return {
-      activeCustomersCount: 1287,
-      appointmentCount: 450,
-      technicianCount: 12,
-      staffCount: 25,
-      monthlyRevenueVnd: 450000000,
-      monthlyExpensesVnd: 280000000,
+      activeCustomersCount: 0,
+      appointmentCount: 0,
+      technicianCount: 0,
+      staffCount: 0,
+      monthlyRevenueVnd: 0,
+      monthlyExpensesVnd: 0,
       isConnected: false,
-      source: 'Bella EIP Baseline'
+      source: 'Bella EIP (Chưa kết nối)'
     };
   }
 

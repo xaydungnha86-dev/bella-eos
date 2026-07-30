@@ -303,11 +303,13 @@ class CampaignExecutionManagerClass {
       this.addLog('EIP CONNECTOR', `📡 Đang kết nối Bella EIP API để lấy dữ liệu Doanh thu, Khách hàng, Lịch hẹn & KTV thực tế...`, 'text-indigo-400 font-bold');
       const eipOverview = await EipConnector.getEnterpriseOverview();
       const activeCustomers = await EipConnector.getActiveCustomers();
-      const finalCustCount = eipOverview.activeCustomersCount || (activeCustomers.length + 1287);
+      const finalCustCount = eipOverview.isConnected && eipOverview.activeCustomersCount 
+        ? eipOverview.activeCustomersCount 
+        : activeCustomers.length;
       this.state.activeCustomerCount = finalCustCount;
       this.notify();
 
-      this.addLog('EIP PAYLOAD DIGEST', `📊 Số liệu từ Bella EIP: ${finalCustCount} Khách CRM | ${eipOverview.appointmentCount} Lịch hẹn | ${eipOverview.technicianCount} KTV | ${eipOverview.staffCount} Nhân sự | Doanh thu: ${(eipOverview.monthlyRevenueVnd / 1000000).toFixed(0)}M | Chi phí: ${(eipOverview.monthlyExpensesVnd / 1000000).toFixed(0)}M VND.`, 'text-emerald-400 font-semibold');
+      this.addLog('EIP PAYLOAD DIGEST', `📊 Số liệu từ Bella EIP: ${finalCustCount > 0 ? `${finalCustCount} Khách CRM` : 'Chưa đồng bộ CRM'} | ${eipOverview.appointmentCount} Lịch hẹn | ${eipOverview.technicianCount} KTV | ${eipOverview.staffCount} Nhân sự | Doanh thu: ${(eipOverview.monthlyRevenueVnd / 1000000).toFixed(0)}M | Chi phí: ${(eipOverview.monthlyExpensesVnd / 1000000).toFixed(0)}M VND.`, 'text-emerald-400 font-semibold');
 
       await delay(500);
       this.addLog('Understanding Center', `Digesting API / EIP payload from: ${eipOverview.source}`, 'text-slate-300');
@@ -404,7 +406,9 @@ class CampaignExecutionManagerClass {
           avatar: '💼',
           role: 'Giám Đốc Bán Hàng & CSKH',
           department: 'Sales & Chốt Booking',
-          opinion: `Phản biện: Với cơ sở dữ liệu hiện tại là ${finalCustCount} khách hàng CRM đồng bộ từ EIP, nếu không tối ưu kịch bản chốt Booking, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.`,
+          opinion: finalCustCount > 0
+            ? `Phản biện: Với cơ sở dữ liệu hiện tại là ${finalCustCount} khách hàng CRM${eipOverview.isConnected ? ' đồng bộ từ EIP' : ''}, nếu không tối ưu kịch bản chốt Booking, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.`
+            : `Phản biện: Hệ thống chưa ghi nhận dữ liệu CRM từ EIP. Nếu không tối ưu kịch bản chốt Booking, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.`,
           status: 'CRITIQUE',
           riskScore: 0.35
         },

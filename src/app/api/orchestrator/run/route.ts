@@ -1185,12 +1185,12 @@ async function tool_orchestrate_enterprise_plan(input: any, clientKeys?: any, co
   const geminiKey = clientKeys?.gemini || process.env.GEMINI_API_KEY || '';
 
   // Extract real EIP metrics or context
-  const activeCustomers = context?.activeCustomerCount || 1287;
-  const appointmentCount = context?.appointmentCount || 450;
-  const technicianCount = context?.technicianCount || 12;
-  const staffCount = context?.staffCount || 25;
-  const monthlyRevenue = context?.monthlyRevenueVnd ? `${(context.monthlyRevenueVnd / 1000000).toFixed(0)}M` : '450M';
-  const monthlyExpenses = context?.monthlyExpensesVnd ? `${(context.monthlyExpensesVnd / 1000000).toFixed(0)}M` : '280M';
+  const activeCustomers = context?.activeCustomerCount || 0;
+  const appointmentCount = context?.appointmentCount || 0;
+  const technicianCount = context?.technicianCount || 0;
+  const staffCount = context?.staffCount || 0;
+  const monthlyRevenue = context?.monthlyRevenueVnd ? `${(context.monthlyRevenueVnd / 1000000).toFixed(0)}M` : '0M';
+  const monthlyExpenses = context?.monthlyExpensesVnd ? `${(context.monthlyExpensesVnd / 1000000).toFixed(0)}M` : '0M';
 
   // If Gemini API Key is available, invoke Gemini 1.5 Flash in real-time
   if (geminiKey) {
@@ -1383,13 +1383,19 @@ export async function POST(request: Request) {
     let liveEipData: Record<string, any> = {};
     if (client_eip_api_url && client_eip_api_key && !client_eip_api_url.includes('placeholder')) {
       try {
-        console.log(`[AgentRunner] 📡 Calling Bella EIP API: ${client_eip_api_url}/overview`);
-        const eipRes = await fetch(`${client_eip_api_url}/overview`, {
+        const eipBaseUrl = client_eip_api_url.trim().replace(/\/$/, '');
+        const targetEipUrl = eipBaseUrl.endsWith('/overview') ? eipBaseUrl : `${eipBaseUrl}/overview`;
+        console.log(`[AgentRunner] 📡 Calling Bella EIP API: ${targetEipUrl}`);
+        const eipRes = await fetch(targetEipUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${client_eip_api_key}`,
+            'X-API-Key': client_eip_api_key,
+            'api-key': client_eip_api_key,
+            'x-api-key': client_eip_api_key,
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-Client': 'bella-eos-platform'
           }
         });
         if (eipRes.ok) {

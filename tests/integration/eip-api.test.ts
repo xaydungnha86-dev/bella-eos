@@ -73,6 +73,31 @@ describe('Bella EOS: EIP Proxy API Endpoints Tests', () => {
       expect(data.status).toBe('AUTH_FAILED');
       expect(data.message).toContain('API Key không hợp lệ');
     });
+
+    test('should reject HTML (non-JSON) 200 response and fail connectivity test', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValue({
+        ok: true,
+        status: 200,
+        text: async () => '<!DOCTYPE html><html><body>Web Page</body></html>',
+        json: async () => { throw new Error('Invalid JSON'); },
+        headers: new Headers({ 'content-type': 'text/html' })
+      } as any);
+
+      const mockReq = new Request('http://localhost/api/eip/test', {
+        method: 'POST',
+        body: JSON.stringify({
+          eip_url: 'https://mock-eip.bella.ai/api/v1/overview',
+          eip_api_key: 'mock-key-123'
+        })
+      });
+
+      const res = await testPost(mockReq);
+      const data = await res.json();
+
+      expect(data.success).toBe(false);
+      expect(data.status).toBe('ALL_ENDPOINTS_FAILED');
+      expect(data.message).toContain('trả về trang HTML web thay vì JSON API');
+    });
   });
 
   describe('POST /api/eip/overview (Proxy Endpoint)', () => {

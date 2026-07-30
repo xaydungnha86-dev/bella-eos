@@ -24,16 +24,19 @@ export async function POST(request: Request) {
       });
     }
 
-    // Normalise URL: strip trailing slash
-    const baseUrl = eip_url.replace(/\/$/, '');
+    // Normalise URL: strip trailing slash and deduplicate trailing /overview to avoid /overview/overview
+    const rawUrl = eip_url.trim().replace(/\/$/, '');
+    const cleanBase = rawUrl.replace(/\/overview$/, '').replace(/\/$/, '');
     
     // Try multiple common endpoint patterns for Bella EIP
-    const endpoints = [
-      `${baseUrl}/overview`,
-      `${baseUrl}/dashboard`,
-      `${baseUrl}/stats`,
-      `${baseUrl}/`,
-    ];
+    const endpoints = Array.from(new Set([
+      rawUrl,
+      `${cleanBase}/overview`,
+      `${cleanBase}/dashboard`,
+      `${cleanBase}/stats`,
+      `${cleanBase}/metrics`,
+      cleanBase
+    ]));
 
     let lastStatus = 0;
     let lastError = '';
@@ -45,6 +48,7 @@ export async function POST(request: Request) {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${eip_api_key}`,
+            'x-api-key': eip_api_key,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'X-Client': 'bella-eos-platform'
@@ -54,16 +58,26 @@ export async function POST(request: Request) {
         });
 
         lastStatus = res.status;
+        const contentType = res.headers.get('content-type') || '';
         const responseText = await res.text();
         
         let data: any = null;
+        let isJsonParsed = false;
         try {
           data = JSON.parse(responseText);
+          isJsonParsed = true;
         } catch {
           data = responseText ? { raw: responseText.substring(0, 300) } : null;
         }
 
         if (res.ok) {
+          // Reject HTML / non-JSON responses from API endpoints
+          if (!contentType.includes('application/json') && !isJsonParsed) {
+            console.warn(`[EIP Test] ${endpoint} returned HTTP 200 but non-JSON body. Skipping non-API HTML response.`);
+            lastError = `Endpoint ${endpoint} trả về trang HTML web thay vì JSON API.`;
+            continue;
+          }
+
           return NextResponse.json({
             success: true,
             status: 'CONNECTED',
@@ -71,7 +85,7 @@ export async function POST(request: Request) {
             endpoint,
             message: `✅ Kết nối Bella EIP thành công! HTTP ${res.status}`,
             data,
-            eip_url: baseUrl
+            eip_url: cleanBase
           });
         }
 
@@ -90,6 +104,17 @@ export async function POST(request: Request) {
         if (res.status === 404) {
           lastError = `Endpoint ${endpoint} trả về 404`;
           continue;
+        }
+
+        if (res.status === 500) {
+          return NextResponse.json({
+            success: false,
+            status: 'SERVER_ERROR',
+            httpStatus: 500,
+            endpoint,
+            message: `⚠️ Bella EIP đã nhận được Request nhưng bị lỗi xử lý nội bộ (HTTP 500). Endpoint ${endpoint} chính xác nhưng máy chủ Bella EIP đang gặp sự cố Backend/Database.`,
+            data
+          });
         }
 
         // Any other non-OK: return the status
@@ -123,7 +148,7 @@ export async function POST(request: Request) {
       success: false,
       status: 'ALL_ENDPOINTS_FAILED',
       httpStatus: lastStatus,
-      endpoint: baseUrl,
+      endpoint: rawUrl,
       message: `❌ Không thể kết nối tới Bella EIP. Lỗi cuối: ${lastError}. Kiểm tra lại EIP Endpoint URL trong /settings.`,
       data: null
     });

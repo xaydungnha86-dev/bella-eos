@@ -20,18 +20,20 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    const baseUrl = eip_url.replace(/\/$/, '');
+    const rawUrl = eip_url.trim().replace(/\/$/, '');
+    const cleanBase = rawUrl.replace(/\/overview$/, '').replace(/\/$/, '');
     
     // Candidate endpoints for EIP overview
-    const candidateEndpoints = [
-      `${baseUrl}/overview`,
-      `${baseUrl}/dashboard`,
-      `${baseUrl}/stats`,
-      `${baseUrl}/metrics`,
-      `${baseUrl}/`
-    ];
+    const candidateEndpoints = Array.from(new Set([
+      rawUrl,
+      `${cleanBase}/overview`,
+      `${cleanBase}/dashboard`,
+      `${cleanBase}/stats`,
+      `${cleanBase}/metrics`,
+      cleanBase
+    ]));
 
-    console.log(`[EIP Overview Proxy] Querying EIP server base URL: ${baseUrl}`);
+    console.log(`[EIP Overview Proxy] Querying EIP server base URL: ${rawUrl}`);
     
     let lastStatus = 500;
     let lastError = 'No endpoint responded';
@@ -45,8 +47,7 @@ export async function POST(request: Request) {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${eip_api_key}`,
-            'X-API-Key': eip_api_key,
-            'api-key': eip_api_key,
+            'x-api-key': eip_api_key,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'X-Client': 'bella-eos-platform'
