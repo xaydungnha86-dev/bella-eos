@@ -1,4 +1,4 @@
-# 🔒 BELLA EOS — ARCHITECTURE BASELINE HANDOFF & FREEZE CERTIFICATE
+np# 🔒 BELLA EOS — ARCHITECTURE BASELINE HANDOFF & FREEZE CERTIFICATE
 
 > **Tài liệu Bàn giao Baseline & Khóa Cứng Kiến trúc (Architecture Baseline Handoff & Freeze Certificate)**  
 > **Phiên bản**: 3.1.0-GOVERNANCE  

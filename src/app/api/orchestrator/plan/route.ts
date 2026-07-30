@@ -213,9 +213,12 @@ Context hiện tại của doanh nghiệp:
 
 Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiêu này.`;
 
+    // ── Diagnostic Error Collector ───────────────────────────────────────
+    let diagnosticErrors: string[] = [];
+
     // ── Try OpenAI GPT-4o ─────────────────────────────────────────────────
     const openaiKey = client_openai_key || process.env.OPENAI_API_KEY;
-    if (openaiKey) {
+    if (openaiKey && !openaiKey.includes('your_openai_api_key')) {
       try {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -237,13 +240,18 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
           if (plan) plan.tasks = enrichTasksWithScorecard(plan.tasks);
           return NextResponse.json({ success: true, plan, provider: 'openai', model: 'gpt-4o' });
         }
-        console.warn('[orchestrator/plan] OpenAI error:', data.error?.message);
-      } catch (e) { console.warn('[orchestrator/plan] OpenAI unavailable:', e); }
+        const errStr = data.error?.message || `HTTP ${res.status}`;
+        diagnosticErrors.push(`OpenAI Error: ${errStr}`);
+        console.warn('[orchestrator/plan] OpenAI error:', errStr);
+      } catch (e: any) { 
+        diagnosticErrors.push(`OpenAI Exception: ${e.message}`);
+        console.warn('[orchestrator/plan] OpenAI unavailable:', e); 
+      }
     }
 
     // ── Try Anthropic Claude ──────────────────────────────────────────────
     const anthropicKey = client_anthropic_key || process.env.ANTHROPIC_API_KEY;
-    if (anthropicKey) {
+    if (anthropicKey && !anthropicKey.includes('your_anthropic_api_key')) {
       try {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
@@ -266,13 +274,18 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
           if (plan) plan.tasks = enrichTasksWithScorecard(plan.tasks);
           return NextResponse.json({ success: true, plan, provider: 'anthropic', model: 'claude-3-5-sonnet' });
         }
-        console.warn('[orchestrator/plan] Anthropic error:', data.error?.message);
-      } catch (e) { console.warn('[orchestrator/plan] Anthropic unavailable:', e); }
+        const errStr = data.error?.message || `HTTP ${res.status}`;
+        diagnosticErrors.push(`Anthropic Error: ${errStr}`);
+        console.warn('[orchestrator/plan] Anthropic error:', errStr);
+      } catch (e: any) { 
+        diagnosticErrors.push(`Anthropic Exception: ${e.message}`);
+        console.warn('[orchestrator/plan] Anthropic unavailable:', e); 
+      }
     }
 
     // ── Try Google Gemini ─────────────────────────────────────────────────
     const geminiKey = client_gemini_key || process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
-    if (geminiKey) {
+    if (geminiKey && !geminiKey.includes('your_gemini_api_key')) {
       try {
         const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
         const res = await fetch(geminiUrl, {
@@ -293,22 +306,31 @@ Hãy lập kế hoạch thực thi đầy đủ để đạt được mục tiê
           const raw = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
           const plan = JSON.parse(raw);
           if (plan) plan.tasks = enrichTasksWithScorecard(plan.tasks);
-          return NextResponse.json({ success: true, plan, provider: 'gemini', model: 'gemini-2.5-flash' });
+          return NextResponse.json({ success: true, plan, provider: 'google-gemini', model: 'gemini-2.5-flash' });
         }
-        console.warn('[orchestrator/plan] Gemini error:', data.error?.message);
-      } catch (e) { console.warn('[orchestrator/plan] Gemini unavailable:', e); }
+        const errStr = data.error?.message || `HTTP ${res.status}`;
+        diagnosticErrors.push(`Gemini Error: ${errStr}`);
+        console.warn('[orchestrator/plan] Gemini error:', errStr);
+      } catch (e: any) { 
+        diagnosticErrors.push(`Gemini Exception: ${e.message}`);
+        console.warn('[orchestrator/plan] Gemini unavailable:', e); 
+      }
     }
 
     // ── Fallback: Rule-based planner (no LLM needed) ──────────────────────
-    console.info('[orchestrator/plan] No AI key — using rule-based planner fallback.');
+    const fallbackDiagnostic = diagnosticErrors.length > 0
+      ? diagnosticErrors.join(' | ')
+      : 'Chưa nhập API Key hợp lệ (hoặc key mang giá trị mặc định trong .env.local)';
+
+    console.info('[orchestrator/plan] Fallback triggered:', fallbackDiagnostic);
     const fallbackPlan = buildFallbackPlan(objective, context);
     if (fallbackPlan) fallbackPlan.tasks = enrichTasksWithScorecard(fallbackPlan.tasks);
     return NextResponse.json({
       success: true,
       plan: fallbackPlan,
-      provider: 'rule-based',
-      model: 'fallback-planner',
-      warning: 'Chưa cấu hình AI API Key. Kế hoạch được tạo bởi AI COO Rule-Based Engine. Cấu hình OpenAI/Claude/Gemini để Orchestrator AI thật sự tự phân tích.'
+      provider: 'rule-based-fallback',
+      model: 'ece-fallback-planner',
+      warning: `[Chế độ AI Fallback] Lý do: ${fallbackDiagnostic}. Kế hoạch được kích hoạt từ AI COO Dynamic Rule Engine. Cấu hình Key trong màn hình Cài Đặt để gọi trực tiếp LLM API.`
     });
 
   } catch (err: any) {

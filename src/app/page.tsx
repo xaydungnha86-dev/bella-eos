@@ -215,6 +215,7 @@ export default function Dashboard() {
 
   const [geminiModels, setGeminiModels] = useState<string[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
+  const [showNavDropdown, setShowNavDropdown] = useState(false);
 
   useEffect(() => {
     const fetchGeminiModels = async () => {
@@ -523,48 +524,79 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Navigation Actions */}
-        <div className="flex items-center gap-3">
+        {/* Navigation Actions - Consolidated Executive Header */}
+        <div className="flex items-center gap-2.5 relative">
           <Link
             href="/tasks"
-            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-2xs"
+            className="bg-emerald-50/80 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 shadow-2xs"
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>📋 Quản lý tác vụ & tiến độ</span>
+            <span>📋 Tác vụ &amp; Bàn giao ({dynamicTasks.filter(t => t.status === 'COMPLETED' || t.isApproved).length}/{dynamicTasks.length})</span>
           </Link>
+
           <Link
-            href="/matrix"
-            className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-2xs"
+            href="/admin"
+            className="bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-cyan-800/80 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 shadow-xs"
           >
-            <Layers className="w-3.5 h-3.5 text-indigo-600" />
-            <span>📊 Bảng Kết Quả Toàn Cục ({dynamicTasks.filter(t => t.status === 'COMPLETED' || t.isApproved).length}/{dynamicTasks.length})</span>
+            <Shield className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🛡️ Tháp Điều Hành Admin</span>
           </Link>
-          <Link
-            href="/settings"
-            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-xs hover:border-slate-300"
-          >
-            <Key className="w-3.5 h-3.5 text-slate-400" />
-            <span>Cài đặt</span>
-          </Link>
-          <Link
-            href="/settings/company"
-            className="bg-amber-50/50 hover:bg-amber-50 text-amber-800 border border-amber-200/80 text-xs font-semibold px-4.5 py-2.5 rounded-lg transition-all flex items-center gap-2 shadow-xs"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Hồ sơ DNA Doanh nghiệp</span>
-          </Link>
-          <button
-            onClick={() => {
-              if (confirm('Bạn có chắc chắn muốn reset toàn bộ trạng thái?')) {
-                CampaignExecutionManager.hardReset();
-              }
-            }}
-            className="bg-white hover:bg-slate-50 text-slate-650 border border-slate-200/80 text-xs font-semibold px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 cursor-pointer hover:border-slate-300"
-            title="Reset hệ thống"
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-slate-450 text-slate-400" />
-            <span>Khởi động lại</span>
-          </button>
+
+          {/* Consolidated Settings Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNavDropdown(prev => !prev)}
+              className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 shadow-xs hover:border-slate-300"
+            >
+              <Settings className="w-3.5 h-3.5 text-slate-500" />
+              <span>Cấu hình &amp; Hệ thống ▾</span>
+            </button>
+
+            {showNavDropdown && (
+              <div 
+                className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                onClick={() => setShowNavDropdown(false)}
+              >
+                <Link
+                  href="/settings/company"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-amber-50 hover:text-amber-900 font-medium transition-colors"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-600" />
+                  <span>Hồ sơ DNA Doanh nghiệp</span>
+                </Link>
+
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 font-medium transition-colors"
+                >
+                  <Key className="w-4 h-4 text-slate-500" />
+                  <span>Cài đặt API Provider</span>
+                </Link>
+
+                <Link
+                  href="/matrix"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-700 hover:bg-indigo-50 hover:text-indigo-900 font-medium transition-colors border-t border-slate-100"
+                >
+                  <Layers className="w-4 h-4 text-indigo-600" />
+                  <span>Bảng Kết Quả Toàn Cục</span>
+                </Link>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNavDropdown(false);
+                    if (confirm('Bạn có chắc chắn muốn reset toàn bộ trạng thái hệ thống?')) {
+                      CampaignExecutionManager.hardReset();
+                    }
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-rose-600 hover:bg-rose-50 font-medium transition-colors border-t border-slate-100 text-left"
+                >
+                  <RotateCcw className="w-4 h-4 text-rose-500" />
+                  <span>Khởi động lại Hệ thống</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

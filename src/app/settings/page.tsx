@@ -156,6 +156,10 @@ export default function IntegrationSettingsPage() {
   const [eipTesting, setEipTesting] = useState(false);
   const [eipTestResult, setEipTestResult] = useState<{success: boolean; status: string; message: string; data?: any; httpStatus?: number; endpoint?: string} | null>(null);
 
+  // AI Key connectivity & quota test
+  const [aiTesting, setAiTesting] = useState<Record<string, boolean>>({});
+  const [aiTestResult, setAiTestResult] = useState<Record<string, {success: boolean; status: string; message?: string; error?: string}>>({});
+
   const categories = [...new Set(INTEGRATION_CATALOGUE.map(i => i.category))];
   const storeKey = (provider: string, key_name: string) => `${provider}::${key_name}`;
   const savedCount = Object.keys(stored).length;
@@ -263,6 +267,35 @@ export default function IntegrationSettingsPage() {
       setEipTestResult({ success: false, status: 'NETWORK_ERROR', message: `❌ Không thể kết nối đến test endpoint: ${e.message}` });
     } finally {
       setEipTesting(false);
+    }
+  }, [stored, draft]);
+
+  // Test AI Provider API Key & Quota
+  const handleTestAiKey = useCallback(async (provider: string) => {
+    const draftKey = draft[`${provider}::api_key`]?.trim();
+    const savedKey = stored[`${provider}::api_key`]?.trim();
+    const apiKey = draftKey || savedKey;
+
+    if (!apiKey) {
+      setAiTestResult(p => ({ ...p, [provider]: { success: false, status: 'NO_KEY', error: '⚠️ Vui lòng nhập API Key trước khi thử nghiệm.' } }));
+      return;
+    }
+
+    setAiTesting(p => ({ ...p, [provider]: true }));
+    setAiTestResult(p => ({ ...p, [provider]: { success: false, status: 'TESTING', message: 'Đang kiểm tra hạn mức...' } }));
+
+    try {
+      const res = await fetch('/api/ai/test-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, apiKey })
+      });
+      const data = await res.json();
+      setAiTestResult(p => ({ ...p, [provider]: data }));
+    } catch (err: any) {
+      setAiTestResult(p => ({ ...p, [provider]: { success: false, status: 'NETWORK_ERROR', error: `Lỗi kết nối: ${err.message}` } }));
+    } finally {
+      setAiTesting(p => ({ ...p, [provider]: false }));
     }
   }, [stored, draft]);
 
@@ -480,6 +513,35 @@ export default function IntegrationSettingsPage() {
                             <pre className="mt-2 text-[10px] overflow-auto max-h-40 bg-white/60 rounded-lg p-2 font-mono">{JSON.stringify(eipTestResult.data, null, 2)}</pre>
                           </details>
                         )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Extra: Test AI Key button for AI providers */}
+                {['gemini', 'openai', 'anthropic'].includes(integration.provider) && (
+                  <div className="px-5 pb-5 space-y-3 border-t border-slate-100 pt-4">
+                    <button
+                      onClick={() => handleTestAiKey(integration.provider)}
+                      disabled={aiTesting[integration.provider]}
+                      className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 active:scale-95 disabled:opacity-50 text-white text-[11px] font-bold px-4 h-9 rounded-xl transition-all cursor-pointer shadow-xs"
+                    >
+                      {aiTesting[integration.provider]
+                        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang kiểm tra API &amp; Quota...</>
+                        : <><RefreshCw className="w-3.5 h-3.5 text-cyan-400" /> 🧪 Kiểm tra Hạn mức Key ({integration.name})</>
+                      }
+                    </button>
+
+                    {aiTestResult[integration.provider] && (
+                      <div className={`rounded-xl border p-3.5 text-xs space-y-1 ${
+                        aiTestResult[integration.provider].success
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                          : 'bg-amber-50 border-amber-300 text-amber-900'
+                      }`}>
+                        <p className="font-bold">
+                          {aiTestResult[integration.provider].success 
+                            ? aiTestResult[integration.provider].message 
+                            : aiTestResult[integration.provider].error}
+                        </p>
                       </div>
                     )}
                   </div>

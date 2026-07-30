@@ -384,98 +384,36 @@ class CampaignExecutionManagerClass {
       await delay(800);
       this.addLog('COUNCIL DEBATE', `🏛️ AI COO triệu tập HỘI ĐỒNG PHẢN BIỆN AI 5 PHÒNG BAN: Marketing, Sales, HR, Vận hành, Pháp lý & Tài chính...`, 'text-amber-400 font-bold');
 
-      const lowerObj = objective.toLowerCase();
-      const isExtreme = lowerObj.includes('300%') || lowerObj.includes('gấp 3');
+      try {
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+        const councilRes = await fetch(`${baseUrl}/api/orchestrator/council`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            objective,
+            context: {
+              brandDna: this.state.dnaState,
+              activeCustomerCount: finalCustCount,
+              appointmentCount: eipOverview.appointmentCount,
+              technicianCount: eipOverview.technicianCount,
+              staffCount: eipOverview.staffCount,
+              monthlyRevenueVnd: eipOverview.monthlyRevenueVnd,
+              monthlyExpensesVnd: eipOverview.monthlyExpensesVnd
+            }
+          })
+        });
 
-      // Calculate HR Capacity metrics dynamically based on EIP data
-      const hrWorkload = eipOverview.technicianCount > 0 
-        ? Math.round((eipOverview.appointmentCount / (eipOverview.technicianCount * 8)) * 100)
-        : 0;
-      
-      let hrOpinion = '';
-      let hrStatus: 'APPROVED' | 'CRITIQUE' | 'ADJUSTED' = 'APPROVED';
-      let hrRisk = 0.10;
-
-      if (!eipOverview.isConnected) {
-        hrOpinion = `Thẩm định nhân sự: Hệ thống chưa kết nối EIP. Ước tính có 3 KTV khả dụng. Tải trọng ca đạt mức 65%, đủ năng lực vận hành chiến dịch mà không cần tuyển mới gấp.`;
-      } else if (eipOverview.technicianCount === 0) {
-        hrOpinion = `Thẩm định nhân sự: CẢNH BÁO: Hiện tại có 0 KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV quá tải nghiêm trọng (Không khả dụng). Không thể vận hành chiến dịch mà không có kỹ thuật viên. Đề xuất bắt buộc: Cần lập tức tuyển dụng hoặc điều động thêm KTV gấp.`;
-        hrStatus = 'CRITIQUE';
-        hrRisk = 0.95;
-      } else if (hrWorkload > 90) {
-        hrOpinion = `Thẩm định nhân sự: CẢNH BÁO: Hiện tại có ${eipOverview.technicianCount} KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV quá tải đạt mức ${hrWorkload}%, vượt ngưỡng an toàn. Đề xuất: Cần bổ sung hoặc tuyển dụng thêm KTV mới trước khi khởi chạy chiến dịch.`;
-        hrStatus = 'CRITIQUE';
-        hrRisk = 0.65;
-      } else {
-        hrOpinion = `Thẩm định nhân sự: Hiện tại có ${eipOverview.technicianCount} KTV đang hoạt động tại chi nhánh. Lượng đặt lịch là ${eipOverview.appointmentCount} cuộc hẹn. Tải trọng KTV đạt mức ${hrWorkload}%, đủ năng lực vận hành chiến dịch mà không cần tuyển mới gấp.`;
-      }
-
-      this.state.councilDebate = [
-        {
-          agentId: 'marketing_manager',
-          agentName: 'CMO AI (Executive Marketing Strategist)',
-          avatar: '🎯',
-          role: 'Chief Marketing Officer',
-          department: 'Marketing & Truyền thông',
-          opinion: isExtreme 
-            ? 'CẢNH BÁO: Mục tiêu tăng 300% là phi thực tế trong thời gian ngắn. Đề xuất điều chỉnh phễu và chia mốc 60 ngày.'
-            : 'Đề xuất chiến lược Phễu Lead đa kênh kết hợp Content Hook + Banner 4K. Cần Sales bảo đảm kịch bản chốt đơn.',
-          status: isExtreme ? 'CRITIQUE' : 'APPROVED',
-          riskScore: isExtreme ? 0.85 : 0.15
-        },
-        {
-          agentId: 'sales_director',
-          agentName: 'Sales Director AI',
-          avatar: '💼',
-          role: 'Giám Đốc Bán Hàng & CSKH',
-          department: 'Sales & Chốt Booking',
-          opinion: finalCustCount > 0
-            ? `Phản biện: Với cơ sở dữ liệu hiện tại là ${finalCustCount} khách hàng CRM${eipOverview.isConnected ? ' đồng bộ từ EIP' : ''}, nếu không tối ưu kịch bản chốt Booking, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.`
-            : `Phản biện: Hệ thống chưa ghi nhận dữ liệu CRM từ EIP. Nếu không tối ưu kịch bản chốt Booking, tỷ lệ rơi rớt lead sẽ tăng 25%. Cần bổ sung Task đào tạo kịch bản Sales.`,
-          status: 'CRITIQUE',
-          riskScore: 0.35
-        },
-        {
-          agentId: 'demeter_hr',
-          agentName: 'Demeter HR & Staffing AI',
-          avatar: '👥',
-          role: 'Trưởng Phòng Nhân Sự',
-          department: 'Nhân Sự & Công Suất Ca',
-          opinion: hrOpinion,
-          status: hrStatus,
-          riskScore: hrRisk
-        },
-        {
-          agentId: 'ops_operations',
-          agentName: 'Ops Operations AI',
-          avatar: '⚙️',
-          role: 'Trưởng Phòng Vận Hành',
-          department: 'Vận Hành Chi Nhánh & SLA',
-          opinion: `Thẩm định quy trình: Đã đối chiếu quy trình phục vụ cho ${eipOverview.appointmentCount} lịch hẹn hiện tại dựa trên SOP-MKT-V1.8 & SOP-DSN-V2.1. Đảm bảo SLA phục vụ dưới 15 phút/khách.`,
-          status: 'APPROVED',
-          riskScore: 0.05
-        },
-        {
-          agentId: 'themis_legal',
-          agentName: 'Themis Legal & Compliance AI',
-          avatar: '⚖️',
-          role: 'Giám Đốc Pháp Lý',
-          department: 'Pháp Lý & Quy Chế',
-          opinion: 'Kiểm toán quy chế: Hạn mức ngân sách hợp lệ theo Policy Guard. Bản quyền hình ảnh & thông điệp tuân thủ WCAG AA.',
-          status: 'APPROVED',
-          riskScore: 0.02
-        },
-        {
-          agentId: 'hermes_finance',
-          agentName: 'Hermes Finance & Treasury AI',
-          avatar: '💰',
-          role: 'Giám Đốc Tài Chính',
-          department: 'Tài Chính & Ngân Sách',
-          opinion: `Thẩm định tài chính: Doanh thu tháng hiện tại của EIP đạt ${(eipOverview.monthlyRevenueVnd).toLocaleString('vi-VN')} VND, chi phí vận hành ${(eipOverview.monthlyExpensesVnd).toLocaleString('vi-VN')} VND. Ngân sách đề xuất ${(budgetLimitVal).toLocaleString('vi-VN')} VND nằm trong vùng an toàn dòng tiền.`,
-          status: 'APPROVED',
-          riskScore: 0.12
+        if (councilRes.ok) {
+          const councilData = await councilRes.json();
+          if (councilData.success && councilData.debateMemory) {
+            this.state.councilDebate = councilData.debateMemory;
+            this.notify();
+            this.addLog('COUNCIL DEBATE', `✅ Đã thu thập đủ ${councilData.debateMemory.length} ý kiến phản biện từ Backend Council API (${councilData.provider}).`, 'text-emerald-400 font-bold');
+          }
         }
-      ];
+      } catch (cErr) {
+        console.warn('[CampaignExecutionManager] Council API fetch fallback:', cErr);
+      }
       this.notify();
 
       // Execute upgraded Decision Evaluation
