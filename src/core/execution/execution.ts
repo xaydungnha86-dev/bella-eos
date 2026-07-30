@@ -68,9 +68,6 @@ async function callAgentRunner(tasks: any[], contextPackage: CanonicalContextPac
   
   // Use passed clientKeys instead of localStorage
   const keys = clientKeys || getClientKeys();
-  
-  // Use passed clientKeys instead of localStorage
-  const keys = clientKeys || getClientKeys();
 
   
   let agentConfigs = {};

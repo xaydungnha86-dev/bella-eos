@@ -151,12 +151,15 @@ class CampaignExecutionManagerClass {
     }
     this.state = {
       isProcessing: false,
+      isPaused: false,
+      stopRequested: false,
       activeStep: -1,
       telemetryLogs: [],
       goalTree: null,
       dnaState: { tone: 'Professional & Premium', style: 'Minimalist & Glassmorphism' },
       orchestratorPlan: null,
       dynamicTasks: [],
+      councilDebate: [],
       verificationReport: null,
       lastApiStatus: null,
       activeCustomerCount: 0,
@@ -243,6 +246,7 @@ class CampaignExecutionManagerClass {
       dnaState,
       orchestratorPlan: null,
       dynamicTasks: [],
+      councilDebate: [],
       verificationReport: null,
       lastApiStatus: null,
       activeCustomerCount: this.state.activeCustomerCount,

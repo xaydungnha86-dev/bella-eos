@@ -91,7 +91,7 @@ export class AuditExplorer {
     const completionRate = totalSteps > 0 ? completedSteps / totalSteps : 1.0;
     const compensationCount = state.steps.filter(s => s.status === 'FAILED' || s.status === 'COMPENSATED').length;
 
-    const workflowDurationMs = (state.completedAt || Date.now()) - state.startedAt;
+    const workflowDurationMs = (state.endedAt || Date.now()) - state.startedAt;
     
     // Explicitly distinguish Active Compute Latency vs Human Approval Wait Duration
     const humanApprovalWaitMs = state.status === 'RUNNING' || state.sopId?.includes('finance') ? Math.round(workflowDurationMs * 0.85) : 0;
@@ -156,7 +156,7 @@ export class AuditExplorer {
         totalSteps: state.steps.length,
         completedSteps,
         startedAt: new Date(state.startedAt).toISOString(),
-        completedAt: state.completedAt ? new Date(state.completedAt).toISOString() : undefined,
+        completedAt: state.endedAt ? new Date(state.endedAt).toISOString() : undefined,
         workflowDurationMs,
         activeExecutionLatencyMs,
         humanApprovalWaitMs,

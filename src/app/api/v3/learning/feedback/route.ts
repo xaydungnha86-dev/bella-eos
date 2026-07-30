@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { StrategicLearningLoop } from '@/core/learning/strategic-learning-loop';
 import { ObservedOutcome } from '@/types/strategic-learning';
+import { ExecutiveRecommendation } from '@/types/executive-recommendation';
 
 const learningLoop = new StrategicLearningLoop();
 
@@ -13,11 +14,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const { outcome } = body;
+    const { outcome, recommendation } = body;
     
     if (!outcome || typeof outcome !== 'object') {
       return NextResponse.json(
-        { error: 'Missing required field: outcome (ObservedOutcome object)' },
+        { error: 'Missing required field: outcome' },
         { status: 400 }
       );
     }
@@ -36,7 +37,72 @@ export async function POST(request: NextRequest) {
     console.log('[API] Processing campaign outcome feedback');
     console.log('[API] Campaign ID:', outcome.campaignId);
 
-    const result = await learningLoop.processCampaignOutcome(outcome as ObservedOutcome);
+    // Map incoming outcome to the correct ObservedOutcome structure
+    const parsedOutcome: ObservedOutcome = {
+      campaignId: outcome.campaignId,
+      actualRevenue: outcome.actualRevenue || outcome.actualMetrics?.revenue || 0,
+      actualMetrics: outcome.actualMetrics || {},
+      timestamp: outcome.timestamp || outcome.completionDate || new Date().toISOString()
+    };
+
+    // Construct recommendation if not provided in the request body
+    const finalRecommendation: ExecutiveRecommendation = recommendation || {
+      goal: {
+        what: 'Goal',
+        howMuch: '30%',
+        by: '4 weeks',
+        baseline: 0,
+        target: outcome.plannedMetrics?.revenue || 1000,
+        constraints: [],
+        urgency: 'high'
+      },
+      diagnosis: {
+        currentState: 'Stale',
+        symptoms: [],
+        rootCauses: [],
+        opportunities: []
+      },
+      constraints: {
+        budget: { type: 'budget', limit: '1000', current: '0', status: 'acceptable' },
+        workforce: { type: 'workforce', limit: '10', current: '0', status: 'acceptable' },
+        timeline: { type: 'timeline', limit: '4 weeks', current: '0', status: 'acceptable' },
+        technology: { type: 'technology', limit: 'none', current: '0', status: 'acceptable' },
+        policy: { type: 'policy', limit: 'none', current: '0', status: 'acceptable' },
+        market: { type: 'market', limit: 'none', current: '0', status: 'acceptable' }
+      },
+      assumptions: [],
+      alternatives: [],
+      chosenStrategy: {
+        name: outcome.strategyId || 'Default Strategy',
+        initiatives: outcome.initiatives || ['TikTok pilot', 'Win-back campaign', 'Upsell program'],
+        expectedRevenue: outcome.plannedMetrics?.revenue || 1000,
+        budget: outcome.plannedMetrics?.budget || 100,
+        risk: 'medium',
+        tradeoffs: []
+      },
+      simulationSummary: {
+        strategy: { name: 'Default', initiatives: [], expectedRevenue: 1000, budget: 100, risk: 'medium', tradeoffs: [] },
+        scenarios: [],
+        expectedValue: outcome.plannedMetrics?.revenue || 1000,
+        probabilitySuccess: 0.80,
+        convergence: true
+      },
+      confidence: 0.80,
+      expectedOutcome: '',
+      majorRisks: [],
+      successCriteria: {
+        primary: '',
+        secondary: []
+      },
+      generatedAt: new Date().toISOString(),
+      reasoningTrace: {
+        nodes: [],
+        iterations: 1,
+        convergenceAchieved: true
+      }
+    };
+
+    const result = await learningLoop.processCampaignOutcome(finalRecommendation, parsedOutcome);
 
     return NextResponse.json({
       success: true,

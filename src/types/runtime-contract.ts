@@ -64,3 +64,31 @@ export interface RuntimeHealth {
   checkHealth(): Promise<HealthStatus>;
   getMetrics(): Promise<Record<string, number>>;
 }
+
+export interface CapabilityDescriptor {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  author: string;
+  dependencies: {
+    capabilityId: string;
+    versionRange: string;
+  }[];
+  permissions: {
+    network: {
+      allowedDomains: string[];
+    };
+    fileSystem: {
+      readablePaths: string[];
+      writablePaths: string[];
+    };
+    environmentVariables: string[];
+  };
+}
+
+export interface Capability {
+  descriptor: CapabilityDescriptor;
+  onLoad(context: Record<string, any>): Promise<void>;
+  onUnload(): Promise<void>;
+}

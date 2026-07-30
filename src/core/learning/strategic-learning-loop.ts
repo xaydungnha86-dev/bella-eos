@@ -89,8 +89,9 @@ export class StrategicLearningLoop {
       if (filter.category) {
         lessons = lessons.filter(l => l.category === filter.category);
       }
-      if (filter.minConfidence) {
-        lessons = lessons.filter(l => l.confidence >= filter.minConfidence);
+      if (filter.minConfidence !== undefined) {
+        const minConf = filter.minConfidence;
+        lessons = lessons.filter(l => l.confidence >= minConf);
       }
     }
     

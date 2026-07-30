@@ -306,7 +306,7 @@ export interface CreativeOutput {
 
 export interface CreativeRequest {
   objective: string;
-  copywriterSnippet?: string;
+  copywriterSnippet?: string | Record<string, any>;
   brandDna?: any;  // TODO: Replace with proper BrandDnaContext type
   format?: '16:9' | '1:1' | '9:16' | '4:3';
   medium?: 'image' | 'video' | 'slide' | 'landing_page';

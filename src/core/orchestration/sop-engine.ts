@@ -5,6 +5,24 @@
 
 import { SagaStep } from './workflow-runtime';
 
+export interface DeclarativeSOP {
+  id: string;
+  version: string;
+  name: string;
+  category: string;
+  department: string;
+  description: string;
+  approvalPolicy: {
+    requiresCEOApproval: boolean;
+    requiredRoles: string[];
+  };
+  securityPolicy?: {
+    securityTag: 'NORMAL' | 'HIGH_SECURITY';
+    auditLevel: 'STANDARD' | 'DETAILED';
+  };
+  steps: any[];
+}
+
 export interface SopStepDefinition {
   stepId: string;
   stepName: string;
