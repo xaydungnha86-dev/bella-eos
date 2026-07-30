@@ -1,7 +1,7 @@
 # 🎨 BELLA EOS - KIẾN TRÚC TRỰC QUAN (VISUAL SUMMARY)
 
 > Tài liệu hình ảnh tóm tắt kiến trúc Bella EOS Platform
-> **Phiên bản**: 3.0 — Cập nhật 30/07/2026 (Production Hardened & Governed Learning Framework)
+> **Phiên bản**: 3.1 — Cập nhật 30/07/2026 (Work Governance Framework & Automated Validation Added)
 
 ---
 
@@ -175,6 +175,17 @@ Hãy nghĩ đến 11 miền như 11 bộ phận chuyên biệt trong bộ não d
 
 Nếu bất kỳ Gate nào FAIL → dừng ngay, báo cáo lý do, không tiếp tục
 ```
+
+---
+
+### 💼 WORK GOVERNANCE — QUẢN TRỊ CÔNG VIỆC & THẨM ĐỊNH TỰ ĐỘNG
+
+**Work Governance (v5.4)** — Bounded Context chuyên biệt quản lý vòng đời bàn giao và nghiệm thu công việc của con người & AI.
+
+* **Phân rã trạng thái (Decoupled State Machines)**: Tác vụ không gộp chung trạng thái, mà phân tách thành 3 luồng độc lập: Thực thi (Execution: `NOT_STARTED`, `RUNNING`, `DONE`), Thẩm định máy (Verification: `NONE`, `VALIDATING`, `PASSED`, `FAILED`), và Phê duyệt lãnh đạo (Approval: `NONE`, `PENDING`, `APPROVED`, `REJECTED`).
+* **Bằng chứng & Báo cáo độc lập (Submission Store)**: Báo cáo và bằng chứng được lưu vết bất biến trong kho `SubmissionStore` để phục vụ kiểm toán (Audit Trail) thay vì lưu trực tiếp trong thực thể tác vụ, cho phép nhân sự chỉnh sửa và nộp lại nhiều lần.
+* **Thẩm định tự động (Evidence Engine)**: Máy tự động phân tích tính hợp lệ của bằng chứng (định dạng URL, mã khách hàng CRM `crm::cust-...`, mã hash tệp tin) trước khi đưa ra quyết định duyệt thẳng hoặc chuyển tiếp lên hàng đợi phê duyệt thủ công.
+* **Lọc sự kiện & Nhật ký (Telemetry & Event-driven)**: Mọi thao tác đều sinh ra sự kiện miền (Domain Event) hướng đối tượng type-safe (như `AssignmentCreated`, `AssignmentReported`, `AssignmentVerified`), được lọc qua `TelemetryAdapter` trước khi ghi vết giám sát.
 
 ---
 
